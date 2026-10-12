@@ -2,44 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MindFrame – coping-skills companion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f3f0ea" />
+  <meta name="color-scheme" content="light" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>MindFrame</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
 </head>
 <body>
-  <!-- Always-visible safety banner (never hidden) -->
-  <div class="safety-banner">
-    If you're in crisis or thinking about harming yourself, call or text <strong>988</strong>
-    (Suicide &amp; Crisis Lifeline, US) or reach out to someone you trust. MindFrame is a practice tool, not a substitute for therapy.
+  <!-- Always visible. Crisis support lives here even when the rest of the page changes. -->
+  <p class="safety-banner">
+    In crisis, call or text <strong>988</strong> (US). MindFrame is practice, not therapy.
+  </p>
+
+  <div class="app">
+    <header class="top">
+      <h1>MindFrame</h1>
+      <!-- Shown only when the browser offers to install the app. -->
+      <button type="button" id="install" class="text hidden">Install</button>
+    </header>
+
+    <main>
+      <section id="view-reflect">
+        <div id="phase-write">
+          <form id="thought-form">
+            <label class="visually-hidden" for="thought">A thought</label>
+            <textarea id="thought" rows="5" placeholder="A thought, in your own words"></textarea>
+            <button type="submit" class="primary">Look at this</button>
+          </form>
+        </div>
+
+        <!-- Crisis stops the flow: this box only. No pause, no coaches, nothing saved. -->
+        <div id="phase-crisis" class="hidden">
+          <div id="crisis" class="crisis" tabindex="-1"></div>
+          <button type="button" id="crisis-again" class="text">Write another</button>
+        </div>
+
+        <div id="phase-pause" class="hidden">
+          <p id="breath-word" class="breath-word" aria-live="polite">Breathe in</p>
+          <div id="breath" aria-hidden="true"></div>
+          <button type="button" id="skip-pause" class="text">Skip</button>
+        </div>
+
+        <div id="phase-frame" class="hidden">
+          <p id="frame-count" class="quiet">1 of 4</p>
+          <h2 id="frame-title">Notice</h2>
+          <p id="frame-hint" class="quiet"></p>
+          <form id="frame-form">
+            <label class="visually-hidden" for="frame-input" id="frame-label">Notice</label>
+            <input id="frame-input" type="text" maxlength="140" autocomplete="off" />
+            <button type="submit" class="primary" id="frame-next">Next</button>
+          </form>
+        </div>
+
+        <div id="phase-advice" class="hidden">
+          <article id="best-coach" class="card coach"></article>
+          <article id="values-card" class="card hidden"></article>
+          <button type="button" id="more-angles" class="text" aria-expanded="false">See other angles</button>
+          <div id="other-angles" class="hidden"></div>
+          <button type="button" id="to-hope" class="primary">Picture a hopeful moment</button>
+        </div>
+
+        <div id="phase-hope" class="hidden">
+          <h2>A hopeful moment</h2>
+          <p class="quiet">Picture one scene where this is a little easier.</p>
+          <canvas id="hope-canvas" width="640" height="360" aria-label="A slow, soft light"></canvas>
+          <form id="hope-form">
+            <label class="visually-hidden" for="hope-line">What you picture</label>
+            <input id="hope-line" type="text" maxlength="140" placeholder="What do you see?" autocomplete="off" />
+            <button type="submit" class="primary">Done</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="view-journal" class="hidden">
+        <ul id="journal-list"></ul>
+        <button type="button" id="clear-journal" class="text hidden">Clear journal</button>
+      </section>
+
+      <section id="view-insights" class="hidden">
+        <div id="insights"></div>
+      </section>
+    </main>
+
+    <nav class="tabs" aria-label="Sections">
+      <button type="button" class="tab" data-view="reflect" aria-current="page">Reflect</button>
+      <button type="button" class="tab" data-view="journal">Journal</button>
+      <button type="button" class="tab" data-view="insights">Insights</button>
+    </nav>
   </div>
 
-  <main>
-    <h1>MindFrame</h1>
-    <p class="subtitle">Write down a thought. Five coaches will help you look at it.</p>
-
-    <form id="thought-form">
-      <textarea id="thought" rows="3" placeholder="e.g. I always mess everything up, there's no point trying"></textarea>
-      <button type="submit">Reframe it</button>
-    </form>
-
-    <!-- Shown only when crisis words are detected; appears BEFORE bot output -->
-    <div id="crisis" class="crisis hidden"></div>
-
-    <section id="results" class="results hidden">
-      <article class="bot dbt"><h2>🧭 DBT Coach</h2><div id="out-dbt"></div></article>
-      <article class="bot philo"><h2>🏛️ Philosopher</h2><div id="out-philo"></div></article>
-      <article class="bot equation"><h2>🧮 Thought Equation</h2><div id="out-eq"></div></article>
-      <article class="bot compassion"><h2>💗 Compassion Coach</h2><div id="out-comp"></div></article>
-      <article class="bot cbt"><h2>🧠 CBT Coach</h2><div id="out-cbt"></div></article>
-    </section>
-
-    <section class="journal">
-      <h2>Journal <button id="clear-journal" class="link">clear</button></h2>
-      <ul id="journal-list"></ul>
-    </section>
-  </main>
-
-  <!-- Load order matters: analyzer -> technique data -> bots -> app -->
+  <!-- Load order: analyzer -> technique data -> bots -> app -->
   <script src="js/analyzer.js"></script>
   <script src="js/cbt-techniques.js"></script>
   <script src="js/bots.js"></script>

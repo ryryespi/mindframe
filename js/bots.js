@@ -38,43 +38,55 @@ function philosopher({ categories }) {
   return parts.join("");
 }
 
-// ---------- 3. Thought Equation: structured worksheet + a score ----------
-const DISTORTIONS = {
-  absolutes: "All-or-nothing thinking",
-  selfBlame: "Labeling / personalization",
-  hopelessness: "Fortune telling (predicting the future)",
-  anxiety: "Catastrophizing",
-  anger: "Mind reading / should statements",
-  urge: "Emotional reasoning (\"I feel it, so I must act\")",
-};
+// ---------- 3. Thought Equation: the thought, the traps, then a live score ----------
+// The number used to assume evidence for and against were equal (0.5).
+// app.js now asks for real list entries and calls believability() below.
+// D, the distortion penalty, is still the count of traps the analyzer found.
+function thoughtEquation(signals) {
+  const ids = signals.distortions || [];
+  const names = ids.map(id => DISTORTION_NAMES[id]).filter(Boolean);
 
-function thoughtEquation({ text, categories, absolutes }) {
-  const distortions = categories.map(c => DISTORTIONS[c]).filter(Boolean);
-  if (absolutes.length) distortions.unshift(DISTORTIONS.absolutes);
-
-  // Simple, transparent formula. Each distortion lowers how believable the
-  // thought is as stated; we assume a neutral 0.5 evidence balance.
-  //   Believability = EvidenceFor / (EvidenceFor + EvidenceAgainst) × (1 − 0.15 × D)
-  const D = distortions.length;
-  const believability = Math.max(0.05, 0.5 * (1 - 0.15 * D));
-  const pct = Math.round(believability * 100);
-
-  // Balanced conclusion: soften absolute words.
-  let balanced = text
+  // A softer wording: swap a few absolute words for gentler ones.
+  const balanced = signals.text
     .replace(/\balways\b/gi, "sometimes")
     .replace(/\bnever\b/gi, "not yet")
     .replace(/\beverything\b/gi, "some things")
     .replace(/\bnothing\b/gi, "not much right now")
     .replace(/there'?s no point( trying)?/gi, "trying still gives me a chance");
 
+  const tags = names.length
+    ? names.map(name => `<span class="tag">${esc(name)}</span>`).join("")
+    : `<span class="quiet">No clear trap in the wording.</span>`;
+
   return `
-    <p><b>Thought:</b> "${esc(text)}"</p>
-    <p><b>Evidence for:</b> <i>List facts (not feelings) that support it.</i></p>
-    <p><b>Evidence against:</b> <i>Times it wasn't true, what a friend would say, things you've done well.</i></p>
-    <p><b>Distortions spotted:</b> ${D ? distortions.map(d => `<span class="tag">${d}</span>`).join("") : "none obvious"}</p>
-    <div class="formula">B = F / (F + A) × (1 − 0.15·D)<br>B = 0.5 × (1 − 0.15·${D}) = <b>${pct}%</b></div>
-    <p style="font-size:12px;color:#888">F = evidence for, A = evidence against (assumed equal), D = distortions. Lower B means the thought, as worded, is less reliable.</p>
-    <p><b>Balanced conclusion:</b> "${esc(balanced)}" + "I'm struggling right now, and I can take one small step."</p>`;
+    <p>${esc(signals.text)}</p>
+    <p>${tags}</p>
+    <div id="evidence-mount" data-d="${ids.length}"></div>
+    <p class="quiet">A softer wording: ${esc(balanced)}</p>`;
+}
+
+// B = F / (F + A) × (1 − 0.15 × D)
+// F = how many "evidence for" lines the person added
+// A = how many "evidence against" lines
+// D = how many thinking traps were spotted
+// Returns null when F + A is 0, because there is nothing to divide by.
+// The penalty is never negative: more than 6 traps just brings that part to 0.
+function believability(forCount, againstCount, distortionCount) {
+  const F = forCount;
+  const A = againstCount;
+  const D = distortionCount;
+  if (F + A === 0) return null;
+  const penalty = Math.max(0, 1 - 0.15 * D);
+  const value = (F / (F + A)) * penalty;
+  return { F, A, D, value, pct: Math.round(value * 100) };
+}
+
+// The same formula, written as a sentence a beginner can read aloud.
+function believabilityWords(result) {
+  const lead = "Believability is your evidence for, divided by all the evidence you listed, then lowered a little for each thinking trap.";
+  if (!result) return lead + " Add a point for or against and the score will use those counts.";
+  const { F, A, D, pct } = result;
+  return `${lead} You added ${F} for and ${A} against, and ${D} traps were spotted. ${F} divided by (${F} + ${A}), times (1 minus 0.15 times ${D}), is ${pct}%.`;
 }
 
 // ---------- 4. Compassion Coach: Kristin Neff's self-compassion + ACT defusion ----------
@@ -112,4 +124,37 @@ function cbtCoach(signals) {
   }).join("");
 
   return spotted + blocks;
+}
+
+// Which single coach to show first. The other four stay behind "See other angles".
+// Points are just a way to pick. They are not a diagnosis.
+// On a tie, the earlier name in `order` wins.
+// If nothing was detected, Compassion is the calm default (every score stays 0).
+function bestCoach(signals) {
+  const scores = { dbt: 0, philo: 0, equation: 0, compassion: 0, cbt: 0 };
+  const has = id => (signals.categories || []).includes(id);
+
+  if (has("urge")) scores.dbt += 3;
+  if (has("anger")) { scores.dbt += 2; scores.philo += 1; }
+  if (has("anxiety")) scores.dbt += 2;
+  if (has("hopelessness")) { scores.dbt += 2; scores.philo += 2; scores.compassion += 2; }
+  if (has("selfBlame")) { scores.compassion += 3; scores.philo += 1; scores.dbt += 1; }
+
+  const traps = (signals.distortions || []).length;
+  if (traps) {
+    scores.equation += traps * 2;
+    scores.cbt += traps + 1;
+  }
+  if ((signals.absolutes || []).length) scores.equation += 1;
+
+  const order = ["equation", "cbt", "dbt", "compassion", "philo"];
+  let best = "compassion";
+  let bestScore = 0;
+  order.forEach(id => {
+    if (scores[id] > bestScore) {
+      best = id;
+      bestScore = scores[id];
+    }
+  });
+  return best;
 }

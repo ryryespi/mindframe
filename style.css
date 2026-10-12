@@ -1,28 +1,249 @@
-/* Calm palette, readable type, card layout */
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; background: #f4f6fb; color: #23263a; }
-.safety-banner { position: sticky; top: 0; z-index: 10; background: #2d3a8c; color: #fff;
-  padding: 10px 16px; font-size: 14px; text-align: center; }
-main { max-width: 1100px; margin: 0 auto; padding: 24px; }
-h1 { margin: 0; color: #2d3a8c; }
-.subtitle { color: #5a5f7a; margin-top: 4px; }
-textarea { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #c9cde0; border-radius: 10px; resize: vertical; }
-button { margin-top: 8px; padding: 10px 20px; font-size: 15px; border: 0; border-radius: 8px; background: #2d3a8c; color: #fff; cursor: pointer; }
-button.link { background: none; color: #5a5f7a; font-size: 12px; padding: 0 6px; margin: 0; text-decoration: underline; }
-.hidden { display: none !important; } /* !important so it beats later rules like .results { display: grid } */
-.crisis { margin: 16px 0; padding: 16px; border-radius: 10px; background: #fde8e8; border: 2px solid #c0392b; color: #7a1c14; font-size: 16px; }
-/* Two columns. With five cards the last one would sit alone, so let it span the row. */
-.results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 20px; }
-.results .bot:last-child:nth-child(odd) { grid-column: 1 / -1; }
-@media (max-width: 800px) {
-  .results { grid-template-columns: 1fr; }
-  .results .bot:last-child:nth-child(odd) { grid-column: auto; }
+/* Calm, phone-first layout.
+   One muted accent, paper background, lots of empty space.
+   The column stays narrow even on a desktop so it still feels like a phone.
+   The crisis box is the only place the color shifts, so it can be found quickly. */
+
+:root {
+  --bg: #f3f0ea;
+  --ink: #3f3a34;
+  --muted: #6f685f;
+  --line: #e3ddd4;
+  --card: #fbfaf7;
+  --accent: #4e5a53;
+  --on-accent: #f6f3ee;
+  --crisis-bg: #f4e4e0;
+  --crisis-ink: #5c3a36;
 }
-.bot { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06); border-top: 5px solid; font-size: 14px; line-height: 1.5; }
-.bot h2 { margin-top: 0; font-size: 18px; }
-.dbt { border-color: #16a085; } .philo { border-color: #8e44ad; } .equation { border-color: #e67e22; } .compassion { border-color: #d6457a; } .cbt { border-color: #2471a3; }
-.formula { font-family: ui-monospace, monospace; background: #fdf3e7; padding: 8px; border-radius: 6px; }
-.tag { display: inline-block; background: #eef0fa; border-radius: 12px; padding: 2px 8px; margin: 2px; font-size: 12px; }
-.journal { margin-top: 28px; }
-.journal li { background: #fff; margin: 6px 0; padding: 8px 12px; border-radius: 8px; list-style: none; font-size: 14px; }
-.journal ul { padding: 0; } .journal time { color: #8a8fa8; font-size: 12px; margin-right: 8px; }
+
+* { box-sizing: border-box; }
+
+html { color-scheme: light; scroll-padding-bottom: 6.5rem; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 28rem;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.safety-banner {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 0.7rem 1.25rem;
+  background: #ebe6df;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.75rem 1.35rem 0.25rem;
+}
+
+h1 { margin: 0; font-size: 1.45rem; font-weight: 500; letter-spacing: -0.02em; }
+h2 { margin: 0 0 0.75rem; font-size: 1.15rem; font-weight: 500; }
+
+main { padding: 1.25rem 1.35rem 2rem; }
+
+.quiet { color: var(--muted); margin: 0.35rem 0 1rem; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+textarea, input[type="text"] {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 0.7rem 0;
+}
+
+textarea {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 1.1rem;
+  padding: 1rem 1rem 1.15rem;
+  resize: vertical;
+  min-height: 8.5rem;
+}
+
+textarea::placeholder, input::placeholder { color: #a39b91; }
+
+button { font: inherit; cursor: pointer; }
+
+.primary {
+  display: block;
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.9rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  scroll-margin-bottom: 6.5rem;
+}
+
+.text {
+  display: block;
+  width: auto;
+  margin: 1rem auto 0;
+  padding: 0.4rem 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+  scroll-margin-bottom: 6.5rem;
+}
+
+.top .text { margin: 0; }
+
+.hidden { display: none !important; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.15rem 1.1rem;
+  margin: 0 0 0.5rem;
+}
+
+.card p { margin: 0.55rem 0; }
+.card ol { margin: 0.4rem 0 0.8rem; padding-left: 1.15rem; }
+.card li { margin: 0.35rem 0; }
+
+.tag {
+  display: inline-block;
+  margin: 0.15rem 0.3rem 0.15rem 0;
+  padding: 0.12rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.crisis {
+  padding: 1.25rem 1.15rem;
+  border-radius: 1.25rem;
+  background: var(--crisis-bg);
+  color: var(--crisis-ink);
+}
+
+.crisis p { margin: 0.5rem 0; }
+
+.breath-word { text-align: center; margin-top: 2.5rem; color: var(--muted); }
+
+#breath {
+  width: 9.5rem;
+  height: 9.5rem;
+  margin: 2.5rem auto 2rem;
+  border-radius: 50%;
+  background: #e4ddd3;
+  transform-origin: center;
+}
+
+#frame-count { margin-bottom: 0.35rem; }
+#frame-title { margin-top: 0; }
+#frame-hint { min-height: 1.5rem; }
+
+.ev-add { display: flex; align-items: flex-end; gap: 0.75rem; margin-top: 0.15rem; }
+.ev-add input { flex: 1; min-width: 0; }
+.ev-add .text { margin: 0 0 0.35rem; flex: none; }
+
+.ev-list { list-style: none; margin: 0.25rem 0 0.75rem; padding: 0; }
+.ev-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.ev-list .text { margin: 0; font-size: 0.85rem; }
+
+.score-words { margin-top: 0.85rem; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.75rem 0 1rem; }
+.chip {
+  width: auto;
+  margin: 0;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+}
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+#hope-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.journal-list, #journal-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+#journal-list li { margin: 0 0 1.6rem; }
+#journal-list time { display: block; color: var(--muted); font-size: 0.8rem; margin-bottom: 0.2rem; }
+#journal-list p { margin: 0; }
+
+.week-nav { display: flex; justify-content: space-between; gap: 1rem; }
+.week-nav .text { margin: 0; }
+
+#insights svg { display: block; width: 100%; height: auto; margin: 0.25rem 0 1rem; }
+
+label { display: block; margin-top: 0.35rem; color: var(--muted); font-size: 0.92rem; }
+
+.tabs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  padding: 0.15rem 0.5rem calc(0.15rem + env(safe-area-inset-bottom, 0px));
+}
+
+.tab {
+  flex: 1;
+  max-width: 9rem;
+  margin: 0;
+  padding: 0.85rem 0.4rem 0.75rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+}
+
+.tab[aria-current="page"] {
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

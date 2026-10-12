@@ -41,6 +41,18 @@ const DISTORTION_PATTERNS = {
 // Crisis phrases trigger the safety message no matter what else is found.
 const CRISIS = [/suicid/, /kill myself/, /end it( all)?\b/, /self[- ]?harm/, /hurt myself/, /cut myself/, /want to die/, /better off dead/, /end my life/, /no reason to live/];
 
+// Big-ambition language. The app uses this only to offer one realistic next
+// step. It is not an insult and it is not a diagnosis.
+// Examples the patterns are meant to catch: "I will change the world",
+// "greatest", "destined", "everyone will".
+const GRANDIOSE = [
+  /i will change the world/,
+  /change the world/,
+  /\bgreatest\b/,
+  /\bdestined\b/,
+  /everyone will/,
+];
+
 function analyze(text) {
   const t = text.toLowerCase();
   const categories = Object.keys(CATEGORIES).filter(cat => CATEGORIES[cat].some(re => re.test(t)));
@@ -49,6 +61,7 @@ function analyze(text) {
   // Absolute words are the usual sign of all-or-nothing thinking, even if a
   // future edit adds a word to ABSOLUTES and forgets DISTORTION_PATTERNS.
   if (absolutes.length && !distortions.includes("allOrNothing")) distortions.push("allOrNothing");
+  const grandiose = GRANDIOSE.some(re => re.test(t));
   const crisis = CRISIS.some(re => re.test(t));
-  return { text, categories, absolutes, distortions, crisis };
+  return { text, categories, absolutes, distortions, grandiose, crisis };
 }
