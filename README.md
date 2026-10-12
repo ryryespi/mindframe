@@ -42,7 +42,8 @@ Then open [http://localhost:8000](http://localhost:8000).
 
 ## Research paper
 
-[MindFrame: Toward an Inner Language and an Integrated, Low-Overload Framework for Self-Talk Support](paper/MindFrame_Paper.pdf) is a concept paper on MindFrame's framework.
+- [MindFrame: An Inner Language for Self-Talk, an Integrated Low-Overload Framework, and the Ψ Daily Reflection Index](paper/MindFrame_Combined_Paper.pdf) combines MindFrame with the Psi daily reflection index, and names the next project, MindFrame Psi-Lab.
+- [MindFrame: Toward an Inner Language and an Integrated, Low-Overload Framework for Self-Talk Support](paper/MindFrame_Paper.pdf) is the original concept paper on MindFrame's framework.
 
 ## File structure
 
@@ -59,6 +60,8 @@ js/bots.js              five coaches, believability, which coach goes first
 js/app.js               screens, journal, chart, install
 screenshot.png          earlier example of a reframe
 crisis.png              earlier example of the crisis box
-paper/MindFrame_Paper.pdf   concept paper
-paper/MindFrame_Paper.tex   LaTeX source
+paper/MindFrame_Combined_Paper.pdf   combined paper (MindFrame, Psi index, Psi-Lab)
+paper/MindFrame_Combined_Paper.tex   LaTeX source for the combined paper
+paper/MindFrame_Paper.pdf   original concept paper
+paper/MindFrame_Paper.tex   LaTeX source for the original paper
 ```
