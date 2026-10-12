@@ -19,6 +19,10 @@ python3 serve.py
 
 Then open [http://localhost:8000](http://localhost:8000).
 
+## Research paper
+
+[MindFrame: Toward an Inner Language and an Integrated, Low-Overload Framework for Self-Talk Support](paper/MindFrame_Paper.pdf) is a concept paper on MindFrame's framework.
+
 ## File structure
 
 ```
@@ -30,4 +34,6 @@ js/bots.js        the four bots
 js/app.js         form, crisis check, and journal
 screenshot.png    example of a normal reframe
 crisis.png        example of the crisis support box
+paper/MindFrame_Paper.pdf   concept paper
+paper/MindFrame_Paper.tex   LaTeX source
 ```
