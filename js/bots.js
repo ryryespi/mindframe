@@ -1,4 +1,4 @@
-// bots.js — three "personas". Each is a function: signals in, HTML string out.
+// bots.js — five "personas". Each is a function: signals in, HTML string out.
 // Same input, different mental structure. That's the core idea of the app.
 
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -93,4 +93,23 @@ function compassionCoach({ text, categories }) {
     <p><b>Self-kindness</b>: ${kind} A hand on your heart and "May I be kind to myself" can help.</p>
     <p><b>Defusion</b> (ACT): Try rewording it as <i>"I'm having the thought that ${thought.charAt(0).toLowerCase() + thought.slice(1)}."</i> Notice how it becomes a thought you're having, not the truth about you.</p>
     <p><b>Values</b>: What matters to you here? Choose one small step toward it.</p>`;
+}
+
+// ---------- 5. CBT Coach: name the distortion, offer 2–3 exercises ----------
+// techniquesFor() and DISTORTION_NAMES live in cbt-techniques.js, loaded first.
+// Steps are from that local list. We never send the thought to an API.
+function cbtCoach(signals) {
+  const names = (signals.distortions || []).map(id => DISTORTION_NAMES[id]).filter(Boolean);
+  const techniques = techniquesFor(signals);
+
+  const spotted = names.length
+    ? `<p><b>Distortions spotted:</b> ${names.map(name => `<span class="tag">${esc(name)}</span>`).join("")}</p>`
+    : `<p><b>Distortions spotted:</b> none obvious in the wording. Two general exercises are below.</p>`;
+
+  const blocks = techniques.map(tech => {
+    const steps = tech.steps.map(step => `<li>${esc(step)}</li>`).join("");
+    return `<p><b>${esc(tech.name)}</b>. ${esc(tech.description)}</p><ol>${steps}</ol>`;
+  }).join("");
+
+  return spotted + blocks;
 }

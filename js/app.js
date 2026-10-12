@@ -31,10 +31,13 @@ function handleThought(text) {
   }
   crisis.classList.add("hidden");
 
+  // All five bots run only after the crisis check above. A crisis thought
+  // returned early, so CBT Coach never renders in that case.
   $("out-dbt").innerHTML = dbtCoach(signals);
   $("out-philo").innerHTML = philosopher(signals);
   $("out-eq").innerHTML = thoughtEquation(signals);
   $("out-comp").innerHTML = compassionCoach(signals);
+  $("out-cbt").innerHTML = cbtCoach(signals);
   $("results").classList.remove("hidden");
 
   saveJournal([...loadJournal(), { text, date: Date.now(), categories: signals.categories }]);
