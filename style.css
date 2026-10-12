@@ -1,0 +1,23 @@
+/* Calm palette, readable type, card layout */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: #f4f6fb; color: #23263a; }
+.safety-banner { position: sticky; top: 0; z-index: 10; background: #2d3a8c; color: #fff;
+  padding: 10px 16px; font-size: 14px; text-align: center; }
+main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+h1 { margin: 0; color: #2d3a8c; }
+.subtitle { color: #5a5f7a; margin-top: 4px; }
+textarea { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #c9cde0; border-radius: 10px; resize: vertical; }
+button { margin-top: 8px; padding: 10px 20px; font-size: 15px; border: 0; border-radius: 8px; background: #2d3a8c; color: #fff; cursor: pointer; }
+button.link { background: none; color: #5a5f7a; font-size: 12px; padding: 0 6px; margin: 0; text-decoration: underline; }
+.hidden { display: none !important; } /* !important so it beats later rules like .results { display: grid } */
+.crisis { margin: 16px 0; padding: 16px; border-radius: 10px; background: #fde8e8; border: 2px solid #c0392b; color: #7a1c14; font-size: 16px; }
+.results { display: grid; grid-template-columns: repeat(2, 1fr)  /* 2×2 grid for four bots */; gap: 16px; margin-top: 20px; }
+@media (max-width: 800px) { .results { grid-template-columns: 1fr; } }
+.bot { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06); border-top: 5px solid; font-size: 14px; line-height: 1.5; }
+.bot h2 { margin-top: 0; font-size: 18px; }
+.dbt { border-color: #16a085; } .philo { border-color: #8e44ad; } .equation { border-color: #e67e22; } .compassion { border-color: #d6457a; }
+.formula { font-family: ui-monospace, monospace; background: #fdf3e7; padding: 8px; border-radius: 6px; }
+.tag { display: inline-block; background: #eef0fa; border-radius: 12px; padding: 2px 8px; margin: 2px; font-size: 12px; }
+.journal { margin-top: 28px; }
+.journal li { background: #fff; margin: 6px 0; padding: 8px 12px; border-radius: 8px; list-style: none; font-size: 14px; }
+.journal ul { padding: 0; } .journal time { color: #8a8fa8; font-size: 12px; margin-right: 8px; }

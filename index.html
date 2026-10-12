@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MindFrame – coping-skills companion</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Always-visible safety banner (never hidden) -->
+  <div class="safety-banner">
+    If you're in crisis or thinking about harming yourself, call or text <strong>988</strong>
+    (Suicide &amp; Crisis Lifeline, US) or reach out to someone you trust. MindFrame is a practice tool, not a substitute for therapy.
+  </div>
+
+  <main>
+    <h1>MindFrame</h1>
+    <p class="subtitle">Write down a thought. Three different minds will help you look at it.</p>
+
+    <form id="thought-form">
+      <textarea id="thought" rows="3" placeholder="e.g. I always mess everything up, there's no point trying"></textarea>
+      <button type="submit">Reframe it</button>
+    </form>
+
+    <!-- Shown only when crisis words are detected; appears BEFORE bot output -->
+    <div id="crisis" class="crisis hidden"></div>
+
+    <section id="results" class="results hidden">
+      <article class="bot dbt"><h2>🧭 DBT Coach</h2><div id="out-dbt"></div></article>
+      <article class="bot philo"><h2>🏛️ Philosopher</h2><div id="out-philo"></div></article>
+      <article class="bot equation"><h2>🧮 Thought Equation</h2><div id="out-eq"></div></article>
+      <article class="bot compassion"><h2>💗 Compassion Coach</h2><div id="out-comp"></div></article>
+    </section>
+
+    <section class="journal">
+      <h2>Journal <button id="clear-journal" class="link">clear</button></h2>
+      <ul id="journal-list"></ul>
+    </section>
+  </main>
+
+  <!-- Load order matters: analyzer -> bots -> app (app uses the other two) -->
+  <script src="js/analyzer.js"></script>
+  <script src="js/bots.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
