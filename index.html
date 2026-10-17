@@ -89,6 +89,7 @@
             <textarea id="g-thought" rows="4" placeholder="The thought, as it sounds in your head"></textarea>
             <button type="submit" class="primary">Name it</button>
           </form>
+          <button type="button" id="g-play-sample" class="text">Play a short game instead</button>
         </div>
 
         <div id="g-grip" class="hidden">
@@ -154,8 +155,30 @@
             <label class="toggle"><input type="checkbox" id="g-faith" /> Include faith</label>
             <label class="toggle"><input type="checkbox" id="g-you" /> Tell it to me</label>
           </div>
+          <button type="button" id="g-story-play" class="text">Play this story</button>
           <button type="button" id="g-story-again" class="text">Another story</button>
           <button type="button" id="g-story-back" class="primary">Back to the loop</button>
+        </div>
+
+        <!-- Play: small offline games from the story pieces. Nothing typed is saved. -->
+        <div id="g-play-pick" class="hidden">
+          <p class="creature-tag" id="gp-pick-tag"></p>
+          <h2 id="gp-pick-title" tabindex="-1">Play</h2>
+          <p class="quiet small" id="gp-pick-note"></p>
+          <div class="options">
+            <button type="button" class="option game-option" data-game="path"><span class="opt-title">Choose a path</span><span class="opt-sub">Find the grounded way through four short scenes.</span></button>
+            <button type="button" class="option game-option" data-game="spot"><span class="opt-title">Spot the mirage</span><span class="opt-sub">Sort six short lines: mirage or real.</span></button>
+            <button type="button" class="option game-option" data-game="tiles"><span class="opt-title">Rebuild the sentence</span><span class="opt-sub">Tap the words of a true sentence in order.</span></button>
+          </div>
+          <button type="button" id="gp-pick-other" class="text hidden">Try a different sample thought</button>
+          <button type="button" id="gp-pick-back" class="text">Back</button>
+        </div>
+
+        <div id="g-play" class="hidden">
+          <p class="creature-tag" id="gp-tag"></p>
+          <div class="meter" id="gp-meter" role="progressbar" aria-label="Steadiness" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="gp-meter-fill"></span></div>
+          <p class="quiet small" id="gp-meter-label">Steadiness 0</p>
+          <div id="gp-stage"></div>
         </div>
 
         <div id="g-done" class="hidden">
@@ -241,15 +264,17 @@
     </nav>
   </div>
 
-  <!-- Load order: analyzer -> grounding -> stories -> psi -> technique data -> bots -> app -> ground UI -> check-in UI -->
+  <!-- Load order: analyzer -> grounding -> stories -> psi -> games -> technique data -> bots -> app -> ground UI -> play UI -> check-in UI -->
   <script src="js/analyzer.js"></script>
   <script src="js/grounding.js"></script>
   <script src="js/stories.js"></script>
   <script src="js/psi.js"></script>
+  <script src="js/games.js"></script>
   <script src="js/cbt-techniques.js"></script>
   <script src="js/bots.js"></script>
   <script src="js/app.js"></script>
   <script src="js/ground-ui.js"></script>
+  <script src="js/play-ui.js"></script>
   <script src="js/checkin-ui.js"></script>
 </body>
 </html>

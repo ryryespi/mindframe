@@ -242,7 +242,10 @@ const Stories = (function () {
     return story && !story.crisis ? `<p>${escapeHTML(story.text)}</p>` : "";
   }
 
-  return { tell, toHTML, escapeHTML, truncate, arcFor, ARCS, CHARACTERS, PATTERN_CREATURE };
+  // Shared with games.js so games use the same story pieces.
+  const parts = { MIRAGE, NAMING, REAL_THINGS, FAITH, LANDING, QUESTIONS, DEFAULT_STEPS, asReframe, asStep, rng, fill, cap };
+
+  return { tell, toHTML, escapeHTML, truncate, arcFor, ARCS, CHARACTERS, PATTERN_CREATURE, parts };
 })();
 
 if (typeof module !== "undefined" && module.exports) module.exports = Stories;

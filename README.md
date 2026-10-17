@@ -37,9 +37,17 @@ Groundedness updates with `G_next = clamp01(G + 0.2 × r × (1 + H − M) / 2)`,
 
 **Tell me a story** (on the Reframe and Act steps) makes a short, calm story on the phone from templates, with no network. Each kind of thought has its own made-up guide, reused from Project Veda where possible: Lumowl (hidden meaning), Mistfawn (predicting), Tidelyn (mind reading), Hivewright (absolute words), Pell (harsh labels), Brakkor (worst case), Sela (hopeless), and Nim (anything else). The guide feels a thought like yours, notices one real thing, says your reframe, takes your small step, and ends steadier, with no magic fix and no promises, then asks you a gentle question. **Another story** keeps the same guide and changes the wording. **Include faith** starts on only for curse, sign, or punishment thoughts, and **Tell it to me** switches to "you". Stories and thoughts are never saved; only a count of stories read is kept.
 
-Crisis safety holds here too: every line typed in the loop is checked, including any text a story would use, and crisis wording stops the loop, saves nothing, and shows only the 988/911 box.
+**Play** turns the same story pieces into three short offline games, with the same creature guide for each kind of thought. Start from a story with **Play this story**, or tap **Play a short game instead** on the Ground start screen to use a sample thought, no typing needed.
 
-Tests: `node tests/grounding.test.js`, `node tests/stories.test.js`, and `node tests/psi.test.js` (no dependencies).
+- **Choose a path:** four short scenes. Each has one mirage choice and one or two grounded ones. The mirage gets a kind note and you try again; there is no game over. It ends with the real step and a question.
+- **Spot the mirage:** sort six short lines into mirage or real, with a short reason for each.
+- **Rebuild the sentence:** tap the shuffled words of a true sentence in order (a long reframe uses its first short sentence, or switches to the path game).
+
+A steadiness meter (0 to 100) rises with grounded choices and never drops. At the end you can tap **Log as a Ground loop** to count it as a real choice (r = +1); nothing is logged unless you tap it. Only a count of games played is kept, never the thought or the story.
+
+Crisis safety holds here too: every line typed in the loop is checked, including any text a story or game would use, and crisis wording stops the loop, saves nothing, and shows only the 988/911 box.
+
+Tests: `node tests/grounding.test.js`, `node tests/stories.test.js`, `node tests/psi.test.js`, and `node tests/games.test.js` (no dependencies).
 
 ## Daily check-in (Insights)
 
@@ -85,12 +93,15 @@ js/analyzer.js          keyword patterns, traps, crisis, big-ambition language
 js/grounding.js         Grounding Loop guide: mirage reading, update rule, history
 js/stories.js           grounded story templates for the Ground tab
 js/psi.js               check-in math: Ψ, weights, next skill, weekly summary
+js/games.js             Play: path, spot-the-mirage, and word-tile games from story pieces
 js/ground-ui.js         Ground tab screens and stories
+js/play-ui.js           Play screens and the steadiness meter
 js/checkin-ui.js        check-in, weights, combined chart, weekly card
 tests/grounding.test.js node tests for the update rule and crisis gating
 tests/stories.test.js   node tests for the story generator
 tests/psi.test.js       node tests for the check-in math
-screenshots/            Ground steps, a story, the check-in, and Insights
+tests/games.test.js     node tests for the games
+screenshots/            Ground steps, a story, a game, the check-in, and Insights
 js/cbt-techniques.js    local CBT exercises
 js/bots.js              five coaches, believability, which coach goes first
 js/app.js               screens, journal, chart, install

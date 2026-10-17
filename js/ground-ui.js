@@ -5,7 +5,7 @@
 // the same 988/911 box Reflect uses.
 
 const GROUND_KEY = "mindframe-ground";
-const G_PHASES = ["name", "grip", "test", "reframe", "act", "story", "done"];
+const G_PHASES = ["name", "grip", "test", "reframe", "act", "story", "play-pick", "play", "done"];
 const STORY_COUNT_KEY = "mindframe-stories-read";
 let gDraft = null;
 

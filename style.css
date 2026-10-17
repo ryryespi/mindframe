@@ -300,3 +300,23 @@ textarea.short { min-height: 5rem; }
 .row { display: flex; justify-content: space-between; }
 .row .text { margin: 0.5rem 0 0; }
 #weekly { margin-bottom: 1.75rem; }
+
+/* Play */
+.opt-title { display: block; font-weight: 500; }
+.opt-sub { display: block; color: var(--muted); font-size: 0.88rem; margin-top: 0.15rem; }
+.option { min-height: 3rem; }
+.option:disabled { cursor: default; }
+.option.tried { opacity: 0.5; text-decoration: line-through; text-decoration-color: var(--line); }
+.option.chosen { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.meter { height: 0.45rem; border-radius: 999px; background: var(--line); overflow: hidden; margin: 0.25rem 0 0.25rem; }
+#gp-meter-fill { display: block; height: 100%; width: 0; background: #8d9a91; transition: width 0.6s ease; }
+@media (prefers-reduced-motion: reduce) { #gp-meter-fill { transition: none; } }
+.feedback { min-height: 1.5rem; color: var(--ink); }
+.pair { display: flex; gap: 0.75rem; margin: 1rem 0 0.5rem; }
+.chip.big { flex: 1; padding: 0.85rem 1rem; font-size: 1rem; }
+.chip:disabled { opacity: 0.5; cursor: default; }
+.spot-line { margin: 0.75rem 0; padding: 1rem 1.1rem; background: var(--card); border: 1px solid var(--line); border-radius: 1rem; font-size: 1.05rem; }
+.built { min-height: 3.2rem; padding: 0.8rem 1rem; border: 1px dashed var(--line); border-radius: 1rem; margin: 0.5rem 0 1rem; }
+.tiles { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.tile { min-width: 2.75rem; min-height: 2.75rem; padding: 0.5rem 0.8rem; border: 1px solid var(--line); border-radius: 0.8rem; background: var(--card); color: var(--ink); }
+.tile.placed { visibility: hidden; }
