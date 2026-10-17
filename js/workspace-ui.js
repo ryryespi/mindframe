@@ -7,7 +7,10 @@ const $w = id => document.getElementById(id);
 
 let wsState = Workspace.defaultState();
 let wsBase = wsState.e.slice(); // the restored or accepted vector; new words add to it
+let wsBaseG = wsState.ego.g;      // same for the ego grip
 let wsNotes = [];
+let wsMarkers = {};
+let wsOpt = null;
 let wsStory = null;
 let wsSeed = 1;
 let wsTimer = null;
@@ -17,7 +20,14 @@ function wsLoad() {
   const code = localStorage.getItem(WS_KEY);
   if (!code) return;
   const p = Workspace.parse(code);
-  if (p.ok) { wsState = Workspace.refreshIdeal(p.state); wsBase = wsState.e.slice(); }
+  if (p.ok) { wsState = Workspace.refreshIdeal(p.state); wsSetBase(); }
+}
+
+function wsSetBase() {
+  wsBase = wsState.e.slice();
+  wsBaseG = wsState.ego.g;
+  wsNotes = [];
+  wsMarkers = {};
 }
 
 function wsSave() {
@@ -45,14 +55,15 @@ function wsUpdate() {
   const words = Workspace.fromText($w("ws-input").value);
   if (words.crisis) { wsCrisis(true); return; }
   if (wsInCrisis) wsCrisis(false);
-  wsState = { ...wsState, e: Workspace.combine(wsBase, words.e) };
+  wsState = { ...wsState, e: Workspace.combine(wsBase, words.e), ego: { ...wsState.ego, g: Workspace.combine1(wsBaseG, words.ego.g) } };
   wsNotes = words.notes;
+  wsMarkers = words.ego.markers;
   wsRender();
   wsSave();
 }
 
 function wsRender() {
-  const m = Workspace.metrics(wsState, wsNotes);
+  const m = Workspace.metrics(wsState, wsNotes, wsMarkers);
   const ul = $w("ws-lines");
   ul.innerHTML = "";
   Workspace.lines(wsState, m).forEach(l => {
@@ -61,8 +72,10 @@ function wsRender() {
     ul.appendChild(li);
   });
   $w("ws-ideal-words").textContent = Workspace.idealWords(m);
-  $w("ws-story-go").disabled = m.d === 0;
+  $w("ws-story-go").disabled = m.d === 0 && m.ideal.egoGap < 0.005;
   wsRenderCheckpoints();
+  wsRenderWeek();
+  wsRenderVars();
   $w("ws-code").textContent = Workspace.serialize(Workspace.refreshIdeal(wsState));
 }
 
@@ -77,7 +90,7 @@ function wsRenderCheckpoints() {
     btn.className = "cp";
     btn.dataset.n = cp.n;
     const d = Workspace.distance(cp.e, wsState.home).toFixed(2);
-    btn.textContent = `${cp.n} \u00B7 ${cp.label} \u00B7 ${cp.t.replace("T", " ")} \u00B7 d = ${d}, \u03BB = ${cp.lambda > 0 ? "+" : ""}${cp.lambda.toFixed(2)}`;
+    btn.textContent = `${cp.n} \u00B7 ${cp.label} \u00B7 ${cp.t.replace("T", " ")} \u00B7 d = ${d}, g = ${cp.g.toFixed(2)}, \u03BB = ${cp.lambda > 0 ? "+" : ""}${cp.lambda.toFixed(2)}`;
     btn.setAttribute("aria-label", `Restore checkpoint ${cp.n}, ${cp.label}`);
     btn.addEventListener("click", () => wsRestore(cp.n));
     li.appendChild(btn);
@@ -87,9 +100,8 @@ function wsRenderCheckpoints() {
 
 function wsRestore(n) {
   wsState = Workspace.restore(wsState, n);
-  wsBase = wsState.e.slice();
+  wsSetBase();
   $w("ws-input").value = "";
-  wsNotes = [];
   wsHideStory();
   wsRender();
   wsSave();
@@ -118,26 +130,26 @@ function wsHideStory() {
 function wsTell() {
   wsUpdate();
   if (wsInCrisis) return;
-  const m = Workspace.metrics(wsState, wsNotes);
-  wsStory = Workspace.story(wsState, m, { seed: wsSeed });
+  const m = Workspace.metrics(wsState, wsNotes, wsMarkers);
+  wsStory = Workspace.story(wsState, m, { seed: wsSeed, faith: $w("ws-faith").checked });
   if (!wsStory) { wsHideStory(); return; }
   $w("ws-story-tag").textContent = "Guide: " + wsStory.tag;
   $w("ws-story-text").textContent = wsStory.text;
   const next = wsStory.next;
   const parts = Workspace.NAMES.map((n, i) => [n, next[i]]).filter(([, x]) => x > 0).sort((a, b) => b[1] - a[1]).map(([n, x]) => `${n} ${x.toFixed(2)}`);
-  $w("ws-preview").textContent = `preview: e\u2032 = (${parts.join(", ") || "0"}), d\u2032 = ${m.ideal.dNext.toFixed(2)}`;
+  $w("ws-preview").textContent = `preview: e\u2032 = (${parts.join(", ") || "0"}), g\u2032 = ${m.ideal.gNext.toFixed(2)}, d\u2032 = ${m.ideal.dNext.toFixed(2)}`;
   $w("ws-story").classList.remove("hidden");
 }
 
 $w("ws-story-go").addEventListener("click", () => { wsSeed = 1; wsTell(); });
 $w("ws-story-again").addEventListener("click", () => { wsSeed += 1; wsTell(); });
+$w("ws-faith").addEventListener("change", () => { if (wsStory) wsTell(); });
 
 $w("ws-accept").addEventListener("click", () => {
   if (!wsStory || wsInCrisis) return;
   wsState = Workspace.acceptStep(wsState);
-  wsBase = wsState.e.slice();
+  wsSetBase();
   $w("ws-input").value = "";
-  wsNotes = [];
   wsHideStory();
   wsRender();
   wsSave();
@@ -201,10 +213,9 @@ $w("ws-import-go").addEventListener("click", () => {
   if (p.crisis) { wsCrisis(true); return; }
   if (!p.ok) { wsImportErrors(p.errors.slice(0, 8).map(x => x.msg)); return; }
   wsState = Workspace.refreshIdeal(p.state);
-  wsBase = wsState.e.slice();
+  wsSetBase();
   $w("ws-input").value = "";
   $w("ws-import-text").value = "";
-  wsNotes = [];
   wsImportErrors([]);
   $w("ws-import").classList.add("hidden");
   wsHideStory();
@@ -217,14 +228,187 @@ $w("ws-clear").addEventListener("click", () => {
   if (!confirm("Start over? This clears the vector and checkpoints on this device.")) return;
   localStorage.removeItem(WS_KEY);
   wsState = Workspace.defaultState();
-  wsBase = wsState.e.slice();
+  wsSetBase();
   $w("ws-input").value = "";
-  wsNotes = [];
+  wsOpt = null;
+  $w("ws-compare-list").innerHTML = "";
   wsHideStory();
   wsRender();
 });
 
+// ---------- Every day ----------
+function wsRenderWeek() {
+  const ul = $w("ws-week");
+  ul.innerHTML = "";
+  Workspace.weekLines(wsState).forEach(l => { const li = document.createElement("li"); li.textContent = l; ul.appendChild(li); });
+  $w("ws-today").textContent = Workspace.todayWords(wsState);
+}
+
+// ---------- Variables and frameworks ----------
+const WS_GROUPS = [
+  ["Steps toward home", ["aBase", "aMin", "aMax", "aCap", "b", "bU", "eps"]],
+  ["Dynamics", ["d", "dt", "rise", "k"]],
+  ["Ego and days", ["target", "r", "rCap", "kShame", "kAnger", "kConn", "kCalm", "beta"]],
+];
+
+function wsInput(kind, key, label, min, max, step, note) {
+  const lab = document.createElement("label");
+  lab.title = note || "";
+  const span = document.createElement("span");
+  span.textContent = label;
+  const inp = document.createElement("input");
+  inp.type = "number";
+  Object.assign(inp, { min, max, step });
+  inp.dataset.kind = kind;
+  inp.dataset.key = key;
+  inp.setAttribute("aria-label", `${label}${note ? ": " + note : ""}`);
+  lab.append(span, inp);
+  return lab;
+}
+
+function wsBuildVars() {
+  const grid = $w("ws-var-grid");
+  grid.innerHTML = "";
+  const head = t => { const h = document.createElement("h3"); h.textContent = t; grid.appendChild(h); };
+  WS_GROUPS.forEach(([title, keys]) => {
+    head(title);
+    keys.forEach(k => {
+      const sp = Workspace.SPEC[k];
+      grid.appendChild(wsInput(Workspace.VAR_KEYS.includes(k) ? "var" : "extra", k, k === "target" ? "g*" : k === "beta" ? "\u03B2" : k, sp.min, sp.max, k === "k" ? 1 : 0.01, sp.note));
+    });
+  });
+  head("Home h");
+  ["joy", "hope", "calm", "connection"].forEach(n => grid.appendChild(wsInput("home", n, `h.${n}`, 0, 1, 0.01, `home value of ${n}`)));
+  head("Main pairs W (+ amplifies, \u2212 dampens)");
+  Workspace.MAIN_PAIRS.forEach(([a, b]) => grid.appendChild(wsInput("w", `${a}>${b}`, `${a}\u2192${b}`, -1, 1, 0.01, `how much ${a} changes ${b}`)));
+  grid.addEventListener("change", wsVarChanged);
+}
+
+function wsRenderVars() {
+  const sel = $w("ws-fw");
+  sel.innerHTML = "";
+  const opt = (value, text) => { const o = document.createElement("option"); o.value = value; o.textContent = text; sel.appendChild(o); };
+  Workspace.PRESETS.forEach(p => opt(p.id, p.title));
+  wsState.frameworks.forEach(f => opt(f.name, `${f.name} (yours)`));
+  if (![...sel.options].some(o => o.value === wsState.framework)) opt(wsState.framework, wsState.framework === "custom" ? "Custom (edited)" : wsState.framework);
+  sel.value = wsState.framework;
+  const preset = Workspace.PRESETS.find(p => p.id === wsState.framework);
+  $w("ws-fw-note").textContent = preset ? preset.note : wsState.framework === "custom" ? "Your edits. Save them as a framework to keep a name." : "Your saved framework.";
+  const W = Workspace.weights(wsState.w), NAMES = Workspace.NAMES;
+  $w("ws-var-grid").querySelectorAll("input").forEach(inp => {
+    const { kind, key } = inp.dataset;
+    let v;
+    if (kind === "var") v = wsState.vars[key];
+    else if (kind === "extra") v = key === "target" ? wsState.ego.target : key === "beta" ? wsState.beta : wsState.steps;
+    else if (kind === "home") v = wsState.home[NAMES.indexOf(key)];
+    else { const [a, b] = key.split(">"); v = W[NAMES.indexOf(a)][NAMES.indexOf(b)]; }
+    if (document.activeElement !== inp) inp.value = key === "k" ? String(v) : Number(v).toFixed(2);
+  });
+}
+
+function wsVarChanged(ev) {
+  const inp = ev.target;
+  if (!inp.dataset || !inp.dataset.kind) return;
+  const { kind, key } = inp.dataset;
+  const x = Number(inp.value);
+  let s = { ...wsState, framework: "custom" }, notes = [];
+  if (kind === "var") { const v = Workspace.validateVars({ ...s.vars, [key]: x }); s.vars = v.vars; notes = v.notes; }
+  else if (kind === "extra") {
+    const c = Workspace.clampExtra(key, x);
+    if (c !== x) notes.push(`${key}: kept inside ${Workspace.SPEC[key].min}\u2013${Workspace.SPEC[key].max}`);
+    if (key === "target") s.ego = { ...s.ego, target: c };
+    else if (key === "beta") s = Workspace.withBaseline({ ...s, beta: c });
+    else s.steps = c;
+  } else if (kind === "home") {
+    const home = s.home.slice();
+    const c = Math.min(1, Math.max(0, Math.round((Number.isFinite(x) ? x : 0) * 100) / 100));
+    if (c !== x) notes.push(`h.${key}: kept inside 0\u20131`);
+    home[Workspace.NAMES.indexOf(key)] = c;
+    s.home = home;
+  } else {
+    const [a, b] = key.split(">");
+    const c = Math.min(1, Math.max(-1, Number.isFinite(x) ? x : 0));
+    if (c !== x) notes.push(`${a}\u2192${b}: kept inside \u22121 to 1`);
+    s = Workspace.setWeight(s, a, b, c);
+  }
+  wsState = s;
+  $w("ws-var-notes").textContent = notes.join("; ");
+  wsOpt = null;
+  $w("ws-opt").classList.add("hidden");
+  inp.blur();
+  wsRender();
+  wsSave();
+}
+
+function wsUseFramework(name) {
+  wsState = Workspace.applyFramework(wsState, Workspace.findFramework(wsState, name));
+  $w("ws-var-notes").textContent = "";
+  wsRender();
+  wsSave();
+}
+
+$w("ws-fw").addEventListener("change", () => {
+  if (Workspace.findFramework(wsState, $w("ws-fw").value)) wsUseFramework($w("ws-fw").value);
+});
+$w("ws-vars-reset").addEventListener("click", () => wsUseFramework("default"));
+
+$w("ws-compare").addEventListener("click", () => {
+  const ul = $w("ws-compare-list");
+  ul.innerHTML = "";
+  Workspace.compare(wsState).forEach(row => {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    span.textContent = `${row.title}: ${Workspace.recText(row)}`;
+    const use = document.createElement("button");
+    use.type = "button";
+    use.className = "text";
+    use.dataset.fw = row.name;
+    use.textContent = row.name === wsState.framework ? "in use" : "Use this";
+    use.disabled = row.name === wsState.framework;
+    use.addEventListener("click", () => { wsUseFramework(row.name); $w("ws-compare").click(); });
+    li.append(span, use);
+    ul.appendChild(li);
+  });
+});
+
+$w("ws-optimize").addEventListener("click", () => {
+  wsOpt = Workspace.optimize(wsState);
+  const ch = wsOpt.changed.map(c => `${c.key} ${c.from.toFixed(2)} \u2192 ${c.to.toFixed(2)}`).join(", ");
+  const t = x => Workspace.recText({ ...x, days: x.steps });
+  $w("ws-opt-text").textContent = ch
+    ? `optimized: ${t(wsOpt.after)} (was ${t(wsOpt.before)}); ${ch}. Unstable caps unchanged.`
+    : `Already as quick as these safe bounds allow: ${t(wsOpt.before)}.`;
+  $w("ws-opt-accept").disabled = !ch;
+  $w("ws-opt").classList.remove("hidden");
+});
+
+$w("ws-opt-accept").addEventListener("click", () => {
+  if (!wsOpt || !wsOpt.changed.length) return;
+  const n = wsState.frameworks.filter(f => /^optimized-\d+$/.test(f.name)).length + 1;
+  const saved = Workspace.saveFramework({ ...wsState, vars: wsOpt.vars }, `optimized-${n}`);
+  if (saved.ok) wsState = Workspace.refreshIdeal(saved.state);
+  wsOpt = null;
+  $w("ws-opt").classList.add("hidden");
+  $w("ws-fw-msg").textContent = `Saved as optimized-${n}.`;
+  wsRender();
+  wsSave();
+});
+$w("ws-opt-discard").addEventListener("click", () => { wsOpt = null; $w("ws-opt").classList.add("hidden"); });
+
+$w("ws-fw-save").addEventListener("click", () => {
+  const name = $w("ws-fw-name").value.trim();
+  const saved = Workspace.saveFramework(wsState, name);
+  if (saved.crisis) { wsCrisis(true); return; }
+  if (!saved.ok) { $w("ws-fw-msg").textContent = saved.msg; return; }
+  wsState = saved.state;
+  $w("ws-fw-name").value = "";
+  $w("ws-fw-msg").textContent = `Saved as ${name}. It is in the code, so it exports and imports with your session.`;
+  wsRender();
+  wsSave();
+});
+
 // ---------- Start ----------
+wsBuildVars();
 wsLoad();
 wsRender();
 

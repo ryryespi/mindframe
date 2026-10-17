@@ -55,6 +55,7 @@
           <p id="ws-story-tag" class="creature-tag"></p>
           <p id="ws-story-text"></p>
           <p id="ws-preview" class="eq-line"></p>
+          <label class="small quiet ws-check"><input type="checkbox" id="ws-faith" /> Include a faith line</label>
           <div class="ws-buttons">
             <button type="button" id="ws-accept" class="secondary">Accept step</button>
             <button type="button" id="ws-story-again" class="text">Another story</button>
@@ -66,6 +67,42 @@
           <p id="ws-cps-empty" class="quiet small">None yet. Save one to come back to it.</p>
           <ol id="ws-cps" class="ws-cps"></ol>
         </section>
+
+        <section class="ws-sec">
+          <h2>Every day</h2>
+          <p class="quiet small">Each day keeps its last saved state. The baseline B moves a little toward each new day: B = (1 − β)·B + β·D.</p>
+          <ul id="ws-week" class="ws-lines"></ul>
+          <p id="ws-today" class="ws-words"></p>
+        </section>
+
+        <details id="ws-vars" class="ws-sec ws-vars">
+          <summary>Variables</summary>
+          <p class="quiet small">Every number the equations use. Frameworks are sets of these values: design choices inspired by each approach, not validated versions of them. Recovery estimates come from the model, not a prediction of real recovery.</p>
+          <label class="small" for="ws-fw">Framework</label>
+          <select id="ws-fw"></select>
+          <p id="ws-fw-note" class="quiet small"></p>
+          <div id="ws-var-grid" class="ws-var-grid"></div>
+          <p id="ws-var-notes" class="quiet small"></p>
+          <div class="ws-buttons">
+            <button type="button" id="ws-vars-reset" class="secondary">Reset to defaults</button>
+            <button type="button" id="ws-compare" class="secondary">Compare frameworks</button>
+            <button type="button" id="ws-optimize" class="secondary">Optimize</button>
+          </div>
+          <ul id="ws-compare-list" class="ws-compare"></ul>
+          <div id="ws-opt" class="card hidden">
+            <p id="ws-opt-text" class="eq-line"></p>
+            <div class="ws-buttons">
+              <button type="button" id="ws-opt-accept" class="secondary">Use it</button>
+              <button type="button" id="ws-opt-discard" class="text">Discard</button>
+            </div>
+          </div>
+          <div class="ws-buttons">
+            <label class="visually-hidden" for="ws-fw-name">Framework name</label>
+            <input type="text" id="ws-fw-name" placeholder="name, e.g. my-plan" maxlength="24" />
+            <button type="button" id="ws-fw-save" class="secondary">Save as framework</button>
+          </div>
+          <p id="ws-fw-msg" class="quiet small"></p>
+        </details>
 
         <section class="ws-sec">
           <h2>Code</h2>

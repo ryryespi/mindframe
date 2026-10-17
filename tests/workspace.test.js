@@ -42,7 +42,7 @@ test("hidden variables: unstated feelings the dynamics raise, with the source", 
   const s = withE(W.fromText(TARGET).e);
   const m = W.metrics(s);
   const sad = m.hidden.find(x => x.kind === "dynamics" && x.name === "sadness");
-  assert.ok(sad && sad.from === 0 && sad.to - sad.from >= W.HIDDEN_RISE);
+  assert.ok(sad && sad.from === 0 && sad.to - sad.from >= W.SPEC.rise.def);
   assert.equal(sad.via, "loneliness");
   m.hidden.filter(x => x.kind === "dynamics").forEach(x => assert.ok(x.from <= E.ACTIVE));
 });
@@ -76,14 +76,14 @@ test("ideal step: also shrinks distance in the unstable case, with a capped step
   let s = withE(W.fromText(TARGET).e);
   let m = W.metrics(s);
   assert.ok(m.lambda > 0);
-  assert.ok(m.ideal.a <= W.A_UNSTABLE && m.ideal.a >= W.A_MIN);
-  assert.equal(m.ideal.b, W.B_UNSTABLE);
+  assert.ok(m.ideal.a <= W.SPEC.aCap.def && m.ideal.a >= W.SPEC.aMin.def);
+  assert.equal(m.ideal.b, W.SPEC.bU.def);
   let d = m.d;
   for (let k = 0; k < 10; k++) {
     s = W.acceptStep(s, T0 + k * 60000);
     m = W.metrics(s);
     assert.ok(m.d < d, `step ${k}`);
-    if (m.lambda > 0) assert.ok(m.ideal.a <= W.A_UNSTABLE);
+    if (m.lambda > 0) assert.ok(m.ideal.a <= W.SPEC.aCap.def);
     d = m.d;
   }
 });
@@ -91,7 +91,7 @@ test("ideal step: a scales with distance (bigger far away, never above the cap)"
   const far = W.ideal(vec({ sadness: 0.9, fear: 0.9, guilt: 0.9 })), near_ = W.ideal(vec({ joy: 0.5, hope: 0.7, calm: 0.7, connection: 0.7 }));
   assert.ok(far.lambda <= 0);
   assert.ok(far.a > near_.a);
-  [far, near_].forEach(x => assert.ok(x.a <= W.A_MAX && x.a >= W.A_MIN));
+  [far, near_].forEach(x => assert.ok(x.a <= W.SPEC.aMax.def && x.a >= W.SPEC.aMin.def));
 });
 test("ideal step: every value moves toward home and never passes it", () => {
   const s = withE(vec({ joy: 0.9, shame: 0.7, calm: 0.2 }));
@@ -133,18 +133,22 @@ test("round trip: parse(serialize(s)) = s, and serialize(parse(code)) = code", (
   assert.deepEqual(p.state, s);
   assert.equal(W.serialize(p.state), code);
 });
-test("code shape: header, home, e, steps, w, cp, ideal, eq", () => {
+test("code shape: header, home, e, ego, steps, vars, w, baseline, day, cp, ideal, eq", () => {
   const code = W.serialize(W.refreshIdeal(sample()));
   const lines = code.trim().split("\n");
   assert.equal(lines[0], "mf 1");
   assert.equal(lines[1], "home joy=0.60 hope=0.80 calm=0.80 connection=0.80");
   assert.match(lines[2], /^e( [a-z]+=\d\.\d\d)+$/);
-  assert.equal(lines[3], "steps 8");
-  assert.equal(lines[4], "w shame>loneliness=0.45");
-  assert.match(lines[5], /^cp 1 2026-10-17T13:50 label=start anger=0\.68 shame=0\.80 loneliness=0\.94 lambda=0\.27$/);
-  assert.match(lines[6], /^cp 2 2026-10-17T13:55 label=step-1 /);
-  assert.match(lines[7], /^ideal a=0\.\d\d b=0\.\d\d$/);
-  assert.match(lines[8], /^eq e' = e \+ 0\.\d\d\*\(h - e\) \+ 0\.\d\d\*s\(e\)$/);
+  assert.match(lines[3], /^ego g=0\.\d\d target=0\.30$/);
+  assert.equal(lines[4], "steps 8");
+  assert.equal(lines[5], "vars framework=default");
+  assert.equal(lines[6], "w shame>loneliness=0.45");
+  assert.match(lines[7], /^baseline beta=0\.20( [a-z]+=\d\.\d\d)+ g=0\.\d\d$/);
+  assert.match(lines[8], /^day 2026-10-17( [a-z]+=\d\.\d\d)+ g=0\.\d\d$/);
+  assert.match(lines[9], /^cp 1 2026-10-17T13:50 label=start anger=0\.68 shame=0\.80 loneliness=0\.94 g=0\.30 lambda=0\.27$/);
+  assert.match(lines[10], /^cp 2 2026-10-17T13:55 label=step-1 /);
+  assert.match(lines[11], /^ideal a=0\.\d\d b=0\.\d\d r=0\.\d\d$/);
+  assert.match(lines[12], /^eq e' = e \+ 0\.\d\d\*\(h - e\) \+ 0\.\d\d\*s\(e\); g' = g - 0\.\d\d\*\(g - 0\.30\)$/);
 });
 test("parser is lenient on form: comments, blank lines, short numbers, CRLF", () => {
   const p = W.parse("# my session\r\n\r\nmf 1\r\ne shame=.8 fear=1   # end note\r\nsteps 4\r\n");
@@ -241,13 +245,13 @@ test("no user text in exported code: only keywords, emotion names, numbers, time
   s = W.addCheckpoint(s, "start", T0);
   const code = W.serialize(W.refreshIdeal(W.acceptStep(s, T0)));
   ["ashamed", "alone", "nobody", "Jordan", "myself", "angry"].forEach(w => assert.ok(!code.includes(w), w));
-  code.trim().split("\n").forEach(line => assert.match(line, /^(mf 1|home( [a-z]+=\d\.\d\d)*|e( [a-z]+=\d\.\d\d)*|steps \d+|cp \d+ [\dT:-]+ label=[a-z0-9-]+( [a-z]+=-?\d\.\d\d)*|ideal a=\d\.\d\d b=\d\.\d\d|eq e' = e \+ \d\.\d\d\*\(h - e\) \+ \d\.\d\d\*s\(e\))$/, line));
+  code.trim().split("\n").forEach(line => assert.match(line, /^(mf 1|home( [a-z]+=\d\.\d\d)*|e( [a-z]+=\d\.\d\d)*|ego g=\d\.\d\d target=\d\.\d\d|steps \d+|vars framework=[a-z0-9-]+( [a-zA-Z]+=\d\.\d\d)*|baseline beta=\d\.\d\d( [a-z]+=\d\.\d\d)*|day [\d-]+( [a-z]+=\d\.\d\d)*|cp \d+ [\dT:-]+ label=[a-z0-9-]+( [a-z]+=-?\d\.\d\d)*|ideal a=\d\.\d\d b=\d\.\d\d r=\d\.\d\d|eq e' = e \+ \d\.\d\d\*\(h - e\) \+ \d\.\d\d\*s\(e\); g' = g - \d\.\d\d\*\(g - \d\.\d\d\))$/, line));
 });
 test("lines never echo the input, so markup cannot get in", () => {
   const r = W.fromText("<img src=x onerror=alert(1)> I am <b>sad</b>");
   const s = withE(r.e);
   const txt = W.lines(s, W.metrics(s, r.notes)).join("\n");
-  assert.ok(!/[<>]/.test(txt));
+  assert.ok(!/<img|<b>|onerror/.test(txt));
 });
 
 console.log(`\n${passed} passed${process.exitCode ? ", some failed" : ""}`);

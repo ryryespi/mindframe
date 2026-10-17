@@ -349,3 +349,21 @@ h2[tabindex="-1"]:focus { outline: none; }
 .ws-errors { color: var(--crisis-ink); font-size: 0.85rem; padding-left: 1.1rem; }
 #ws-import input[type="file"] { display: block; margin: 0.4rem 0; font-size: 0.85rem; }
 #ws-story-text { line-height: 1.6; user-select: text; -webkit-user-select: text; }
+
+/* ---------- Workspace: every day, variables ---------- */
+.ws-check { display: flex; gap: 0.4rem; align-items: center; margin-top: 0.75rem; }
+.ws-vars summary { cursor: pointer; font-size: 1.15rem; font-weight: 500; padding: 0.25rem 0; }
+.ws-vars select, .ws-vars input[type="text"] {
+  font: inherit; padding: 0.45rem 0.6rem; border: 1px solid var(--line); border-radius: 0.6rem; background: var(--card); color: var(--ink);
+}
+.ws-vars select { display: block; width: 100%; margin: 0.3rem 0 0.25rem; }
+.ws-var-grid { display: grid; grid-template-columns: 1fr; gap: 0.35rem 1.25rem; margin-top: 0.5rem; }
+@media (min-width: 560px) { .ws-var-grid { grid-template-columns: 1fr 1fr; } }
+.ws-var-grid h3 { grid-column: 1 / -1; margin: 0.6rem 0 0; font-size: 0.9rem; font-weight: 600; color: var(--accent); }
+.ws-var-grid label { display: flex; justify-content: space-between; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+.ws-var-grid input { width: 4.6rem; font: inherit; padding: 0.25rem 0.35rem; border: 1px solid var(--line); border-radius: 0.4rem; background: var(--card); color: var(--ink); }
+.ws-compare { list-style: none; margin: 0.75rem 0 0; padding: 0; }
+.ws-compare li { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; padding: 0.35rem 0; border-bottom: 1px solid var(--line); font-size: 0.85rem; }
+.ws-compare li span { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+.ws-compare .text { margin: 0; white-space: nowrap; }
+#ws-fw-name { flex: 1; min-width: 9rem; }
