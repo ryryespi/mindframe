@@ -247,3 +247,29 @@ label { display: block; margin-top: 0.35rem; color: var(--muted); font-size: 0.9
 }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Grounding Loop */
+.small { font-size: 0.85rem; }
+.tags { margin: 0 0 1rem; min-height: 1.5rem; }
+input[type="range"] { width: 100%; margin: 0.75rem 0 0; accent-color: var(--accent); }
+.slider-words { margin: 0.25rem 0 0.5rem; }
+textarea.short { min-height: 5rem; }
+.options { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.25rem 0 1rem; }
+.option {
+  text-align: left;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--card);
+  color: var(--ink);
+  line-height: 1.4;
+}
+.primary:disabled { opacity: 0.45; cursor: default; }
+.g-result { font-size: 1.3rem; margin: 0.5rem 0 0.75rem; }
+.soft-note {
+  margin: 0.25rem 0 1.5rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  background: #ece7df;
+  color: var(--ink);
+}

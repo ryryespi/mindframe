@@ -71,7 +71,7 @@ function renderJournal() {
 // ---------- Tabs ----------
 
 function showView(name) {
-  ["reflect", "journal", "insights"].forEach(id => {
+  ["reflect", "ground", "journal", "insights"].forEach(id => {
     $("view-" + id).classList.toggle("hidden", id !== name);
   });
   document.querySelectorAll(".tab").forEach(btn => {
@@ -376,7 +376,7 @@ function renderInsights() {
   });
   const weeks = [...grouped.entries()].sort((a, b) => a[0] - b[0]);
   if (!weeks.length) {
-    root.innerHTML = `<h2>This week</h2><p class="quiet">Reflections you keep will show up here.</p>`;
+    root.innerHTML = groundTrendHTML() + `<h2>This week</h2><p class="quiet">Reflections you keep will show up here.</p>`;
     return;
   }
   if (insightIndex < 0 || insightIndex >= weeks.length) insightIndex = weeks.length - 1;
@@ -412,7 +412,7 @@ function renderInsights() {
   const earlier = insightIndex > 0 ? `<button type="button" class="text" id="week-earlier">Earlier</button>` : `<span></span>`;
   const later = insightIndex < weeks.length - 1 ? `<button type="button" class="text" id="week-later">Later</button>` : `<span></span>`;
   const nav = weeks.length > 1 ? `<div class="week-nav">${earlier}${later}</div>` : "";
-  root.innerHTML = `<h2>Week of ${esc(label)}</h2>${bars}${nav}`;
+  root.innerHTML = groundTrendHTML() + `<h2>Week of ${esc(label)}</h2>${bars}${nav}`;
   const back = $("week-earlier");
   const forward = $("week-later");
   if (back) back.addEventListener("click", () => { insightIndex -= 1; renderInsights(); });

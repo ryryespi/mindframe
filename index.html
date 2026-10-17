@@ -80,6 +80,75 @@
         </div>
       </section>
 
+      <section id="view-ground" class="hidden">
+        <!-- Grounding Loop: a guided tool, not a therapist. One step on screen at a time. -->
+        <div id="g-name">
+          <p class="quiet">A guided loop for heavy, hard-to-prove thoughts. Four short steps. Just a tool, not a therapist.</p>
+          <form id="g-name-form">
+            <label class="visually-hidden" for="g-thought">The thought</label>
+            <textarea id="g-thought" rows="4" placeholder="The thought, as it sounds in your head"></textarea>
+            <button type="submit" class="primary">Name it</button>
+          </form>
+        </div>
+
+        <div id="g-grip" class="hidden">
+          <p class="quiet">1 of 4 · Name it</p>
+          <h2>How strong is its grip?</h2>
+          <div id="g-labels" class="tags"></div>
+          <input id="g-m" type="range" min="0" max="1" step="0.05" aria-describedby="g-m-words" />
+          <p id="g-m-words" class="slider-words quiet"></p>
+          <p class="quiet small">Suggested from the words you used. Move it to how it really feels.</p>
+          <button type="button" id="g-to-test" class="primary">Next</button>
+        </div>
+
+        <div id="g-test" class="hidden">
+          <p class="quiet">2 of 4 · Test it</p>
+          <h2 id="g-question"></h2>
+          <div class="chips" role="group" aria-label="Is it a fact, a fear, or a belief?">
+            <button type="button" class="chip" data-kind="fact" aria-pressed="false">Fact</button>
+            <button type="button" class="chip" data-kind="fear" aria-pressed="false">Fear</button>
+            <button type="button" class="chip" data-kind="belief" aria-pressed="false">Belief</button>
+          </div>
+          <label for="g-see">What you can actually see</label>
+          <input id="g-see" type="text" maxlength="160" autocomplete="off" />
+          <button type="button" id="g-to-reframe" class="primary">Next</button>
+        </div>
+
+        <div id="g-reframe" class="hidden">
+          <p class="quiet">3 of 4 · Reframe it</p>
+          <h2>One true, hopeful sentence</h2>
+          <div id="g-options" class="options"></div>
+          <label for="g-real">Your words (edit freely)</label>
+          <textarea id="g-real" rows="3" class="short"></textarea>
+          <label for="g-h">How true does it feel?</label>
+          <input id="g-h" type="range" min="0" max="1" step="0.05" value="0.5" aria-describedby="g-h-words" />
+          <p id="g-h-words" class="slider-words quiet"></p>
+          <button type="button" id="g-to-act" class="primary">Next</button>
+        </div>
+
+        <div id="g-act" class="hidden">
+          <p class="quiet">4 of 4 · Act on it</p>
+          <h2>One small, real step</h2>
+          <div id="g-actions" class="options"></div>
+          <label for="g-step">Your step</label>
+          <input id="g-step" type="text" maxlength="160" autocomplete="off" />
+          <p class="quiet small">Which way are you going?</p>
+          <div class="chips" role="group" aria-label="Your choice">
+            <button type="button" class="chip" data-r="1" aria-pressed="false">The real one</button>
+            <button type="button" class="chip" data-r="0" aria-pressed="false">Not sure</button>
+            <button type="button" class="chip" data-r="-1" aria-pressed="false">The old thought</button>
+          </div>
+          <button type="button" id="g-finish" class="primary" disabled>Update</button>
+        </div>
+
+        <div id="g-done" class="hidden">
+          <h2>Grounded</h2>
+          <p id="g-result" class="g-result"></p>
+          <p id="g-note" class="quiet"></p>
+          <button type="button" id="g-again" class="primary">Done</button>
+        </div>
+      </section>
+
       <section id="view-journal" class="hidden">
         <ul id="journal-list"></ul>
         <button type="button" id="clear-journal" class="text hidden">Clear journal</button>
@@ -92,15 +161,18 @@
 
     <nav class="tabs" aria-label="Sections">
       <button type="button" class="tab" data-view="reflect" aria-current="page">Reflect</button>
+      <button type="button" class="tab" data-view="ground">Ground</button>
       <button type="button" class="tab" data-view="journal">Journal</button>
       <button type="button" class="tab" data-view="insights">Insights</button>
     </nav>
   </div>
 
-  <!-- Load order: analyzer -> technique data -> bots -> app -->
+  <!-- Load order: analyzer -> grounding -> technique data -> bots -> app -> ground UI -->
   <script src="js/analyzer.js"></script>
+  <script src="js/grounding.js"></script>
   <script src="js/cbt-techniques.js"></script>
   <script src="js/bots.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/ground-ui.js"></script>
 </body>
 </html>

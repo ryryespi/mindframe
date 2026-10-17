@@ -65,3 +65,6 @@ function analyze(text) {
   const crisis = CRISIS.some(re => re.test(t));
   return { text, categories, absolutes, distortions, grandiose, crisis };
 }
+
+// Lets the node tests in tests/ load this file. Browsers skip this line.
+if (typeof module !== "undefined" && module.exports) module.exports = { analyze, CRISIS };

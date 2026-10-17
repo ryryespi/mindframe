@@ -8,7 +8,7 @@ MindFrame is practice, not a substitute for therapy.
 
 ## Reflect
 
-Bottom tabs are **Reflect**, **Journal**, and **Insights**.
+Bottom tabs are **Reflect**, **Ground**, **Journal**, and **Insights**.
 
 On Reflect, one primary action is on screen at a time:
 
@@ -23,6 +23,21 @@ The Thought Equation asks for evidence for and evidence against as separate list
 If the wording sounds like a very big ambition ("I will change the world", "greatest", "destined", "everyone will"), a **One small step** card offers a value and one realistic action. The tone stays respectful. If ideas feel racing or overwhelming, it suggests talking with someone you trust.
 
 Technique text stays in the browser, in `js/cbt-techniques.js`. Sources are noted in that file (Beck, Burns' *Feeling Good*, and related CBT work).
+
+## Ground: the Grounding Loop
+
+A small guide for heavy, hard-to-prove thoughts ("I'm cursed", "nothing will ever change"). It is rule-based and runs on the phone. It is a guided tool, not a therapist, and nothing is sent anywhere.
+
+1. **Name it.** Write the thought. The guide looks for mirage wording (absolute words, curse/fate/sign/punishment language, mind reading, predicting the future, harsh labels) and suggests how strong its grip is (M). You move the slider.
+2. **Test it.** One question that fits what it noticed, plus fact, fear, or belief.
+3. **Reframe it.** Two or three true, hopeful sentences to start from. Edit freely, then rate how true it feels (H).
+4. **Act on it.** One small step (a short prayer, a text to a friend, a walk, a two-minute task), then choose: the real one (+1), not sure (0), or the old thought (−1).
+
+Groundedness updates with `G_next = clamp01(G + 0.2 × r × (1 + H − M) / 2)`, starting at 0.5. Choosing the real version always raises it, the old thought always lowers it, and not sure leaves it; H and M only set how big the step is. Only the numbers are kept, not the thought. Insights shows a 7-day line, and if groundedness stays under 0.3 for three days in a row, a soft note suggests reaching out to someone you trust, and 988.
+
+Crisis safety holds here too: every line typed in the loop is checked, and crisis wording stops the loop, saves nothing, and shows only the 988/911 box.
+
+Tests: `node tests/grounding.test.js` (no dependencies).
 
 ## Journal and Insights
 
@@ -55,6 +70,10 @@ sw.js                   offline cache
 serve.py                static server on port 8000
 icons/                  home-screen icons
 js/analyzer.js          keyword patterns, traps, crisis, big-ambition language
+js/grounding.js         Grounding Loop guide: mirage reading, update rule, history
+js/ground-ui.js         Ground tab screens and the Insights trend
+tests/grounding.test.js node tests for the update rule and crisis gating
+screenshots/            Ground reframe step and Insights trend
 js/cbt-techniques.js    local CBT exercises
 js/bots.js              five coaches, believability, which coach goes first
 js/app.js               screens, journal, chart, install
