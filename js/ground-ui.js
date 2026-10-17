@@ -5,7 +5,8 @@
 // the same 988/911 box Reflect uses.
 
 const GROUND_KEY = "mindframe-ground";
-const G_PHASES = ["name", "grip", "test", "reframe", "act", "done"];
+const G_PHASES = ["name", "grip", "test", "reframe", "act", "story", "done"];
+const STORY_COUNT_KEY = "mindframe-stories-read";
 let gDraft = null;
 
 function loadGround() {
@@ -146,6 +147,52 @@ $("g-finish").addEventListener("click", () => {
 });
 
 $("g-again").addEventListener("click", resetGround);
+
+// ---------- Stories: made from templates, shown with textContent, never saved ----------
+
+function gTellStory(fresh) {
+  if (!gDraft) return;
+  const s = gDraft.story;
+  if (fresh) s.seed = Math.floor(Math.random() * 1e9);
+  const story = Stories.tell({
+    read: gDraft.read,
+    thought: $("g-thought").value,
+    reframe: $("g-real").value,
+    step: s.from === "act" ? $("g-step").value : "",
+    faith: $("g-faith").checked,
+    you: $("g-you").checked,
+    seed: s.seed,
+    avoid: fresh ? s.lastKey : null,
+  });
+  if (story.crisis) { groundCrisis(); return; }
+  s.lastKey = story.key;
+  $("g-story-text").textContent = story.text;
+  if (fresh) {
+    const n = Number(localStorage.getItem(STORY_COUNT_KEY) || 0) + 1;
+    localStorage.setItem(STORY_COUNT_KEY, String(n)); // a count only
+  }
+}
+
+document.querySelectorAll(".g-story-open").forEach(btn => {
+  btn.addEventListener("click", () => {
+    if (!gDraft) return;
+    gDraft.story = { from: btn.dataset.from, seed: 0, lastKey: null };
+    // Faith starts on only for hidden-meaning thoughts. The toggle is yours.
+    $("g-faith").checked = Stories.arcFor(gDraft.read) === "meaning";
+    $("g-you").checked = false;
+    showG("story");
+    gTellStory(true);
+  });
+});
+
+$("g-story-again").addEventListener("click", () => gTellStory(true));
+// Toggles re-tell the same story with or without the change.
+$("g-faith").addEventListener("change", () => gTellStory(false));
+$("g-you").addEventListener("change", () => gTellStory(false));
+$("g-story-back").addEventListener("click", () => {
+  if (!gDraft) return;
+  showG(gDraft.story && gDraft.story.from === "act" ? "act" : "reframe");
+});
 
 // ---------- Insights: a 7-day sparkline of G, plus a soft note on low streaks ----------
 

@@ -35,9 +35,11 @@ A small guide for heavy, hard-to-prove thoughts ("I'm cursed", "nothing will eve
 
 Groundedness updates with `G_next = clamp01(G + 0.2 × r × (1 + H − M) / 2)`, starting at 0.5. Choosing the real version always raises it, the old thought always lowers it, and not sure leaves it; H and M only set how big the step is. Only the numbers are kept, not the thought. Insights shows a 7-day line, and if groundedness stays under 0.3 for three days in a row, a soft note suggests reaching out to someone you trust, and 988.
 
-Crisis safety holds here too: every line typed in the loop is checked, and crisis wording stops the loop, saves nothing, and shows only the 988/911 box.
+**Tell me a story** (on the Reframe and Act steps) makes a short, calm story on the phone from templates, with no network. A made-up character (a fernling, a glimmerback, a stone-keeper, a traveler in a blue coat, and others) feels a thought like yours, notices one real thing, says your reframe, takes your small step, and ends steadier, with no magic fix and no promises, then asks you a gentle question. **Another story** gives a different one. **Include faith** starts on only for curse, sign, or punishment thoughts, and **Tell it to me** switches to "you". Stories and thoughts are never saved; only a count of stories read is kept.
 
-Tests: `node tests/grounding.test.js` (no dependencies).
+Crisis safety holds here too: every line typed in the loop is checked, including any text a story would use, and crisis wording stops the loop, saves nothing, and shows only the 988/911 box.
+
+Tests: `node tests/grounding.test.js` and `node tests/stories.test.js` (no dependencies).
 
 ## Journal and Insights
 
@@ -71,9 +73,11 @@ serve.py                static server on port 8000
 icons/                  home-screen icons
 js/analyzer.js          keyword patterns, traps, crisis, big-ambition language
 js/grounding.js         Grounding Loop guide: mirage reading, update rule, history
+js/stories.js           grounded story templates for the Ground tab
 js/ground-ui.js         Ground tab screens and the Insights trend
 tests/grounding.test.js node tests for the update rule and crisis gating
-screenshots/            Ground reframe step and Insights trend
+tests/stories.test.js   node tests for the story generator
+screenshots/            Ground reframe step, a story, and the Insights trend
 js/cbt-techniques.js    local CBT exercises
 js/bots.js              five coaches, believability, which coach goes first
 js/app.js               screens, journal, chart, install

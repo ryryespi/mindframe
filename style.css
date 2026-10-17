@@ -273,3 +273,9 @@ textarea.short { min-height: 5rem; }
   background: #ece7df;
   color: var(--ink);
 }
+
+/* Grounded stories */
+.story p { line-height: 1.65; }
+.toggles { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 0.75rem 0 0.25rem; }
+.toggle { display: flex; align-items: center; gap: 0.4rem; margin: 0; color: var(--muted); font-size: 0.9rem; }
+.toggle input { accent-color: var(--accent); width: 1.05rem; height: 1.05rem; margin: 0; }
