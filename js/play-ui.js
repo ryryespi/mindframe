@@ -22,17 +22,24 @@ function el(tag, opts = {}, kids = []) {
 
 // ---------- Entry points ----------
 
+function showPlay(name) {
+  $("g-play-pick").classList.toggle("hidden", name !== "pick");
+  $("g-play").classList.toggle("hidden", name !== "game");
+}
+
 function openPlayPick() {
   // Check every bit of text before anything is made.
   const probe = Games.make({ ...playCtx, type: "path", seed: 1 });
-  if (probe.crisis) { groundCrisis(); return; }
+  if (probe.crisis) { showCrisis(); return; }
   $("gp-pick-tag").textContent = "Guide: " + probe.tag;
   $("gp-pick-note").textContent = playCtx.from === "sample"
-    ? `A sample thought: \u201C${playCtx.thought}\u201D`
-    : "Made from your story. Nothing you typed is saved.";
+    ? `Nothing written yet, so here is a sample thought: \u201C${playCtx.thought}\u201D`
+    : playCtx.from === "story"
+      ? "Made from your story. Nothing you typed is saved."
+      : "Made from your words. Nothing you typed is saved.";
   $("gp-pick-other").classList.toggle("hidden", playCtx.from !== "sample");
-  showG("play-pick");
-  $("gp-pick-title").focus();
+  showPanel("play");
+  showPlay("pick");
 }
 
 function newSample() {
@@ -42,8 +49,16 @@ function newSample() {
   playCtx = { from: "sample", arc, thought: Games.SAMPLES[arc], read: Grounding.read(Games.SAMPLES[arc]) };
 }
 
-$("g-play-sample").addEventListener("click", () => {
-  newSample();
+onCrisisReset(() => {
+  playCtx = null;
+  play = null;
+  $("gp-stage").innerHTML = "";
+});
+
+// Play from the main box, or from a sample thought when the box is empty.
+registerOutput("play", text => {
+  if (text) playCtx = { from: "input", thought: text, read: Grounding.read(text) };
+  else newSample();
   openPlayPick();
 });
 
@@ -52,22 +67,12 @@ $("gp-pick-other").addEventListener("click", () => {
   openPlayPick();
 });
 
+// Play the story that is showing, with its reframe, step, and faith setting.
 $("g-story-play").addEventListener("click", () => {
-  if (!gDraft) return;
-  playCtx = {
-    from: "story",
-    read: gDraft.read,
-    thought: $("g-thought").value,
-    reframe: $("g-real").value,
-    step: gDraft.story && gDraft.story.from === "act" ? $("g-step").value : "",
-    faith: $("g-faith").checked,
-  };
+  if (!storyCtx) return;
+  playCtx = { from: "story", read: storyCtx.read, thought: storyCtx.thought, reframe: storyCtx.reframe, step: storyCtx.step, faith: $("g-faith").checked };
+  selectChip("play", false);
   openPlayPick();
-});
-
-$("gp-pick-back").addEventListener("click", () => {
-  if (playCtx && playCtx.from === "story" && gDraft) showG("story");
-  else { playCtx = null; showG("name"); }
 });
 
 document.querySelectorAll(".game-option").forEach(btn => {
@@ -79,11 +84,11 @@ document.querySelectorAll(".game-option").forEach(btn => {
 function startGame(type) {
   if (!playCtx) return;
   const game = Games.make({ ...playCtx, type, seed: Math.floor(Math.random() * 1e9) });
-  if (game.crisis) { groundCrisis(); return; }
+  if (game.crisis) { showCrisis(); return; }
   play = { game, i: 0, first: 0, retried: 0, missed: false, placed: [], logged: false };
   $("gp-tag").textContent = "Guide: " + game.tag;
   paintMeter();
-  showG("play");
+  showPlay("game");
   renderStep();
 }
 
@@ -262,18 +267,10 @@ function renderEnd() {
     },
   });
   const again = nextButton("Play another", () => { play = null; openPlayPick(); });
-  const done = el("button", {
-    type: "button", cls: "text", text: "Done",
-    onClick: () => {
-      play = null;
-      if (playCtx && playCtx.from === "story" && gDraft) showG("story");
-      else { playCtx = null; showG("name"); }
-    },
-  });
   stage([
     el("h2", { text: { path: "You found the real path", spot: "You spotted the mirages", tiles: "You rebuilt the sentence" }[g.type], attrs: { tabindex: "-1" } }),
     el("p", { cls: "g-result", text: `Steadiness ${value}` }),
-    ...g.ending.map(line => el("p", { text: line })),
-    log, logNote, again, done,
+    ...g.ending.map(line => el("p", { cls: "copyable", text: line })),
+    log, logNote, again,
   ]);
 }

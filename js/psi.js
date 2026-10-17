@@ -69,7 +69,7 @@ const Psi = (function () {
     S: { creature: "Tidelyn", name: "Reach out", line: "Send one warm message to someone, even just hello." },
     M: { creature: "Hivewright", name: "One planned skill", line: "Pick one skill you planned and do the smallest version of it." },
     R: { creature: "Brakkor", name: "Opposite Action", line: "Take one small step toward what you've been avoiding." },
-    B: { creature: "Lumowl", name: "Check the Facts", line: "Check the facts on the hard thought in the Ground tab." },
+    B: { creature: "Lumowl", name: "Check the Facts", line: "Check the facts on the hard thought with Reframe." },
   };
   const GOOD_ENOUGH = 0.75;
 

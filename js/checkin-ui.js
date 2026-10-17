@@ -1,5 +1,6 @@
-// checkin-ui.js — the 30-second check-in, adjustable weights, the next-skill
-// card, the combined 7-day chart, and the weekly reflection (all in Insights).
+// checkin-ui.js — the Check-in output (30-second check-in, adjustable weights,
+// next-skill card) and the Insights parts (combined 7-day chart, today's next
+// skill, weekly reflection).
 // Math lives in psi.js. Only numbers are stored, never text, unless you tap
 // Save on the weekly reflection.
 
@@ -76,7 +77,6 @@ $("ci-reset").addEventListener("click", () => {
 
 // ---------- Open, save, result ----------
 function ciShow(name) {
-  $("ci-start").classList.toggle("hidden", name !== "start");
   $("ci-form").classList.toggle("hidden", name !== "form");
   $("ci-result").classList.toggle("hidden", name !== "result");
 }
@@ -90,7 +90,7 @@ function openCheckin() {
   ciSkills = prev ? prev.skills : null;
   $("ci-skills").querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.skills === ciSkills ? "true" : "false"));
   $("ci-save").disabled = !ciSkills;
-  // Believability starts from a recent Reflect, if there is one.
+  // Believability starts from recent Coach evidence, if there is any.
   const last = readJSON(BELIEVE_KEY, null);
   const fresh = last && Number.isFinite(last.pct) && Date.now() - last.ts < BELIEVE_FRESH_MS;
   $("ci-believe").value = prev ? prev.believe : fresh ? last.pct : 50;
@@ -101,9 +101,7 @@ function openCheckin() {
   ciShow("form");
 }
 
-$("ci-open").addEventListener("click", openCheckin);
 $("ci-redo").addEventListener("click", openCheckin);
-$("ci-cancel").addEventListener("click", () => renderInsightsTop());
 
 $("ci-form").addEventListener("submit", event => {
   event.preventDefault();
@@ -121,14 +119,8 @@ function todayEntry() {
   return loadCheckins().log.find(e => e.day === today) || null;
 }
 
-function showCheckinResult() {
-  const entry = todayEntry();
-  if (!entry) { ciShow("start"); return; }
-  const W = loadWeights();
-  const t = Psi.terms(entry);
-  const skill = Psi.nextSkill(t, W);
-  $("ci-score").textContent = `${Psi.score(t, W)} of 100`;
-  const card = $("ci-skill");
+// One line: which creature suggests which skill. Check the Facts links to Reframe.
+function fillSkillCard(card, skill) {
   card.innerHTML = "";
   const line = document.createElement("p");
   line.innerHTML = `<span class="creature-tag">${esc(skill.creature)} suggests</span> <strong>${esc(skill.name)}.</strong> `;
@@ -138,12 +130,30 @@ function showCheckinResult() {
     const go = document.createElement("button");
     go.type = "button";
     go.className = "text";
-    go.textContent = "Open Ground";
-    go.addEventListener("click", () => showView("ground"));
+    go.textContent = "Check the facts in Reframe";
+    go.addEventListener("click", () => selectChip("reframe"));
     card.appendChild(go);
   }
+}
+
+function todaySkill() {
+  const entry = todayEntry();
+  return entry ? { entry, skill: Psi.nextSkill(Psi.terms(entry), loadWeights()) } : null;
+}
+
+function showCheckinResult() {
+  const today = todaySkill();
+  if (!today) { openCheckin(); return; }
+  $("ci-score").textContent = `Today: ${Psi.score(Psi.terms(today.entry), loadWeights())} of 100`;
+  fillSkillCard($("ci-skill"), today.skill);
   ciShow("result");
 }
+
+registerOutput("checkin", () => {
+  if (todayEntry()) showCheckinResult();
+  else openCheckin();
+  showPanel("checkin");
+});
 
 // ---------- Combined 7-day chart ----------
 function scoreByDay() {
@@ -237,7 +247,6 @@ function renderWeekly() {
   const crisisStop = () => {
     if (!Grounding.isCrisis($("weekly-answer").value)) return false;
     $("weekly-answer").value = "";
-    showView("reflect");
     showCrisis();
     return true;
   };
@@ -251,15 +260,11 @@ function renderWeekly() {
   });
 }
 
-// Called by renderInsights() in app.js.
-function renderInsightsTop() {
+// The Insights output: weekly card, today's next skill, and the chart.
+onInsights(() => {
   renderWeekly();
-  if (todayEntry()) showCheckinResult();
-  else ciShow("start");
+  const today = todaySkill();
+  $("ins-skill").classList.toggle("hidden", !today);
+  if (today) fillSkillCard($("ins-skill"), today.skill);
   renderTrend();
-}
-
-// Optional: index.html?view=ground (or insights, journal) opens that tab.
-// Kept in the last script so every function exists before it runs.
-const groundStartView = new URLSearchParams(location.search).get("view");
-if (["ground", "journal", "insights"].includes(groundStartView)) showView(groundStartView);
+});

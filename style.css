@@ -17,7 +17,7 @@
 
 * { box-sizing: border-box; }
 
-html { color-scheme: light; scroll-padding-bottom: 6.5rem; }
+html { color-scheme: light; }
 
 body {
   margin: 0;
@@ -32,7 +32,7 @@ body {
   max-width: 28rem;
   margin: 0 auto;
   min-height: 100dvh;
-  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 .safety-banner {
@@ -105,7 +105,6 @@ button { font: inherit; cursor: pointer; }
   border-radius: 999px;
   background: var(--accent);
   color: var(--on-accent);
-  scroll-margin-bottom: 6.5rem;
 }
 
 .text {
@@ -118,7 +117,6 @@ button { font: inherit; cursor: pointer; }
   color: var(--muted);
   text-decoration: underline;
   text-underline-offset: 0.22em;
-  scroll-margin-bottom: 6.5rem;
 }
 
 .top .text { margin: 0; }
@@ -156,20 +154,6 @@ button { font: inherit; cursor: pointer; }
 
 .crisis p { margin: 0.5rem 0; }
 
-.breath-word { text-align: center; margin-top: 2.5rem; color: var(--muted); }
-
-#breath {
-  width: 9.5rem;
-  height: 9.5rem;
-  margin: 2.5rem auto 2rem;
-  border-radius: 50%;
-  background: #e4ddd3;
-  transform-origin: center;
-}
-
-#frame-count { margin-bottom: 0.35rem; }
-#frame-title { margin-top: 0; }
-#frame-hint { min-height: 1.5rem; }
 
 .ev-add { display: flex; align-items: flex-end; gap: 0.75rem; margin-top: 0.15rem; }
 .ev-add input { flex: 1; min-width: 0; }
@@ -200,13 +184,6 @@ button { font: inherit; cursor: pointer; }
 }
 .chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 
-#hope-canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin: 0.5rem 0 0.25rem;
-}
-
 .journal-list, #journal-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
 #journal-list li { margin: 0 0 1.6rem; }
 #journal-list time { display: block; color: var(--muted); font-size: 0.8rem; margin-bottom: 0.2rem; }
@@ -218,33 +195,6 @@ button { font: inherit; cursor: pointer; }
 #insights svg { display: block; width: 100%; height: auto; margin: 0.25rem 0 1rem; }
 
 label { display: block; margin-top: 0.35rem; color: var(--muted); font-size: 0.92rem; }
-
-.tabs {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  background: var(--bg);
-  border-top: 1px solid var(--line);
-  padding: 0.15rem 0.5rem calc(0.15rem + env(safe-area-inset-bottom, 0px));
-}
-
-.tab {
-  flex: 1;
-  max-width: 9rem;
-  margin: 0;
-  padding: 0.85rem 0.4rem 0.75rem;
-  border: 0;
-  background: none;
-  color: var(--muted);
-}
-
-.tab[aria-current="page"] {
-  color: var(--ink);
-  box-shadow: inset 0 -2px 0 var(--accent);
-}
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
@@ -299,7 +249,7 @@ textarea.short { min-height: 5rem; }
 .plain li { margin: 0.2rem 0; }
 .row { display: flex; justify-content: space-between; }
 .row .text { margin: 0.5rem 0 0; }
-#weekly { margin-bottom: 1.75rem; }
+#weekly, #ins-skill { margin-bottom: 1.5rem; }
 
 /* Play */
 .opt-title { display: block; font-weight: 500; }
@@ -320,3 +270,21 @@ textarea.short { min-height: 5rem; }
 .tiles { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .tile { min-width: 2.75rem; min-height: 2.75rem; padding: 0.5rem 0.8rem; border: 1px solid var(--line); border-radius: 0.8rem; background: var(--card); color: var(--ink); }
 .tile.placed { visibility: hidden; }
+
+/* One screen: input, choices, output */
+.ask textarea { min-height: 6.5rem; }
+.choices { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 0; }
+.choice {
+  min-height: 2.75rem;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+}
+.choice[aria-checked="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.ask .primary { margin-top: 1.1rem; }
+.out { margin-top: 1.75rem; padding-top: 1rem; border-top: 1px solid var(--line); user-select: text; -webkit-user-select: text; }
+.out-bar { display: flex; justify-content: flex-end; align-items: baseline; gap: 0.75rem; min-height: 1.5rem; }
+.out-bar .text { margin: 0; font-size: 0.9rem; }
+h2[tabindex="-1"]:focus { outline: none; }

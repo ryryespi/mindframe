@@ -1,32 +1,30 @@
-// app.js — one screen at a time.
+// app.js — the one screen.
 //
-// Reflect flow, for a thought that is not a crisis:
-//   write -> optional 10 second breath -> Notice, Name, Stance, Act
-//   -> one coach -> (optional) other angles -> a hopeful picture
+// One input ("What's on your mind?"), one row of choices for what comes back,
+// and one output area. Every action checks the input for crisis wording first.
+// Crisis -> only the 988/911 box; nothing is generated and nothing is saved.
 //
-// Crisis flow: the support box only. No breath, no coaches, nothing saved.
+// Privacy: thought text is stored only when you tap "Save what's in the box"
+// in Journal. Everything else keeps numbers or nothing at all.
 //
-// Paths are relative ("./sw.js", "./manifest.json") so the same files work
-// on your computer and on GitHub Pages under /mindframe/.
+// The other output parts (ground-ui, play-ui, checkin-ui) register themselves
+// with registerOutput(). start.js picks the first choice and handles old links.
 
 const $ = id => document.getElementById(id);
 const JOURNAL_KEY = "mindframe-journal";
-const BREATH_MS = 10000;
+const CHIP_KEY = "mindframe-chip";
+const CHIPS = ["reframe", "coach", "story", "play", "checkin", "journal", "insights"];
+const NEEDS_WORDS = new Set(["reframe", "coach", "story"]);
+const PANELS = ["hint", "crisis", "reframe", "coach", "story", "play", "checkin", "journal", "insights"];
+// Panels whose text is worth copying get a small Copy button.
+const COPYABLE = new Set(["reframe", "coach", "story", "checkin", "journal", "insights"]);
 
-// The five coaches. bestCoach() in bots.js returns one of these ids.
 const COACHES = [
   { id: "dbt", title: "DBT Coach", render: dbtCoach },
   { id: "philo", title: "Philosopher", render: philosopher },
   { id: "equation", title: "Thought Equation", render: thoughtEquation },
   { id: "compassion", title: "Compassion Coach", render: compassionCoach },
   { id: "cbt", title: "CBT Coach", render: cbtCoach },
-];
-
-const FRAME = [
-  { key: "notice", title: "Notice", hint: "What do you notice, in a few words?" },
-  { key: "name", title: "Name", hint: "Give the thought a short name." },
-  { key: "stance", title: "Stance", hint: "How do you want to stand toward it?" },
-  { key: "act", title: "Act", hint: "One small act." },
 ];
 
 const VALUES = ["Kindness", "Learning", "Care", "Courage", "Honesty", "Patience"];
@@ -39,219 +37,152 @@ const CATEGORY_NAMES = {
   anxiety: "Anxiety",
 };
 
-// The thought currently moving through Reflect. Null on the write screen.
-let draft = null;
-let breathCancel = null;
-let hopeFrame = 0;
+let currentChip = "reframe";
 let insightIndex = -1;
+const outputs = {};
+const crisisResets = [];
 
-// ---------- Journal: this phone only, no account, no network ----------
+// Output parts call this to say "I can answer this choice".
+function registerOutput(chip, fn) { outputs[chip] = fn; }
+// ...and this to clear their drafts when a crisis stops everything.
+function onCrisisReset(fn) { crisisResets.push(fn); }
 
-function loadJournal() {
-  try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); }
-  catch (err) { return []; }
+// ---------- Panels ----------
+
+function showPanel(name) {
+  PANELS.forEach(id => $("p-" + id).classList.toggle("hidden", id !== name));
+  $("copy").classList.toggle("hidden", !COPYABLE.has(name));
+  $("copied").textContent = "";
 }
 
-function saveJournal(entries) {
-  localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
+function hint(text) {
+  $("hint-text").textContent = text;
+  showPanel("hint");
 }
 
-function renderJournal() {
-  const items = loadJournal().slice().reverse();
-  $("journal-list").innerHTML = items.length
-    ? items.map(entry => {
-        const when = new Date(entry.date).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-        const step = entry.step ? `<p class="quiet">Step: ${esc(entry.step)}</p>` : "";
-        return `<li><time>${esc(when)}</time><p>${esc(entry.text)}</p>${step}</li>`;
-      }).join("")
-    : `<li><p class="quiet">Nothing kept yet.</p></li>`;
-  $("clear-journal").classList.toggle("hidden", items.length === 0);
-}
-
-// ---------- Tabs ----------
-
-function showView(name) {
-  ["reflect", "ground", "journal", "insights"].forEach(id => {
-    $("view-" + id).classList.toggle("hidden", id !== name);
-  });
-  document.querySelectorAll(".tab").forEach(btn => {
-    if (btn.dataset.view === name) btn.setAttribute("aria-current", "page");
-    else btn.removeAttribute("aria-current");
-  });
-  if (name === "journal") renderJournal();
-  if (name === "insights") renderInsights();
-  if (name !== "reflect") stopHope();
-}
-
-document.querySelectorAll(".tab").forEach(btn => {
-  btn.addEventListener("click", () => showView(btn.dataset.view));
-});
-
-// ---------- Reflect phases ----------
-
-function showPhase(name) {
-  ["write", "crisis", "pause", "frame", "advice", "hope"].forEach(id => {
-    $("phase-" + id).classList.toggle("hidden", id !== name);
-  });
-  if (name !== "hope") stopHope();
-}
+// ---------- Crisis ----------
 
 function showCrisis() {
+  crisisResets.forEach(fn => { try { fn(); } catch (err) { /* keep going: the box must show */ } });
   $("crisis").innerHTML = `<p><strong>You don't have to carry this alone.</strong> What you're feeling matters, and help is available right now.</p>
     <p>Call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline, US, free, 24/7). If you're in immediate danger, call <strong>911</strong>.</p>
     <p>Please also reach out to someone you trust.</p>`;
-  showPhase("crisis");
+  showPanel("crisis");
   $("crisis").focus();
 }
 
-// Entry point for a thought. Crisis returns before any of the later steps.
-function begin(text) {
-  const trimmed = text.trim();
-  if (!trimmed) return;
-  if (breathCancel) breathCancel();
-  const signals = analyze(trimmed);
-  if (signals.crisis) {
-    draft = null;
-    showCrisis();
-    return;
-  }
-  draft = { signals, frame: {}, frameIndex: 0, savedAt: null, value: "" };
-  startBreath();
+// True (and the support box is showing) when any text reads as a crisis.
+function checkText(...texts) {
+  if (texts.some(t => t && analyze(String(t)).crisis)) { showCrisis(); return true; }
+  return false;
 }
-
-$("thought-form").addEventListener("submit", event => {
-  event.preventDefault();
-  begin($("thought").value);
-});
 
 $("crisis-again").addEventListener("click", () => {
   $("thought").value = "";
-  showPhase("write");
+  hint("Write a thought, pick what you'd like back, then tap Show me.");
   $("thought").focus();
 });
 
-// ---------- 10 second breath. Skip goes to the four-step frame, not past it. ----------
+// ---------- Choices ----------
 
-function startBreath() {
-  if (breathCancel) breathCancel();
-  showPhase("pause");
-  const circle = $("breath");
-  const word = $("breath-word");
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let stopped = false;
-  let frame = 0;
-  let timer = 0;
-  const started = performance.now();
+function selectChip(chip, run = true) {
+  if (!CHIPS.includes(chip)) chip = "reframe";
+  currentChip = chip;
+  localStorage.setItem(CHIP_KEY, chip); // only the name of the choice
+  document.querySelectorAll(".choice").forEach(btn => {
+    const on = btn.dataset.chip === chip;
+    btn.setAttribute("aria-checked", on ? "true" : "false");
+    btn.tabIndex = on ? 0 : -1;
+  });
+  if (run) runChip();
+}
 
-  function stop() {
-    stopped = true;
-    if (frame) cancelAnimationFrame(frame);
-    if (timer) clearTimeout(timer);
-  }
-  breathCancel = stop;
-
-  function finish() {
-    if (stopped) return;
-    stopped = true;
-    breathCancel = null;
-    showFrame();
-  }
-
-  if (reduce) {
-    word.textContent = "A short pause";
-    circle.style.transform = "none";
-    timer = setTimeout(finish, BREATH_MS);
+function runChip() {
+  const text = $("thought").value.trim();
+  if (checkText(text)) return;
+  if (NEEDS_WORDS.has(currentChip) && !text) {
+    hint("Write a thought above first, then tap Show me.");
     return;
   }
-
-  function tick(now) {
-    if (stopped) return;
-    const t = Math.min(1, (now - started) / BREATH_MS);
-    // One breath: 4 seconds in, 6 seconds out. Together that is 10 seconds.
-    const inhaling = t < 0.4;
-    const local = inhaling ? t / 0.4 : (t - 0.4) / 0.6;
-    const scale = inhaling ? 0.72 + 0.28 * local : 1 - 0.28 * local;
-    circle.style.transform = `scale(${scale})`;
-    word.textContent = inhaling ? "Breathe in" : "Breathe out";
-    if (t < 1) frame = requestAnimationFrame(tick);
-    else finish();
-  }
-  frame = requestAnimationFrame(tick);
+  const fn = outputs[currentChip];
+  if (fn) fn(text);
 }
 
-$("skip-pause").addEventListener("click", () => {
-  if (breathCancel) breathCancel();
-  breathCancel = null;
-  showFrame();
+const choices = $("choices");
+choices.addEventListener("click", event => {
+  const btn = event.target.closest(".choice");
+  if (btn) selectChip(btn.dataset.chip);
 });
 
-// ---------- Notice, Name, Stance, Act ----------
-
-function showFrame() {
-  if (!draft) return;
-  draft.frameIndex = draft.frameIndex || 0;
-  paintFrame();
-  showPhase("frame");
-  $("frame-input").focus();
-}
-
-function paintFrame() {
-  const step = FRAME[draft.frameIndex];
-  $("frame-count").textContent = `${draft.frameIndex + 1} of ${FRAME.length}`;
-  $("frame-title").textContent = step.title;
-  $("frame-hint").textContent = step.hint;
-  $("frame-label").textContent = step.title;
-  $("frame-input").value = draft.frame[step.key] || "";
-  $("frame-input").placeholder = step.hint;
-  $("frame-next").textContent = draft.frameIndex === FRAME.length - 1 ? "Continue" : "Next";
-}
-
-$("frame-form").addEventListener("submit", event => {
+// Arrow keys move between choices (radio group); Enter or Space shows it.
+choices.addEventListener("keydown", event => {
+  const keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+  if (!(event.key in keys)) return;
   event.preventDefault();
-  if (!draft) return;
-  const step = FRAME[draft.frameIndex];
-  draft.frame[step.key] = $("frame-input").value.trim();
-  if (draft.frameIndex < FRAME.length - 1) {
-    draft.frameIndex += 1;
-    paintFrame();
-    $("frame-input").focus();
-    return;
-  }
-  showAdvice();
+  const i = (CHIPS.indexOf(currentChip) + keys[event.key] + CHIPS.length) % CHIPS.length;
+  selectChip(CHIPS[i], false);
+  document.querySelector(`.choice[data-chip="${CHIPS[i]}"]`).focus();
 });
 
-// ---------- One coach, then the others on request ----------
+$("ask").addEventListener("submit", event => {
+  event.preventDefault();
+  runChip();
+});
 
-function showAdvice() {
-  if (!draft) return;
-  const entry = {
-    text: draft.signals.text,
-    date: Date.now(),
-    categories: draft.signals.categories,
-    distortions: draft.signals.distortions,
-    grandiose: !!draft.signals.grandiose,
-    frame: { ...draft.frame },
-  };
-  draft.savedAt = entry.date;
-  saveJournal(loadJournal().concat(entry));
+// Ctrl/Cmd + Enter in the box also shows the answer.
+$("thought").addEventListener("keydown", event => {
+  if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    runChip();
+  }
+});
 
-  const bestId = bestCoach(draft.signals);
+// ---------- Copy: the visible output text, as plain text ----------
+
+function visibleCopyText() {
+  const panel = document.querySelector(".panel:not(.hidden)");
+  if (!panel) return "";
+  const parts = [...panel.querySelectorAll(".copyable")]
+    .filter(node => node.offsetParent !== null && !node.closest(".hidden"))
+    .map(node => node.innerText.trim())
+    .filter(Boolean);
+  return (parts.length ? parts : [panel.innerText.trim()]).join("\n\n");
+}
+
+$("copy").addEventListener("click", async () => {
+  const text = visibleCopyText();
+  if (!text) return;
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; }
+  catch (err) {
+    const area = document.createElement("textarea");
+    area.value = text;
+    document.body.appendChild(area);
+    area.select();
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    area.remove();
+  }
+  $("copied").textContent = ok ? "Copied" : "Select the text to copy it";
+});
+
+// ---------- Coach: one coach first, the others on request ----------
+
+registerOutput("coach", text => {
+  const signals = analyze(text);
+  const bestId = bestCoach(signals);
   const best = COACHES.find(coach => coach.id === bestId) || COACHES[3];
   const rest = COACHES.filter(coach => coach.id !== best.id);
-
-  $("best-coach").innerHTML = `<h2>${best.title}</h2>${best.render(draft.signals)}`;
+  $("best-coach").innerHTML = `<h2>${best.title}</h2>${best.render(signals)}`;
   $("other-angles").innerHTML = rest.map(coach =>
-    `<article class="card coach"><h2>${coach.title}</h2>${coach.render(draft.signals)}</article>`
+    `<article class="card coach"><h2>${coach.title}</h2>${coach.render(signals)}</article>`
   ).join("");
   $("other-angles").classList.add("hidden");
   $("more-angles").setAttribute("aria-expanded", "false");
   $("more-angles").textContent = "See other angles";
-
-  const mount = document.getElementById("evidence-mount");
-  if (mount) mountEvidence(mount);
-  renderValues();
-  showPhase("advice");
-}
+  document.querySelectorAll("#p-coach [id='evidence-mount']").forEach(mount => mountEvidence(mount));
+  renderValues(signals);
+  showPanel("coach");
+});
 
 $("more-angles").addEventListener("click", () => {
   const open = $("more-angles").getAttribute("aria-expanded") === "true";
@@ -260,11 +191,10 @@ $("more-angles").addEventListener("click", () => {
   $("more-angles").textContent = open ? "See other angles" : "Hide other angles";
 });
 
-// Shown only when the analyzer noticed big-ambition language.
-// The wording stays respectful: a large hope is not a punchline.
-function renderValues() {
+// Shown only when the analyzer noticed big-ambition language. Nothing here is saved.
+function renderValues(signals) {
   const card = $("values-card");
-  if (!draft || !draft.signals.grandiose) {
+  if (!signals.grandiose) {
     card.classList.add("hidden");
     card.innerHTML = "";
     return;
@@ -282,25 +212,10 @@ function renderValues() {
   card.classList.remove("hidden");
   card.querySelectorAll(".chip").forEach(btn => {
     btn.addEventListener("click", () => {
-      draft.value = btn.dataset.value;
-      card.querySelectorAll(".chip").forEach(other => {
-        other.setAttribute("aria-pressed", other === btn ? "true" : "false");
-      });
-      saveSmallStep();
+      card.querySelectorAll(".chip").forEach(other => other.setAttribute("aria-pressed", other === btn ? "true" : "false"));
     });
   });
-  $("small-step").addEventListener("change", saveSmallStep);
-}
-
-function saveSmallStep() {
-  if (!draft || !draft.savedAt) return;
-  const input = $("small-step");
-  const entries = loadJournal();
-  const entry = entries.find(item => item.date === draft.savedAt);
-  if (!entry) return;
-  entry.value = draft.value || "";
-  entry.step = input ? input.value.trim() : (entry.step || "");
-  saveJournal(entries);
+  $("small-step").addEventListener("change", () => checkText($("small-step").value));
 }
 
 // ---------- Evidence lists and the believability sentence ----------
@@ -342,6 +257,7 @@ function mountEvidence(mount) {
     const input = form.querySelector("input");
     const text = input.value.trim();
     if (!text) return;
+    if (checkText(text)) return; // crisis: support box only, nothing kept
     (form.dataset.side === "for" ? fore : against).push(text);
     input.value = "";
     paint();
@@ -358,7 +274,51 @@ function mountEvidence(mount) {
   paint();
 }
 
-// ---------- Insights: counts per week, drawn with plain markup, no network ----------
+// ---------- Journal: only what you choose to save, on this phone ----------
+
+function loadJournal() {
+  try { return JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"); }
+  catch (err) { return []; }
+}
+
+function saveJournal(entries) {
+  localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
+}
+
+function renderJournal() {
+  const items = loadJournal().slice().reverse();
+  $("journal-list").innerHTML = items.length
+    ? items.map(entry => {
+        const when = new Date(entry.date).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        return `<li><time>${esc(when)}</time><p>${esc(entry.text)}</p></li>`;
+      }).join("")
+    : `<li><p class="quiet">Nothing kept yet.</p></li>`;
+  $("clear-journal").classList.toggle("hidden", items.length === 0);
+}
+
+registerOutput("journal", () => {
+  $("journal-note").textContent = "";
+  renderJournal();
+  showPanel("journal");
+});
+
+$("journal-save").addEventListener("click", () => {
+  const text = $("thought").value.trim();
+  if (checkText(text)) return;
+  if (!text) { $("journal-note").textContent = "Write something above to save it."; return; }
+  const signals = analyze(text);
+  saveJournal(loadJournal().concat({ text, date: Date.now(), categories: signals.categories, distortions: signals.distortions }));
+  $("journal-note").textContent = "Saved on this phone.";
+  renderJournal();
+});
+
+$("clear-journal").addEventListener("click", () => {
+  saveJournal([]);
+  insightIndex = -1;
+  renderJournal();
+});
+
+// ---------- Insights: weekly patterns from saved Journal entries ----------
 
 function mondayStart(timestamp) {
   const date = new Date(timestamp);
@@ -379,8 +339,7 @@ function renderInsights() {
   });
   const weeks = [...grouped.entries()].sort((a, b) => a[0] - b[0]);
   if (!weeks.length) {
-    if (typeof renderInsightsTop === "function") renderInsightsTop();
-    root.innerHTML = `<h2>This week</h2><p class="quiet">Reflections you keep will show up here.</p>`;
+    root.innerHTML = `<h2>Patterns this week</h2><p class="quiet">Thoughts you save to the Journal will show up here.</p>`;
     return;
   }
   if (insightIndex < 0 || insightIndex >= weeks.length) insightIndex = weeks.length - 1;
@@ -416,7 +375,6 @@ function renderInsights() {
   const earlier = insightIndex > 0 ? `<button type="button" class="text" id="week-earlier">Earlier</button>` : `<span></span>`;
   const later = insightIndex < weeks.length - 1 ? `<button type="button" class="text" id="week-later">Later</button>` : `<span></span>`;
   const nav = weeks.length > 1 ? `<div class="week-nav">${earlier}${later}</div>` : "";
-  if (typeof renderInsightsTop === "function") renderInsightsTop();
   root.innerHTML = `<h2>Week of ${esc(label)}</h2>${bars}${nav}`;
   const back = $("week-earlier");
   const forward = $("week-later");
@@ -424,60 +382,14 @@ function renderInsights() {
   if (forward) forward.addEventListener("click", () => { insightIndex += 1; renderInsights(); });
 }
 
-$("clear-journal").addEventListener("click", () => {
-  saveJournal([]);
-  insightIndex = -1;
-  renderJournal();
-});
+const insightParts = [];
+// checkin-ui adds the weekly card, the chart, and today's next skill.
+function onInsights(fn) { insightParts.push(fn); }
 
-// ---------- Hopeful picture ----------
-
-function paintHope(ctx, canvas, now) {
-  const w = canvas.width;
-  const h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
-  const t = (now || 0) / 1000;
-  const y = h * 0.58 + Math.sin(t * 0.45) * 18;
-  const glow = ctx.createRadialGradient(w / 2, y, 10, w / 2, y, 210);
-  glow.addColorStop(0, "rgba(214, 196, 166, 0.95)");
-  glow.addColorStop(0.45, "rgba(214, 196, 166, 0.28)");
-  glow.addColorStop(1, "rgba(243, 240, 234, 0)");
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(w / 2, y, 210, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function startHope() {
-  stopHope();
-  const canvas = $("hope-canvas");
-  const ctx = canvas.getContext("2d");
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const draw = now => {
-    paintHope(ctx, canvas, now || 0);
-    if (!reduce) hopeFrame = requestAnimationFrame(draw);
-  };
-  draw(0);
-}
-
-function stopHope() {
-  if (hopeFrame) cancelAnimationFrame(hopeFrame);
-  hopeFrame = 0;
-}
-
-$("to-hope").addEventListener("click", () => {
-  saveSmallStep();
-  showPhase("hope");
-  startHope();
-});
-
-$("hope-form").addEventListener("submit", event => {
-  event.preventDefault();
-  stopHope();
-  draft = null;
-  $("thought").value = "";
-  $("hope-line").value = "";
-  showPhase("write");
+registerOutput("insights", () => {
+  insightParts.forEach(fn => fn());
+  renderInsights();
+  showPanel("insights");
 });
 
 // ---------- Install. The button stays hidden until the browser asks. ----------
@@ -501,11 +413,4 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(() => {
     // If caching fails, the page still works while you are online.
   });
-}
-
-// Optional: index.html?thought=... starts the flow (used for checks and screenshots).
-const demo = new URLSearchParams(location.search).get("thought");
-if (demo) {
-  $("thought").value = demo;
-  begin(demo);
 }

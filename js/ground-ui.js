@@ -1,13 +1,15 @@
-// ground-ui.js — screens for the Grounding Loop (logic lives in grounding.js).
+// ground-ui.js — the Reframe and Story outputs (logic in grounding.js, stories.js).
 //
-// Crisis rule: every piece of text typed in the loop is checked. If it reads
-// as a crisis, the loop stops, nothing is saved, and the only thing shown is
-// the same 988/911 box Reflect uses.
+// Reframe runs the Grounding Loop on the thought in the main box:
+//   Name it (grip) -> Test it -> Reframe it -> Act on it -> groundedness update.
+// Every piece of text is checked; crisis wording shows only the 988/911 box
+// and nothing is saved. Only numbers go into the groundedness history.
 
 const GROUND_KEY = "mindframe-ground";
-const G_PHASES = ["name", "grip", "test", "reframe", "act", "story", "play-pick", "play", "done"];
+const G_PHASES = ["grip", "test", "reframe", "act", "done"];
 const STORY_COUNT_KEY = "mindframe-stories-read";
 let gDraft = null;
+let storyCtx = null;
 
 function loadGround() {
   try { return JSON.parse(localStorage.getItem(GROUND_KEY) || "{}"); }
@@ -20,26 +22,26 @@ function saveGround(state) {
 
 function showG(name) {
   G_PHASES.forEach(id => $("g-" + id).classList.toggle("hidden", id !== name));
+  const h = $("g-" + name).querySelector("h2");
+  if (h && name !== "grip") h.focus();
 }
 
 function resetGround() {
   gDraft = null;
-  ["g-thought", "g-see", "g-real", "g-step"].forEach(id => { $(id).value = ""; });
-  document.querySelectorAll("#view-ground .chip").forEach(c => c.setAttribute("aria-pressed", "false"));
+  ["g-see", "g-real", "g-step"].forEach(id => { $(id).value = ""; });
+  document.querySelectorAll("#p-reframe .chip").forEach(c => c.setAttribute("aria-pressed", "false"));
   $("g-finish").disabled = true;
-  showG("name");
 }
 
-// Stop everything and hand over to the crisis box. Nothing is written.
-function groundCrisis() {
+onCrisisReset(() => {
   resetGround();
-  showView("reflect");
-  showCrisis();
-}
+  storyCtx = null;
+  $("g-story-text").textContent = "";
+  $("g-story-tag").textContent = "";
+});
 
 function gCheckCrisis(...texts) {
-  if (texts.some(t => Grounding.isCrisis(t))) { groundCrisis(); return true; }
-  return false;
+  return checkText(...texts);
 }
 
 const gGripWords = v => v < 0.25 ? "A light grip" : v < 0.5 ? "Some grip" : v < 0.75 ? "A strong grip" : "A very strong grip";
@@ -53,19 +55,18 @@ function gPick(group, btn) {
   group.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c === btn ? "true" : "false"));
 }
 
-// Step 1: name it.
-$("g-name-form").addEventListener("submit", event => {
-  event.preventDefault();
-  const text = $("g-thought").value.trim();
-  if (!text) return;
+// Step 1: name it, from the main box. app.js has already checked for crisis.
+registerOutput("reframe", text => {
   const read = Grounding.read(text);
-  if (read.crisis) { groundCrisis(); return; }
+  if (read.crisis) { showCrisis(); return; }
+  resetGround();
   gDraft = { read, kind: "", r: null };
   $("g-labels").innerHTML = read.labels.length
     ? read.labels.map(l => `<span class="tag">${esc(l)}</span>`).join("")
     : `<span class="quiet small">No strong mirage words found.</span>`;
   $("g-m").value = read.suggestedM;
   gSlider("g-m", "g-m-words", gGripWords);
+  showPanel("reframe");
   showG("grip");
 });
 
@@ -146,25 +147,23 @@ $("g-finish").addEventListener("click", () => {
   showG("done");
 });
 
-$("g-again").addEventListener("click", resetGround);
-
 // ---------- Stories: made from templates, shown with textContent, never saved ----------
 
 function gTellStory(fresh) {
-  if (!gDraft) return;
-  const s = gDraft.story;
+  if (!storyCtx) return;
+  const s = storyCtx;
   if (fresh) s.seed = Math.floor(Math.random() * 1e9);
   const story = Stories.tell({
-    read: gDraft.read,
-    thought: $("g-thought").value,
-    reframe: $("g-real").value,
-    step: s.from === "act" ? $("g-step").value : "",
+    read: s.read,
+    thought: s.thought,
+    reframe: s.reframe,
+    step: s.step,
     faith: $("g-faith").checked,
     you: $("g-you").checked,
     seed: s.seed,
     avoid: fresh ? s.lastKey : null,
   });
-  if (story.crisis) { groundCrisis(); return; }
+  if (story.crisis) { showCrisis(); return; }
   s.lastKey = story.key;
   $("g-story-text").textContent = story.text;
   $("g-story-tag").textContent = "Guide: " + story.tag;
@@ -174,15 +173,31 @@ function gTellStory(fresh) {
   }
 }
 
+function openStory(ctx) {
+  storyCtx = { ...ctx, seed: 0, lastKey: null };
+  // Faith starts on only for hidden-meaning thoughts. The toggle is yours.
+  $("g-faith").checked = Stories.arcFor(ctx.read) === "meaning";
+  $("g-you").checked = false;
+  showPanel("story");
+  gTellStory(true);
+}
+
+// Story from the main box.
+registerOutput("story", text => {
+  const read = Grounding.read(text);
+  if (read.crisis) { showCrisis(); return; }
+  openStory({ read, thought: text, reframe: "", step: "" });
+});
+
+// Story from inside the Reframe loop, using your reframe (and step, from Act).
 document.querySelectorAll(".g-story-open").forEach(btn => {
   btn.addEventListener("click", () => {
     if (!gDraft) return;
-    gDraft.story = { from: btn.dataset.from, seed: 0, lastKey: null };
-    // Faith starts on only for hidden-meaning thoughts. The toggle is yours.
-    $("g-faith").checked = Stories.arcFor(gDraft.read) === "meaning";
-    $("g-you").checked = false;
-    showG("story");
-    gTellStory(true);
+    const reframe = $("g-real").value;
+    const step = btn.dataset.from === "act" ? $("g-step").value : "";
+    if (gCheckCrisis($("thought").value, $("g-see").value, reframe, step)) return;
+    selectChip("story", false);
+    openStory({ read: gDraft.read, thought: $("thought").value, reframe, step });
   });
 });
 
@@ -190,7 +205,3 @@ $("g-story-again").addEventListener("click", () => gTellStory(true));
 // Toggles re-tell the same story with or without the change.
 $("g-faith").addEventListener("change", () => gTellStory(false));
 $("g-you").addEventListener("change", () => gTellStory(false));
-$("g-story-back").addEventListener("click", () => {
-  if (!gDraft) return;
-  showG(gDraft.story && gDraft.story.from === "act" ? "act" : "reframe");
-});
