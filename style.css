@@ -309,3 +309,43 @@ h2[tabindex="-1"]:focus { outline: none; }
   overflow-wrap: anywhere;
 }
 #eq-trend svg { width: 100%; max-width: 420px; height: auto; display: block; }
+
+/* ---------- Workspace (main page) ---------- */
+.top-links { display: flex; gap: 1rem; align-items: baseline; }
+.top a.text { margin: 0; }
+#ws-input { min-height: 6.5rem; }
+.ws-sec { margin-top: 1.75rem; }
+.ws-lines { list-style: none; margin: 0.25rem 0 0; padding: 0; }
+.ws-lines li {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.ws-words { margin: 0.9rem 0 0; line-height: 1.5; }
+.ws-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; align-items: baseline; }
+.ws-buttons .text { margin: 0; }
+.secondary {
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+}
+.secondary:disabled { opacity: 0.45; cursor: default; }
+.ws-cps { list-style: none; margin: 0; padding: 0; }
+.ws-cps .cp {
+  display: block; width: 100%; text-align: left;
+  margin: 0 0 0.4rem; padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line); border-radius: 0.75rem;
+  background: var(--card); color: var(--ink);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.8rem;
+}
+.ws-code {
+  margin: 0; padding: 0.75rem; white-space: pre-wrap; overflow-wrap: anywhere;
+  background: var(--card); border: 1px solid var(--line); border-radius: 0.75rem;
+  font-size: 0.78rem; line-height: 1.5; user-select: text; -webkit-user-select: text;
+}
+.ws-errors { color: var(--crisis-ink); font-size: 0.85rem; padding-left: 1.1rem; }
+#ws-import input[type="file"] { display: block; margin: 0.4rem 0; font-size: 0.85rem; }
+#ws-story-text { line-height: 1.6; user-select: text; -webkit-user-select: text; }

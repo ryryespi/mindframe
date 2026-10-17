@@ -4,11 +4,12 @@
 // http://localhost:8000/. On GitHub Pages it is /mindframe/.
 // A leading slash would skip that folder and break one of those two.
 
-const CACHE = "mindframe-shell-v7";
+const CACHE = "mindframe-shell-v8";
 
 const FILES = [
   "./",
   "./index.html",
+  "./tools.html",
   "./style.css",
   "./manifest.json",
   "./js/analyzer.js",
@@ -17,6 +18,7 @@ const FILES = [
   "./js/psi.js",
   "./js/games.js",
   "./js/emotions.js",
+  "./js/workspace.js",
   "./js/cbt-techniques.js",
   "./js/bots.js",
   "./js/app.js",
@@ -25,6 +27,7 @@ const FILES = [
   "./js/play-ui.js",
   "./js/checkin-ui.js",
   "./js/start.js",
+  "./js/workspace-ui.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
 ];
@@ -51,7 +54,8 @@ self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
   event.respondWith(
-    caches.match(request).then(cached => {
+    // Pages keep their ?view= or ?chip= part, so match pages without it.
+    caches.match(request, { ignoreSearch: request.mode === "navigate" }).then(cached => {
       if (cached) return cached;
       return fetch(request).then(response => {
         if (response && response.ok && new URL(request.url).origin === self.location.origin) {
@@ -59,7 +63,7 @@ self.addEventListener("fetch", event => {
           caches.open(CACHE).then(cache => cache.put(request, copy));
         }
         return response;
-      }).catch(() => caches.match(abs("./index.html")));
+      }).catch(() => caches.match(abs(/tools\.html$/.test(new URL(request.url).pathname) ? "./tools.html" : "./index.html")));
     })
   );
 });

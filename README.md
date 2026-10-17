@@ -1,14 +1,88 @@
 # MindFrame
 
-MindFrame is a coping-skills practice tool for your phone. It is one calm screen: you write what's on your mind, pick what you'd like back, and read the answer below.
+MindFrame is a coping-skills practice tool for your phone. It has two pages:
+
+- **Workspace** (the main page): write what's on your mind and watch it turn into equations as you type: where your feelings are, how far they are from a steadier "home", which combinations are unstable, and one small, balanced step toward home. Save checkpoints, generate a short story built from that step, and export or import the whole session as plain `.mf` code.
+- **Tools** (`tools.html`, the **Tools** link at the top): every earlier choice, working as before: Equations, Reframe, Coach, Story, Play, Check-in, Journal, Insights.
 
 A safety line stays at the top. If anything you type looks like a crisis (thoughts of suicide or self-harm), the only response is a support box with **988** (Suicide & Crisis Lifeline, US) and **911**. Nothing is generated and nothing is saved. Every action checks the text again, including text typed inside an answer.
 
 MindFrame is practice, not a substitute for therapy. Everything runs on the phone; nothing is sent to a server.
 
-![One screen with Equations](screenshots/one-screen-equations.png)
+![Workspace](screenshots/workspace.png)
 
-## One screen
+## Workspace: equations, checkpoints, code
+
+**This is a model, not validated science.** The home vector, weights, and step rule are design assumptions. They are not a diagnosis and not a measurement of you. The home vector is one picture of a steadier place, not a rule for how anyone should feel.
+
+**Live equations.** About 0.4 s after you stop typing, the equation engine (below) reads the box and shows:
+
+| Line | Meaning |
+|---|---|
+| `e = (…)` | the current emotion vector (ten emotions, each 0 to 1; zeros left out) |
+| `h = (…)` | the home vector: joy 0.60, hope 0.80, calm 0.80, connection 0.80, every hard feeling 0 |
+| `d = ‖e − h‖` | distance from home |
+| `cos(e, h)` | how much e points the same way as home (0 if e is all zero) |
+| `λ` | largest real eigenvalue of `Wᵀ − d·I` on the active **hard** feelings; `λ > 0` means small changes grow |
+| `unstable:` | hard-feeling loops that grow on their own (`√(W_ij·W_ji) > d`) |
+| `hidden:` | feelings you didn't name (`e ≤ 0.1`) that the dynamics raise by 0.15 or more within `steps` steps, with the feeling that drives them; and pattern amplifiers found in the words (absolute words, curse/sign language, harsh labels…) |
+| `ideal:` | the next balanced step and the distance after it |
+| `work on:` | unstable loops first, then the three biggest gaps to home |
+| `stabilizer:` | the helpful feeling that dampens the hard ones most, with one skill and a guide |
+
+**Words add to the saved state.** A restored checkpoint, an accepted step, or the last session is the *base*. New words add to it: `e = 1 − (1 − base)·(1 − words)`. Your words are never stored; only the numbers are.
+
+**The ideal step** (`js/workspace.js`):
+
+```
+e' = e + a·(h − e) + b·s(e)
+s_j = e_j · Σ_{i helpful} min(0, W_ij)·h_i      for each hard feeling j above its home value
+a  = clamp(0.2·(0.5 + d/d_max), 0.05, 0.25)      bigger steps when far from home
+if λ > 0:  a = max(0.05, min(0.12, a/(1 + 4λ))),  b = 0.15     (smaller, steadier steps when unstable)
+else:      b = 0.10
+```
+
+`s(e)` is the pull that home's helpful feelings (connection, calm, hope, joy) have on the hard ones. No value is allowed to pass its home value, and values move by at least 0.01, so the distance to home goes down at every step and reaches 0. The raw dynamics term `W·e − d·e` is left out of the step on purpose: in an unstable mix it would feed the loop away from home.
+
+**Checkpoints.** **Save checkpoint** adds the current vector, with a time and λ. Tap a checkpoint to restore it. **Generate story** writes a short fictional story with a creature guide (from Stories). It names the feeling farthest from home and the stabilizer, and it ends with the move toward home ("loneliness moved from 0.94 to 0.76"). It also shows a preview of `e'`. **Accept step** makes `e'` the current state and saves it as checkpoint `step-n`, so the next equation is built from there. Each accepted step is smaller or larger depending on where you are, which keeps the sequence balanced as it goes.
+
+**Save space.** The whole session is kept on the device as `.mf` code (`localStorage` key `mindframe-workspace`) and comes back on the next visit. **Copy code** and **Download .mf.txt** export it. **Import** (paste or file) restores it. **Start over** clears it.
+
+### The .mf code language
+
+Plain, line-based data. It is never run as code: each line is matched against the shapes below, and anything else is a friendly error with its line number. Only keywords, emotion names, numbers, times, and labels appear, never your words.
+
+```
+mf 1                                   header, version 1 (required, first line)
+home name=v ...                        home vector (default joy .6, hope .8, calm .8, connection .8)
+e name=v ...                           current vector; missing names are 0
+steps k                                projection steps for hidden variables (1–50, default 8)
+w from>to=v                            override one W weight (−1 to 1)
+cp n YYYY-MM-DDTHH:MM label=x name=v ... lambda=v
+                                       checkpoint n (numbers go up; label a–z, 0–9, dashes)
+ideal a=v b=v                          the step sizes for the current vector
+eq e' = e + a*(h - e) + b*s(e)         readable copy of the ideal line (rebuilt on save, ignored on read)
+# comment                              ignored, as are blank lines
+```
+
+Values are 0 to 1 and kept to two decimals. Emotion names: joy, hope, calm, connection, fear, anger, sadness, shame, guilt, loneliness. Limits: 400 lines, 50 checkpoints, 40 weights. Writing then reading gives back exactly the same code. Example:
+
+```
+mf 1
+home joy=0.60 hope=0.80 calm=0.80 connection=0.80
+e anger=0.68 shame=0.80 loneliness=0.94
+steps 8
+cp 1 2026-10-17T13:58 label=start anger=0.68 shame=0.80 loneliness=0.94 lambda=0.27
+cp 2 2026-10-17T13:58 label=step-1 joy=0.07 hope=0.10 calm=0.10 connection=0.10 anger=0.57 shame=0.62 loneliness=0.76 lambda=0.27
+ideal a=0.12 b=0.15
+eq e' = e + 0.12*(h - e) + 0.15*s(e)
+```
+
+**Safety.** Crisis words in the box, or a crisis label in imported code, show only the 988/911 support box. Nothing is computed or saved.
+
+![Workspace story](screenshots/workspace-story.png)
+
+## Tools: one screen
 
 1. **Input:** one box, "What's on your mind?"
 2. **Choices:** pick what comes back. The choice is remembered next time.
@@ -27,11 +101,11 @@ MindFrame is practice, not a substitute for therapy. Everything runs on the phon
 
 Every other choice also shows one short **Equation view** line from the same engine (Reframe, Coach, Story, Play), Check-in shows its Ψ equation with today's numbers, and Insights adds a 7-day instability (λ) trend.
 
-Old links still work: `?view=reflect` opens Coach, `?view=ground` opens Reframe, and `?view=journal` and `?view=insights` open those choices. On a keyboard, arrow keys move between choices and Enter shows the answer; Ctrl+Enter in the box does too.
+Old links still work and open the Tools page: `?view=reflect` opens Coach, `?view=ground` opens Reframe, and `?view=journal` and `?view=insights` open those choices. On a keyboard, arrow keys move between choices and Enter shows the answer; Ctrl+Enter in the box does too.
 
 ## Privacy
 
-Thought text is stored only when you tap **Save what's in the box** in Journal, or **Save to journal** on the weekly card. Everything else keeps numbers (groundedness, check-in answers, counts of stories and games, one λ number per day from the equation engine) or nothing at all.
+Thought text is stored only when you tap **Save what's in the box** in Journal, or **Save to journal** on the weekly card. Everything else keeps numbers (groundedness, check-in answers, counts of stories and games, one λ number per day from the equation engine, the Workspace's `.mf` code of numbers and labels) or nothing at all.
 
 ## Equations: the emotion engine
 
@@ -116,7 +190,7 @@ Insights shows a 7-day chart of the check-in score and groundedness. If either s
 
 ## Install and run
 
-MindFrame works offline. `manifest.json` uses a relative scope, and the service worker caches the app with relative paths, so the same files work at `http://localhost:8000` and on GitHub Pages under `/mindframe/`. An **Install** button appears when the browser offers it.
+MindFrame works offline. `manifest.json` uses a relative scope, and the service worker caches the app with relative paths, so the same files work at `http://localhost:8000` and on GitHub Pages under `/mindframe/`. An **Install** button appears on the Tools page when the browser offers it.
 
 ```bash
 python3 serve.py
@@ -124,7 +198,7 @@ python3 serve.py
 
 Then open [http://localhost:8000](http://localhost:8000).
 
-Tests (no dependencies): `node tests/emotions.test.js`, `node tests/grounding.test.js`, `node tests/stories.test.js`, `node tests/psi.test.js`, `node tests/games.test.js`.
+Tests (no dependencies): `node tests/workspace.test.js`, `node tests/emotions.test.js`, `node tests/grounding.test.js`, `node tests/stories.test.js`, `node tests/psi.test.js`, `node tests/games.test.js`.
 
 ## Research paper
 
@@ -134,7 +208,8 @@ Tests (no dependencies): `node tests/emotions.test.js`, `node tests/grounding.te
 ## File structure
 
 ```
-index.html              the one screen: input, choices, output
+index.html              Workspace (main page): live equations, checkpoints, story, .mf code
+tools.html              Tools: the one screen with every choice
 style.css               calm phone layout
 manifest.json           install metadata, relative scope
 sw.js                   offline cache
@@ -146,6 +221,7 @@ js/stories.js           story templates and creature guides
 js/psi.js               check-in math: Ψ, weights, next skill, weekly summary
 js/games.js             path, spot-the-mirage, and word-tile games
 js/emotions.js          equation engine: emotion vector, W, dynamics, loops, λ, language
+js/workspace.js         Workspace math: home, distance, hidden variables, ideal step, .mf code, step story
 js/cbt-techniques.js    local CBT exercises
 js/bots.js              five coaches, believability, which coach goes first
 js/app.js               the screen: choices, crisis, copy, Coach, Journal, Insights
@@ -154,7 +230,8 @@ js/ground-ui.js         Reframe and Story outputs
 js/play-ui.js           Play output and the steadiness meter
 js/checkin-ui.js        Check-in output, weights, chart, weekly card
 js/start.js             first choice on open, old ?view= links
-tests/                  node tests for emotions, grounding, stories, psi, games
-screenshots/            the one screen with Equations, Reframe, Story, Play, Insights, crisis
+js/workspace-ui.js      the Workspace page
+tests/                  node tests for workspace, emotions, grounding, stories, psi, games
+screenshots/            Workspace and story; Tools with Equations, Reframe, Story, Play, Insights, crisis
 paper/                  research papers (PDF and LaTeX)
 ```
