@@ -12,17 +12,33 @@
 //   conflicts= √(x_i·y_j) for opposing pulls both active, plus "I want … but" clashes
 //   positives= positive words from the gains toward home in this step
 //   (the last three come from core/reality.js, computed in this same pass)
+//   P        = 1/(1 + (d/d0)²)·(1 − γ·C_max)·(1 − δ·g)       inner peace (core/peace.js)
+//   lever    = argmax_i ΔP_i for a move of e_i toward h_i by 0.05
+//   solve    = iterate the master map to its fixed point e*; n* = steps until P ≥ 0.8
+//
+// Convergence (proof sketch; exact map, before rounding). With hard/process
+// homes at 0 (always true in the app), for every mover j:
+//   grounding j:      next_j − h_j = (1 − a)(e_j − h_j)
+//   hard/process j:   next_j = clip01(e_j(1 − a − b·κ_j)), κ_j = −Σ_g min(0, W_gj)·h_g ≥ 0,
+//                     so 0 ≤ next_j ≤ (1 − a)·e_j
+// hence ‖next − h‖ ≤ (1 − a)‖e − h‖, and a ≥ a_lo = min(a0, a_max, a_cap) ≥ 0.05
+// (validateVars keeps a_max ≥ 0.05; a0 ≥ 0.05; a_cap = 0.12). So
+// d_t ≤ (1 − a_lo)^t·d_0 → 0: the map is a contraction toward h for ANY b ≥ 0
+// and any W, and e* = h is its unique fixed point, where P = 1.
+// The app rounds each step to 0.01, so the computed iteration stops at a
+// lattice point with |e*_j − h_j| ≤ 0.005/a per mover (tested; ≤ 0.03 with defaults).
 //
 // Also here: act()'s skills and the reframes, the baseline, and the recovery count.
 
 if (typeof module !== "undefined") {
   require("./movers.js");
   require("./reality.js");
+  require("./peace.js");
 }
 
 (function (MF) {
   "use strict";
-  const R = MF.Reality;
+  const R = MF.Reality, PEACE = MF.Peace;
   const { NAMES, GROUND, REST, FIXED, ACTIVE, MAX_SIM, N, idx, isGround, r2, clamp01, norm, distance, stamp, dayOf, weights, fromText, combine } = MF.Movers;
   // ---------- Vectors, dynamics, λ ----------
 
@@ -169,7 +185,7 @@ if (typeof module !== "undefined") {
    * @param {object} state the session
    * @param {{sim?:boolean, now?:number}} [opts] sim:false skips the recovery count
    * @returns {object} {crisis:true} or the full reading (e, next, a, b, s, d, λ, links, baseline, recovery,
-   *   grand {g, kind…}, conflicts[], positives[])
+   *   grand {g, kind…}, conflicts[], positives[], peace {P, Pd, Pc, Pg, lever, grad, solve {n, eStar, PStar}})
    */
   function master(text, state, opts = {}) {
     calls.master += 1;
@@ -212,8 +228,41 @@ if (typeof module !== "undefined") {
       loops: loops(e, W, V.d), hidden: hidden(e, W, V),
       B, baseline: { dPrev: Bprev ? r2(distance(Bprev, h)) : null, dB: r2(distance(B, h)), days: state.days.length },
     };
-    if (opts.sim !== false) out.recovery = recovery({ ...state, e });
+    // Inner peace, same pass: P for this reading, then (outside the inner
+    // simulation) the lever, the gradient, and the solve for e* and n*.
+    out.peace = PEACE.score(e, h, V, out.conflicts, grand.g);
+    if (opts.sim !== false) {
+      out.recovery = recovery({ ...state, e });
+      out.peace.lever = PEACE.lever(e, h, V, data.clashes || [], grand.g);
+      out.peace.grad = PEACE.gradient(e, h, V, data.clashes || [], grand.g);
+      out.peace.solve = solvePeace({ ...state, e }, out.peace.P);
+    }
     return out;
+  }
+
+  // ---------- Solve for inner peace ----------
+  /**
+   * Iterate the master map (text "") from the reading to its fixed point e*.
+   * n* is the first step t with P(e_t) ≥ 0.8 (t = 0 is the reading itself,
+   * with its text conflicts and g; later steps have no text, so only mover
+   * conflicts count and g = 0). Stops when a step changes nothing (the
+   * rounded fixed point) or after MAX_SIM steps.
+   * @param {object} state the session with e = the reading's e
+   * @param {number} P0 P of the reading
+   * @returns {{n:number|null, steps:number, eStar:number[], PStar:number, dStar:number, converged:boolean}}
+   */
+  function solvePeace(state, P0) {
+    const h = state.home, V = state.vars;
+    let cur = state, n = P0 >= PEACE.P_STAR ? 0 : null, t = 0, converged = false;
+    while (t < MAX_SIM) {
+      const m = master("", cur, { sim: false });
+      if (m.next.every((x, i) => x === cur.e[i])) { converged = true; break; }
+      cur = { ...cur, e: m.next };
+      t += 1;
+      if (n === null && PEACE.score(cur.e, h, V, R.conflicts(cur.e, []), 0).P >= PEACE.P_STAR) n = t;
+    }
+    const sc = PEACE.score(cur.e, h, V, R.conflicts(cur.e, []), 0);
+    return { n, steps: t, eStar: cur.e.slice(), PStar: sc.P, dStar: sc.d, converged };
   }
 
   // ---------- Recovery: repeat the master step until d < 0.3 ----------
@@ -250,7 +299,7 @@ if (typeof module !== "undefined") {
   }
 
   MF.Master = {
-    SKILL, REFRAME, master, calls, recovery, recText, refreshIdeal, focus, baselineSeries, baselineOf,
+    SKILL, REFRAME, master, calls, recovery, solvePeace, recText, refreshIdeal, focus, baselineSeries, baselineOf,
     // Building blocks master uses (exported for tests only; features call master).
     _parts: { step, lambda, hidden, loops, sVec, act, ema, simulate },
   };

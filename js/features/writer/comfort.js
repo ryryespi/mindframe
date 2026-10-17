@@ -10,7 +10,8 @@
 //     pull, the reality check, the step, the affirmations; faith wording if on)
 //   • a compact numbers summary from master(): movers with bands, the step
 //     direction (d → d_next and the mover that moves most), conflicts with c,
-//     the grandiosity signal g, and the positive emotions
+//     the grandiosity signal g, the positive emotions, and inner peace
+//     (P with its band, steps n* to the 0.8 threshold, the lever)
 //   • a request for a ~200-word comfort story with a friendly animal plus
 //     three affirmations written FROM that analysis, with no medical advice
 // It never contains the text you typed: every line is composed from numbers,
@@ -57,6 +58,7 @@ if (typeof module !== "undefined") {
       `Hidden conflicts: ${conf.length ? conf.join("; ") : "none"}`,
       `Grandiosity signal: ${f2(g.g)}${g.kinds.length ? ` (${g.kinds.join(", ")})` : ""}`,
       `Positive emotions it points toward: ${(m.positives || []).map(p => p.word).join(", ") || "calm"}`,
+      ...(m.peace ? [`Inner peace P: ${f2(m.peace.P)} (${MF.Peace.band(m.peace.P)}); steps until P >= 0.80: ${m.peace.solve ? (m.peace.solve.n === null ? "not reached" : m.peace.solve.n) : "?"}; biggest lever: ${m.peace.lever && m.peace.lever.name ? `${m.peace.lever.kind === "grow" ? "growing" : "easing"} ${m.peace.lever.name}` : "none"}`] : []),
     ];
   }
 
@@ -90,6 +92,7 @@ if (typeof module !== "undefined") {
     const c = W.card(state, m, { faith: !!opts.faith, seed: opts.seed || 1 });
     const words = [
       `- ${c.room}`,
+      ...c.peace.map(x => `- ${x}`),
       `- ${c.feeling}`,
       `- How they connect: ${c.connect.join(" ")}`,
       ...c.conflict.map(x => `- ${x}`),
@@ -98,7 +101,7 @@ if (typeof module !== "undefined") {
       `- Affirmations the app composed: ${c.affirmations.join(" / ")}`,
     ];
     const out = [ASK, "", ABOUT, "", "In words:", ...scrub(words, opts.raw), "", "Numbers (0 to 1):", ...numbers(m).map(x => `- ${x}`)];
-    if (opts.faith) out.push("", "Faith: please include one gentle line of Christian faith (for example God's peace or mercy).");
+    if (opts.faith) out.push("", "Faith: please include one gentle line of Christian faith, for example the peace of God that surpasses understanding (Philippians 4:7).");
     return out.join("\n");
   }
 

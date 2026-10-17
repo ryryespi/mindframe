@@ -62,7 +62,7 @@ test("relationship: nudges only touch existing movers, and add no new variables"
   assert.deepEqual(Object.keys(R.HORSEMEN.stonewalling.add), ["avoidance"]);
   assert.deepEqual(Object.keys(R.HORSEMEN.stonewalling.neg), ["connection"]);
   assert.equal(M.NAMES.length, 9, "still nine movers");
-  assert.deepEqual(Object.keys(M.defaultVars()).sort(), ["aBase", "aMax", "b", "d", "k"]);
+  assert.deepEqual(Object.keys(M.defaultVars()).sort(), ["aBase", "aMax", "b", "d", "d0", "delta", "gamma", "k"], "the only new variables are the inner-peace weights");
 });
 test("relationship: nudges move the master reading in the expected direction", () => {
   const base = M.defaultState();
@@ -147,7 +147,7 @@ test("page: five friendly animals, each with a picture, name, role and a panel",
 });
 test("code: every js file has a header comment, and every function a JSDoc or a one-line comment", () => {
   const files = ["js/app.js", ...["core", "features", "features/writer"].flatMap(d => fs.readdirSync(path.join(__dirname, "../js", d)).filter(f => f.endsWith(".js")).map(f => `js/${d}/${f}`))];
-  assert.equal(files.length, 16);
+  assert.equal(files.length, 17);
   files.forEach(f => {
     const src = read(f);
     assert.match(src.split("\n")[0], /^\/\/ js\/|^\/\/ /, `${f} header`);

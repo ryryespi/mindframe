@@ -14,6 +14,9 @@
 //   conflicts      the pulls in master's conflicts[] with the strength c
 //   grandiosity    master's grand.g and its kinds ("very sure that the worst will happen")
 //   dose           the distance d sets the size of the step ("two" / "five" / "ten" minutes)
+//   inner peace    P's band (a little / growing / close / steady), n* as number
+//                  words, the lever (ease X / grow Y), and how much the hidden
+//                  pull (1 − P_c) and the grand thought (1 − P_g) take away
 //
 // Choices between equal parts (for example "fuels" or "feeds") are made by a
 // hash of the seed and the numbers themselves (choose()), so the same state
@@ -26,12 +29,14 @@
 if (typeof module !== "undefined") {
   require("./movers.js");
   require("./reality.js");
+  require("./peace.js");
 }
 
 (function (MF) {
   "use strict";
   const { NAMES, GROUND, HARD, FIXED, ACTIVE, idx, isGround, cap, listJoin, weights } = MF.Movers;
   const { G_SHOW } = MF.Reality;
+  const PEACE = MF.Peace;
 
   // ---------- Deterministic choice ----------
   /** FNV-1a hash of a string (32-bit, unsigned). */
@@ -314,10 +319,43 @@ if (typeof module !== "undefined") {
    * the step's gain for that mover ("so the anger can loosen its grip a little").
    */
   function stepLine(m) {
-    if (!m.mover) return "Keep going: notice one good thing and stay with it for a breath.";
-    const g = gainOf(m, idx[m.mover]);
-    return `${cap(TECHNIQUE[m.mover](dose(m.d)))}, so ${subj(m.mover)} can ${EASE[m.mover][0]}${g < 0.15 ? " a little" : ""}.`;
+    // The most helpful lever for inner peace (∂P/∂e_i), else the mover that moves most.
+    const n = (m.peace && m.peace.lever && m.peace.lever.name) || m.mover;
+    if (!n) return "Keep going: notice one good thing and stay with it for a breath.";
+    const g = gainOf(m, idx[n]);
+    return `${cap(TECHNIQUE[n](dose(m.d)))}, so ${subj(n)} can ${EASE[n][0]}${g < 0.15 ? " a little" : ""}.`;
   }
+
+  // ---------- Inner peace ----------
+  const NUMBER = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+  /** A count as words (over twenty: "many"). */
+  const countWord = n => (n <= 20 ? NUMBER[n] : "many");
+  /** What the lever acts on, as an object of "easing" / "growing". */
+  const LEVER_NOUN = { fear: "the fear", sadness: "the sadness", anger: "the anger", shame: "the shame", rumination: "the replaying", avoidance: "the urge to avoid things", calm: "calm", connection: "connection", hope: "hope" };
+  /** "a little" when a factor takes less than 0.15 of peace, else "some". */
+  const takes = x => (x >= 0.15 ? "some" : "a little");
+  /**
+   * Inner peace in words, from master's peace output:
+   *  • "Inner peace: <band>." with band from P (< 0.4 a little, < 0.6 growing, < 0.8 close, else steady)
+   *  • "Path to peace: about <n* in words> gentle steps; the biggest help right now is easing X / growing Y."
+   *  • the hidden pull's share (1 − P_c) and the grand thought's share (1 − P_g), when ≥ 0.03
+   */
+  function peaceLines(m, seed = 1) {
+    const p = m.peace;
+    if (!p) return [];
+    const b = PEACE.band(p.P);
+    const out = [`Inner peace: ${b}${b === "steady" ? "." : choose([", for now.", ", and it can grow."], `peace|${k2(p.P)}`, seed)}`];
+    const lv = p.lever && p.lever.name ? `${p.lever.kind === "grow" ? "growing" : "easing"} ${LEVER_NOUN[p.lever.name]}` : "keeping things gentle";
+    const sv = p.solve;
+    if (sv && sv.n === 0) out.push(`Path to peace: you're there right now; the biggest help is ${lv}.`);
+    else if (sv && sv.n !== null) out.push(`Path to peace: about ${countWord(sv.n)} gentle step${sv.n === 1 ? "" : "s"}; the biggest help right now is ${lv}.`);
+    else out.push(`Path to peace: this may take longer, and you don't have to do it alone; the biggest help right now is ${lv}.`);
+    if (1 - p.Pc >= 0.03) out.push(`The hidden pull takes ${takes(1 - p.Pc)} of your peace; holding both parts kindly gives it back.`);
+    if (1 - p.Pg >= 0.03) out.push(`The grand thought takes ${takes(1 - p.Pg)} too; seeing it at its true size makes room for peace.`);
+    return out;
+  }
+  /** Faith wording for peace (only with Include faith on). */
+  const PEACE_FAITH = "May the peace of God, which surpasses all understanding, guard your heart and mind (from Philippians).";
 
   // ---------- Progress ----------
   /** Steps as words: ≤ 2 "one or two", ≤ 5 "a few", ≤ 12 "several", else "many". */
@@ -347,12 +385,14 @@ if (typeof module !== "undefined") {
   // ---------- The card ----------
   /**
    * The default card, words only, every line composed from the master output.
-   * @returns {{room:string, feeling:string, connect:string[], conflict:string[], reality:string[], affirmations:string[], step:string, progress:string}}
+   * @returns {{room:string, peace:string[], peaceFaith:string|null, feeling:string, connect:string[], conflict:string[], reality:string[], affirmations:string[], step:string, progress:string}}
    */
   function card(state, m, opts = {}) {
     const seed = Number.isFinite(opts.seed) ? opts.seed : 1;
     return {
       room: roomLine(m),
+      peace: peaceLines(m, seed),
+      peaceFaith: opts.faith && m.peace ? PEACE_FAITH : null,
       feeling: feelingLine(m, seed),
       connect: connectLines(state, m, seed),
       conflict: conflictLines(m, seed),
@@ -367,6 +407,7 @@ if (typeof module !== "undefined") {
     const c = card(state, m, opts);
     return [
       c.room,
+      ...c.peace, ...(c.peaceFaith ? [c.peaceFaith] : []),
       `What you may be feeling: ${c.feeling.replace(/^You may be feeling /, "")}`,
       `How they connect: ${c.connect.join(" ")}`,
       ...c.conflict, ...c.reality,
@@ -378,7 +419,7 @@ if (typeof module !== "undefined") {
 
   MF.Words = {
     hash, choose, band, DEGREE, ADV, SIZE, FEEL, FEEL_HIGH, NOUN, LOW_NOUN, SOFTENER, LINK_VERB, strength, EASE, ACT, subj,
-    felt, feelingLine, roomLine, connectLines, pulls, conflictLines, realityLines, affirmations, stepLine, progressLine, card, lines,
+    felt, feelingLine, roomLine, peaceLines, countWord, PEACE_FAITH, connectLines, pulls, conflictLines, realityLines, affirmations, stepLine, progressLine, card, lines,
   };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Words;

@@ -38,6 +38,7 @@
         <!-- 2. The reading, in words. Hidden until Update. -->
         <section id="out" class="card hidden" aria-live="polite">
           <p id="room" class="room"></p>
+          <div id="peace" class="peace-box"></div>
           <span class="label">What you may be feeling</span><p id="feel"></p>
           <span class="label">How they connect</span><ul id="connect" class="plain"></ul>
           <div id="conflict" class="soft-box hidden"></div>
@@ -164,7 +165,7 @@
           <p class="quiet small">Set any mover by hand; new words add to these. Tap Update to see the result.</p>
           <div id="sliders" class="sliders"></div>
           <h3>Variables</h3>
-          <p class="quiet small">a0, k, a_max, b, decay d, home targets and the main links. Design choices, not validated values.</p>
+          <p class="quiet small">a0, k, a_max, b, decay d, inner-peace d₀, γ, δ, home targets and the main links. Design choices, not validated values.</p>
           <div id="var-grid" class="var-grid"></div>
           <p id="var-notes" class="quiet small"></p>
           <button type="button" id="vars-reset" class="secondary">Reset to defaults</button>
@@ -175,11 +176,12 @@
     </main>
   </div>
 
-  <!-- core: signals → grounding → movers → reality → master → words -->
+  <!-- core: signals → grounding → movers → reality → peace → master → words -->
   <script src="js/core/signals.js"></script>
   <script src="js/core/grounding.js"></script>
   <script src="js/core/movers.js"></script>
   <script src="js/core/reality.js"></script>
+  <script src="js/core/peace.js"></script>
   <script src="js/core/master.js"></script>
   <script src="js/core/words.js"></script>
   <!-- features -->

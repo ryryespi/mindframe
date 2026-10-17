@@ -101,3 +101,9 @@ label { color: var(--muted); font-size: 0.92rem; }
 .soft-box { margin-top: 0.4rem; padding: 0.2rem 0.8rem 0.4rem; border-radius: 0.8rem; background: #eef1ec; }
 .soft-box p { margin: 0.35rem 0; }
 #comfort-prompt { font-size: 0.85rem; }
+
+/* Inner peace sits right under "Room for" */
+.peace-box { margin: 0 0 0.6rem; padding: 0.25rem 0.8rem 0.35rem; border-radius: 0.8rem; background: #edf0f3; }
+.peace-box p { margin: 0.3rem 0; }
+.peace-box p:first-child { font-weight: 500; }
+.peace-trend { font-weight: 500; }

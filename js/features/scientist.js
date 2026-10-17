@@ -1,6 +1,8 @@
 // features/scientist.js — Ada the Otter, the Scientist.
 // Shows every number behind the card, including the grandiosity signal g,
-// the hidden-conflict strengths c, and the positive-emotion scores.
+// the hidden-conflict strengths c, the positive-emotion scores, and inner
+// peace: P with its factors, the gradient, the lever, n*, e*, and the
+// convergence proof sketch.
 //
 // Shows the math behind the words and lets you tinker with it:
 //   • mathLines: e, the master equation with its values, λ, loops, the hidden
@@ -47,6 +49,21 @@ if (typeof module !== "undefined") {
     L.push("conflict c = \u221A(x_i\u00B7y_j): hard/process x \u2265 0.30 with grounding y = e \u2265 0.60 (pull toward) or y = 1 \u2212 e when e \u2264 0.40 (need); clashes in the words c = 0.50");
     (m.conflicts || []).forEach(c => L.push(c.from === "words" ? `  clash in the words (${c.a}): c = ${f2(c.c)}` : `  ${label(c.a)} ${f2(c.x)} \u00D7 ${c.side === "need" ? `need for ${c.b}` : c.b} ${f2(c.y)}: c = \u221A(${f2(c.x)}\u00B7${f2(c.y)}) = ${f2(c.c)}`));
     L.push(`positives from gain_j = |e_j \u2212 h_j| \u2212 |next_j \u2212 h_j|: ${(m.positives || []).map(p => `${p.word} ${f2(p.score)}`).join(", ") || "none"}`);
+    // Inner peace (core/peace.js) and its solve.
+    const p = m.peace;
+    if (p) {
+      const V2 = state.vars;
+      L.push(`P = 1/(1 + (d/d\u2080)\u00B2)\u00B7(1 \u2212 \u03B3\u00B7C_max)\u00B7(1 \u2212 \u03B4\u00B7g) = ${f2(p.Pd)}\u00B7${f2(p.Pc)}\u00B7${f2(p.Pg)} = ${f2(p.P)} (d = ${f2(p.d)}, d\u2080 = ${f2(V2.d0)}, C_max = ${f2(p.Cmax)}, \u03B3 = ${f2(V2.gamma)}, g = ${f2(p.g)}, \u03B4 = ${f2(V2.delta)})`);
+      if (p.grad) L.push(`\u2202P/\u2202e: ${NAMES.map((n, i) => `${label(n)} ${p.grad[i] >= 0 ? "+" : ""}${p.grad[i].toFixed(3)}`).join(", ")}`);
+      if (p.lever) L.push(`lever = argmax \u0394P_i for e_i \u2192 h_i by 0.05: ${p.lever.name ? `${p.lever.kind} ${label(p.lever.name)} (\u0394P = +${p.lever.dP.toFixed(3)})` : "none (already at home)"}`);
+      if (p.solve) {
+        const sv = p.solve;
+        L.push(`n* = steps until P \u2265 0.80: ${sv.n === null ? `not reached in ${sv.steps} steps` : sv.n}`);
+        L.push(`e* (fixed point after ${sv.steps} steps${sv.converged ? "" : ", not converged"}): ${NAMES.map((n, i) => `${label(n)} ${f2(sv.eStar[i])}`).join(", ")}; \u2016e* \u2212 h\u2016 = ${f2(sv.dStar)}, P(e*) = ${f2(sv.PStar)}`);
+      }
+      L.push("convergence: grounding next \u2212 h = (1 \u2212 a)(e \u2212 h); hard/process 0 \u2264 next \u2264 (1 \u2212 a)e (s \u2264 0, clip at 0 = h)");
+      L.push(`  \u21D2 \u2016next \u2212 h\u2016 \u2264 (1 \u2212 a)\u2016e \u2212 h\u2016 with a \u2265 min(a0, a_max, a_cap) = ${f2(Math.min(V2.aBase, V2.aMax, FIXED.aCap))} > 0: a contraction to e* = h, where P = 1 (rounding to 0.01 stops within 0.005/a)`);
+    }
     return L;
   }
 
@@ -100,7 +117,7 @@ if (typeof module !== "undefined") {
       grid.appendChild(lab);
     };
     GROUND.forEach(n => field("home", n, `h.${n}`, 0, 1, `home target for ${n}`));
-    VAR_SPEC.forEach(([k, , min, max, hint]) => field("var", k, k === "aBase" ? "a0" : k === "aMax" ? "a_max" : k, min, max, hint));
+    VAR_SPEC.forEach(([k, , min, max, hint]) => field("var", k, ({ aBase: "a0", aMax: "a_max", d0: "d\u2080", gamma: "\u03B3", delta: "\u03B4" })[k] || k, min, max, hint));
     MAIN_PAIRS.forEach(([a, b]) => field("w", `${a}>${b}`, `${a}\u2192${b}`, -1, 1, `how much ${a} changes ${b}`));
     grid.addEventListener("change", ev => {
       const inp = ev.target;

@@ -229,7 +229,7 @@ test("variables: validated and kept in range; Reset defaults are the spec", () =
   assert.equal(v.vars.b, 0);
   assert.equal(v.vars.d, 0.3);
   assert.ok(v.notes.length >= 3);
-  assert.deepEqual(M.defaultVars(), { aBase: 0.2, k: 0.05, aMax: 0.25, b: 0.1, d: 0.3 });
+  assert.deepEqual(M.defaultVars(), { aBase: 0.2, k: 0.05, aMax: 0.25, b: 0.1, d: 0.3, d0: 0.6, gamma: 0.3, delta: 0.3 });
   assert.equal(M.MAIN_PAIRS.length, 7);
 });
 
@@ -466,7 +466,7 @@ test("crisis: a crisis label inside code is refused", () => {
 });
 
 // ---------- one page ----------
-test("single page: index has no tools links; tools.html only redirects; the service worker is v15", () => {
+test("single page: index has no tools links; tools.html only redirects; the service worker is v16", () => {
   const root = path.join(__dirname, "..");
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const tools = fs.readFileSync(path.join(root, "tools.html"), "utf8");
@@ -475,9 +475,9 @@ test("single page: index has no tools links; tools.html only redirects; the serv
   assert.ok(/history\.replaceState/.test(index), "old ?view/?chip links are stripped");
   assert.ok(/location\.replace\("\.\/"\)/.test(tools) && /http-equiv="refresh"/.test(tools));
   assert.ok(!/<textarea|<script src/.test(tools), "tools.html is only a redirect");
-  assert.match(sw, /mindframe-shell-v15/);
+  assert.match(sw, /mindframe-shell-v16/);
   const scripts = [...index.matchAll(/<script src="([^"]+)"/g)].map(x => x[1]);
-  assert.deepEqual(scripts, ["js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/reality.js", "js/core/master.js", "js/core/words.js",
+  assert.deepEqual(scripts, ["js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/reality.js", "js/core/peace.js", "js/core/master.js", "js/core/words.js",
     "js/features/relationship.js", "js/features/writer/stories.js", "js/features/writer/games.js", "js/features/historian.js",
     "js/features/writer/writer.js", "js/features/writer/comfort.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/app.js"]);
   scripts.forEach(s => assert.ok(sw.includes(`./${s}`), `${s} cached`));

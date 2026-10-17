@@ -55,6 +55,7 @@ g      = 1 − e^(−raw)   raw = 0.6·grand + 0.5·certain-worst + 0.25·all-or
                         (adds 0.5·g to rumination and to avoidance/fusion, before saturation)
 c(i,j) = √(x_i·y_j)     opposing pulls both active (hidden conflicts); 0.5 for clashes in the words
 gain_j = |e_j − h_j| − |next_j − h_j|   → the positive emotions the step points toward
+P      = 1/(1 + (d/d0)²) · (1 − γ·C_max) · (1 − δ·g)     inner peace, in [0, 1]
 ```
 
 The last three are computed in the same master pass (`js/core/reality.js`) and returned as `grand`, `conflicts[]` and `positives[]`. No new movers or variables.
@@ -89,13 +90,45 @@ Choices between equal parts are made by a hash of the seed and the numbers, so t
 Card order:
 
 1. **Room for:** the positive emotions the step points toward (calm, connection, hope, plus gratitude, courage, peace, joy as words, not variables), for example "Room for: courage, calm, and connection, as the fear settles."
-2. **What you may be feeling:** the one to three strongest movers.
-3. **How they connect:** the strongest W link and stabilizer, a loop, λ in words, a hidden rise.
-4. **A hidden pull** (when there is one) and **Reality check** (when g ≥ 0.25).
-5. **Affirmations:** (1) the mover that moves most: a stance by its band plus its action; (2) the top positive emotion; (3) the conflict ("I can hold both"), else the true-sized line, else the stabilizer's action. Include faith adds exactly one more.
-6. **One step** and **progress in words.**
+2. **Inner peace** and **Path to peace** (see below).
+3. **What you may be feeling:** the one to three strongest movers.
+4. **How they connect:** the strongest W link and stabilizer, a loop, λ in words, a hidden rise.
+5. **A hidden pull** (when there is one) and **Reality check** (when g ≥ 0.25).
+6. **Affirmations:** (1) the mover that moves most: a stance by its band plus its action; (2) the top positive emotion; (3) the conflict ("I can hold both"), else the true-sized line, else the stabilizer's action. Include faith adds exactly one more.
+7. **One step** (the inner-peace lever's technique, sized by d) and **progress in words.**
 
-7. **A pattern to notice** (only when one is found): see the Four Horsemen section below.
+8. **A pattern to notice** (only when one is found): see the Four Horsemen section below.
+
+## Inner peace: the score and the solve
+
+**Model, not validated science.** Inner peace is a model quantity computed in the same master pass (`js/core/peace.js`), with no new movers:
+
+```
+P   = P_d · P_c · P_g
+P_d = 1 / (1 + (d/d0)²)      d = ‖e − h‖; d0 = 0.6, so P_d = 0.8 at d = 0.3 ("close to steady")
+P_c = 1 − γ·C_max            C_max = the strongest hidden conflict c; γ = 0.3
+P_g = 1 − δ·g                g = the grandiosity signal; δ = 0.3
+```
+
+d0, γ and δ are adjustable in Ada's panel. P = 1 exactly at home and is lower everywhere else (each factor is at most 1). P_d is smooth and strictly decreasing, so there is always a direction to move.
+
+**Solving for inner peace:**
+
+* **Steady state e\*.** Proof sketch for the exact map, with hard/process homes at 0 (always true in the app):
+  * grounding movers: next − h = (1 − a)(e − h);
+  * hard and process movers: s ≤ 0 and h = 0, so 0 ≤ next ≤ (1 − a)·e.
+  * Hence ‖next − h‖ ≤ (1 − a)‖e − h‖ with a ≥ min(a0, a_max, a_cap) ≥ 0.05. The master map is a **contraction** toward h for any b ≥ 0 and any W: d_t ≤ 0.95^t·d_0. Its unique fixed point is e\* = h, where P = 1.
+  * Because the app rounds every step to 0.01, the computed iteration stops at a lattice point within 0.005/a of h per mover (≤ 0.03 with the defaults), where P ≥ 0.95. Tests check the contraction inequality on the exact map (three settings, 180 random starts) and the rounded fixed point (80 random starts).
+* **n\*:** the number of master steps until P ≥ 0.8 (the peace threshold), counted from the current reading. Tests match it against a direct simulation.
+* **The most helpful lever:** the mover whose move toward home by 0.05 raises P most (a finite difference; Ada also shows the central-difference gradient ∂P/∂e_i). The One step is the lever's technique, composed as before.
+
+On the card, under "Room for": "Inner peace: a little / growing / close / steady" (P < 0.4, < 0.6, < 0.8, ≥ 0.8), "Path to peace: about five gentle steps; the biggest help right now is easing the anger", and how much the hidden pull and the grand thought take away. With Include faith on, one more line: "May the peace of God, which surpasses all understanding, guard your heart and mind (from Philippians)." Hazel shows inner peace across your saved days in words. The comfort prompt includes P, its band, n\* and the lever. Crisis wording shows no peace score, only 988/911.
+
+Conceptual basis (nothing is measured):
+
+* **Equanimity:** an even-minded state toward all experience (Desbordes et al., 2015; Kabat-Zinn, 2003). Here: near home with nothing pulling hard.
+* **Peace of mind** as internal peacefulness and harmony (Lee, Lin, Huang & Fredrickson, 2013). Inner conflict lowers it (P_c).
+* **Emotion regulation** (Gross, 1998). The lever is the one place where a small regulation step helps most, and the reality check is the cognitive-change point (P_g).
 
 ## Hidden conflicts
 
@@ -116,10 +149,10 @@ Below the card is a row of friendly animals. Each opens one panel; only one is o
 | Friend | Role | Personality | Panel |
 |---|---|---|---|
 | **Fern the Fox** (pencil) | Writer | Keeps your journal and spins gentle stories. | A creature story driven by the master step (feeling words, ends with an affirmation and a question), accept the step, the path game, the optional public-AI comfort prompt, and the journal (the only place your words are kept, and only when you tap Save). |
-| **Hazel the Owl** (glasses, book) | Historian | Remembers your days and how far you've come. | Each day in words, Save checkpoint (numbers only), restore a checkpoint. |
+| **Hazel the Owl** (glasses, book) | Historian | Remembers your days and how far you've come. | Each day in words, inner peace across your saved days, Save checkpoint (numbers only), restore a checkpoint. |
 | **Remy the Raccoon** (magnifying glass) | Analyzer | Turns over each feeling to see how it fits. | Every hidden pull and any grand wording with its true-sized version, then all nine movers in words: how present each is, what it feeds, what softens it. |
 | **Toby the Tortoise** (quill) | Scribe | Slow and careful; copies your numbers safely. | Export / import `.mf` code, download, Start over. |
-| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores), adjust each mover, and the variables a0, k, a_max, b, decay, home and the main W links, with Reset. |
+| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores, inner peace P with ∂P/∂e, the lever, n*, e* and the convergence proof sketch), adjust each mover, and the variables a0, k, a_max, b, decay, d0, γ, δ, home and the main W links, with Reset. |
 
 Changing a number in a panel does not redraw the card; it says "Tap Update to see the new reading." Buttons that are themselves an action (Write a story, Accept step, Save checkpoint, Restore) run Update for you.
 
@@ -165,7 +198,7 @@ Code is grouped by feature. Every file starts with a header comment; every funct
 ```
 index.html            the one page: input, Update, card, five friends, five panels
 style.css             calm, muted styles; large tap targets
-sw.js                 offline cache (v15)
+sw.js                 offline cache (v16)
 tools.html            redirects old shortcuts to the one page
 img/                  fox, owl, raccoon, tortoise, otter (original SVGs)
 js/
@@ -175,6 +208,7 @@ js/
     grounding.js      crisis wording and pattern reading
     movers.js         MF.Movers: the nine movers, W, variables, lexicon, fromText
     reality.js        MF.Reality: grandiosity g, hidden conflicts, positive emotions
+    peace.js          MF.Peace: inner peace P, the lever, the gradient, the bands
     master.js         MF.Master: the master function, recovery, baseline
     words.js          MF.Words: the composer (every card sentence built from the numbers)
   features/
@@ -191,13 +225,13 @@ js/
 tests/                node tests (tests/mf.js loads every module)
 ```
 
-Load order in `index.html`: core (signals, grounding, movers, reality, master, words), then features (relationship, stories, games, historian, writer, comfort, analyzer, scribe, scientist), then `app.js`.
+Load order in `index.html`: core (signals, grounding, movers, reality, peace, master, words), then features (relationship, stories, games, historian, writer, comfort, analyzer, scribe, scientist), then `app.js`.
 
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
 
 ## Model, not validated science
 
-MindFrame is a model built from design assumptions and informed by the research cited here. It is not validated science, not a measurement of you, and not a diagnosis. The thresholds (0.3, 0.6, 0.25) and weights are design choices.
+MindFrame is a model built from design assumptions and informed by the research cited here. It is not validated science, not a measurement of you, and not a diagnosis. The thresholds (0.3, 0.6, 0.25, the peace threshold 0.8) and weights (including d0, γ, δ) are design choices.
 
 ## References
 
@@ -208,12 +242,16 @@ MindFrame is a model built from design assumptions and informed by the research 
 * Beck, A. T., Steer, R. A., Kovacs, M., & Garrison, B. (1985). Hopelessness and eventual suicide: A 10-year prospective study of patients hospitalized with suicidal ideation. *American Journal of Psychiatry, 142*, 559–563.
 * Bond, F. W., et al. (2011). Preliminary psychometric properties of the Acceptance and Action Questionnaire–II. *Behavior Therapy, 42*(4), 676–688.
 * Burns, D. D. (1980). *Feeling good: The new mood therapy.* New York: William Morrow.
+* Desbordes, G., Gard, T., Hoge, E. A., Hölzel, B. K., Kerr, C., Lazar, S. W., Olendzki, A., & Vago, D. R. (2015). Moving beyond mindfulness: Defining equanimity as an outcome measure in meditation and contemplative research. *Mindfulness, 6*(2), 356–372. doi:10.1007/s12671-013-0269-8
 * Gillanders, D. T., et al. (2014). The development and initial validation of the Cognitive Fusion Questionnaire. *Behavior Therapy, 45*(1), 83–101.
 * Holt-Lunstad, J., Smith, T. B., & Layton, J. B. (2010). Social relationships and mortality risk: A meta-analytic review. *PLoS Medicine, 7*(7), e1000316.
+* Kabat-Zinn, J. (2003). Mindfulness-based interventions in context: Past, present, and future. *Clinical Psychology: Science and Practice, 10*(2), 144–156. doi:10.1093/clipsy/bpg016
 * Kim, S., Thibodeau, R., & Jorgensen, R. S. (2011). Shame, guilt, and depressive symptoms: A meta-analytic review. *Psychological Bulletin, 137*(1), 68–96. doi:10.1037/a0021466
+* Lee, Y.-C., Lin, Y.-C., Huang, C.-L., & Fredrickson, B. L. (2013). The construct and measurement of peace of mind. *Journal of Happiness Studies, 14*(2), 571–590. doi:10.1007/s10902-012-9343-5
 * Miller, W. R., & Rollnick, S. (2013). *Motivational interviewing: Helping people change* (3rd ed.). New York: Guilford Press.
 * Nolen-Hoeksema, S., Wisco, B. E., & Lyubomirsky, S. (2008). Rethinking rumination. *Perspectives on Psychological Science, 3*(5), 400–424.
 * Snyder, C. R. (2002). Hope theory: Rainbows in the mind. *Psychological Inquiry, 13*(4), 249–275.
+* Gross, J. J. (1998). The emerging field of emotion regulation: An integrative review. *Review of General Psychology, 2*(3), 271–299.
 * Gottman, J. M. (1994). *What predicts divorce? The relationship between marital processes and marital outcomes.* Hillsdale, NJ: Erlbaum.
 * Gottman, J. M., & Levenson, R. W. (1992). Marital processes predictive of later dissolution: Behavior, physiology, and health. *Journal of Personality and Social Psychology, 63*(2), 221–233. doi:10.1037/0022-3514.63.2.221
 * Gottman, J. M., & Levenson, R. W. (2000). The timing of divorce: Predicting when a couple will divorce over a 14-year period. *Journal of Marriage and Family, 62*(3), 737–745.

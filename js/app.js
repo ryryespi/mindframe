@@ -3,7 +3,7 @@
 //
 //   Update (or Ctrl/Cmd+Enter) → master(text, state) → the card, every line
 //   composed from master's numbers by core/words.js (room for positive
-//   emotions first, then feelings, links, a hidden pull, a reality check,
+//   emotions first, then inner peace and the path to it, then feelings, links, a hidden pull, a reality check,
 //   affirmations, one step, progress). Nothing is
 //   computed while you type. Crisis wording shows only the 988/911 box, and
 //   nothing is computed or saved.
@@ -114,6 +114,7 @@
     $("room").textContent = c.room;
     $("feel").textContent = c.feeling;
     const soft = (id, list) => { const el = $(id); el.innerHTML = ""; list.forEach(t => { const p = document.createElement("p"); p.textContent = t; el.appendChild(p); }); el.classList.toggle("hidden", !list.length); };
+    soft("peace", c.peace.concat(c.peaceFaith ? [c.peaceFaith] : []));
     soft("conflict", c.conflict);
     soft("reality", c.reality);
     const fill = (id, list) => { const ul = $(id); ul.innerHTML = ""; list.forEach(t => ul.appendChild(li(t))); };

@@ -57,11 +57,15 @@ if (typeof module !== "undefined") {
     ["aMax", 0.25, 0.05, 0.5, "a_max: largest step"],
     ["b", 0.1, 0, 0.5, "stabilizer pull (grounding movers press on hard ones)"],
     ["d", 0.3, 0.05, 1, "decay: how fast a mover settles on its own"],
+    // Inner peace (core/peace.js): P = 1/(1 + (d/d0)²) · (1 − γ·C_max) · (1 − δ·g)
+    ["d0", 0.6, 0.2, 2, "d0: distance at which inner peace is half"],
+    ["gamma", 0.3, 0, 0.6, "γ: how much the strongest hidden pull lowers peace"],
+    ["delta", 0.3, 0, 0.6, "δ: how much grand or absolute thinking lowers peace"],
   ];
   const FIXED = { aMin: 0.05, aCap: 0.12, bU: 0.15, dt: 0.15, rise: 0.15, eps: 0.3, k: 8, beta: 0.2 };
   const SPEC = Object.fromEntries(VAR_SPEC.map(([k, def, min, max, note]) => [k, { def, min, max, note }]));
   const VAR_KEYS = VAR_SPEC.map(v => v[0]);
-  /** The default adjustable variables {aBase, k, aMax, b, d}. */
+  /** The default adjustable variables {aBase, k, aMax, b, d, d0, gamma, delta}. */
   const defaultVars = () => Object.fromEntries(VAR_SPEC.map(([k, v]) => [k, v]));
   /**
    * Clamp variables into their ranges.
