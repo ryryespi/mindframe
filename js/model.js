@@ -1,5 +1,5 @@
-// model.js — MindFrame's one model: nine movers, small dynamics, one ideal
-// step, a recovery estimate, checkpoints and days, and the .mf code (mf 2).
+// model.js — MindFrame's one model: nine movers, one master function (every feature
+// calls it), a words-first card, stories, checkpoints and days, and the .mf code (mf 2).
 // Pure logic, no DOM. All local; nothing is sent anywhere.
 //
 // A MODEL built from design assumptions, informed by research (see README).
@@ -12,17 +12,18 @@
 //   words    hard/process: e = 1 − exp(−raw)
 //            grounding:    e = base + pos·(1 − base) − neg·base
 //            new words add to the base: hard/process 1 − (1 − base)(1 − words)
-//   dynamics e ← clamp01(e + dt·(Wᵀ(e − rest) − d·(e − rest)))
-//            (grounding movers act through their distance from 0.5: low connection
-//            feeds shame and sadness, high calm eases fear)
+//   dynamics e ← clamp01(e + dt·(Wᵀ(e − rest) − d·(e − rest)))   (the "left alone" projection)
 //   λ        = ρ(W on the active hard and process movers) − d   (> 0: unstable)
 //   home     h: calm, connection, hope 0.8; everything else 0
-//   d        = ‖e − h‖
-//   ideal    e' = e + a·(h − e) + b·s(e), never past home, at least 0.01 move
-//            s_j = e_j·Σ_{grounding i} min(0, W_ij)·h_i  for hard/process j above home
-//            a = clamp(aBase·(0.5 + D/Dmax), aMin, aMax); λ > 0: a = max(aMin, min(aCap, a/(1 + 4λ))), b = bU
-//            D is the 7-day baseline's distance once days are recorded
-//   T_rec    ideal steps until d < eps (≤ 200); days = ⌈T_rec ÷ accepted steps per day⌉
+//
+//   THE MASTER FUNCTION (master(text, state)); every feature calls it:
+//     e      = score(text)
+//     step   = act(clip01(e + a(e)·(h − e) + b·s(e)))
+//     a(e)   = min(a_max, a0 + k·‖e − h‖), capped at a_cap when λ > 0 (and b = b_U)
+//     s_j    = e_j·Σ_{grounding i} min(0, W_ij)·h_i  for hard/process j above home
+//     d      = ‖e − h‖;  B_t = 0.8·B_{t−1} + 0.2·e_t;  recovery = master steps until d < 0.3
+//   Output is words: feelings, connections, affirmations, one step, progress.
+//   The numbers stay behind "Show the math".
 
 const Model = (function () {
   const G = typeof Grounding !== "undefined" ? Grounding : require("./grounding.js");
@@ -51,12 +52,12 @@ const Model = (function () {
 
   // ---------- Variables (the panel shows these; the rest are fixed) ----------
   const VAR_SPEC = [
-    ["aBase", 0.2, 0.05, 0.5, "step size toward home"],
-    ["aMax", 0.25, 0.05, 0.5, "largest step"],
+    ["aBase", 0.2, 0.05, 0.5, "a0: base step size toward home"],
+    ["aMax", 0.25, 0.05, 0.5, "a_max: largest step"],
     ["b", 0.1, 0, 0.5, "stabilizer pull (grounding movers press on hard ones)"],
     ["d", 0.3, 0.05, 1, "decay: how fast a mover settles on its own"],
   ];
-  const FIXED = { aMin: 0.05, aCap: 0.12, bU: 0.15, dt: 0.15, rise: 0.15, eps: 0.3, k: 8, beta: 0.2 };
+  const FIXED = { aMin: 0.05, kd: 0.05, aCap: 0.12, bU: 0.15, dt: 0.15, rise: 0.15, eps: 0.3, k: 8, beta: 0.2 };
   const SPEC = Object.fromEntries(VAR_SPEC.map(([k, def, min, max, note]) => [k, { def, min, max, note }]));
   const VAR_KEYS = VAR_SPEC.map(v => v[0]);
   const defaultVars = () => Object.fromEntries(VAR_SPEC.map(([k, v]) => [k, v]));
@@ -305,35 +306,6 @@ const Model = (function () {
     return out.sort((a, b) => (b.to - b.from) - (a.to - a.from));
   }
 
-  // ---------- The ideal step ----------
-  function ideal(e, opts = {}) {
-    const h = opts.home || homeVec(), W = opts.W || W0, V = opts.vars || defaultVars();
-    const lam = lambda(e, W, V.d);
-    const d = distance(e, h);
-    const refD = Number.isFinite(opts.refD) ? opts.refD : d;
-    let a = clamp(V.aBase * (0.5 + refD / dmax(h)), FIXED.aMin, V.aMax), b = V.b;
-    const unstable = lam !== null && lam > 0;
-    if (unstable) { a = Math.max(FIXED.aMin, Math.min(FIXED.aCap, a / (1 + 4 * lam))); b = FIXED.bU; }
-    a = r2(a); b = r2(b);
-    const toward = (x, y, hj) => (x > hj ? Math.max(hj, y) : Math.min(hj, y));
-    const pull = NAMES.map((n, j) => (isGround[j] ? 0 : NAMES.reduce((s, m, i) => s + (isGround[i] ? Math.min(0, W[i][j]) * h[i] : 0), 0)));
-    const next = e.map((x, j) => {
-      let y = x + a * (h[j] - x);
-      if (!isGround[j] && x > h[j]) y += b * x * pull[j];
-      y = r2(clamp01(toward(x, y, h[j])));
-      if (y === r2(x) && r2(x) !== h[j]) y = r2(x + (h[j] > x ? 0.01 : -0.01));
-      return y;
-    });
-    // The stabilizer: the grounding mover that presses hardest on the top hard/process mover.
-    const top = NAMES.map((n, j) => ({ n, j, gap: e[j] - h[j] })).filter(x => !isGround[x.j] && x.gap > 0).sort((p, q) => q.gap - p.gap)[0] || null;
-    let stab = null;
-    if (top) {
-      let best = 0;
-      GROUND.forEach(g => { const p = -Math.min(0, W[idx[g]][top.j]); if (p > best) { best = p; stab = g; } });
-    }
-    return { a, b, lambda: lam, unstable, d: r2(d), next, dNext: r2(distance(next, h)), top: top ? top.n : null, stabilizer: stab };
-  }
-
   // ---------- Skills, reframes, faith wording ----------
   const SKILL = {
     fear: "Paced breathing: breathe out longer than in, five times, then name one thing you can see.",
@@ -383,36 +355,147 @@ const Model = (function () {
     return { kind: "weakest", name: low.gap >= ACTIVE ? low.n : null };
   }
 
-  // ---------- Days, baseline, checkpoints ----------
+  // ---------- Days and baseline helpers ----------
   function stamp(ts) {
     const d = new Date(ts), p = x => String(x).padStart(2, "0");
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
   }
   const dayOf = t => t.slice(0, 10);
-  function baselineSeries(days, beta = FIXED.beta) {
+  // B_t = (1 − β)·B_{t−1} + β·e_t with β = 0.2, i.e. B_t = 0.8·B_{t−1} + 0.2·e_t.
+  const ema = (B, e) => (B ? B.map((b, i) => (1 - FIXED.beta) * b + FIXED.beta * e[i]) : e.slice());
+  function baselineSeries(days) {
     let B = null;
-    return days.map(x => { B = B ? B.map((b, i) => (1 - beta) * b + beta * x.e[i]) : x.e.slice(); return { day: x.day, D: x.e, B: B.slice() }; });
+    return days.map(x => { B = ema(B, x.e); return { day: x.day, D: x.e, B: B.slice() }; });
   }
-  function baseline(state) {
-    const s = baselineSeries(state.days);
-    return s.length ? s[s.length - 1].B.map(r2) : null;
+  function baselineOf(days) {
+    const s = baselineSeries(days);
+    return s.length ? s[s.length - 1].B : null;
   }
+
+  // s(e): grounding movers press on hard/process movers that sit above home.
+  // s_j = e_j · Σ_{grounding i} min(0, W_ij)·h_i  (≤ 0), and 0 for grounding movers.
+  function sVec(e, h, W) {
+    return NAMES.map((n, j) => {
+      if (isGround[j] || e[j] <= h[j]) return 0;
+      return e[j] * NAMES.reduce((acc, m, i) => acc + (isGround[i] ? Math.min(0, W[i][j]) * h[i] : 0), 0);
+    });
+  }
+
+  // act(): the stepped vector becomes one small grounded action.
+  // The action belongs to the mover that moves most toward home in this step.
+  function act(e, next, h) {
+    let mover = null, best = 0;
+    NAMES.forEach((n, j) => {
+      const gain = Math.abs(e[j] - h[j]) - Math.abs(next[j] - h[j]);
+      if (gain > best + 1e-9) { best = gain; mover = n; }
+    });
+    return { mover, action: mover ? SKILL[mover] : "Keep going: notice one good thing and stay with it for a breath." };
+  }
+
+  // ======================================================================
+  // THE MASTER FUNCTION. Every feature calls this; nothing else steps e.
+  //
+  //   e      = score(text)            (the text's words added to where you are)
+  //   step   = act(clip01(e + a(e)·(h − e) + b·s(e)))
+  //   a(e)   = min(a_max, a0 + k·‖e − h‖), capped at a_cap when λ > 0
+  //   b      = b (b_U when λ > 0)
+  //   d      = ‖e − h‖;  B_t = 0.8·B_{t−1} + 0.2·e_t;  recovery = steps until d < 0.3
+  //
+  // text may be "" (step from where you are). opts.sim = false skips the
+  // recovery count (used inside the recovery count itself).
+  // ======================================================================
+  const calls = { master: 0 };
+  function master(text, state, opts = {}) {
+    calls.master += 1;
+    const words = fromText(typeof text === "string" ? text : "");
+    if (words.crisis) return { crisis: true };
+    const h = state.home, W = weights(state.w), V = state.vars;
+    const e = combine(state.e, words.w);
+    const lam = lambda(e, W, V.d);
+    const unstable = lam !== null && lam > 0;
+    const d = distance(e, h);
+    let a = Math.min(V.aMax, V.aBase + FIXED.kd * d);
+    if (unstable) a = Math.min(a, FIXED.aCap);
+    const b = unstable ? FIXED.bU : V.b;
+    const s = sVec(e, h, W);
+    const next = e.map((x, j) => r2(clamp01(x + a * (h[j] - x) + b * s[j])));
+    const { mover, action } = act(e, next, h);
+    // The top hard/process mover above home, and the grounding mover that presses on it most.
+    const top = NAMES.map((n, j) => ({ n, j, gap: e[j] - h[j] })).filter(x => !isGround[x.j] && x.gap > 0).sort((p, q) => q.gap - p.gap)[0] || null;
+    let stabilizer = null;
+    if (top) {
+      let best = 0;
+      GROUND.forEach(g => { const p = -Math.min(0, W[idx[g]][top.j]); if (p > best) { best = p; stabilizer = g; } });
+    } else {
+      const low = GROUND.map(n => ({ n, gap: h[idx[n]] - e[idx[n]] })).sort((p, q) => q.gap - p.gap)[0];
+      if (low.gap >= ACTIVE) stabilizer = low.n;
+    }
+    // Baseline: today's e folded into the days before today.
+    const today = dayOf(stamp(Number.isFinite(opts.now) ? opts.now : Date.now()));
+    const Bprev = baselineOf(state.days.filter(x => x.day < today));
+    const B = ema(Bprev, e).map(r2);
+    const out = {
+      crisis: false, notes: words.notes, read: words.read,
+      e, h: h.slice(), a, b, s, next, lambda: lam, unstable,
+      d: r2(d), dNext: r2(distance(next, h)),
+      top: top ? top.n : null, stabilizer, mover, action,
+      loops: loops(e, W, V.d), hidden: hidden(e, W, V),
+      B, baseline: { dPrev: Bprev ? r2(distance(Bprev, h)) : null, dB: r2(distance(B, h)), days: state.days.length },
+    };
+    if (opts.sim !== false) out.recovery = recovery({ ...state, e });
+    return out;
+  }
+
+  // ---------- Recovery: repeat the master step until d < 0.3 ----------
+  function simulate(state) {
+    let cur = state;
+    for (let n = 0; n <= MAX_SIM; n++) {
+      const D = distance(cur.e, cur.home);
+      if (D < FIXED.eps) return { steps: n, reached: true, final: r2(D) };
+      if (n === MAX_SIM) return { steps: n, reached: false, final: r2(D) };
+      const m = master("", cur, { sim: false });
+      if (m.next.every((x, i) => x === cur.e[i])) return { steps: n, reached: false, final: r2(D) };
+      cur = { ...cur, e: m.next };
+    }
+  }
+  function recovery(state) {
+    const sim = simulate(state);
+    const per = {};
+    state.cps.filter(c => /^step-\d+$/.test(c.label)).forEach(c => { per[dayOf(c.t)] = (per[dayOf(c.t)] || 0) + 1; });
+    const counts = Object.values(per);
+    const rate = counts.length ? r2(counts.reduce((acc, x) => acc + x, 0) / counts.length) : 1;
+    return { ...sim, rate, days: sim.reached ? Math.ceil(sim.steps / rate) : null };
+  }
+  const recText = r => (r.reached ? `~${r.steps} step${r.steps === 1 ? "" : "s"} (~${r.days} day${r.days === 1 ? "" : "s"})` : `not reached in ${MAX_SIM} steps`);
+
+  // ---------- Checkpoints, days, history (all read the master output) ----------
   function recordDay(state, ts) {
     const day = dayOf(stamp(ts));
     const days = state.days.filter(x => x.day !== day).concat({ day, e: state.e.slice() }).sort((a, b) => (a.day < b.day ? -1 : 1)).slice(-MAX_DAYS);
     return { ...state, days };
   }
   function addCheckpoint(state, label, ts = Date.now()) {
+    const m = master("", state, { sim: false, now: ts });
     const n = state.cps.length ? state.cps[state.cps.length - 1].n + 1 : 1;
-    const lam = lambda(state.e, weights(state.w), state.vars.d);
-    const cp = { n, t: stamp(ts), label: LABEL_RE.test(label || "") ? label : `cp-${n}`, e: state.e.slice(), lambda: lam === null ? 0 : lam };
-    return recordDay({ ...state, cps: state.cps.concat(cp).slice(-MAX_CHECKPOINTS) }, ts);
+    const cp = { n, t: stamp(ts), label: LABEL_RE.test(label || "") ? label : `cp-${n}`, e: m.e.slice(), lambda: m.lambda === null ? 0 : m.lambda };
+    return recordDay({ ...state, e: m.e.slice(), cps: state.cps.concat(cp).slice(-MAX_CHECKPOINTS) }, ts);
   }
   function restore(state, n) {
     const cp = state.cps.find(c => c.n === n);
-    return cp ? { ...state, e: cp.e.slice() } : state;
+    return cp ? refreshIdeal({ ...state, e: cp.e.slice() }) : state;
   }
-  // Each day's baseline distance and direction: cos(D_t − D_{t−1}, h − B_{t−1}).
+  // Accept the step: e ← the master step from where you are.
+  function acceptStep(state, ts = Date.now()) {
+    const m = master("", state, { sim: false, now: ts });
+    const n = state.cps.filter(c => /^step-\d+$/.test(c.label)).length + 1;
+    return refreshIdeal(addCheckpoint({ ...state, e: m.next.slice() }, `step-${n}`, ts));
+  }
+  function refreshIdeal(state) {
+    const m = master("", state, { sim: false });
+    return { ...state, ideal: { a: r2(m.a), b: r2(m.b) } };
+  }
+  const baseline = state => { const m = master("", state, { sim: false }); return m.baseline.days ? baselineOf(state.days).map(r2) : null; };
+  // Each day's direction: cos(D_t − D_{t−1}, h − B_{t−1}).
   function week(state, now = Date.now()) {
     const s = baselineSeries(state.days), h = state.home;
     const start = dayOf(stamp(now - 6 * 86400000));
@@ -426,140 +509,243 @@ const Model = (function () {
       return { day: x.day, dB: r2(distance(x.B, h)), dir };
     }).filter(x => x.day >= start);
   }
-  const ARROW = { up: "\u2191 toward home", side: "\u2194 sideways", down: "\u2193 away from home" };
-  const weekLines = (state, now) => week(state, now).map(x => `${x.day.slice(5)}  \u2016B \u2212 h\u2016 = ${x.dB.toFixed(2)}  ${x.dir ? ARROW[x.dir] : "start"}`);
+  const WEEKDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const dayName = day => WEEKDAY[new Date(`${day}T12:00:00`).getDay()];
+  const DIR_WORDS = { up: "a step toward steady", side: "a sideways day (showing up still counts)", down: "a heavier day" };
+  const weekLines = (state, now) => week(state, now).map(x => `${dayName(x.day)}: ${x.dir ? DIR_WORDS[x.dir] : "the first day on the map"}`);
+  const weekMath = (state, now) => week(state, now).map(x => `${x.day.slice(5)}  \u2016B \u2212 h\u2016 = ${x.dB.toFixed(2)}  ${x.dir || "start"}`);
 
-  // ---------- Recovery estimate ----------
-  function simulate(state) {
-    const W = weights(state.w);
-    let e = state.e.slice();
-    for (let n = 0; n <= MAX_SIM; n++) {
-      const D = distance(e, state.home);
-      if (D < FIXED.eps) return { steps: n, reached: true, final: r2(D) };
-      if (n === MAX_SIM) return { steps: n, reached: false, final: r2(D) };
-      const id = ideal(e, { home: state.home, W, vars: state.vars });
-      if (id.next.every((x, i) => x === e[i])) return { steps: n, reached: false, final: r2(D) };
-      e = id.next;
-    }
-  }
-  function recovery(state) {
-    const sim = simulate(state);
-    const per = {};
-    state.cps.filter(c => /^step-\d+$/.test(c.label)).forEach(c => { per[dayOf(c.t)] = (per[dayOf(c.t)] || 0) + 1; });
-    const counts = Object.values(per);
-    const rate = counts.length ? r2(counts.reduce((s, x) => s + x, 0) / counts.length) : 1;
-    return { ...sim, rate, days: sim.reached ? Math.ceil(sim.steps / rate) : null };
-  }
-  const recText = r => (r.reached ? `~${r.steps} step${r.steps === 1 ? "" : "s"} (~${r.days} day${r.days === 1 ? "" : "s"})` : `not reached in ${MAX_SIM} steps`);
-
-  // ---------- Everything the card needs ----------
   function defaultState() {
     return { v: VERSION, home: homeVec(), e: rest(), vars: defaultVars(), w: [], days: [], cps: [], ideal: null };
   }
-  function metrics(state, live = {}) {
-    const W = weights(state.w);
-    const B = baseline(state);
-    const opts = { home: state.home, W, vars: state.vars };
-    if (B) opts.refD = distance(B, state.home);
-    const id = ideal(state.e, opts);
-    return {
-      d: r2(distance(state.e, state.home)), lambda: lambda(state.e, W, state.vars.d), loops: loops(state.e, W, state.vars.d),
-      hidden: hidden(state.e, W, state.vars), ideal: id, focus: focus(state), recovery: recovery(state),
-      baseline: B ? { dB: r2(distance(B, state.home)), days: state.days.length } : null,
-      notes: live.notes || [], read: live.read || null,
-    };
-  }
+  // Kept for callers: the master output for a state (and optional text).
+  const metrics = (state, text = "") => master(typeof text === "string" ? text : "", state);
 
+  // ======================================================================
+  // Words, not numbers: the feelings + affirmations card.
+  // ======================================================================
   const f2 = x => x.toFixed(2);
   const sgn = x => (x > 0 ? "+" : x < 0 ? "\u2212" : "") + Math.abs(x).toFixed(2);
   const label = n => LABEL[n] || n;
-  // Movers worth showing: hard/process ≥ 0.1, grounding 0.1 or more away from 0.5.
-  function shown(state) {
-    return NAMES.map((n, i) => ({ name: n, label: label(n), v: state.e[i], group: HARD.includes(n) ? "hard" : GROUND.includes(n) ? "grounding" : "process" }))
-      .filter(x => (x.group === "grounding" ? Math.abs(x.v - 0.5) >= 0.1 : x.v >= ACTIVE));
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const listJoin = l => (l.length <= 1 ? l.join("") : l.length === 2 ? `${l[0]} and ${l[1]}` : `${l.slice(0, -1).join(", ")}, and ${l[l.length - 1]}`);
+
+  // Intensity bands: < 0.3 a little, 0.3–0.6 quite, > 0.6 strongly.
+  const band = x => (x > 0.6 ? "strongly" : x >= 0.3 ? "quite" : "a little");
+  const FEEL = {
+    fear: "anxious", sadness: "sad", anger: "angry", shame: "ashamed",
+    rumination: "caught in replaying thoughts", avoidance: "pulled to avoid things",
+    calm: "restless", connection: "alone", hope: "discouraged",
+  };
+  const FEEL_HIGH = { calm: "calm", connection: "connected", hope: "hopeful" };
+  // How strongly each mover is felt: hard/process by value, grounding by how far below neutral.
+  function felt(e) {
+    return NAMES.map((n, j) => ({ n, x: isGround[j] ? (e[j] <= 0.4 ? (0.5 - e[j]) / 0.5 : 0) : (e[j] >= ACTIVE ? e[j] : 0) }))
+      .filter(f => f.x > 0).sort((p, q) => q.x - p.x || idx[p.n] - idx[q.n]).slice(0, 3);
+  }
+  function feelingLine(m) {
+    const f = felt(m.e);
+    if (f.length) return `You may be feeling ${listJoin(f.map(x => `${band(x.x)} ${FEEL[x.n]}`))}.`;
+    const high = GROUND.filter(n => m.e[idx[n]] >= 0.65).map(n => FEEL_HIGH[n]);
+    return high.length ? `You may be feeling ${listJoin(high)}.` : "Nothing strong stands out right now; you may be feeling fairly even.";
   }
 
-  function reading(state, m) {
-    const parts = [];
-    const L = m.loops[0];
-    if (L) parts.push(`The strongest loop is ${label(L.a)} \u00D7 ${label(L.b)}: each one feeds the other${L.unstable ? ", and the loop can grow" : ""}.`);
-    const hd = m.hidden[0];
-    if (hd) parts.push(`Left alone, ${label(hd.name)} could rise from ${f2(hd.from)} to ${f2(hd.to)} in ${FIXED.k} steps${hd.via ? ` (via ${label(hd.via)})` : ""}.`);
-    if (m.lambda !== null) parts.push(m.lambda > 0 ? "The mix is unstable (small changes grow), so the step is kept small." : "The active movers settle on their own over time.");
-    const low = GROUND.filter(n => state.e[idx[n]] <= 0.3);
-    if (low.length) parts.push(`${low.map(n => n[0].toUpperCase() + n.slice(1)).join(" and ")} ${low.length > 1 ? "are" : "is"} low.`);
-    if (!parts.length) parts.push(m.d < FIXED.eps ? "You're close to home right now." : "Nothing strong is moving; a quiet moment.");
-    return parts.join(" ");
+  // The relationships between the mental structures, read from W.
+  const NOUN = { fear: "fear", sadness: "sadness", anger: "anger", shame: "shame", rumination: "the replaying", avoidance: "avoiding", calm: "calm", connection: "connection", hope: "hope" };
+  const EFFECT = {
+    "sadness>rumination": "it starts the replaying loop", "rumination>sadness": "it keeps the sadness going",
+    "fear>avoidance": "it makes you want to avoid things", "avoidance>fear": "it keeps the fear alive",
+    "shame>avoidance": "it makes you want to hide", "avoidance>sadness": "it can leave you sadder",
+    "shame>sadness": "it can turn into sadness", "rumination>shame": "it can deepen the shame",
+    "anger>rumination": "it keeps the scene replaying", "rumination>anger": "it keeps the anger hot",
+    "rumination>fear": "it feeds worry", "fear>anger": "it can come out as anger",
+    "fear>calm": "it takes away your calm", "sadness>hope": "it dims your hope",
+    "shame>connection": "it pulls you away from people", "avoidance>connection": "it can cut you off from people",
+  };
+  const SOFTENER = { calm: "slowing down", connection: "connection", hope: "hope" };
+  const LOW_LINK = {
+    connection: "When you feel alone, shame and sadness grow more easily; reaching toward one person is what softens it.",
+    calm: "When you're restless, fear and anger flare up more easily; slowing your breath is what softens it.",
+    hope: "When hope runs low, sadness and avoiding grow more easily; one small plan is what softens it.",
+  };
+  const CREEP = { fear: "worry", sadness: "sadness", anger: "anger", shame: "shame", rumination: "replaying thoughts", avoidance: "the urge to avoid things" };
+  // The strongest effect of the top mover, weighted by how present its target is.
+  function strongestLink(m, W) {
+    const t = idx[m.top];
+    let best = null;
+    NAMES.forEach((n, j) => {
+      const w = W[t][j];
+      if (!EFFECT[`${m.top}>${n}`] || !w) return;
+      const presence = isGround[j] ? Math.max(0, m.h[j] - m.e[j]) : m.e[j];
+      const score = Math.abs(w) * (presence + 0.01);
+      if (!best || score > best.score) best = { to: n, w, score };
+    });
+    return best;
   }
-
-  function card(state, m, opts = {}) {
-    const f = m.focus, key = f.kind === "strongest" ? f.name : "none";
-    const read = m.read;
-    // The thought's own reframe when it has a pattern or a big word; otherwise the top mover's.
-    const own = read && read.reframes && (read.patterns.length || /^"/.test(read.reframes[0] || ""));
-    const reframe = (own && read.reframes[0]) || REFRAME[key] || REFRAME.none;
-    const test = (own && read.question) || TEST[key] || TEST.none;
-    const skill = f.name ? SKILL[f.name] : "Keep going: notice one good thing and stay with it for a breath.";
-    const id = m.ideal;
-    const out = {
-      movers: shown(state),
-      reading: reading(state, m),
-      reframe, test, skill,
-      step: `e\u2032 = e + ${f2(id.a)}\u00B7(h \u2212 e) + ${f2(id.b)}\u00B7s(e): d ${f2(id.d)} \u2192 ${f2(id.dNext)}`,
-      recovery: `${recText(m.recovery)} to d < ${f2(FIXED.eps)} (model estimate)`,
-      faith: opts.faith ? FAITH[f.kind === "strongest" ? f.name : "none"] || FAITH.none : null,
-    };
+  function connectLines(state, m) {
+    const W = weights(state.w), out = [];
+    if (m.top) {
+      const L = strongestLink(m, W);
+      const soft = m.stabilizer ? `${SOFTENER[m.stabilizer]} is what softens it` : "one small step is what softens it";
+      out.push(L ? `When ${NOUN[m.top]} grows, ${EFFECT[`${m.top}>${L.to}`]}; ${soft}.` : `${cap(NOUN[m.top])} is the loudest part right now; ${soft}.`);
+      const loop = m.loops[0];
+      if (loop && ![loop.a, loop.b].every(x => x === m.top || (L && x === L.to))) out.push(`${cap(NOUN[loop.a])} and ${NOUN[loop.b]} are feeding each other.`);
+    } else if (m.stabilizer && LOW_LINK[m.stabilizer]) out.push(LOW_LINK[m.stabilizer]);
+    if (m.lambda !== null) out.push(m.unstable ? "These feelings are feeding each other right now, so go gently." : "These feelings tend to ease on their own.");
+    if (m.hidden[0]) out.push(`If this stays unspoken, ${CREEP[m.hidden[0].name]} may creep in.`);
+    if (!out.length) out.push("Nothing is pulling hard on anything else right now.");
     return out;
   }
 
-  // Plain text lines (for copy and for tests).
+  // Affirmations: true, grounded first-person sentences (not promises).
+  const AFFIRM = {
+    connection: ["I am worth reaching out to.", "I can let one person in a little.", "Feeling alone right now doesn't mean I am alone for good.", "I belong with people, even on hard days."],
+    calm: ["I can slow down; this moment will pass.", "My breath is something I can steady.", "I can take this one breath at a time.", "I don't have to solve everything right now."],
+    hope: ["Small steps still count.", "I can plan one small thing for tomorrow.", "Things have changed before, and they can change again.", "I don't need to see the whole road to take one step."],
+    shame: ["I made mistakes; I am not a mistake.", "I can be as kind to myself as I would be to a friend.", "A hard moment does not decide who I am.", "I can own what I did without hating who I am."],
+    anger: ["My anger shows what matters; I choose how to act.", "I can pause before I answer.", "I can feel angry and still be fair.", "I can care about this without letting it drive me."],
+    fear: ["I can feel afraid and still take one safe step.", "A worry is a guess, not a fact.", "I can notice what is actually here right now.", "I have gotten through hard moments before."],
+    rumination: ["I can set this thought down for now.", "Going over it again isn't the same as solving it.", "I can come back to this later, at a time I choose.", "I can turn toward what's in front of me."],
+    avoidance: ["I can let this feeling be here without obeying it.", "I can take one small step before I feel ready.", "I can face a small piece of this.", "Starting small is still starting."],
+    sadness: ["It's okay to feel this; I'm not alone in it.", "This heaviness is real, and it can change.", "I can be gentle with myself today.", "Sadness can sit with me while I do one small thing."],
+  };
+  const FAITH_AFFIRM = {
+    anger: ["God can give me patience for the next moment.", "I can bring this anger to God before I act."],
+    shame: ["I am held by mercy, not measured by this moment.", "God's mercy is bigger than my mistake."],
+    fear: ["I can trust God with the next hour.", "I am not facing this alone; God is with me."],
+    sadness: ["My hope rests in God, even when I feel low.", "God is near to the brokenhearted, and near to me."],
+    rumination: ["I can leave this in God's hands for now.", "I don't have to carry every thought; I can let go and trust."],
+    avoidance: ["God can give me courage for one small step.", "I can ask for courage and take the next step."],
+    calm: ["God's peace can meet me in this breath.", "I can rest in God for one quiet moment."],
+    connection: ["I am known and loved by God, and I can reach out to others.", "God made me for connection; I can reach out today."],
+    hope: ["God is not finished with my story.", "My hope can rest in God, one day at a time."],
+  };
+  const pickN = (list, k, rand) => { const a = list.slice(), out = []; while (out.length < k && a.length) out.push(a.splice(Math.floor(rand() * a.length), 1)[0]); return out; };
+  // The mover that moves most toward home gives two; the stabilizer gives one; faith adds one.
+  function affirmations(m, opts = {}) {
+    const rand = S.parts.rng(Number.isFinite(opts.seed) ? opts.seed : 1);
+    const main = m.mover || m.stabilizer || "calm";
+    const out = pickN(AFFIRM[main], 2, rand);
+    const stab = m.stabilizer;
+    if (stab && stab !== main) out.push(...pickN(AFFIRM[stab], 1, rand));
+    if (opts.faith) out.push(...pickN(FAITH_AFFIRM[main], 1, rand));
+    return out;
+  }
+  function progressLine(m) {
+    const parts = [];
+    const p = m.baseline;
+    if (p.dPrev === null) parts.push("This is your first check-in here, so there's nothing to compare yet.");
+    else {
+      const diff = p.dPrev - m.d;
+      parts.push(diff > 0.15 ? "You're closer to steady than your recent days."
+        : diff > 0.03 ? "You're a little closer to steady than your recent days."
+        : diff >= -0.03 ? "You're about where you've been lately."
+        : diff >= -0.15 ? "You're a little further from steady than lately; one small step is enough."
+        : "Today is heavier than your recent days; go gently, and one small step is enough.");
+    }
+    const r = m.recovery;
+    if (r) {
+      if (m.d < FIXED.eps) parts.push("You're close to steady right now.");
+      else if (!r.reached) parts.push("This may take time, and you don't have to do it alone.");
+      else if (r.steps <= 2) parts.push("You're near steady ground.");
+      else if (r.steps <= 5) parts.push("A few small steps could bring you close to steady.");
+      else if (r.steps <= 12) parts.push("With small steps over the coming days, this can ease.");
+      else parts.push("This may take a while, and small steps still count.");
+    }
+    return parts.join(" ");
+  }
+  // The default card: words only.
+  function card(state, m, opts = {}) {
+    return {
+      feeling: feelingLine(m),
+      connect: connectLines(state, m),
+      affirmations: affirmations(m, opts),
+      step: m.action,
+      progress: progressLine(m),
+    };
+  }
+  // Plain text of the card (copy and tests).
   function lines(state, m, opts = {}) {
-    const c = card(state, m, opts), L = [];
-    L.push(`movers: ${c.movers.length ? c.movers.map(x => `${x.label} ${f2(x.v)}${x.group === "grounding" && x.v < 0.5 ? " (low)" : ""}`).join(", ") : "nothing strong"}`);
-    L.push(`d = \u2016e \u2212 h\u2016 = ${f2(m.d)}${m.lambda !== null ? `, \u03BB = ${sgn(m.lambda)} (${m.lambda > 0 ? "unstable" : "settles"})` : ""}`);
-    L.push(`reading: ${c.reading}`);
-    L.push(`reframe: ${c.reframe}`);
-    L.push(`test: ${c.test}`);
-    L.push(`next skill: ${c.skill}`);
-    L.push(`ideal step: ${c.step}`);
-    L.push(`recovery: ${c.recovery}`);
-    if (c.faith) L.push(c.faith);
+    const c = card(state, m, opts);
+    return [
+      `What you may be feeling: ${c.feeling.replace(/^You may be feeling /, "")}`,
+      `How they connect: ${c.connect.join(" ")}`,
+      "Affirmations:", ...c.affirmations.map(x => `  ${x}`),
+      `One step: ${c.step}`,
+      c.progress,
+    ];
+  }
+
+  // ---------- Show the math (off by default) ----------
+  function shown(e) {
+    return NAMES.map((n, i) => ({ name: n, label: label(n), v: e[i], group: HARD.includes(n) ? "hard" : GROUND.includes(n) ? "grounding" : "process" }))
+      .filter(x => (x.group === "grounding" ? Math.abs(x.v - 0.5) >= 0.1 : x.v >= ACTIVE));
+  }
+  function mathLines(state, m) {
+    const V = state.vars, L = [];
+    const mv = shown(m.e);
+    L.push(`e: ${mv.length ? mv.map(x => `${x.label} ${f2(x.v)}`).join(", ") : "at rest"}`);
+    L.push("step = act(clip01(e + a(e)\u00B7(h \u2212 e) + b\u00B7s(e)))");
+    const raw = V.aBase + FIXED.kd * m.d;
+    L.push(`a(e) = min(a_max, a0 + k\u2016e \u2212 h\u2016) = min(${f2(V.aMax)}, ${f2(V.aBase)} + ${f2(FIXED.kd)}\u00B7${f2(m.d)}) = ${f2(Math.min(V.aMax, raw))}${m.unstable ? `, capped at a_cap = ${f2(FIXED.aCap)} (\u03BB > 0) \u2192 ${f2(m.a)}` : ""}`);
+    L.push(`b = ${f2(m.b)}${m.unstable ? " (b_U, \u03BB > 0)" : ""}`);
+    L.push(`d = \u2016e \u2212 h\u2016 = ${f2(m.d)} \u2192 ${f2(m.dNext)} after one step`);
+    L.push(`\u03BB = \u03C1(W_active) \u2212 d = ${m.lambda === null ? "none (nothing active)" : `${sgn(m.lambda)} (${m.unstable ? "unstable" : "settles"})`}`);
+    if (m.loops[0]) L.push(`strongest loop: ${label(m.loops[0].a)} \u00D7 ${label(m.loops[0].b)} (gain ${f2(m.loops[0].gain)})`);
+    if (m.hidden[0]) L.push(`hidden rise: ${label(m.hidden[0].name)} ${f2(m.hidden[0].from)} \u2192 ${f2(m.hidden[0].to)} in ${FIXED.k} steps${m.hidden[0].via ? ` via ${label(m.hidden[0].via)}` : ""}`);
+    L.push(`act(): ${m.mover ? `${label(m.mover)} moves most toward home` : "no move"}; stabilizer ${m.stabilizer || "none"}`);
+    L.push(`B = 0.8\u00B7B\u208B\u2081 + 0.2\u00B7e: \u2016B \u2212 h\u2016 = ${f2(m.baseline.dB)}${m.baseline.dPrev === null ? "" : ` (yesterday's B: ${f2(m.baseline.dPrev)})`}`);
+    if (m.recovery) L.push(`recovery: ${recText(m.recovery)} until d < ${f2(FIXED.eps)} (model estimate)`);
     return L;
   }
 
-  // ---------- Story (creature story driven by the ideal step) ----------
+  // ---------- Story (creature story driven by the master step) ----------
   const ARC_FOR = { shame: "labeling", sadness: "hopelessness", fear: "catastrophizing", anger: "catastrophizing", rumination: "allOrNothing", avoidance: "fortuneTelling" };
   const STEP_FOR = { calm: SKILL.calm.split(": ")[1].replace(/\.$/, "").toLowerCase(), connection: "send one short message to someone who is kind", hope: "pick one small thing for tomorrow and write it down" };
+  const LOOSEN = {
+    anger: ["the anger loosened its grip", "the anger loosened its grip a little"],
+    shame: ["the shame grew quieter", "the shame grew a little quieter"],
+    fear: ["the fear settled", "the fear settled a little"],
+    sadness: ["the sadness grew lighter", "the sadness grew a little lighter"],
+    rumination: ["the replaying slowed", "the replaying slowed a little"],
+    avoidance: ["the urge to look away eased", "the urge to look away eased a little"],
+    calm: ["their breath slowed", "their breath slowed a little"],
+    connection: ["they felt less alone", "they felt a little less alone"],
+    hope: ["hope came back", "a little hope came back"],
+  };
+  function storyFocus(state, m) { return focus({ e: m.e, home: state.home }).name || m.top || "calm"; }
   function story(state, m, opts = {}) {
-    const id = m.ideal;
-    if (m.d < 0.005) return null;
-    // Strongest hard/process mover, else the grounding mover with the biggest gap.
-    const top = focus(state).name || id.top || "calm";
+    if (!m || m.crisis || m.d < 0.005) return null;
+    const top = storyFocus(state, m);
     const i = idx[top];
     const arc = HARD.concat(PROCESS).includes(top) ? ARC_FOR[top] : "none";
-    const stab = id.stabilizer;
+    const stab = m.stabilizer;
     const guide = stab === "connection" ? "Tidelyn" : stab === "calm" ? "Mistfawn" : stab === "hope" ? "Hivewright" : S.PATTERN_CREATURE[arc] || S.PATTERN_CREATURE.none;
     // The opening follows the mover; the text's own pattern is used only when it fits that mover.
     const read = { patterns: (m.read && m.read.patterns) || [], reframes: [REFRAME[top] || REFRAME.none] };
     const base = S.tell({ read, mover: top, character: guide, step: STEP_FOR[stab] || STEP_FOR.calm, seed: opts.seed || 1, faith: !!opts.faith });
     if (base.crisis) return null;
-    const from = state.e[i], to = id.next[i];
-    const map = `They kept a small map of feelings, and on it ${label(top)} sat at ${f2(from)}, the farthest point from home.`;
-    const helper = stab ? `They knew ${stab} could pull on it, so the plan stayed small and real.` : "The plan stayed small and real.";
-    const landing = `On the map, ${label(top)} moved from ${f2(from)} to ${f2(to)}, and the way home grew ${f2(Math.max(0, id.d - id.dNext))} shorter. Not all the way. Just closer.`;
+    const from = m.e[i], to = m.next[i];
+    const moved = Math.abs(from - state.home[i]) - Math.abs(to - state.home[i]);
+    const helper = stab && stab !== top ? `They knew ${SOFTENER[stab]} could soften it, so the plan stayed small and real.` : "The plan stayed small and real.";
+    const loosen = `${cap(LOOSEN[top][moved >= 0.15 ? 0 : 1])}. Not all the way. Just closer.`;
+    const aff = affirmations(m, { seed: opts.seed || 1 })[0];
+    const keep = `They kept one sentence close: \u201C${aff}\u201D`;
     const b = base.sentences;
-    const sentences = [b[0], map, helper, ...b.slice(1, -1), landing, b[b.length - 1]];
-    return { guide, tag: base.tag, focus: top, arc, opening: base.opening, openingFrom: base.openingFrom, from, to, text: sentences.join(" "), next: id.next };
+    const sentences = [b[0], helper, ...b.slice(1, -1), loosen, keep, b[b.length - 1]];
+    return { guide, tag: base.tag, focus: top, arc, opening: base.opening, openingFrom: base.openingFrom, from, to, affirmation: aff, text: sentences.join(" "), next: m.next };
   }
-
-  function acceptStep(state, ts = Date.now()) {
-    const m = metrics(state);
-    const n = state.cps.filter(c => /^step-\d+$/.test(c.label)).length + 1;
-    return refreshIdeal(addCheckpoint({ ...state, e: m.ideal.next.slice() }, `step-${n}`, ts));
-  }
-  function refreshIdeal(state) {
-    const m = metrics(state);
-    return { ...state, ideal: { a: m.ideal.a, b: m.ideal.b } };
+  // The path game for this moment: the same master output picks scene 1 and the closing affirmation.
+  function game(state, m, opts = {}) {
+    if (!m || m.crisis) return { crisis: true };
+    const G2 = typeof Games !== "undefined" ? Games : require("./games.js");
+    const top = storyFocus(state, m);
+    const arc = HARD.concat(PROCESS).includes(top) ? ARC_FOR[top] : "none";
+    return G2.make({
+      type: "path", thought: opts.thought || G2.SAMPLES[arc] || G2.SAMPLES.none, read: m.read || undefined, mover: top,
+      reframe: REFRAME[top] || REFRAME.none, faith: !!opts.faith, seed: opts.seed || 1,
+      affirmation: affirmations(m, { seed: opts.seed || 1 })[0],
+    });
   }
 
   // ---------- The code language (mf 2) ----------
@@ -592,7 +778,7 @@ const Model = (function () {
     state.cps.forEach(c => out.push(join([`cp ${c.n} ${c.t} label=${c.label}`, vecCode(c.e), `lambda=${num(c.lambda)}`])));
     if (state.ideal) {
       out.push(`ideal a=${num(state.ideal.a)} b=${num(state.ideal.b)}`);
-      out.push(`eq e' = e + ${num(state.ideal.a)}*(h - e) + ${num(state.ideal.b)}*s(e)`);
+      out.push(`eq step = act(clip01(e + ${num(state.ideal.a)}*(h - e) + ${num(state.ideal.b)}*s(e)))`);
     }
     return out.join("\n") + "\n";
   }
@@ -767,10 +953,15 @@ const Model = (function () {
   }
 
   return {
-    VERSION, NAMES, HARD, GROUND, PROCESS, LABEL, HOME, REST, FIXED, VAR_SPEC, SPEC, VAR_KEYS, EDGES, MAIN_PAIRS, SKILL, REFRAME, TEST, FAITH, MAX_SIM,
-    defaultState, defaultVars, validateVars, weights, defaultWeight, setWeight, fromText, combine, distance, step, lambda, loops, hidden, ideal,
-    focus, metrics, shown, card, lines, reading, story, acceptStep, refreshIdeal, addCheckpoint, restore, recordDay, baseline, baselineSeries, week, weekLines,
-    simulate, recovery, recText, serialize, parse, mapOld, stamp, homeVec, fromObj, label,
+    VERSION, NAMES, HARD, GROUND, PROCESS, LABEL, HOME, REST, FIXED, VAR_SPEC, SPEC, VAR_KEYS, EDGES, MAIN_PAIRS, SKILL, REFRAME, TEST, MAX_SIM,
+    AFFIRM, FAITH_AFFIRM, FEEL, EFFECT, LOW_LINK, CREEP,
+    master, calls,
+    defaultState, defaultVars, validateVars, weights, defaultWeight, setWeight, fromText, combine, distance,
+    focus, metrics, card, lines, mathLines, shown, band, felt, feelingLine, connectLines, affirmations, progressLine,
+    story, game, acceptStep, refreshIdeal, addCheckpoint, restore, recordDay, baseline, baselineSeries, week, weekLines, weekMath,
+    recovery, recText, serialize, parse, mapOld, stamp, homeVec, fromObj, label,
+    // Building blocks master uses (exported for tests only; features call master).
+    _parts: { step, lambda, hidden, loops, sVec, act, ema },
   };
 })();
 

@@ -10,13 +10,13 @@ function test(name, fn) {
   catch (err) { console.error("FAIL -", name); console.error(err); process.exitCode = 1; }
 }
 const I = n => M.NAMES.indexOf(n);
-const live = text => {
-  const s = M.defaultState();
-  const r = M.fromText(text);
-  if (r.crisis) return { crisis: true };
-  const state = { ...s, e: M.combine(s.e, r.w) };
-  return { state, m: M.metrics(state, { notes: r.notes, read: r.read }) };
+// Everything goes through the master function.
+const live = (text, base = M.defaultState()) => {
+  const m = M.master(text, base);
+  if (m.crisis) return { crisis: true };
+  return { state: { ...base, e: m.e }, m, base };
 };
+const DIGIT = /[0-9]/;
 const S1 = "I'm so angry and jealous of my brother, I feel far from God and lazy";
 const S2 = "I'm ashamed and so alone, nobody cares";
 const CRISIS = ["I want to end it all", "I want to die", "I might hurt myself"];
@@ -53,7 +53,7 @@ test("lexicon: neutral text moves nothing; empty text is empty", () => {
   const r = M.fromText("");
   assert.equal(r.empty, true);
   assert.deepEqual(M.combine(M.defaultState().e, r.w), M.defaultState().e);
-  assert.equal(M.shown(live("I had toast for breakfast").state).length, 0);
+  assert.equal(M.shown(live("I had toast for breakfast").state.e).length, 0);
 });
 
 // ---------- mapping (old concepts -> nine movers) ----------
@@ -87,46 +87,122 @@ test("mapping: the old words in text land on the nine movers (envy, lazy, far fr
 });
 
 // ---------- dynamics ----------
-test("dynamics: every step stays inside [0,1] from random starts", () => {
+test("dynamics (the left-alone projection inside master): every step stays inside [0,1]", () => {
   let seed = 7;
   const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   const W = M.weights();
   for (let k = 0; k < 200; k++) {
     let e = M.NAMES.map(() => rnd());
     for (let t = 0; t < 30; t++) {
-      e = M.step(e, W, M.FIXED.dt, M.defaultVars().d);
+      e = M._parts.step(e, W, M.FIXED.dt, M.defaultVars().d);
       e.forEach(x => assert.ok(x >= 0 && x <= 1 && Number.isFinite(x)));
     }
   }
 });
 test("dynamics: grounding at the neutral 0.5 does not press on anything; at rest nothing moves", () => {
   const e = M.defaultState().e;
-  assert.deepEqual(M.step(e, M.weights(), M.FIXED.dt, 0.3), e);
+  assert.deepEqual(M._parts.step(e, M.weights(), M.FIXED.dt, 0.3), e);
 });
 test("λ: null when nothing is active; equals ρ − d on the active block", () => {
-  assert.equal(M.lambda(M.defaultState().e, M.weights(), 0.3), null);
+  const L = M._parts.lambda;
+  assert.equal(L(M.defaultState().e, M.weights(), 0.3), null);
   const e = M.defaultState().e.slice();
   e[I("sadness")] = 0.7; e[I("rumination")] = 0.7;
-  const lam = M.lambda(e, M.weights(), 0.3);
+  const lam = L(e, M.weights(), 0.3);
   assert.ok(Math.abs(lam - (0.4 - 0.3)) < 1e-3, `sadness<->rumination 0.4/0.4 gives ρ = 0.4, λ = 0.1 (got ${lam})`);
-  assert.ok(M.lambda(e, M.weights(), 0.6) < 0, "more decay settles");
+  assert.ok(L(e, M.weights(), 0.6) < 0, "more decay settles");
 });
-test("ideal step reduces distance to home and never passes it", () => {
-  [S1, S2, "I'm terrified it will all go wrong", "I keep replaying what I said"].forEach(t => {
-    const { state, m } = live(t);
-    assert.ok(m.ideal.dNext < m.ideal.d, t);
-    m.ideal.next.forEach((x, i) => {
-      const lo = Math.min(state.e[i], state.home[i]) - 1e-9, hi = Math.max(state.e[i], state.home[i]) + 1e-9;
-      assert.ok(x >= lo && x <= hi, `${M.NAMES[i]} stays between e and h`);
-    });
-  });
+
+// ---------- the master function ----------
+// step = act(clip01(e + a(e)(h − e) + b s(e))), a(e) = min(a_max, a0 + k‖e − h‖), capped at a_cap when λ > 0.
+function formula(state, text) {
+  const e = M.combine(state.e, M.fromText(text).w);
+  const h = state.home, W = M.weights(state.w), V = state.vars;
+  const dist = Math.hypot(...e.map((x, i) => x - h[i]));
+  const lam = M._parts.lambda(e, W, V.d);
+  let a = Math.min(V.aMax, V.aBase + M.FIXED.kd * dist);
+  if (lam !== null && lam > 0) a = Math.min(a, M.FIXED.aCap);
+  const b = lam !== null && lam > 0 ? M.FIXED.bU : V.b;
+  const s = M.NAMES.map((n, j) => (M.GROUND.includes(n) || e[j] <= h[j] ? 0 : e[j] * M.GROUND.reduce((acc, g) => acc + Math.min(0, W[I(g)][j]) * h[I(g)], 0)));
+  const next = e.map((x, j) => Math.round(Math.min(1, Math.max(0, x + a * (h[j] - x) + b * s[j])) * 100) / 100);
+  return { e, a, b, s, next, d: dist };
+}
+test("master: equals the formula for many thoughts and states", () => {
+  const unstable = M.defaultState();
+  unstable.e[I("sadness")] = 0.8; unstable.e[I("rumination")] = 0.8;
+  const tuned = { ...M.setWeight(M.defaultState(), "calm", "fear", -0.8), vars: { ...M.defaultVars(), aBase: 0.35, aMax: 0.4, b: 0.3 } };
+  const texts = [S1, S2, "", "I'm terrified it will all go wrong", "I keep replaying what I said", "I feel calm and close to my friends"];
+  [M.defaultState(), unstable, tuned].forEach(st => texts.forEach(t => {
+    const m = M.master(t, st), f = formula(st, t);
+    assert.deepEqual(m.e, f.e);
+    assert.equal(m.a, f.a);
+    assert.equal(m.b, f.b);
+    assert.deepEqual(m.s, f.s);
+    assert.deepEqual(m.next, f.next);
+    assert.equal(m.d, Math.round(f.d * 100) / 100);
+    assert.equal(m.action, M.SKILL[m.mover] || m.action, "act() turns the step into the mover's action");
+  }));
 });
-test("ideal step stays small when the mix is unstable (λ > 0)", () => {
+test("master: a(e) grows with distance and is capped at a_cap when λ > 0", () => {
+  const near = M.master("I'm a bit worried", M.defaultState()), far = M.master(S1, M.defaultState());
+  assert.ok(far.a >= near.a);
+  assert.ok(far.a <= M.defaultVars().aMax);
   const s = M.defaultState();
   s.e[I("sadness")] = 0.8; s.e[I("rumination")] = 0.8;
-  const m = M.metrics(s);
-  assert.ok(m.lambda > 0);
-  assert.ok(m.ideal.a <= M.FIXED.aCap + 1e-9);
+  const m = M.master("", s);
+  assert.ok(m.lambda > 0 && m.unstable);
+  assert.ok(m.a <= M.FIXED.aCap + 1e-12);
+  assert.equal(m.b, M.FIXED.bU);
+});
+test("master: the step reduces distance to home and stays in [0,1]", () => {
+  [S1, S2, "I'm terrified it will all go wrong", "I keep replaying what I said"].forEach(t => {
+    const { m } = live(t);
+    assert.ok(m.dNext < m.d, t);
+    m.next.forEach(x => assert.ok(x >= 0 && x <= 1));
+  });
+});
+test("master: baseline is B_t = 0.8·B_{t−1} + 0.2·e_t", () => {
+  const s = { ...M.defaultState(), days: [{ day: "2026-10-10", e: M.defaultState().e.map(() => 0.2) }, { day: "2026-10-11", e: M.defaultState().e.map(() => 0.4) }] };
+  const m = M.master(S2, s, { now: Date.parse("2026-10-17T10:00:00") });
+  const Bprev = s.days[0].e.map((x, i) => 0.8 * x + 0.2 * s.days[1].e[i]);
+  assert.deepEqual(m.B, Bprev.map((x, i) => Math.round((0.8 * x + 0.2 * m.e[i]) * 100) / 100));
+  assert.ok(m.baseline.dPrev !== null);
+});
+test("master: crisis text returns only { crisis: true }", () => {
+  ["I want to end it all", "I want to die", `${S1}. I might hurt myself`].forEach(t => assert.deepEqual(M.master(t, M.defaultState()), { crisis: true }));
+});
+test("routing: every feature calls master (live, story, game, checkpoint, accept, recovery, baseline, import, restore)", () => {
+  const count = fn => { const before = M.calls.master; fn(); return M.calls.master - before; };
+  const { state, m } = live(S1);
+  assert.ok(count(() => M.master(S1, M.defaultState(), { sim: false })) === 1, "live output: one master call");
+  assert.ok(count(() => M.master(S1, M.defaultState())) >= 1, "live output with recovery");
+  assert.ok(count(() => M.story(state, M.metrics(state), { seed: 1 })) >= 1, "story");
+  assert.deepEqual(M.story(state, m, { seed: 1 }).next, m.next, "the story is driven by the master step");
+  assert.ok(count(() => M.game(state, M.metrics(state), { seed: 1 })) >= 1, "path game");
+  assert.ok(count(() => M.addCheckpoint(state, "start", Date.parse("2026-10-16T09:00:00"))) >= 1, "checkpoint");
+  assert.ok(count(() => M.acceptStep(state, Date.parse("2026-10-16T09:00:00"))) >= 1, "accept step");
+  const r = count(() => M.recovery(state));
+  assert.ok(r >= m.recovery.steps, "recovery repeats the master step");
+  assert.ok(count(() => M.baseline({ ...state, days: [{ day: "2026-10-10", e: state.e }] })) >= 1, "baseline");
+  const code = M.serialize(M.addCheckpoint(state, "start", Date.parse("2026-10-16T09:00:00")));
+  assert.ok(count(() => M.refreshIdeal(M.parse(code).state)) >= 1, "import restore");
+  assert.ok(count(() => M.restore(M.parse(code).state, 1)) >= 1, "checkpoint restore");
+  assert.ok(count(() => M.parse("mf 1\ne sadness=0.60")) >= 1, "mf 1 import");
+});
+test("routing: accept step lands exactly on master's next; recovery counts master steps", () => {
+  const { state } = live(S2);
+  const m = M.master("", state);
+  const after = M.acceptStep(state, Date.parse("2026-10-16T09:00:00"));
+  assert.deepEqual(after.e, m.next);
+  let cur = state, n = 0;
+  while (M.distance(cur.e, cur.home) >= M.FIXED.eps && n < 200) { cur = { ...cur, e: M.master("", cur, { sim: false }).next }; n++; }
+  assert.equal(M.recovery(state).steps, n);
+});
+test("routing: no other code path steps e (the old ideal/simulate are gone)", () => {
+  ["ideal", "simulate", "step", "lambda", "hidden"].forEach(k => assert.equal(M[k], undefined, k));
+  const src = require("node:fs").readFileSync(require("node:path").join(__dirname, "../js/ui.js"), "utf8");
+  assert.ok(!/\bcombine\(|\bfromText\([^)]*\)\.w|_parts/.test(src), "the UI does not compute steps itself");
+  assert.ok(/Model\.master\(/.test(src));
 });
 test("hidden: a mover that is quiet now can be shown rising", () => {
   const { m } = live(S2);
@@ -156,41 +232,136 @@ test("variables: validated and kept in range; Reset defaults are the spec", () =
   assert.equal(M.MAIN_PAIRS.length, 7);
 });
 
-// ---------- the card ----------
-test("card: movers, reading, reframe + test, skill, step, recovery", () => {
-  [S1, S2].forEach(t => {
-    const { state, m } = live(t);
-    const c = M.card(state, m);
-    assert.ok(c.movers.length >= 2);
-    ["reading", "reframe", "test", "skill", "step", "recovery"].forEach(k => assert.ok(c[k] && c[k].length > 5, k));
-    assert.ok(c.test.endsWith("?"));
-    assert.match(c.step, /^e′ = e \+ [\d.]+·\(h − e\) \+ [\d.]+·s\(e\): d [\d.]+ → [\d.]+$/);
-  });
-  assert.match(M.card(live(S2).state, live(S2).m).reframe, /^"Nobody"/);
+// ---------- the words-first card ----------
+test("band words: < 0.3 a little, 0.3–0.6 quite, > 0.6 strongly", () => {
+  assert.equal(M.band(0.1), "a little");
+  assert.equal(M.band(0.29), "a little");
+  assert.equal(M.band(0.3), "quite");
+  assert.equal(M.band(0.6), "quite");
+  assert.equal(M.band(0.61), "strongly");
+  const s = M.defaultState();
+  s.e[I("anger")] = 0.86; s.e[I("sadness")] = 0.45; s.e[I("fear")] = 0.15;
+  assert.equal(M.feelingLine(M.master("", s)), "You may be feeling strongly angry, quite sad, and a little anxious.");
+  const low = M.defaultState(); low.e[I("connection")] = 0.04;
+  assert.equal(M.feelingLine(M.master("", low)), "You may be feeling strongly alone.");
+  assert.match(M.feelingLine(M.master("", M.defaultState())), /Nothing strong/);
 });
-test("faith changes wording only, never the numbers", () => {
+test("feelings list at most three, strongest first", () => {
+  const s = M.defaultState();
+  ["fear", "sadness", "anger", "shame", "rumination"].forEach((n, k) => { s.e[I(n)] = 0.3 + 0.1 * k; });
+  const f = M.felt(M.master("", s).e);
+  assert.deepEqual(f.map(x => x.n), ["rumination", "shame", "anger"]);
+});
+test("link sentences read the W relationships and the stabilizer", () => {
+  const { state, m } = live(S2);
+  const c = M.connectLines(state, m);
+  assert.equal(c[0], "When shame grows, it pulls you away from people; connection is what softens it.");
+  assert.ok(c.includes("These feelings tend to ease on their own."));
+  assert.ok(c.includes("If this stays unspoken, sadness may creep in."));
+  const a = live(S1);
+  assert.match(M.connectLines(a.state, a.m)[0], /^When anger grows, .+; slowing down is what softens it\.$/);
+  const u = M.defaultState();
+  u.e[I("sadness")] = 0.8; u.e[I("rumination")] = 0.8;
+  assert.ok(M.connectLines(u, M.master("", u)).includes("These feelings are feeding each other right now, so go gently."));
+  const low = M.defaultState(); low.e[I("connection")] = 0.1;
+  assert.equal(M.connectLines(low, M.master("", low))[0], M.LOW_LINK.connection);
+});
+test("affirmations: per mover, deterministic by seed, from the mover that moves most plus the stabilizer", () => {
+  M.NAMES.forEach(n => assert.ok(M.AFFIRM[n].length >= 3 && M.FAITH_AFFIRM[n].length >= 1, n));
+  ["anger", "shame", "fear", "sadness", "rumination", "avoidance", "calm", "connection", "hope"].forEach(n => {
+    const s = M.defaultState();
+    if (M.GROUND.includes(n)) s.e[I(n)] = 0.1; else s.e[I(n)] = 0.7;
+    const m = M.master("", s);
+    assert.equal(m.mover, n, `${n} moves most toward home`);
+    for (let seed = 1; seed <= 10; seed++) {
+      const a1 = M.affirmations(m, { seed }), a2 = M.affirmations(m, { seed });
+      assert.deepEqual(a1, a2, "same seed, same affirmations");
+      assert.ok(a1.length >= 2 && a1.length <= 3);
+      assert.ok(M.AFFIRM[n].includes(a1[0]) && M.AFFIRM[n].includes(a1[1]) && a1[0] !== a1[1]);
+      if (m.stabilizer && m.stabilizer !== n) assert.ok(M.AFFIRM[m.stabilizer].includes(a1[2]));
+      a1.forEach(x => assert.ok(/^(I|I'm|It's|My|A|Small|Feeling|Going|Things|Sadness|Starting|This)\b/.test(x), `first person / grounded: ${x}`));
+    }
+    const seen = new Set();
+    for (let seed = 1; seed <= 20; seed++) seen.add(M.affirmations(m, { seed }).join("|"));
+    assert.ok(seen.size > 1, "seeds vary the choice");
+  });
+});
+test("affirmations avoid promises and toxic positivity", () => {
+  const all = [].concat(...Object.values(M.AFFIRM), ...Object.values(M.FAITH_AFFIRM));
+  all.forEach(x => assert.ok(!/\b(everything will be|always be fine|never feel|just be happy|perfect|good vibes)\b/i.test(x), x));
+});
+test("faith adds exactly one affirmation and changes nothing else", () => {
   [S1, S2, "I'm terrified", "I keep replaying it"].forEach(t => {
     const { state, m } = live(t);
-    const off = M.lines(state, m), on = M.lines(state, m, { faith: true });
-    assert.deepEqual(on.slice(0, off.length), off, "same lines with faith off");
-    assert.equal(on.length, off.length + 1, "one extra faith line");
-    assert.equal(M.serialize(state), M.serialize(state), "code unaffected");
+    const off = M.card(state, m, { seed: 3 }), on = M.card(state, m, { seed: 3, faith: true });
+    assert.equal(on.affirmations.length, off.affirmations.length + 1);
+    assert.deepEqual(on.affirmations.slice(0, -1), off.affirmations);
+    assert.ok(M.FAITH_AFFIRM[m.mover].includes(on.affirmations[on.affirmations.length - 1]));
+    ["feeling", "connect", "step", "progress"].forEach(k => assert.deepEqual(on[k], off[k]));
+    assert.deepEqual(M.mathLines(state, m), M.mathLines(state, m));
   });
-  const word = t => { const { state, m } = live(t); return M.card(state, m, { faith: true }).faith; };
-  assert.match(word("I'm furious"), /patience/i);
-  assert.match(word("I'm ashamed of myself"), /mercy/i);
-  assert.match(word("I'm terrified"), /trust/i);
-  assert.match(word("I feel so sad"), /hope/i);
-  assert.match(word("I keep replaying it over and over"), /humility|let go/i);
+  const fa = t => { const { state, m } = live(t); const c = M.card(state, m, { faith: true }); return c.affirmations[c.affirmations.length - 1]; };
+  assert.match(fa("I'm furious"), /patience|anger to God/i);
+  assert.match(fa("I'm ashamed of myself"), /mercy/i);
+  assert.match(fa("I'm terrified"), /trust|God is with me/i);
 });
-test("story: guided by the ideal step, uses the stabilizer's creature, and finishes", () => {
+test("default output has no digits (cards for many thoughts, faith on and off)", () => {
+  const texts = [S1, S2, "", "I'm terrified it will all go wrong", "I keep replaying what I said", "I feel calm", "It's hopeless", "I'm furious at my boss", "I keep putting it off"];
+  texts.forEach(t => [false, true].forEach(faith => {
+    const { state, m } = live(t);
+    const text = M.lines(state, m, { faith, seed: 2 }).join("\n");
+    assert.ok(!DIGIT.test(text), `digits in: ${text}`);
+  }));
+  const s = { ...live(S1).state, days: [{ day: "2026-10-10", e: M.defaultState().e }] };
+  assert.ok(!DIGIT.test(M.lines(s, M.master("", s)).join(" ")));
+  assert.ok(M.weekLines(s, Date.parse("2026-10-12T10:00:00")).every(l => !DIGIT.test(l)));
+});
+test("progress in words from the baseline and recovery", () => {
+  const { state, m } = live(S1);
+  assert.match(M.progressLine(m), /first check-in/);
+  const better = { ...state, days: [{ day: "2026-10-10", e: state.e }] };
+  const m2 = M.master("", { ...better, e: M.master("", better).next }, { now: Date.parse("2026-10-17T10:00:00") });
+  assert.match(M.progressLine(m2), /closer to steady than your recent days/);
+});
+test("Show the math: numbers and the master equation are there when asked", () => {
+  const { state, m } = live(S1);
+  const L = M.mathLines(state, m).join("\n");
+  assert.match(L, /step = act\(clip01\(e \+ a\(e\)·\(h − e\) \+ b·s\(e\)\)\)/);
+  assert.match(L, /a\(e\) = min\(a_max, a0 \+ k‖e − h‖\) = min\(0\.25, 0\.20 \+ 0\.05·1\.36\) = 0\.25/);
+  assert.match(L, /d = ‖e − h‖ = 1\.36 → /);
+  assert.match(L, /λ = /);
+  assert.match(L, /B = 0\.8·B₋₁ \+ 0\.2·e/);
+  assert.match(L, /recovery: ~\d+ steps/);
+});
+test("story: driven by the master step, words not numbers, ends with an affirmation and a question", () => {
   const a = live(S1), b = live(S2);
   const sa = M.story(a.state, a.m, { seed: 1 }), sb = M.story(b.state, b.m, { seed: 1 });
   assert.equal(sb.guide, "Tidelyn", "connection stabilizer -> Tidelyn");
-  assert.ok(sa.text.includes("moved from") && sa.to < sa.from);
+  assert.equal(sa.guide, "Mistfawn");
+  assert.ok(sa.to < sa.from);
+  assert.match(sa.text, /The anger loosened its grip/);
+  assert.match(sb.text, /The shame grew (a little )?quieter/);
+  for (let seed = 1; seed <= 20; seed++) for (const faith of [false, true]) [a, b].forEach(x => {
+    const st = M.story(x.state, x.m, { seed, faith });
+    assert.ok(!DIGIT.test(st.text), st.text);
+    assert.ok(!/on the map|sat at|moved from/i.test(st.text));
+    const sent = st.text.split(/(?<=[.!?”])\s+/);
+    assert.ok(sent[sent.length - 1].endsWith("?"));
+    assert.ok(sent[sent.length - 2].includes(`“${st.affirmation}”`), "affirmation just before the question");
+  });
   assert.ok(/God|pray|Lord/i.test(M.story(a.state, a.m, { seed: 1, faith: true }).text));
   const home = { ...M.defaultState(), e: M.defaultState().home.slice() };
   assert.equal(M.story(home, M.metrics(home)), null, "nothing to tell at home");
+});
+test("path game: scene one follows the mover and it ends with an affirmation plus the question", () => {
+  const { state, m } = live(S1);
+  const g = M.game(state, m, { seed: 1 });
+  assert.equal(g.opening, "anger");
+  const n = g.ending.length;
+  assert.ok(g.ending[n - 1].endsWith("?"));
+  assert.ok(M.AFFIRM[m.mover].some(x => g.ending[n - 2] === `“${x}”`));
+  assert.ok(!DIGIT.test(g.ending.join(" ") + g.scenes.map(sc => sc.text).join(" ")));
+  assert.deepEqual(M.game(state, { crisis: true }), { crisis: true });
 });
 
 // ---------- code language ----------
@@ -265,7 +436,7 @@ test("crisis: a crisis label inside code is refused", () => {
 });
 
 // ---------- one page ----------
-test("single page: index has no tools links; tools.html only redirects; the service worker is v12", () => {
+test("single page: index has no tools links; tools.html only redirects; the service worker is v13", () => {
   const root = path.join(__dirname, "..");
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const tools = fs.readFileSync(path.join(root, "tools.html"), "utf8");
@@ -274,7 +445,7 @@ test("single page: index has no tools links; tools.html only redirects; the serv
   assert.ok(/history\.replaceState/.test(index), "old ?view/?chip links are stripped");
   assert.ok(/location\.replace\("\.\/"\)/.test(tools) && /http-equiv="refresh"/.test(tools));
   assert.ok(!/<textarea|<script src/.test(tools), "tools.html is only a redirect");
-  assert.match(sw, /mindframe-shell-v12/);
+  assert.match(sw, /mindframe-shell-v13/);
   const scripts = [...index.matchAll(/<script src="([^"]+)"/g)].map(x => x[1]);
   assert.deepEqual(scripts, ["js/analyzer.js", "js/grounding.js", "js/stories.js", "js/games.js", "js/model.js", "js/ui.js"]);
   scripts.forEach(s => assert.ok(sw.includes(`./${s}`), `${s} cached`));

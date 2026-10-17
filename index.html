@@ -34,21 +34,26 @@
 
       <div id="body">
         <section id="out" class="card" aria-live="polite">
-          <ul id="movers" class="movers"></ul>
-          <p id="dline" class="mono"></p>
-          <span class="label">Reading</span><p id="reading"></p>
-          <span class="label">Reframe</span><p id="reframe"></p><p id="test" class="quiet"></p>
-          <span class="label">Next skill</span><p id="skill"></p>
-          <span class="label">Ideal step</span><p id="step" class="mono"></p><p id="recovery" class="mono"></p>
-          <p id="faith-line" class="hidden"></p>
+          <span class="label">What you may be feeling</span><p id="feel"></p>
+          <span class="label">How they connect</span><ul id="connect" class="plain"></ul>
+          <span class="label">Affirmations</span><ul id="affirm" class="affirm"></ul>
+          <span class="label">One step</span><p id="step"></p>
+          <p id="progress" class="quiet"></p>
           <label class="check small"><input type="checkbox" id="faith" /> Include faith</label>
-          <details id="adjust" class="sec">
-            <summary>Adjust numbers</summary>
-            <p class="quiet small">Set any mover by hand. New words add to these.</p>
-            <div id="sliders" class="sliders"></div>
-          </details>
           <div class="row"><button type="button" class="text" id="copy">Copy</button><span class="quiet small" id="copied"></span></div>
         </section>
+
+        <details id="math" class="sec">
+          <summary>Show the math</summary>
+          <p class="quiet small">Every result above comes from one function: step = act(clip01(e + a(e)(h &minus; e) + b&middot;s(e))). These are model numbers, not measurements of you.</p>
+          <ul id="movers" class="movers"></ul>
+          <ul id="math-lines" class="lines"></ul>
+        </details>
+        <details id="adjust" class="sec">
+          <summary>Adjust numbers</summary>
+          <p class="quiet small">Set any mover by hand. New words add to these.</p>
+          <div id="sliders" class="sliders"></div>
+        </details>
 
         <div class="row">
           <button type="button" id="story-go" class="secondary">Story</button>
@@ -61,7 +66,6 @@
         <section id="story" class="card hidden">
           <p id="story-tag" class="creature-tag"></p>
           <p id="story-text"></p>
-          <p id="preview" class="mono"></p>
           <div class="row">
             <button type="button" id="accept" class="secondary">Accept step</button>
             <button type="button" id="play" class="secondary">Play this story</button>
@@ -87,9 +91,10 @@
 
         <details id="history" class="sec">
           <summary>History</summary>
-          <p class="quiet small">One point per day (the last checkpoint or accepted step), and a 7-day baseline B. Arrows show each day's direction.</p>
-          <ul id="week" class="lines"></ul>
+          <p class="quiet small">One point per day (the last checkpoint or accepted step), compared with your recent baseline.</p>
+          <ul id="week" class="plain"></ul>
           <p id="today" class="quiet small"></p>
+          <details class="sub"><summary class="small">The math</summary><ul id="week-math" class="lines"></ul></details>
           <h2>Checkpoints</h2>
           <p id="cps-empty" class="quiet small">None yet. Save one to come back to it.</p>
           <ol id="cps" class="cps"></ol>

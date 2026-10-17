@@ -120,7 +120,10 @@ const Games = (function () {
     return { scenes };
   }
 
-  // opts: { type, read, thought, reframe, step, faith, seed, mover }
+  // An affirmation (first person) closes the game, just before the question.
+  const affirm = t => (t && !G.isCrisis(t) ? `\u201C${String(t).slice(0, 160)}\u201D` : "");
+
+  // opts: { type, read, thought, reframe, step, faith, seed, mover, affirmation }
   // mover picks scene 1's thought (see Stories.opening).
   function make(opts = {}) {
     const texts = [opts.thought, opts.reframe, opts.step].filter(Boolean);
@@ -138,7 +141,7 @@ const Games = (function () {
       crisis: false, type, fallback, seed,
       arc: pc.arc, opening: pc.opening, openingFrom: pc.openingFrom, creature: pc.creature, tag: pc.tag, faith: pc.faith,
       reframe: pc.reframe, step: pc.step,
-      ending: [pc.landing, pc.faithLine, pc.question].filter(Boolean),
+      ending: [pc.landing, pc.faithLine, affirm(opts.affirmation), pc.question].filter(Boolean),
       steps,
       ...body,
     };

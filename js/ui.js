@@ -1,5 +1,7 @@
 // ui.js — the one tool. Words are read live and never stored, except text you
-// save with Journal. The session is kept as .mf code (numbers and labels only).
+// save with Journal. Every result comes from Model.master(text, state); the card
+// shows words (feelings, connections, affirmations, one step, progress) and the
+// numbers stay behind "Show the math". The session is kept as .mf code.
 
 const KEY = "mindframe-workspace";
 const FAITH_KEY = "mindframe-faith";
@@ -9,10 +11,10 @@ const f2 = x => x.toFixed(2);
 
 let state = Model.defaultState();
 let base = state.e.slice();
-let live = { notes: [], read: null };
 let seed = 1, story = null, timer = null, inCrisis = false, game = null;
+let m = null; // the master output for what's on screen
 
-function setBase() { base = state.e.slice(); live = { notes: [], read: null }; }
+function setBase() { base = state.e.slice(); }
 function save() { if (!inCrisis) localStorage.setItem(KEY, Model.serialize(Model.refreshIdeal(state))); }
 function note(t) { $("note").textContent = t || ""; }
 
@@ -36,27 +38,45 @@ function crisis(on) {
   }
 }
 
-// ---------- Live card ----------
+// ---------- Live card: everything comes from Model.master ----------
 function update() {
-  const words = Model.fromText($("input").value);
-  if (words.crisis) { crisis(true); return false; }
+  const out = Model.master($("input").value, { ...state, e: base });
+  if (out.crisis) { crisis(true); return false; }
   if (inCrisis) crisis(false);
-  state = { ...state, e: Model.combine(base, words.w) };
-  live = { notes: words.notes, read: words.read };
+  m = out;
+  state = { ...state, e: m.e.slice() };
   render();
   save();
   return true;
+}
+// Re-read the master output for the current numbers (after a restore, import, or variable change).
+function recompute() {
+  m = Model.master($("input").value, { ...state, e: base });
+  if (m.crisis) { crisis(true); return; }
+  state = { ...state, e: m.e.slice() };
 }
 
 function li(text, cls) { const el = document.createElement("li"); el.textContent = text; if (cls) el.className = cls; return el; }
 
 function render() {
-  const m = Model.metrics(state, live);
-  const c = Model.card(state, m, { faith: $("faith").checked });
+  if (!m || m.crisis) recompute();
+  if (!m || m.crisis) return;
+  const c = Model.card(state, m, { faith: $("faith").checked, seed });
+  $("feel").textContent = c.feeling;
+  const con = $("connect");
+  con.innerHTML = "";
+  c.connect.forEach(t => con.appendChild(li(t)));
+  const aff = $("affirm");
+  aff.innerHTML = "";
+  c.affirmations.forEach(t => aff.appendChild(li(t)));
+  $("step").textContent = c.step;
+  $("progress").textContent = c.progress;
+  // Show the math (collapsed by default)
   const ul = $("movers");
   ul.innerHTML = "";
-  if (!c.movers.length) ul.appendChild(li("Nothing strong is moving."));
-  c.movers.forEach(x => {
+  const mv = Model.shown(m.e);
+  if (!mv.length) ul.appendChild(li("Nothing strong is moving."));
+  mv.forEach(x => {
     const el = document.createElement("li");
     el.className = x.group;
     const name = document.createElement("span");
@@ -72,15 +92,9 @@ function render() {
     el.append(name, bar, v);
     ul.appendChild(el);
   });
-  $("dline").textContent = Model.lines(state, m)[1];
-  $("reading").textContent = c.reading;
-  $("reframe").textContent = c.reframe;
-  $("test").textContent = `Test: ${c.test}`;
-  $("skill").textContent = c.skill;
-  $("step").textContent = c.step;
-  $("recovery").textContent = `recovery: ${c.recovery}`;
-  $("faith-line").textContent = c.faith || "";
-  $("faith-line").classList.toggle("hidden", !c.faith);
+  const ml = $("math-lines");
+  ml.innerHTML = "";
+  Model.mathLines(state, m).forEach(t => ml.appendChild(li(t)));
   $("story-go").disabled = m.d < 0.005;
   renderSliders();
   renderHistory();
@@ -125,7 +139,7 @@ $("faith").addEventListener("change", () => {
   if (story) tell(); else render();
 });
 
-$("copy").addEventListener("click", () => copy(Model.lines(state, Model.metrics(state, live), { faith: $("faith").checked }).join("\n"), "copied"));
+$("copy").addEventListener("click", () => copy(Model.lines(state, m, { faith: $("faith").checked, seed }).join("\n"), "copied"));
 
 async function copy(text, where) {
   let ok = false;
@@ -146,6 +160,7 @@ async function copy(text, where) {
 $("save").addEventListener("click", () => {
   if (!update()) return;
   state = Model.addCheckpoint(state, state.cps.length ? "" : "start");
+  recompute();
   render();
   save();
   note("Checkpoint saved (numbers only).");
@@ -161,6 +176,9 @@ function renderHistory() {
   $("today").textContent = !t ? "Save a checkpoint or accept a step to record today."
     : !t.dir ? "Today is the first day on the map."
     : { up: "Today points toward home.", side: "Today moved sideways. That still counts as showing up.", down: "Today drifted away from home. One small step is enough." }[t.dir];
+  const mathWeek = $("week-math");
+  mathWeek.innerHTML = "";
+  Model.weekMath(state).forEach(l => mathWeek.appendChild(li(l)));
   const ol = $("cps");
   ol.innerHTML = "";
   $("cps-empty").classList.toggle("hidden", state.cps.length > 0);
@@ -169,13 +187,14 @@ function renderHistory() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "cp";
-    btn.textContent = `${cp.n} \u00B7 ${cp.label} \u00B7 ${cp.t.replace("T", " ")} \u00B7 d = ${f2(Model.distance(cp.e, state.home))}`;
+    btn.textContent = `${cp.label} \u00B7 ${new Date(cp.t).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" })}`;
     btn.setAttribute("aria-label", `Restore checkpoint ${cp.n}, ${cp.label}`);
     btn.addEventListener("click", () => {
       state = Model.restore(state, cp.n);
       setBase();
       $("input").value = "";
       hideStory();
+      recompute();
       render();
       save();
       note(`Restored checkpoint ${cp.n}. New words add to it.`);
@@ -190,13 +209,10 @@ function hideStory() { story = null; game = null; $("story").classList.add("hidd
 
 function tell() {
   if (!update()) return;
-  const m = Model.metrics(state, live);
   story = Model.story(state, m, { seed, faith: $("faith").checked });
   if (!story) { hideStory(); return; }
   $("story-tag").textContent = "Guide: " + story.tag;
   $("story-text").textContent = story.text;
-  const parts = Model.NAMES.map((n, i) => [Model.label(n), story.next[i]]).filter(([, x]) => x >= 0.1).map(([n, x]) => `${n} ${f2(x)}`);
-  $("preview").textContent = `preview: e\u2032 = (${parts.join(", ")}), d\u2032 = ${f2(m.ideal.dNext)}`;
   $("story").classList.remove("hidden");
   $("game").classList.add("hidden");
   game = null;
@@ -209,6 +225,7 @@ $("accept").addEventListener("click", () => {
   setBase();
   $("input").value = "";
   hideStory();
+  recompute();
   render();
   save();
   note("Step accepted and saved as a checkpoint. The next reading starts from here.");
@@ -216,9 +233,7 @@ $("accept").addEventListener("click", () => {
 
 $("play").addEventListener("click", () => {
   if (!story) return;
-  const text = $("input").value.trim();
-  const c = Model.card(state, Model.metrics(state, live));
-  const g = Games.make({ type: "path", thought: text || Games.SAMPLES[story.arc] || Games.SAMPLES.none, read: live.read || undefined, mover: story.focus, reframe: c.reframe, faith: $("faith").checked, seed });
+  const g = Model.game(state, m, { thought: $("input").value.trim(), faith: $("faith").checked, seed });
   if (g.crisis) { crisis(true); return; }
   game = { g, i: 0, tried: 0 };
   $("game").classList.remove("hidden");
@@ -335,6 +350,7 @@ function buildVars() {
     }
     $("var-notes").textContent = notes.join("; ");
     inp.blur();
+    recompute();
     render();
     save();
   });
@@ -350,6 +366,7 @@ function renderVars() {
 $("vars-reset").addEventListener("click", () => {
   state = { ...state, vars: Model.defaultVars(), home: Model.homeVec(), w: [] };
   $("var-notes").textContent = "";
+  recompute();
   render();
   save();
 });
@@ -385,6 +402,7 @@ $("import-go").addEventListener("click", () => {
   $("import-text").value = "";
   importErrors([]);
   hideStory();
+  recompute();
   render();
   save();
   note(p.from === 1 ? p.notes.join(" ") : "Restored from code. New words add to it.");
@@ -396,6 +414,7 @@ $("clear").addEventListener("click", () => {
   setBase();
   $("input").value = "";
   hideStory();
+  recompute();
   render();
   note("");
 });
@@ -404,6 +423,7 @@ $("clear").addEventListener("click", () => {
 buildSliders();
 buildVars();
 load();
+recompute();
 render();
 
 if ("serviceWorker" in navigator) {
