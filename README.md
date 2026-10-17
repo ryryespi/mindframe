@@ -35,11 +35,21 @@ A small guide for heavy, hard-to-prove thoughts ("I'm cursed", "nothing will eve
 
 Groundedness updates with `G_next = clamp01(G + 0.2 × r × (1 + H − M) / 2)`, starting at 0.5. Choosing the real version always raises it, the old thought always lowers it, and not sure leaves it; H and M only set how big the step is. Only the numbers are kept, not the thought. Insights shows a 7-day line, and if groundedness stays under 0.3 for three days in a row, a soft note suggests reaching out to someone you trust, and 988.
 
-**Tell me a story** (on the Reframe and Act steps) makes a short, calm story on the phone from templates, with no network. A made-up character (a fernling, a glimmerback, a stone-keeper, a traveler in a blue coat, and others) feels a thought like yours, notices one real thing, says your reframe, takes your small step, and ends steadier, with no magic fix and no promises, then asks you a gentle question. **Another story** gives a different one. **Include faith** starts on only for curse, sign, or punishment thoughts, and **Tell it to me** switches to "you". Stories and thoughts are never saved; only a count of stories read is kept.
+**Tell me a story** (on the Reframe and Act steps) makes a short, calm story on the phone from templates, with no network. Each kind of thought has its own made-up guide, reused from Project Veda where possible: Lumowl (hidden meaning), Mistfawn (predicting), Tidelyn (mind reading), Hivewright (absolute words), Pell (harsh labels), Brakkor (worst case), Sela (hopeless), and Nim (anything else). The guide feels a thought like yours, notices one real thing, says your reframe, takes your small step, and ends steadier, with no magic fix and no promises, then asks you a gentle question. **Another story** keeps the same guide and changes the wording. **Include faith** starts on only for curse, sign, or punishment thoughts, and **Tell it to me** switches to "you". Stories and thoughts are never saved; only a count of stories read is kept.
 
 Crisis safety holds here too: every line typed in the loop is checked, including any text a story would use, and crisis wording stops the loop, saves nothing, and shows only the 988/911 box.
 
-Tests: `node tests/grounding.test.js` and `node tests/stories.test.js` (no dependencies).
+Tests: `node tests/grounding.test.js`, `node tests/stories.test.js`, and `node tests/psi.test.js` (no dependencies).
+
+## Daily check-in (Insights)
+
+Five quick answers, about 30 seconds: distress (0–10), how connected you felt (1–5), how many planned skills you used (None, Some, Most, All), how much you pushed hard feelings away (1–7, one item adapted from the AAQ-II), and how much you believe the hard thought (0–100, filled in from your last Reflect if it was in the past day).
+
+They become the Ψ index from the combined paper: `Ψ = 0.18C + 0.14S + 0.12M − 0.26R − 0.31B`, scored 0–100 as `100 × (Ψ − min) / (max − min)`, where min = −(wR + wB) and max = wC + wS + wM. With the starting weights that is the paper's `100 × (Ψ + 0.57) / 1.01`. Under **Advanced** you can change the size of each weight (the signs stay fixed) or reset to the research values. Those values come from published correlations; they are a starting point, not a validated score.
+
+After saving, one card suggests one next skill for the weakest part of the day: paced breathing (TIPP) from Mistfawn, reaching out from Tidelyn, one planned skill from Hivewright, Opposite Action from Brakkor, or Check the Facts from Lumowl, which links to Ground. Only the numbers are kept, one entry per day (the last one counts).
+
+Insights shows one 7-day chart with the check-in score and groundedness. If either stays under 30 for three days in a row, a soft note suggests reaching out to someone you trust, and 988. Once there are 7 days of data, a weekly card sums up the week and asks what helped most. Your answer is kept only if you tap Save (it goes to the Journal), and the card can be dismissed.
 
 ## Journal and Insights
 
@@ -74,10 +84,13 @@ icons/                  home-screen icons
 js/analyzer.js          keyword patterns, traps, crisis, big-ambition language
 js/grounding.js         Grounding Loop guide: mirage reading, update rule, history
 js/stories.js           grounded story templates for the Ground tab
-js/ground-ui.js         Ground tab screens and the Insights trend
+js/psi.js               check-in math: Ψ, weights, next skill, weekly summary
+js/ground-ui.js         Ground tab screens and stories
+js/checkin-ui.js        check-in, weights, combined chart, weekly card
 tests/grounding.test.js node tests for the update rule and crisis gating
 tests/stories.test.js   node tests for the story generator
-screenshots/            Ground reframe step, a story, and the Insights trend
+tests/psi.test.js       node tests for the check-in math
+screenshots/            Ground steps, a story, the check-in, and Insights
 js/cbt-techniques.js    local CBT exercises
 js/bots.js              five coaches, believability, which coach goes first
 js/app.js               screens, journal, chart, install

@@ -279,3 +279,24 @@ textarea.short { min-height: 5rem; }
 .toggles { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 0.75rem 0 0.25rem; }
 .toggle { display: flex; align-items: center; gap: 0.4rem; margin: 0; color: var(--muted); font-size: 0.9rem; }
 .toggle input { accent-color: var(--accent); width: 1.05rem; height: 1.05rem; margin: 0; }
+
+/* Check-in, chart legend, weekly card */
+.checkin { margin: 0 0 1.75rem; }
+.val { float: right; color: var(--ink); }
+.ends { display: flex; justify-content: space-between; margin: 0.1rem 0 0.9rem; }
+.field-label { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.92rem; }
+.advanced { margin: 1rem 0 0; border-top: 1px solid var(--line); padding-top: 0.75rem; }
+.advanced summary { color: var(--muted); cursor: pointer; font-size: 0.92rem; }
+.creature-tag { margin: 0 0 0.35rem; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.02em; }
+.skill p { margin: 0.2rem 0; }
+.skill .text { margin: 0.4rem 0 0; }
+.legend { display: flex; gap: 1.25rem; margin: -0.5rem 0 1rem; color: var(--muted); font-size: 0.85rem; }
+.legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+.swatch { display: inline-block; width: 1.3rem; border-top: 2px solid; }
+.swatch.dash { border-top-style: dashed; }
+#trend svg { display: block; width: 100%; height: auto; margin: 0.25rem 0 0.75rem; }
+.plain { list-style: none; padding: 0; margin: 0.25rem 0 0.75rem; }
+.plain li { margin: 0.2rem 0; }
+.row { display: flex; justify-content: space-between; }
+.row .text { margin: 0.5rem 0 0; }
+#weekly { margin-bottom: 1.75rem; }

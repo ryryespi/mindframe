@@ -167,6 +167,7 @@ function gTellStory(fresh) {
   if (story.crisis) { groundCrisis(); return; }
   s.lastKey = story.key;
   $("g-story-text").textContent = story.text;
+  $("g-story-tag").textContent = "Guide: " + story.tag;
   if (fresh) {
     const n = Number(localStorage.getItem(STORY_COUNT_KEY) || 0) + 1;
     localStorage.setItem(STORY_COUNT_KEY, String(n)); // a count only
@@ -193,40 +194,3 @@ $("g-story-back").addEventListener("click", () => {
   if (!gDraft) return;
   showG(gDraft.story && gDraft.story.from === "act" ? "act" : "reframe");
 });
-
-// ---------- Insights: a 7-day sparkline of G, plus a soft note on low streaks ----------
-
-function groundTrendHTML() {
-  const state = loadGround();
-  if (!state.log || !state.log.length) return "";
-  const days = Grounding.last7(state);
-  const W = 320, H = 110, pad = 8;
-  const x = i => pad + (i * (W - 2 * pad)) / 6;
-  const y = g => H - pad - g * (H - 2 * pad);
-  let path = "";
-  let pen = false;
-  days.forEach((d, i) => {
-    if (d.G === null) { pen = false; return; }
-    path += `${pen ? "L" : "M"}${x(i).toFixed(1)} ${y(d.G).toFixed(1)} `;
-    pen = true;
-  });
-  const dots = days.map((d, i) => d.G === null ? "" :
-    `<circle cx="${x(i).toFixed(1)}" cy="${y(d.G).toFixed(1)}" r="3" fill="#4e5a53"></circle>`).join("");
-  const today = days[6].G !== null ? days[6].G : Grounding.currentG(state);
-  const note = Grounding.needsCheckIn(state)
-    ? `<p class="soft-note">It has felt heavy for a few days. Consider reaching out to someone you trust. If it ever feels like too much, call or text <strong>988</strong>.</p>`
-    : "";
-  return `<h2>Groundedness, last 7 days</h2>
-    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Groundedness over the last 7 days">
-      <title>Groundedness over the last 7 days</title>
-      <line x1="${pad}" x2="${W - pad}" y1="${y(0.5)}" y2="${y(0.5)}" stroke="#e3ddd4" stroke-dasharray="3 4"></line>
-      <path d="${path}" fill="none" stroke="#8d9a91" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
-      ${dots}
-    </svg>
-    <p class="quiet small">Latest: ${Math.round(today * 100)} of 100</p>
-    ${note}`;
-}
-
-// Optional: index.html?view=ground (or insights, journal) opens that tab.
-const groundStartView = new URLSearchParams(location.search).get("view");
-if (["ground", "journal", "insights"].includes(groundStartView)) showView(groundStartView);

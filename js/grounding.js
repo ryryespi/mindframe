@@ -228,7 +228,7 @@ const Grounding = (function () {
     return lowStreak(state) >= LOW_DAYS;
   }
 
-  return { ETA, START_G, LOW_G, LOW_DAYS, clamp01, updateG, read, isCrisis, bigWordReframe, dayKey, currentG, record, daily, last7, lowStreak, needsCheckIn };
+  return { ETA, START_G, LOW_G, LOW_DAYS, LABELS, clamp01, updateG, read, isCrisis, bigWordReframe, dayKey, currentG, record, daily, last7, lowStreak, needsCheckIn };
 })();
 
 if (typeof module !== "undefined" && module.exports) module.exports = Grounding;

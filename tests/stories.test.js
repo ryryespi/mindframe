@@ -75,9 +75,6 @@ test("same seed gives the same story; different seeds give variety", () => {
   const set = new Set();
   for (let seed = 0; seed < 30; seed++) set.add(S.tell({ thought: "I'm cursed", seed }).text);
   assert.ok(set.size >= 20, `only ${set.size} distinct stories`);
-  const chars = new Set();
-  for (let seed = 0; seed < 60; seed++) chars.add(S.tell({ thought: "I'm cursed", seed }).character);
-  assert.ok(chars.size >= 4);
 });
 
 test("avoid prevents an immediate repeat of character and opening", () => {
@@ -119,6 +116,32 @@ test("no magic-fix or promise wording in any template output", () => {
     const t = S.tell({ thought, seed, faith: true }).text.toLowerCase();
     assert.ok(!/\b(magic|miracle|guarantee|forever fixed|everything was fine|all better)\b/.test(t), t);
   }
+});
+
+test("each pattern keeps one stable creature across seeds and modes", () => {
+  const seen = new Set();
+  for (const [arc, thought] of Object.entries(SAMPLES)) {
+    const expected = S.PATTERN_CREATURE[arc];
+    assert.ok(S.CHARACTERS.some(c => c.name === expected), expected);
+    for (let seed = 0; seed < 30; seed++) for (const you of [false, true]) {
+      const st = S.tell({ thought, seed, you });
+      assert.equal(st.character, expected);
+      assert.ok(st.tag.startsWith(expected + ", "));
+      if (!you) assert.ok(st.text.startsWith(expected + ",") || st.text.includes(" " + expected + ","), st.text);
+    }
+    seen.add(expected);
+  }
+  assert.equal(seen.size, 8, "each pattern has its own creature");
+});
+
+test("Veda creatures are reused for consistency", () => {
+  ["Lumowl", "Brakkor", "Mistfawn", "Hivewright", "Tidelyn"].forEach(n => assert.ok(Object.values(S.PATTERN_CREATURE).includes(n), n));
+});
+
+test("Another story still varies wording with the same creature", () => {
+  const texts = new Set();
+  for (let seed = 0; seed < 20; seed++) texts.add(S.tell({ thought: "This is a disaster", seed }).text);
+  assert.ok(texts.size >= 10);
 });
 
 console.log(`\n${passed} passed${process.exitCode ? ", some failed" : ""}`);

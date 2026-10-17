@@ -146,7 +146,10 @@
         <!-- A short story made on this phone from templates. Never saved. -->
         <div id="g-story" class="hidden">
           <h2>A grounded story</h2>
-          <article class="card story"><p id="g-story-text" aria-live="polite"></p></article>
+          <article class="card story">
+            <p id="g-story-tag" class="creature-tag"></p>
+            <p id="g-story-text" aria-live="polite"></p>
+          </article>
           <div class="toggles">
             <label class="toggle"><input type="checkbox" id="g-faith" /> Include faith</label>
             <label class="toggle"><input type="checkbox" id="g-you" /> Tell it to me</label>
@@ -169,6 +172,63 @@
       </section>
 
       <section id="view-insights" class="hidden">
+        <!-- Weekly reflection: shown once a week when there is enough data. -->
+        <article id="weekly" class="card hidden"></article>
+
+        <!-- 30-second check-in. Numbers only, kept on this phone. -->
+        <section id="checkin" class="checkin">
+          <div id="ci-start">
+            <h2>Daily check-in</h2>
+            <p class="quiet" id="ci-status">About 30 seconds. Numbers only, kept on this phone.</p>
+            <button type="button" id="ci-open" class="primary">Start check-in</button>
+          </div>
+
+          <form id="ci-form" class="hidden">
+            <h2>Daily check-in</h2>
+            <label for="ci-suds">How much distress right now? <span class="val" id="ci-suds-v"></span></label>
+            <input id="ci-suds" type="range" min="0" max="10" step="1" value="5" />
+            <p class="ends quiet small"><span>0 calm</span><span>10 the most</span></p>
+
+            <label for="ci-belong">How connected did you feel today? <span class="val" id="ci-belong-v"></span></label>
+            <input id="ci-belong" type="range" min="1" max="5" step="1" value="3" />
+            <p class="ends quiet small"><span>1 alone</span><span>5 very</span></p>
+
+            <p class="field-label">How many of the skills you planned did you use?</p>
+            <div class="chips" id="ci-skills" role="group" aria-label="Skills used">
+              <button type="button" class="chip" data-skills="none" aria-pressed="false">None</button>
+              <button type="button" class="chip" data-skills="some" aria-pressed="false">Some</button>
+              <button type="button" class="chip" data-skills="most" aria-pressed="false">Most</button>
+              <button type="button" class="chip" data-skills="all" aria-pressed="false">All</button>
+            </div>
+
+            <label for="ci-avoid">I pushed away hard thoughts or feelings today. <span class="val" id="ci-avoid-v"></span></label>
+            <input id="ci-avoid" type="range" min="1" max="7" step="1" value="4" />
+            <p class="ends quiet small"><span>1 never true</span><span>7 always true</span></p>
+
+            <label for="ci-believe">How much do you believe the hard thought? <span class="val" id="ci-believe-v"></span></label>
+            <input id="ci-believe" type="range" min="0" max="100" step="5" value="50" />
+            <p class="quiet small hidden" id="ci-believe-src">Filled in from your last Reflect. Move it if it feels different now.</p>
+
+            <details id="ci-advanced" class="advanced">
+              <summary>Advanced: weights</summary>
+              <p class="quiet small">Starting values come from published correlations. They are a starting point, not a validated score. Signs stay fixed; you choose the sizes.</p>
+              <div id="ci-weights"></div>
+              <button type="button" id="ci-reset" class="text">Reset to research values</button>
+            </details>
+
+            <button type="submit" id="ci-save" class="primary" disabled>Save check-in</button>
+            <button type="button" id="ci-cancel" class="text">Not now</button>
+          </form>
+
+          <div id="ci-result" class="hidden">
+            <h2>Today</h2>
+            <p class="g-result" id="ci-score"></p>
+            <article class="card skill" id="ci-skill"></article>
+            <button type="button" id="ci-redo" class="text">Redo check-in</button>
+          </div>
+        </section>
+
+        <div id="trend"></div>
         <div id="insights"></div>
       </section>
     </main>
@@ -181,13 +241,15 @@
     </nav>
   </div>
 
-  <!-- Load order: analyzer -> grounding -> stories -> technique data -> bots -> app -> ground UI -->
+  <!-- Load order: analyzer -> grounding -> stories -> psi -> technique data -> bots -> app -> ground UI -> check-in UI -->
   <script src="js/analyzer.js"></script>
   <script src="js/grounding.js"></script>
   <script src="js/stories.js"></script>
+  <script src="js/psi.js"></script>
   <script src="js/cbt-techniques.js"></script>
   <script src="js/bots.js"></script>
   <script src="js/app.js"></script>
   <script src="js/ground-ui.js"></script>
+  <script src="js/checkin-ui.js"></script>
 </body>
 </html>

@@ -12,14 +12,31 @@ const Stories = (function () {
   const G = typeof Grounding !== "undefined" ? Grounding : require("./grounding.js");
 
   // Invented creatures and simple travelers. Not real animals.
+  // The first five come from Project Veda (veda/mental.py), so the same
+  // creatures appear across Ryan's projects. Each pattern keeps one guide,
+  // so a thought type always meets the same creature; only the wording varies.
   const CHARACTERS = [
+    { name: "Lumowl", intro: "Lumowl, a lantern-eyed night watcher," },
+    { name: "Mistfawn", intro: "Mistfawn, a fog spirit who slows every breath," },
+    { name: "Tidelyn", intro: "Tidelyn, a sea serpent who links far shores," },
+    { name: "Hivewright", intro: "Hivewright, a many-armed builder who lays one brick a day," },
     { name: "Pell", intro: "Pell, a small fernling with leaf-shaped ears," },
-    { name: "Tib", intro: "Tib, a glimmerback who lived under the hill," },
-    { name: "Bram", intro: "Bram, an old stone-keeper of the valley path," },
-    { name: "Oro", intro: "Oro, a drift-walker who followed the river mist," },
+    { name: "Brakkor", intro: "Brakkor, a stone-maned beast who walks toward the storm," },
     { name: "Sela", intro: "Sela, a traveler in a patched blue coat," },
     { name: "Nim", intro: "Nim, a quiet lamplighter from the edge of town," },
   ];
+
+  // Pattern -> guide. Chosen to fit each creature's role in Veda.
+  const PATTERN_CREATURE = {
+    meaning: "Lumowl",          // watches in the dark, checks what is really there
+    fortuneTelling: "Mistfawn", // slows the racing guess about tomorrow
+    mindReading: "Tidelyn",     // reaches across to ask, instead of guessing
+    allOrNothing: "Hivewright", // one brick at a time, never all or nothing
+    labeling: "Pell",           // small and gentle with itself
+    catastrophizing: "Brakkor", // walks toward the storm and finds it smaller
+    hopelessness: "Sela",       // keeps walking, one patch at a time
+    none: "Nim",                // lights one lamp
+  };
 
   // How each arc names the mirage: briefly, calmly, never vividly.
   const MIRAGE = {
@@ -185,9 +202,8 @@ const Stories = (function () {
   function compose(arc, read, opts, faith, seed) {
     const rand = rng(seed);
     const pick = list => list[Math.floor(rand() * list.length)];
-    const ci = Math.floor(rand() * CHARACTERS.length);
+    const who = CHARACTERS.find(c => c.name === (opts.character || PATTERN_CREATURE[arc])) || CHARACTERS[0];
     const oi = Math.floor(rand() * OPENINGS.length);
-    const who = CHARACTERS[ci];
     const you = !!opts.you;
 
     const p = you
@@ -200,23 +216,25 @@ const Stories = (function () {
     let real = pick(REAL_THINGS);
     if (you) real = real.replace(/\btheir\b/g, "your");
 
+    const picks = [];
+    const pickI = list => { const i = Math.floor(rand() * list.length); picks.push(i); return list[i]; };
     const sentences = [
       fill(OPENINGS[oi], { ...pro, intro: p.intro, Intro: p.Intro, mirage: fill(pick(MIRAGE[arc]), pro) }),
-      fill(pick(NAMING[arc]), pro),
-      fill(pick(NOTICING), { ...pro, real }),
-      fill(pick(SAYING), { ...pro, reframe }),
-      fill(pick(STEPPING), { ...pro, step }),
+      fill(pickI(NAMING[arc]), pro),
+      fill(pickI(NOTICING), { ...pro, real }),
+      fill(pickI(SAYING), { ...pro, reframe }),
+      fill(pickI(STEPPING), { ...pro, step }),
     ];
     // If the step is already a prayer, use the other faith line so it isn't said twice.
     if (faith) sentences.push(fill(/\bpray/i.test(step) ? FAITH[0] : pick(FAITH), pro));
-    sentences.push(fill(pick(LANDING), pro));
+    sentences.push(fill(pickI(LANDING), pro));
     sentences.push(pick(QUESTIONS));
 
     // A step that ends in a quoted question already has its punctuation.
     const tidy = sentences.map(s => cap(s).replace(/([.!?\u2026]["\u201D])\.$/, "$1"));
     sentences.splice(0, sentences.length, ...tidy);
     const text = sentences.join(" ");
-    return { crisis: false, arc, faith, you, character: you ? "you" : who.name, key: `${you ? "you" : ci}-${oi}`, sentences, text };
+    return { crisis: false, arc, faith, you, character: who.name, tag: `${who.name}, ${who.intro.slice(who.name.length + 2).replace(/,$/, "")}`, key: [oi, ...picks].join("-"), sentences, text };
   }
 
   // Safe markup, if a caller ever needs HTML. The app itself uses textContent.
@@ -224,7 +242,7 @@ const Stories = (function () {
     return story && !story.crisis ? `<p>${escapeHTML(story.text)}</p>` : "";
   }
 
-  return { tell, toHTML, escapeHTML, truncate, arcFor, ARCS, CHARACTERS };
+  return { tell, toHTML, escapeHTML, truncate, arcFor, ARCS, CHARACTERS, PATTERN_CREATURE };
 })();
 
 if (typeof module !== "undefined" && module.exports) module.exports = Stories;
