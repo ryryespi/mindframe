@@ -32,6 +32,9 @@ function openPlayPick() {
   const probe = Games.make({ ...playCtx, type: "path", seed: 1 });
   if (probe.crisis) { showCrisis(); return; }
   $("gp-pick-tag").textContent = "Guide: " + probe.tag;
+  const eqLine = playCtx.from === "sample" ? "" : (playCtx.eq || Emotions.analyze(playCtx.thought || "")).summary || "";
+  $("eq-play").textContent = eqLine;
+  $("eq-play").classList.toggle("hidden", !eqLine);
   $("gp-pick-note").textContent = playCtx.from === "sample"
     ? `Nothing written yet, so here is a sample thought: \u201C${playCtx.thought}\u201D`
     : playCtx.from === "story"
@@ -57,7 +60,10 @@ onCrisisReset(() => {
 
 // Play from the main box, or from a sample thought when the box is empty.
 registerOutput("play", text => {
-  if (text) playCtx = { from: "input", thought: text, read: Grounding.read(text) };
+  if (text) {
+    const eq = emotionResult(text);
+    playCtx = { from: "input", thought: text, read: withEmotionArc(Grounding.read(text), text, eq), eq };
+  }
   else newSample();
   openPlayPick();
 });

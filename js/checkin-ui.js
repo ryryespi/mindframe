@@ -145,6 +145,7 @@ function showCheckinResult() {
   const today = todaySkill();
   if (!today) { openCheckin(); return; }
   $("ci-score").textContent = `Today: ${Psi.score(Psi.terms(today.entry), loadWeights())} of 100`;
+  $("eq-checkin").textContent = psiEquationLine(today.entry, loadWeights());
   fillSkillCard($("ci-skill"), today.skill);
   ciShow("result");
 }

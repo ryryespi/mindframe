@@ -13,11 +13,11 @@
 const $ = id => document.getElementById(id);
 const JOURNAL_KEY = "mindframe-journal";
 const CHIP_KEY = "mindframe-chip";
-const CHIPS = ["reframe", "coach", "story", "play", "checkin", "journal", "insights"];
-const NEEDS_WORDS = new Set(["reframe", "coach", "story"]);
-const PANELS = ["hint", "crisis", "reframe", "coach", "story", "play", "checkin", "journal", "insights"];
+const CHIPS = ["equations", "reframe", "coach", "story", "play", "checkin", "journal", "insights"];
+const NEEDS_WORDS = new Set(["equations", "reframe", "coach", "story"]);
+const PANELS = ["hint", "crisis", "equations", "reframe", "coach", "story", "play", "checkin", "journal", "insights"];
 // Panels whose text is worth copying get a small Copy button.
-const COPYABLE = new Set(["reframe", "coach", "story", "checkin", "journal", "insights"]);
+const COPYABLE = new Set(["equations", "reframe", "coach", "story", "checkin", "journal", "insights"]);
 
 const COACHES = [
   { id: "dbt", title: "DBT Coach", render: dbtCoach },
@@ -37,7 +37,7 @@ const CATEGORY_NAMES = {
   anxiety: "Anxiety",
 };
 
-let currentChip = "reframe";
+let currentChip = "equations";
 let insightIndex = -1;
 const outputs = {};
 const crisisResets = [];
@@ -86,7 +86,7 @@ $("crisis-again").addEventListener("click", () => {
 // ---------- Choices ----------
 
 function selectChip(chip, run = true) {
-  if (!CHIPS.includes(chip)) chip = "reframe";
+  if (!CHIPS.includes(chip)) chip = "equations";
   currentChip = chip;
   localStorage.setItem(CHIP_KEY, chip); // only the name of the choice
   document.querySelectorAll(".choice").forEach(btn => {
@@ -181,6 +181,7 @@ registerOutput("coach", text => {
   $("more-angles").textContent = "See other angles";
   document.querySelectorAll("#p-coach [id='evidence-mount']").forEach(mount => mountEvidence(mount));
   renderValues(signals);
+  equationLine("eq-coach", text);
   showPanel("coach");
 });
 

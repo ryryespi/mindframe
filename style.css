@@ -288,3 +288,24 @@ textarea.short { min-height: 5rem; }
 .out-bar { display: flex; justify-content: flex-end; align-items: baseline; gap: 0.75rem; min-height: 1.5rem; }
 .out-bar .text { margin: 0; font-size: 0.9rem; }
 h2[tabindex="-1"]:focus { outline: none; }
+
+/* ---------- Equations ---------- */
+.eq-sec { margin: 0 0 0.9rem; }
+.eq-sec h3 { font-size: 0.95rem; font-weight: 600; margin: 0 0 0.25rem; color: var(--accent); }
+.eq-sec ul { list-style: none; margin: 0; padding: 0; }
+.eq-sec li {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  padding-left: 0.75rem;
+}
+.eq-line {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  border-left: 3px solid var(--line);
+  padding: 0.15rem 0 0.15rem 0.6rem;
+  margin: 0 0 0.9rem;
+  overflow-wrap: anywhere;
+}
+#eq-trend svg { width: 100%; max-width: 420px; height: auto; display: block; }

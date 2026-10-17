@@ -6,7 +6,7 @@ A safety line stays at the top. If anything you type looks like a crisis (though
 
 MindFrame is practice, not a substitute for therapy. Everything runs on the phone; nothing is sent to a server.
 
-![One screen](screenshots/one-screen.png)
+![One screen with Equations](screenshots/one-screen-equations.png)
 
 ## One screen
 
@@ -16,6 +16,7 @@ MindFrame is practice, not a substitute for therapy. Everything runs on the phon
 
 | Choice | What you get back | Needs words? |
 |---|---|---|
+| **Equations** (default) | The emotion equation engine: emotions found, how they push on each other, unstable combinations, overall λ, and one stabilizer skill | yes |
 | **Reframe** | The Grounding Loop on your thought: grip, one test question, reframe suggestions, one small step | yes |
 | **Coach** | One coach chosen from what the analyzer noticed, plus the other angles and the evidence lists with believability | yes |
 | **Story** | A short, calm story with a made-up creature guide | yes |
@@ -24,11 +25,61 @@ MindFrame is practice, not a substitute for therapy. Everything runs on the phon
 | **Journal** | Save what's in the box, and read what you saved | no |
 | **Insights** | Weekly card, a 7-day chart, today's next skill, weekly patterns | no |
 
+Every other choice also shows one short **Equation view** line from the same engine (Reframe, Coach, Story, Play), Check-in shows its Ψ equation with today's numbers, and Insights adds a 7-day instability (λ) trend.
+
 Old links still work: `?view=reflect` opens Coach, `?view=ground` opens Reframe, and `?view=journal` and `?view=insights` open those choices. On a keyboard, arrow keys move between choices and Enter shows the answer; Ctrl+Enter in the box does too.
 
 ## Privacy
 
-Thought text is stored only when you tap **Save what's in the box** in Journal, or **Save to journal** on the weekly card. Everything else keeps numbers (groundedness, check-in answers, counts of stories and games) or nothing at all.
+Thought text is stored only when you tap **Save what's in the box** in Journal, or **Save to journal** on the weekly card. Everything else keeps numbers (groundedness, check-in answers, counts of stories and games, one λ number per day from the equation engine) or nothing at all.
+
+## Equations: the emotion engine
+
+**This is a model, not validated science.** The words, weights, and thresholds below are design assumptions informed by general emotion and CBT research. They have not been tested in a study, they are not a diagnosis, and the numbers are not a measurement of you. They are a way to look at a hard moment from a little distance. The code is in `js/emotions.js`; every weight is in one table there and can be changed.
+
+**1. Emotion vector.** Ten emotions: joy, hope, calm, connection (helpful) and fear, anger, sadness, shame, guilt, loneliness (hard). Each word or phrase in a small lexicon adds a weight `w` to its emotion (`ashamed` → shame 1.0, `nobody cares` → loneliness 1.0). Then:
+
+- an intensifier just before the word multiplies it (`very` ×1.5, `so` ×1.4, `extremely` ×1.7…); a softener lowers it (`a little` ×0.6);
+- a negator within the 3 words before flips it to a nearby emotion at half weight (`not happy` → sadness, `not afraid` → calm);
+- the existing analyzers add amplifiers: hopeless wording → sadness +0.6 and hope ×0.5; self-blame → shame +0.4, guilt +0.3; harsh labels → shame +0.3; mind reading → fear +0.2, shame +0.2; worst-case wording → fear +0.3; curse/sign language → fear +0.4; absolute words (`always`, `never`) make the hard emotions ×(1 + 0.15·n), n ≤ 2;
+- `e_i = 1 − exp(−raw_i)`, so more evidence gets closer to 1 without passing it.
+
+**2. Influence matrix W.** `W[i][j] > 0` means emotion i amplifies j; `< 0` means it dampens j. Assumed links include shame ↔ loneliness (0.5 / 0.4: hiding and isolating), sadness ↔ loneliness (0.4 / 0.5: withdrawal), guilt ↔ shame (0.4 / 0.3), fear ↔ anger (0.3 / 0.2), shame ↔ anger (0.35 / 0.2), and dampeners such as connection → loneliness −0.6, connection → shame −0.5, calm → fear −0.5, hope → sadness −0.4.
+
+**3. Dynamics.** `e(t+1) = clamp01( e(t) + h·(Wᵀ·e(t) − d·e(t)) )` with `h = 0.15`, `d = 0.3` (each feeling fades on its own). The Projection line runs 8 steps and names the feeling that moves most "if nothing changes".
+
+**4. Unstable combinations.** For two present emotions that amplify each other, the loop strength is `u_ij = W_ij·W_ji·e_i·e_j`; loops with `u ≥ 0.025` are listed. A loop of hard feelings is **unstable** on its own when `√(W_ij·W_ji) − d > 0` (it grows faster than it fades), otherwise **reinforcing** (it settles on its own). Loops of helpful feelings are **steadying**. A **tension** pair is a helpful and a hard feeling that dampen each other (a tug-of-war).
+
+**5. Overall λ.** On the active emotions (`e > 0.1`), the Jacobian is `J = Wᵀ − d·I`, and λ is the largest real part of its eigenvalues (QR iteration, all local). `λ > 0`: small changes grow instead of fading (a feeding loop, or a tug-of-war where one side wins). `λ ≤ 0`: the mix settles back.
+
+**6. Stabilizer.** The helpful emotion that dampens the unstable pair most, with one skill and a guide: connection → Reach out (Tidelyn), calm → Paced breathing / TIPP (Mistfawn), hope → One small step (Hivewright), joy → One pleasant activity (Pell).
+
+When the words show no thinking pattern, Story and Play take their guide from the strongest hard loop (shame or guilt → labeling, loneliness or sadness → hopelessness, fear or anger → catastrophizing). The words win when they show a pattern.
+
+Example, for "I'm ashamed and so alone, nobody cares and I'm angry at myself":
+
+```
+Emotions
+  loneliness = 0.94
+  shame = 0.80
+  anger = 0.68
+Relationships
+  shame (0.80) ↑ loneliness (0.94)
+  loneliness (0.94) ↑ shame (0.80)
+  shame (0.80) ↑ anger (0.68)
+  anger (0.68) ↑ loneliness (0.94)
+Unstable combinations
+  shame × loneliness: loop, u = 0.15 → unstable
+  anger × shame: loop, u = 0.04 → reinforcing, settles on its own
+Overall
+  λ = +0.27 → unstable mix (small changes grow instead of fading)
+Projection
+  If nothing changes (8 steps): sadness 0.00 → 0.52
+Stabilizer
+  connection ↓ shame, ↓ loneliness → try Reach out, with Tidelyn
+```
+
+Crisis text is checked first: the engine returns nothing and the support box is shown. The output never repeats your words, and only one λ number per day is stored (`mindframe-lambda`).
 
 ## Reframe: the Grounding Loop
 
@@ -73,7 +124,7 @@ python3 serve.py
 
 Then open [http://localhost:8000](http://localhost:8000).
 
-Tests (no dependencies): `node tests/grounding.test.js`, `node tests/stories.test.js`, `node tests/psi.test.js`, `node tests/games.test.js`.
+Tests (no dependencies): `node tests/emotions.test.js`, `node tests/grounding.test.js`, `node tests/stories.test.js`, `node tests/psi.test.js`, `node tests/games.test.js`.
 
 ## Research paper
 
@@ -94,14 +145,16 @@ js/grounding.js         Grounding Loop: mirage reading, update rule, history
 js/stories.js           story templates and creature guides
 js/psi.js               check-in math: Ψ, weights, next skill, weekly summary
 js/games.js             path, spot-the-mirage, and word-tile games
+js/emotions.js          equation engine: emotion vector, W, dynamics, loops, λ, language
 js/cbt-techniques.js    local CBT exercises
 js/bots.js              five coaches, believability, which coach goes first
 js/app.js               the screen: choices, crisis, copy, Coach, Journal, Insights
+js/equations-ui.js      Equations output, Equation view lines, λ trend
 js/ground-ui.js         Reframe and Story outputs
 js/play-ui.js           Play output and the steadiness meter
 js/checkin-ui.js        Check-in output, weights, chart, weekly card
 js/start.js             first choice on open, old ?view= links
-tests/                  node tests for grounding, stories, psi, games
-screenshots/            the one screen with Reframe, Story, Play, Insights, crisis
+tests/                  node tests for emotions, grounding, stories, psi, games
+screenshots/            the one screen with Equations, Reframe, Story, Play, Insights, crisis
 paper/                  research papers (PDF and LaTeX)
 ```

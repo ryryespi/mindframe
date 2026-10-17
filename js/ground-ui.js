@@ -60,6 +60,7 @@ registerOutput("reframe", text => {
   const read = Grounding.read(text);
   if (read.crisis) { showCrisis(); return; }
   resetGround();
+  equationLine("eq-reframe", text);
   gDraft = { read, kind: "", r: null };
   $("g-labels").innerHTML = read.labels.length
     ? read.labels.map(l => `<span class="tag">${esc(l)}</span>`).join("")
@@ -174,6 +175,8 @@ function gTellStory(fresh) {
 }
 
 function openStory(ctx) {
+  const eq = equationLine("eq-story", ctx.thought);
+  ctx = { ...ctx, read: withEmotionArc(ctx.read, ctx.thought, eq) };
   storyCtx = { ...ctx, seed: 0, lastKey: null };
   // Faith starts on only for hidden-meaning thoughts. The toggle is yours.
   $("g-faith").checked = Stories.arcFor(ctx.read) === "meaning";

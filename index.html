@@ -34,6 +34,7 @@
         <textarea id="thought" rows="4" placeholder="What's on your mind?"></textarea>
 
         <div class="choices" id="choices" role="radiogroup" aria-label="What you'd like back">
+          <button type="button" class="choice" role="radio" data-chip="equations" aria-checked="false">Equations</button>
           <button type="button" class="choice" role="radio" data-chip="reframe" aria-checked="false">Reframe</button>
           <button type="button" class="choice" role="radio" data-chip="coach" aria-checked="false">Coach</button>
           <button type="button" class="choice" role="radio" data-chip="story" aria-checked="false">Story</button>
@@ -62,8 +63,15 @@
           <button type="button" id="crisis-again" class="text">Write another</button>
         </div>
 
+        <!-- Equations: the emotion engine. A model, not validated science. -->
+        <div id="p-equations" class="panel hidden">
+          <div id="eq-out" class="eq"></div>
+          <p class="quiet small">A model built from design assumptions informed by emotion research. Not validated science, and not a diagnosis.</p>
+        </div>
+
         <!-- Reframe: the Grounding Loop, starting from the thought above. -->
         <div id="p-reframe" class="panel hidden">
+          <p class="eq-line copyable hidden" id="eq-reframe"></p>
           <div id="g-grip">
             <p class="quiet small">1 of 4 · Name it</p>
             <h2 tabindex="-1">How strong is its grip?</h2>
@@ -125,6 +133,7 @@
 
         <!-- Coach: one coach chosen from what the analyzer noticed, others on request. -->
         <div id="p-coach" class="panel hidden">
+          <p class="eq-line copyable hidden" id="eq-coach"></p>
           <article id="best-coach" class="card coach copyable"></article>
           <article id="values-card" class="card hidden"></article>
           <button type="button" id="more-angles" class="text" aria-expanded="false">See other angles</button>
@@ -133,6 +142,7 @@
 
         <!-- Story: made on this phone from templates. Never saved. -->
         <div id="p-story" class="panel hidden">
+          <p class="eq-line copyable hidden" id="eq-story"></p>
           <article class="card story">
             <p id="g-story-tag" class="creature-tag"></p>
             <p id="g-story-text" class="copyable"></p>
@@ -148,6 +158,7 @@
         <!-- Play: small offline games from the story pieces. -->
         <div id="p-play" class="panel hidden">
           <div id="g-play-pick">
+            <p class="eq-line hidden" id="eq-play"></p>
             <p class="creature-tag" id="gp-pick-tag"></p>
             <p class="quiet small" id="gp-pick-note"></p>
             <div class="options">
@@ -205,6 +216,7 @@
 
           <div id="ci-result" class="hidden">
             <p class="g-result copyable" id="ci-score"></p>
+            <p class="eq-line copyable" id="eq-checkin"></p>
             <article class="card skill copyable" id="ci-skill"></article>
             <button type="button" id="ci-redo" class="text">Redo check-in</button>
           </div>
@@ -223,22 +235,25 @@
           <article id="weekly" class="card hidden"></article>
           <article id="ins-skill" class="card skill hidden copyable"></article>
           <div id="trend" class="copyable"></div>
+          <div id="eq-trend" class="copyable"></div>
           <div id="insights"></div>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- Load order: logic first (analyzer, grounding, stories, psi, games, techniques, bots),
+  <!-- Load order: logic first (analyzer, grounding, stories, psi, games, emotions, techniques, bots),
        then the screen (app), then the output parts that use it. -->
   <script src="js/analyzer.js"></script>
   <script src="js/grounding.js"></script>
   <script src="js/stories.js"></script>
   <script src="js/psi.js"></script>
   <script src="js/games.js"></script>
+  <script src="js/emotions.js"></script>
   <script src="js/cbt-techniques.js"></script>
   <script src="js/bots.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/equations-ui.js"></script>
   <script src="js/ground-ui.js"></script>
   <script src="js/play-ui.js"></script>
   <script src="js/checkin-ui.js"></script>
