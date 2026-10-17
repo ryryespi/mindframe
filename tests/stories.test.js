@@ -1,7 +1,7 @@
 // Run: node tests/stories.test.js   (no dependencies)
 const assert = require("node:assert/strict");
-const G = require("../js/grounding.js");
-const S = require("../js/stories.js");
+const G = require("../js/core/grounding.js");
+const S = require("../js/features/writer/stories.js");
 
 let passed = 0;
 function test(name, fn) {

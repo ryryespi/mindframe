@@ -2,7 +2,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const M = require("../js/model.js");
+const M = require("./mf.js");
 
 let passed = 0;
 function test(name, fn) {
@@ -120,7 +120,7 @@ function formula(state, text) {
   const h = state.home, W = M.weights(state.w), V = state.vars;
   const dist = Math.hypot(...e.map((x, i) => x - h[i]));
   const lam = M._parts.lambda(e, W, V.d);
-  let a = Math.min(V.aMax, V.aBase + M.FIXED.kd * dist);
+  let a = Math.min(V.aMax, V.aBase + V.k * dist);
   if (lam !== null && lam > 0) a = Math.min(a, M.FIXED.aCap);
   const b = lam !== null && lam > 0 ? M.FIXED.bU : V.b;
   const s = M.NAMES.map((n, j) => (M.GROUND.includes(n) || e[j] <= h[j] ? 0 : e[j] * M.GROUND.reduce((acc, g) => acc + Math.min(0, W[I(g)][j]) * h[I(g)], 0)));
@@ -176,14 +176,14 @@ test("routing: every feature calls master (live, story, game, checkpoint, accept
   const { state, m } = live(S1);
   assert.ok(count(() => M.master(S1, M.defaultState(), { sim: false })) === 1, "live output: one master call");
   assert.ok(count(() => M.master(S1, M.defaultState())) >= 1, "live output with recovery");
-  assert.ok(count(() => M.story(state, M.metrics(state), { seed: 1 })) >= 1, "story");
+  assert.ok(count(() => M.story(state, M.master("", state), { seed: 1 })) >= 1, "story");
   assert.deepEqual(M.story(state, m, { seed: 1 }).next, m.next, "the story is driven by the master step");
-  assert.ok(count(() => M.game(state, M.metrics(state), { seed: 1 })) >= 1, "path game");
+  assert.ok(count(() => M.game(state, M.master("", state), { seed: 1 })) >= 1, "path game");
   assert.ok(count(() => M.addCheckpoint(state, "start", Date.parse("2026-10-16T09:00:00"))) >= 1, "checkpoint");
   assert.ok(count(() => M.acceptStep(state, Date.parse("2026-10-16T09:00:00"))) >= 1, "accept step");
   const r = count(() => M.recovery(state));
   assert.ok(r >= m.recovery.steps, "recovery repeats the master step");
-  assert.ok(count(() => M.baseline({ ...state, days: [{ day: "2026-10-10", e: state.e }] })) >= 1, "baseline");
+  assert.ok(count(() => assert.equal(M.master("", { ...state, days: [{ day: "2026-10-10", e: state.e }] }, { sim: false }).baseline.days, 1)) >= 1, "baseline");
   const code = M.serialize(M.addCheckpoint(state, "start", Date.parse("2026-10-16T09:00:00")));
   assert.ok(count(() => M.refreshIdeal(M.parse(code).state)) >= 1, "import restore");
   assert.ok(count(() => M.restore(M.parse(code).state, 1)) >= 1, "checkpoint restore");
@@ -200,9 +200,10 @@ test("routing: accept step lands exactly on master's next; recovery counts maste
 });
 test("routing: no other code path steps e (the old ideal/simulate are gone)", () => {
   ["ideal", "simulate", "step", "lambda", "hidden"].forEach(k => assert.equal(M[k], undefined, k));
-  const src = require("node:fs").readFileSync(require("node:path").join(__dirname, "../js/ui.js"), "utf8");
-  assert.ok(!/\bcombine\(|\bfromText\([^)]*\)\.w|_parts/.test(src), "the UI does not compute steps itself");
-  assert.ok(/Model\.master\(/.test(src));
+  const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+  const outside = ["js/app.js", "js/features/historian.js", "js/features/writer/writer.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/features/relationship.js"];
+  outside.forEach(f => assert.ok(!/\bcombine\(|\bfromText\([^)]*\)\.w|_parts/.test(read(f)), `${f} does not compute steps itself`));
+  assert.ok(/\bmaster\(\$\("input"\)\.value/.test(read("js/app.js")), "the app calls the master function on Update");
 });
 test("hidden: a mover that is quiet now can be shown rising", () => {
   const { m } = live(S2);
@@ -228,7 +229,7 @@ test("variables: validated and kept in range; Reset defaults are the spec", () =
   assert.equal(v.vars.b, 0);
   assert.equal(v.vars.d, 0.3);
   assert.ok(v.notes.length >= 3);
-  assert.deepEqual(M.defaultVars(), { aBase: 0.2, aMax: 0.25, b: 0.1, d: 0.3 });
+  assert.deepEqual(M.defaultVars(), { aBase: 0.2, k: 0.05, aMax: 0.25, b: 0.1, d: 0.3 });
   assert.equal(M.MAIN_PAIRS.length, 7);
 });
 
@@ -351,7 +352,7 @@ test("story: driven by the master step, words not numbers, ends with an affirmat
   });
   assert.ok(/God|pray|Lord/i.test(M.story(a.state, a.m, { seed: 1, faith: true }).text));
   const home = { ...M.defaultState(), e: M.defaultState().home.slice() };
-  assert.equal(M.story(home, M.metrics(home)), null, "nothing to tell at home");
+  assert.equal(M.story(home, M.master("", home)), null, "nothing to tell at home");
 });
 test("path game: scene one follows the mover and it ends with an affirmation plus the question", () => {
   const { state, m } = live(S1);
@@ -436,7 +437,7 @@ test("crisis: a crisis label inside code is refused", () => {
 });
 
 // ---------- one page ----------
-test("single page: index has no tools links; tools.html only redirects; the service worker is v13", () => {
+test("single page: index has no tools links; tools.html only redirects; the service worker is v14", () => {
   const root = path.join(__dirname, "..");
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const tools = fs.readFileSync(path.join(root, "tools.html"), "utf8");
@@ -445,9 +446,11 @@ test("single page: index has no tools links; tools.html only redirects; the serv
   assert.ok(/history\.replaceState/.test(index), "old ?view/?chip links are stripped");
   assert.ok(/location\.replace\("\.\/"\)/.test(tools) && /http-equiv="refresh"/.test(tools));
   assert.ok(!/<textarea|<script src/.test(tools), "tools.html is only a redirect");
-  assert.match(sw, /mindframe-shell-v13/);
+  assert.match(sw, /mindframe-shell-v14/);
   const scripts = [...index.matchAll(/<script src="([^"]+)"/g)].map(x => x[1]);
-  assert.deepEqual(scripts, ["js/analyzer.js", "js/grounding.js", "js/stories.js", "js/games.js", "js/model.js", "js/ui.js"]);
+  assert.deepEqual(scripts, ["js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/master.js", "js/core/words.js",
+    "js/features/relationship.js", "js/features/writer/stories.js", "js/features/writer/games.js", "js/features/historian.js",
+    "js/features/writer/writer.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/app.js"]);
   scripts.forEach(s => assert.ok(sw.includes(`./${s}`), `${s} cached`));
   ["presets", "Compare", "Optimize", "Check-in", "Spot the mirage", "Rebuild"].forEach(w => assert.ok(!index.includes(w), `no ${w}`));
 });

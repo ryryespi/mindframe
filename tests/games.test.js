@@ -1,8 +1,8 @@
 // Run: node tests/games.test.js   (no dependencies)
 const assert = require("node:assert/strict");
-const G = require("../js/grounding.js");
-const S = require("../js/stories.js");
-const Gm = require("../js/games.js");
+const G = require("../js/core/grounding.js");
+const S = require("../js/features/writer/stories.js");
+const Gm = require("../js/features/writer/games.js");
 
 let passed = 0;
 function test(name, fn) {

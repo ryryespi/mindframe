@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-labelledby="t"><title id="t">Toby the Tortoise, the Scribe</title>
+<circle cx="60" cy="60" r="58" fill="#e6eee3"/>
+<ellipse cx="30" cy="88" rx="7" ry="9" fill="#9fbf8f"/><ellipse cx="62" cy="90" rx="7" ry="9" fill="#9fbf8f"/>
+<path d="M14 82 C14 52 36 36 54 36 C72 36 90 52 88 82 Z" fill="#7f9f6a"/>
+<path d="M51 40 L61 50 L56 64 L42 64 L37 50 Z M24 66 L37 50 L42 64 L36 80 L18 80 Z M80 80 L62 80 L56 64 L61 50 L76 62 Z" fill="#94b47c" stroke="#6b8a58" stroke-width="2" stroke-linejoin="round"/>
+<path d="M12 82 L90 82" stroke="#6b8a58" stroke-width="4" stroke-linecap="round"/>
+<path d="M86 70 C86 58 96 50 104 54 C112 58 112 72 104 78 C98 82 88 80 86 70 Z" fill="#a8c797"/>
+<circle cx="100" cy="62" r="3.4" fill="#3f3a34"/><circle cx="101" cy="61" r="1.1" fill="#fff"/>
+<path d="M96 70 Q100 73 104 70" stroke="#3f3a34" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<ellipse cx="94" cy="67" rx="3" ry="2" fill="#ef9f86" opacity=".55"/>
+<path d="M60 26 C76 14 96 10 104 12 C98 22 82 34 64 32 Z" fill="#fbf6ee" stroke="#b9b1a5" stroke-width="1.5"/>
+<path d="M62 30 L104 12" stroke="#b9b1a5" stroke-width="1.3"/>
+<path d="M62 30 L52 44" stroke="#3f3a34" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

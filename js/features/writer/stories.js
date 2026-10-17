@@ -1,4 +1,4 @@
-// stories.js — short, calm, grounded stories for the Grounding Loop.
+// features/writer/stories.js — (Writer) short, calm, grounded stories for the Grounding Loop.
 //
 // Built from templates on the phone. No network, no model.
 // Each story follows one shape:
@@ -8,8 +8,10 @@
 //   -> a gentle question back to you.
 // Stories make no promises about outcomes, and nothing here is saved.
 
+if (typeof module !== "undefined") require("../../core/movers.js");
+
 const Stories = (function () {
-  const G = typeof Grounding !== "undefined" ? Grounding : require("./grounding.js");
+  const G = typeof Grounding !== "undefined" ? Grounding : require("../../core/grounding.js");
 
   // Invented creatures and simple travelers. Not real animals.
   // The first five come from Project Veda (veda/mental.py), so the same
@@ -165,18 +167,10 @@ const Stories = (function () {
 
   const ARCS = Object.keys(MIRAGE);
 
-  // Small seeded random generator (mulberry32), so a seed gives the same story.
-  function rng(seed) {
-    let a = seed >>> 0;
-    return function () {
-      a = (a + 0x6d2b79f5) >>> 0;
-      let t = a;
-      t = Math.imul(t ^ (t >>> 15), t | 1);
-      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
+  // The seeded random generator is shared with the rest of the app (core/movers.js).
+  const rng = (typeof window !== "undefined" ? window.MF : global.MF).Movers.rng;
 
+  /** Escape text for safe use inside HTML. */
   function escapeHTML(s) {
     return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
@@ -211,19 +205,24 @@ const Stories = (function () {
     }).join("").replace(/,\s*$/, "");
   }
 
+  /** Capitalize the first letter. */
   const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 
+  /** Replace {key} placeholders in a template from ctx. */
   function fill(template, ctx) {
     return template.replace(/\{(\w+)\}/g, (m, key) => (key in ctx ? ctx[key] : m));
   }
 
+  /** The story arc for a reading: its top pattern, or "none". */
   function arcFor(read) {
     const top = read && read.patterns && read.patterns[0];
     return ARCS.includes(top) ? top : "none";
   }
 
-  // opts: { read, thought, reframe, step, faith, you, seed, avoid, mover }
-  // Returns { crisis: true } and nothing else when any text reads as a crisis.
+  /**
+   * Tell one creature story. opts: { read, thought, reframe, step, faith, you, seed, avoid, mover }.
+   * Returns { crisis: true } and nothing else when any text reads as a crisis.
+   */
   function tell(opts = {}) {
     const texts = [opts.thought, opts.reframe, opts.step].filter(Boolean);
     if (texts.some(t => G.isCrisis(t))) return { crisis: true };
@@ -240,6 +239,7 @@ const Stories = (function () {
     return compose(arc, read, opts, faith, seed);
   }
 
+  /** Write one story for an arc with a seeded choice of creature, opening and lines. */
   function compose(arc, read, opts, faith, seed) {
     const rand = rng(seed);
     const pick = list => list[Math.floor(rand() * list.length)];

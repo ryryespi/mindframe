@@ -14,7 +14,7 @@
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script>
-    // Old links (?view=, ?chip=, ?thought=) all open this one tool. Nothing from the link is used.
+    // Old links (?view=, ?chip=, ?thought=) all open this one page. Nothing from the link is used.
     if (/[?&](view|chip|thought)=/.test(location.search)) history.replaceState(null, "", location.pathname + location.hash);
   </script>
 </head>
@@ -26,91 +26,100 @@
     <header class="top"><h1>MindFrame</h1></header>
 
     <main>
+      <!-- 1. Write, then tap Update. Nothing is read until you do. -->
       <label class="visually-hidden" for="input">What's on your mind?</label>
       <textarea id="input" rows="4" placeholder="What's on your mind?"></textarea>
-      <p class="quiet small" id="base-note">Updates as you type. Your words are never saved unless you tap Journal; only the numbers are kept.</p>
+      <button type="button" id="update" class="primary">Update</button>
+      <p class="quiet small">Your words stay on this device and are never saved unless you keep them in the journal. Ctrl or Cmd + Enter also works.</p>
 
       <div id="crisis-wrap" class="hidden"><div id="crisis" class="crisis" tabindex="-1"></div></div>
 
       <div id="body">
-        <section id="out" class="card" aria-live="polite">
+        <!-- 2. The reading, in words. Hidden until Update. -->
+        <section id="out" class="card hidden" aria-live="polite">
           <span class="label">What you may be feeling</span><p id="feel"></p>
           <span class="label">How they connect</span><ul id="connect" class="plain"></ul>
+          <div id="pattern" class="hidden"></div>
           <span class="label">Affirmations</span><ul id="affirm" class="affirm"></ul>
           <span class="label">One step</span><p id="step"></p>
           <p id="progress" class="quiet"></p>
-          <label class="check small"><input type="checkbox" id="faith" /> Include faith</label>
-          <div class="row"><button type="button" class="text" id="copy">Copy</button><span class="quiet small" id="copied"></span></div>
+          <div class="row">
+            <label class="check small"><input type="checkbox" id="faith" /> Include faith</label>
+            <button type="button" class="text" id="copy">Copy</button><span class="quiet small" id="copied"></span>
+          </div>
         </section>
-
-        <details id="math" class="sec">
-          <summary>Show the math</summary>
-          <p class="quiet small">Every result above comes from one function: step = act(clip01(e + a(e)(h &minus; e) + b&middot;s(e))). These are model numbers, not measurements of you.</p>
-          <ul id="movers" class="movers"></ul>
-          <ul id="math-lines" class="lines"></ul>
-        </details>
-        <details id="adjust" class="sec">
-          <summary>Adjust numbers</summary>
-          <p class="quiet small">Set any mover by hand. New words add to these.</p>
-          <div id="sliders" class="sliders"></div>
-        </details>
-
-        <div class="row">
-          <button type="button" id="story-go" class="secondary">Story</button>
-          <button type="button" id="save" class="secondary">Save checkpoint</button>
-          <button type="button" id="journal-save" class="secondary">Journal</button>
-          <button type="button" id="code-open" class="secondary">Export / Import</button>
-        </div>
         <p id="note" class="quiet small" aria-live="polite"></p>
 
-        <section id="story" class="card hidden">
-          <p id="story-tag" class="creature-tag"></p>
-          <p id="story-text"></p>
-          <div class="row">
-            <button type="button" id="accept" class="secondary">Accept step</button>
-            <button type="button" id="play" class="secondary">Play this story</button>
-            <button type="button" id="story-again" class="text">Another story</button>
-          </div>
-          <div id="game" class="hidden">
-            <p id="game-count" class="quiet small"></p>
-            <h2 id="game-title" tabindex="-1"></h2>
-            <p id="game-text"></p>
-            <p id="game-prompt" class="quiet"></p>
-            <div id="game-choices" class="choices"></div>
-            <p id="game-feedback" class="feedback"></p>
-            <button type="button" id="game-next" class="secondary hidden">Next</button>
-          </div>
-        </section>
+        <!-- 3. Five friends, each opens one panel. -->
+        <nav class="friends" aria-label="Helpers">
+          <button type="button" class="friend" aria-controls="p-writer" aria-expanded="false" aria-label="Fern the Fox, Writer: journal and stories">
+            <img src="img/fox.svg" alt="" width="64" height="64" /><strong>Fern</strong><span class="role">Writer</span><span class="who">Keeps your journal and spins gentle stories.</span>
+          </button>
+          <button type="button" class="friend" aria-controls="p-historian" aria-expanded="false" aria-label="Hazel the Owl, Historian: history and checkpoints">
+            <img src="img/owl.svg" alt="" width="64" height="64" /><strong>Hazel</strong><span class="role">Historian</span><span class="who">Remembers your days and how far you've come.</span>
+          </button>
+          <button type="button" class="friend" aria-controls="p-analyzer" aria-expanded="false" aria-label="Remy the Raccoon, Analyzer: the nine movers in words">
+            <img src="img/raccoon.svg" alt="" width="64" height="64" /><strong>Remy</strong><span class="role">Analyzer</span><span class="who">Turns over each feeling to see how it fits.</span>
+          </button>
+          <button type="button" class="friend" aria-controls="p-scribe" aria-expanded="false" aria-label="Toby the Tortoise, Scribe: export and import">
+            <img src="img/tortoise.svg" alt="" width="64" height="64" /><strong>Toby</strong><span class="role">Scribe</span><span class="who">Slow and careful; copies your numbers safely.</span>
+          </button>
+          <button type="button" class="friend" aria-controls="p-scientist" aria-expanded="false" aria-label="Ada the Otter, Scientist: the math and adjust numbers">
+            <img src="img/otter.svg" alt="" width="64" height="64" /><strong>Ada</strong><span class="role">Scientist</span><span class="who">Loves equations and lets you tinker.</span>
+          </button>
+        </nav>
 
-        <details id="journal-sec" class="sec">
-          <summary>Journal</summary>
-          <p class="quiet small">Only what you save with Journal, kept on this device.</p>
+        <!-- Writer: journal + stories + path game -->
+        <section id="p-writer" class="panel card hidden" aria-label="Writer">
+          <div class="panel-head"><img src="img/fox.svg" alt="" width="40" height="40" /><h2>Fern the Fox, Writer</h2><button type="button" class="text panel-close" aria-label="Close the Writer">Close</button></div>
+          <div class="row">
+            <button type="button" id="story-go" class="secondary">Write a story</button>
+            <button type="button" id="journal-save" class="secondary">Save to journal</button>
+          </div>
+          <div id="story" class="hidden">
+            <p id="story-tag" class="creature-tag"></p>
+            <p id="story-text"></p>
+            <div class="row">
+              <button type="button" id="accept" class="secondary">Accept step</button>
+              <button type="button" id="play" class="secondary">Play this story</button>
+              <button type="button" id="story-again" class="text">Another story</button>
+            </div>
+            <div id="game" class="hidden">
+              <p id="game-count" class="quiet small"></p>
+              <h2 id="game-title" tabindex="-1"></h2>
+              <p id="game-text"></p>
+              <p id="game-prompt" class="quiet"></p>
+              <div id="game-choices" class="choices"></div>
+              <p id="game-feedback" class="feedback"></p>
+              <button type="button" id="game-next" class="secondary hidden">Next</button>
+            </div>
+          </div>
+          <h3>Journal</h3>
+          <p class="quiet small">Only what you save here is kept, on this device.</p>
           <ul id="journal-list" class="journal"></ul>
           <button type="button" id="journal-clear" class="text hidden">Clear journal</button>
-        </details>
+        </section>
 
-        <details id="history" class="sec">
-          <summary>History</summary>
-          <p class="quiet small">One point per day (the last checkpoint or accepted step), compared with your recent baseline.</p>
+        <!-- Historian: history + checkpoints -->
+        <section id="p-historian" class="panel card hidden" aria-label="Historian">
+          <div class="panel-head"><img src="img/owl.svg" alt="" width="40" height="40" /><h2>Hazel the Owl, Historian</h2><button type="button" class="text panel-close" aria-label="Close the Historian">Close</button></div>
           <ul id="week" class="plain"></ul>
-          <p id="today" class="quiet small"></p>
-          <details class="sub"><summary class="small">The math</summary><ul id="week-math" class="lines"></ul></details>
-          <h2>Checkpoints</h2>
+          <button type="button" id="save" class="secondary">Save checkpoint</button>
+          <h3>Checkpoints</h3>
           <p id="cps-empty" class="quiet small">None yet. Save one to come back to it.</p>
           <ol id="cps" class="cps"></ol>
-        </details>
+        </section>
 
-        <details id="vars" class="sec">
-          <summary>Variables</summary>
-          <p class="quiet small">The home targets, step size, decay, and the main links between movers. Design choices, not validated values.</p>
-          <div id="var-grid" class="var-grid"></div>
-          <p id="var-notes" class="quiet small"></p>
-          <button type="button" id="vars-reset" class="secondary">Reset to defaults</button>
-        </details>
+        <!-- Analyzer: the nine movers in words -->
+        <section id="p-analyzer" class="panel card hidden" aria-label="Analyzer">
+          <div class="panel-head"><img src="img/raccoon.svg" alt="" width="40" height="40" /><h2>Remy the Raccoon, Analyzer</h2><button type="button" class="text panel-close" aria-label="Close the Analyzer">Close</button></div>
+          <ul id="breakdown" class="plain"></ul>
+        </section>
 
-        <details id="code-sec" class="sec">
-          <summary>Export / Import</summary>
-          <p class="quiet small">Your session as plain .mf code: numbers and labels only, kept on this device for next time.</p>
+        <!-- Scribe: export / import -->
+        <section id="p-scribe" class="panel card hidden" aria-label="Scribe">
+          <div class="panel-head"><img src="img/tortoise.svg" alt="" width="40" height="40" /><h2>Toby the Tortoise, Scribe</h2><button type="button" class="text panel-close" aria-label="Close the Scribe">Close</button></div>
+          <p class="quiet small">Your session as plain .mf code: numbers and labels only, never your words.</p>
           <pre id="code" class="code"></pre>
           <div class="row">
             <button type="button" id="copy-code" class="secondary">Copy code</button>
@@ -123,18 +132,44 @@
           <ul id="import-errors" class="errors"></ul>
           <button type="button" id="import-go" class="primary">Restore from code</button>
           <div class="row"><button type="button" id="clear" class="text">Start over</button></div>
-        </details>
+        </section>
 
-        <p class="quiet small">A model built from design assumptions and informed by research, not validated science and not a diagnosis. The home vector is one picture of a steadier place, not a rule for how you should feel.</p>
+        <!-- Scientist: the math + adjust numbers and variables -->
+        <section id="p-scientist" class="panel card hidden" aria-label="Scientist">
+          <div class="panel-head"><img src="img/otter.svg" alt="" width="40" height="40" /><h2>Ada the Otter, Scientist</h2><button type="button" class="text panel-close" aria-label="Close the Scientist">Close</button></div>
+          <p class="quiet small">Every result comes from one function: step = act(clip01(e + a(e)(h &minus; e) + b&middot;s(e))). Model numbers, not measurements of you.</p>
+          <ul id="movers" class="movers"></ul>
+          <ul id="math-lines" class="lines"></ul>
+          <h3>Adjust numbers</h3>
+          <p class="quiet small">Set any mover by hand; new words add to these. Tap Update to see the result.</p>
+          <div id="sliders" class="sliders"></div>
+          <h3>Variables</h3>
+          <p class="quiet small">a0, k, a_max, b, decay d, home targets and the main links. Design choices, not validated values.</p>
+          <div id="var-grid" class="var-grid"></div>
+          <p id="var-notes" class="quiet small"></p>
+          <button type="button" id="vars-reset" class="secondary">Reset to defaults</button>
+        </section>
+
+        <p class="quiet small foot">A model built from design assumptions and informed by research, not validated science and not a diagnosis.</p>
       </div>
     </main>
   </div>
 
-  <script src="js/analyzer.js"></script>
-  <script src="js/grounding.js"></script>
-  <script src="js/stories.js"></script>
-  <script src="js/games.js"></script>
-  <script src="js/model.js"></script>
-  <script src="js/ui.js"></script>
+  <!-- core: signals → grounding → movers → master → words -->
+  <script src="js/core/signals.js"></script>
+  <script src="js/core/grounding.js"></script>
+  <script src="js/core/movers.js"></script>
+  <script src="js/core/master.js"></script>
+  <script src="js/core/words.js"></script>
+  <!-- features -->
+  <script src="js/features/relationship.js"></script>
+  <script src="js/features/writer/stories.js"></script>
+  <script src="js/features/writer/games.js"></script>
+  <script src="js/features/historian.js"></script>
+  <script src="js/features/writer/writer.js"></script>
+  <script src="js/features/analyzer.js"></script>
+  <script src="js/features/scribe.js"></script>
+  <script src="js/features/scientist.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

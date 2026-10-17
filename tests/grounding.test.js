@@ -1,6 +1,6 @@
 // Run: node tests/grounding.test.js   (no dependencies)
 const assert = require("node:assert/strict");
-const G = require("../js/grounding.js");
+const G = require("../js/core/grounding.js");
 
 let passed = 0;
 function test(name, fn) {

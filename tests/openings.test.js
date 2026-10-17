@@ -1,9 +1,9 @@
 // Run: node tests/openings.test.js   (no dependencies)
 // Story openings and the path game's first scene follow the strongest mover.
 const assert = require("node:assert/strict");
-const S = require("../js/stories.js");
-const Gm = require("../js/games.js");
-const M = require("../js/model.js");
+const S = require("../js/features/writer/stories.js");
+const Gm = require("../js/features/writer/games.js");
+const M = require("./mf.js");
 
 let passed = 0;
 function test(name, fn) {
@@ -18,7 +18,7 @@ const I = n => M.NAMES.indexOf(n);
 const live = text => {
   const s = M.defaultState(), r = M.fromText(text);
   const state = { ...s, e: M.combine(s.e, r.w) };
-  return { state, m: M.metrics(state, { notes: r.notes, read: r.read }) };
+  return { state, m: M.master("", state) };
 };
 // A state where one mover leads: a hard/process mover high, or one grounding mover low.
 function leading(mover) {
@@ -53,7 +53,7 @@ for (const mover of ALL9) {
   });
   test(`${mover}: the model picks it as the opening when it leads`, () => {
     const s = leading(mover);
-    const story = M.story(s, M.metrics(s), { seed: 3 });
+    const story = M.story(s, M.master("", s), { seed: 3 });
     assert.equal(story.focus, mover);
     assert.equal(story.opening, mover);
     assert.ok(has(story.text, P.MOVER_MIRAGE[mover]));

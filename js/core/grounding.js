@@ -1,4 +1,4 @@
-// grounding.js — the Grounding Loop guide.
+// core/grounding.js — the Grounding Loop guide.
 //
 // A small rule-based guide, not a trained model. It reads the thought you
 // type, looks for "mirage" wording, and walks you through four steps:
@@ -17,18 +17,20 @@
 // Wrapped in one object so no name collides with the other scripts.
 
 const Grounding = (function () {
-  const analyzeFn = typeof analyze === "function" ? analyze : require("./analyzer.js").analyze;
+  const analyzeFn = typeof analyze === "function" ? analyze : require("./signals.js").analyze;
 
   const ETA = 0.2;
   const START_G = 0.5;
   const LOW_G = 0.3;
   const LOW_DAYS = 3;
 
+  /** Clamp a number to [0, 1]; anything not finite becomes 0. */
   function clamp01(x) {
     if (!Number.isFinite(x)) return 0;
     return Math.min(1, Math.max(0, x));
   }
 
+  /** One grounding update: move G by eta in the direction of r, scaled by hope H and grip M. */
   function updateG(G, M, H, r, eta = ETA) {
     const step = r > 0 ? 1 : r < 0 ? -1 : 0;
     return clamp01(clamp01(G) + eta * step * (1 + clamp01(H) - clamp01(M)) / 2);
@@ -109,6 +111,7 @@ const Grounding = (function () {
     totally: "part of this is hard, not all of it",
   };
 
+  /** A gentler phrasing for an absolute word ("always", "never", …). */
   function bigWordReframe(word) {
     const truer = BIG_WORD[word];
     if (!truer) return "";
@@ -116,6 +119,7 @@ const Grounding = (function () {
     return `"${cap}" is a big word. Truer: ${truer}.`;
   }
 
+  /** Round to the nearest 0.05. */
   const round05 = x => Math.round(x * 20) / 20;
 
   // The guide's whole decision, in one place. Returns everything the screen needs.
@@ -169,16 +173,19 @@ const Grounding = (function () {
 
   // ---------- History (numbers only; the thought text is not stored) ----------
 
+  /** Local calendar day for a timestamp, as YYYY-MM-DD. */
   function dayKey(ts) {
     const d = new Date(ts);
     const pad = n => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   }
 
+  /** The latest grounding value in the log, or the starting value. */
   function currentG(state) {
     return state && state.log && state.log.length ? state.log[state.log.length - 1].G : START_G;
   }
 
+  /** Add one numbers-only entry to the log (the thought text is never stored). */
   function record(state, entry, ts = Date.now()) {
     const log = (state && state.log ? state.log : []).slice();
     log.push({ ts, day: dayKey(ts), ...entry });
@@ -224,6 +231,7 @@ const Grounding = (function () {
     return streak;
   }
 
+  /** True after LOW_DAYS low days in a row. */
   function needsCheckIn(state) {
     return lowStreak(state) >= LOW_DAYS;
   }

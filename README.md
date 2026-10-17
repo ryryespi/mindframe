@@ -1,6 +1,6 @@
 # MindFrame
 
-A calm, local-only practice tool for looking at a thought. One page, one input box: type and the card updates as you go. No network, no account, no API.
+A calm, local-only practice tool for looking at a thought. One page, one input box, and an **Update** button: nothing is read or shown until you tap Update (or press Ctrl/Cmd + Enter). No network, no account, no API.
 
 **Not therapy, not a diagnosis.** In crisis, call or text **988** (US) or call **911**. Crisis wording shows only that support box; nothing is computed or saved.
 
@@ -41,7 +41,7 @@ Only emotions and processes with strong evidence behind them as drivers of distr
 
 ## The master function
 
-Every feature calls one function, `Model.master(text, state)`. That covers the live card, the story, the path game, checkpoints, accepting a step, recovery, the baseline, import and restore. Nothing else steps e.
+Every feature calls one function, `MF.Master.master(text, state)` in `js/core/master.js`. That covers the live card, the story, the path game, checkpoints, accepting a step, recovery, the baseline, import and restore. Nothing else steps e.
 
 ```
 e      = score(text)                                   (the words, added to where you are)
@@ -55,15 +55,15 @@ recovery = number of master steps until d < 0.3
 
 * e is the 9-vector in [0, 1]. Hard and process movers rest at 0. Grounding movers rest at 0.5 ("unknown").
 * Home h has calm, connection and hope at 0.8, everything else at 0.
-* Defaults: a0 = 0.20, k = 0.05, a_max = 0.25, a_cap = 0.12, b = 0.10, b_U = 0.15.
+* Defaults (all but a_cap and b_U adjustable in the Scientist panel): a0 = 0.20, k = 0.05, a_max = 0.25, a_cap = 0.12, b = 0.10, b_U = 0.15.
 * act() turns the stepped vector into one small action, for the mover that moves most toward home.
 * λ = ρ(W on the active hard/process movers) − decay. λ > 0 means the feelings are feeding each other.
-* Hidden rise: a left-alone projection using the small W in `js/model.js`. For example sadness ↔ rumination 0.4, and connection → shame −0.5.
+* Hidden rise: a left-alone projection using the small W in `js/core/movers.js`. For example sadness ↔ rumination 0.4, and connection → shame −0.5.
 * These are design choices informed by the research above, not validated values.
 
 ## The card: words, not numbers
 
-The default card shows no numbers. "Show the math" (collapsed) reveals the vector, the master equation with its values, λ, the baseline and the recovery count.
+The card appears only after Update and shows no numbers. The Scientist panel (Ada the Otter) shows the vector, the master equation with its values, λ, the baseline and the recovery count.
 
 1. **What you may be feeling:** the one to three strongest movers in feeling words.
    * Hard and process movers use their value. Grounding movers use how far they sit below neutral.
@@ -90,18 +90,38 @@ The default card shows no numbers. "Show the math" (collapsed) reveals the vecto
 
 The affirmations are true, grounded statements, not promises.
 
-Below the card:
+6. **A pattern to notice** (only when one is found): see the Four Horsemen section below.
 
-* **Story:** a creature story driven by the master step.
-  * It opens with the strongest mover, or the biggest grounding gap (low hope, connection or calm).
-  * It is told in feeling words, for example "the anger loosened its grip", never numbers.
-  * It ends with an affirmation and a question.
-  * Accept the step, or play the path game, which ends the same way.
-* **Save checkpoint** (numbers only).
-* **Journal:** the only place your words are kept, and only when you tap it.
-* **Export / Import.**
-* **History:** each day in words, with the math collapsed.
-* **Variables:** home targets, a0, a_max, b, decay, and the main W links, with Reset.
+## Five friends
+
+Below the card is a row of friendly animals. Each opens one panel; only one is open at a time. Pictures are original SVGs in `img/`, cached for offline use.
+
+| Friend | Role | Personality | Panel |
+|---|---|---|---|
+| **Fern the Fox** (pencil) | Writer | Keeps your journal and spins gentle stories. | A creature story driven by the master step (feeling words, ends with an affirmation and a question), accept the step, the path game, and the journal (the only place your words are kept, and only when you tap Save). |
+| **Hazel the Owl** (glasses, book) | Historian | Remembers your days and how far you've come. | Each day in words, Save checkpoint (numbers only), restore a checkpoint. |
+| **Remy the Raccoon** (magnifying glass) | Analyzer | Turns over each feeling to see how it fits. | All nine movers in words: how present each is, what it feeds, what softens it. |
+| **Toby the Tortoise** (quill) | Scribe | Slow and careful; copies your numbers safely. | Export / import `.mf` code, download, Start over. |
+| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery), adjust each mover, and the variables a0, k, a_max, b, decay, home and the main W links, with Reset. |
+
+Changing a number in a panel does not redraw the card; it says "Tap Update to see the new reading." Buttons that are themselves an action (Write a story, Accept step, Save checkpoint, Restore) run Update for you.
+
+## Four Horsemen (relationship patterns)
+
+`js/features/relationship.js` looks for John Gottman's four conflict patterns in what you typed. It is **negation-aware**: "I'm not done talking" or "he didn't walk out" are ignored (a negator within four words, in the same clause).
+
+| Pattern | Example wording | Nudge (existing movers only) | Antidote shown |
+|---|---|---|---|
+| Criticism | "you always…", "you never…" | anger | Gentle startup |
+| Contempt | sarcasm ("yeah, right"), insults, "pathetic", eye-rolling | anger + shame | A culture of appreciation |
+| Defensiveness | "it's not my fault", "yes, but", counterattack ("what about you") | shame + fear | Take responsibility for a small part |
+| Stonewalling | "I'm done talking", "shut down", "silent treatment", "walked out" | avoidance, lower connection | Self-soothe with a structured break |
+
+No new movers or variables are added; the nudges go through the same word reading, so master() stays the one computation. After Update the card shows, in words only, "A pattern to notice: Criticism", the antidote, and one example phrase. Crisis wording still shows only the 988/911 box.
+
+Sources: Gottman & Levenson (1992), "Marital processes predictive of later dissolution: Behavior, physiology, and health," *J Pers Soc Psychol, 63*(2), 221–233; Gottman (1994), *What Predicts Divorce?* (Erlbaum); Gottman & Levenson (2000), "The timing of divorce: Predicting when a couple will divorce over a 14-year period," *J Marriage Fam, 62*(3), 737–745.
+
+**Caveat:** the high predictive accuracies reported in this work (for example around 90%) come from small samples (dozens of couples) and are debated, notably because the models were not cross-validated (Heyman & Slep, 2001, "The hazards of predicting divorce without crossvalidation," *J Marriage Fam, 63*(2), 473–479). MindFrame uses the four patterns as a pattern helper for one message, not a predictor of any relationship.
 
 ## Code (`mf 2`)
 
@@ -121,14 +141,38 @@ eq step = act(clip01(e + 0.25*(h - e) + 0.10*s(e)))   # readable; ignored on imp
 * mf 2 round-trips exactly.
 * mf 1 codes import on a best-effort basis through the mapping above. Old variables and frameworks are dropped, with a note.
 
-## Files
+## Structure
 
-* `index.html`, `style.css`, `js/ui.js`: the one page.
-* `js/model.js`: the nine movers, lexicon, the master function, the words-first card, stories and code.
-* `js/grounding.js`, `js/analyzer.js`: pattern reading and crisis wording.
-* `js/stories.js`, `js/games.js`: stories and the path game.
-* `tools.html` only redirects old shortcuts to the one page.
-* `sw.js` caches the shell for offline use (cache v13).
+Code is grouped by feature. Every file starts with a header comment; every function has a JSDoc. Files share one namespace, `MF` (`window.MF` in the browser, `global.MF` in Node tests).
+
+```
+index.html            the one page: input, Update, card, five friends, five panels
+style.css             calm, muted styles; large tap targets
+sw.js                 offline cache (v14)
+tools.html            redirects old shortcuts to the one page
+img/                  fox, owl, raccoon, tortoise, otter (original SVGs)
+js/
+  app.js              page shell: state, Update, the card, opening panels
+  core/               the model; no page code
+    signals.js        word patterns (thinking traps, needs)
+    grounding.js      crisis wording and pattern reading
+    movers.js         MF.Movers: the nine movers, W, variables, lexicon, fromText
+    master.js         MF.Master: the master function, recovery, baseline
+    words.js          MF.Words: the words-first card
+  features/
+    writer/           Fern the Fox
+      writer.js       MF.Writer: story, path game, journal, panel
+      stories.js      creature stories
+      games.js        the path game
+    historian.js      Hazel the Owl: days, checkpoints, restore, history
+    analyzer.js       Remy the Raccoon: the nine movers in words
+    scribe.js         Toby the Tortoise: mf 2 / mf 1 export and import
+    scientist.js      Ada the Otter: the math, sliders and variables
+    relationship.js   the Four Horsemen pattern helper
+tests/                node tests (tests/mf.js loads every module)
+```
+
+Load order in `index.html`: core (signals, grounding, movers, master, words), then features (relationship, stories, games, historian, writer, analyzer, scribe, scientist), then `app.js`.
 
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
 
@@ -143,6 +187,10 @@ Tests: `for f in tests/*.test.js; do node "$f"; done`.
 * Kim, S., Thibodeau, R., & Jorgensen, R. S. (2011). Shame, guilt, and depressive symptoms: A meta-analytic review. *Psychological Bulletin, 137*(1), 68–96. doi:10.1037/a0021466
 * Nolen-Hoeksema, S., Wisco, B. E., & Lyubomirsky, S. (2008). Rethinking rumination. *Perspectives on Psychological Science, 3*(5), 400–424.
 * Snyder, C. R. (2002). Hope theory: Rainbows in the mind. *Psychological Inquiry, 13*(4), 249–275.
+* Gottman, J. M. (1994). *What predicts divorce? The relationship between marital processes and marital outcomes.* Hillsdale, NJ: Erlbaum.
+* Gottman, J. M., & Levenson, R. W. (1992). Marital processes predictive of later dissolution: Behavior, physiology, and health. *Journal of Personality and Social Psychology, 63*(2), 221–233. doi:10.1037/0022-3514.63.2.221
+* Gottman, J. M., & Levenson, R. W. (2000). The timing of divorce: Predicting when a couple will divorce over a 14-year period. *Journal of Marriage and Family, 62*(3), 737–745.
+* Heyman, R. E., & Slep, A. M. S. (2001). The hazards of predicting divorce without crossvalidation. *Journal of Marriage and Family, 63*(2), 473–479. doi:10.1111/j.1741-3737.2001.00473.x
 * Zaccaro, A., et al. (2018). How breath-control can change your life: A systematic review on psycho-physiological correlates of slow breathing. *Frontiers in Human Neuroscience, 12*, 353.
 
 ## Privacy

@@ -1,4 +1,4 @@
-// games.js — small offline games made from the same pieces as the stories.
+// features/writer/games.js — (Writer) small offline games made from the same pieces as the stories.
 //
 // One game, built on the phone from templates (no network, no model):
 //   path    Choose a path: 4 scenes. Each has one mirage choice and 1-2
@@ -7,7 +7,7 @@
 // Nothing here is saved. The UI may keep a count of games played.
 
 const Games = (function () {
-  const G = typeof Grounding !== "undefined" ? Grounding : require("./grounding.js");
+  const G = typeof Grounding !== "undefined" ? Grounding : require("../../core/grounding.js");
   const S = typeof Stories !== "undefined" ? Stories : require("./stories.js");
   const P = S.parts;
 
@@ -40,6 +40,7 @@ const Games = (function () {
     "drink a glass of water and open a window",
   ];
 
+  /** A seeded shuffle (Fisher–Yates) that leaves the input untouched. */
   function shuffle(list, rand) {
     const a = list.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -74,6 +75,7 @@ const Games = (function () {
     };
   }
 
+  /** Build the four-scene path game for one creature story. */
   function pathGame(pc, rand) {
     const n = pc.creature;
     const choice = (text, grounded, feedback) => ({ text, grounded, feedback });

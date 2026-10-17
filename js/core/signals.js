@@ -1,4 +1,4 @@
-// analyzer.js — turns raw text into structured "signals" the bots can use.
+// core/signals.js — rule-based text signals (categories, absolute words, Burns distortions, crisis wording).
 // This is rule-based NLP: we look for keyword patterns (regular expressions).
 
 // Each category maps to a list of regex patterns. \b = word boundary.
