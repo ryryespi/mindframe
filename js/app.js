@@ -1,7 +1,10 @@
 // app.js — the app shell: one text box, an Update button, the words-first
 // card, and five animal helpers that each open one panel.
 //
-//   Update (or Ctrl/Cmd+Enter) → master(text, state) → the card. Nothing is
+//   Update (or Ctrl/Cmd+Enter) → master(text, state) → the card, every line
+//   composed from master's numbers by core/words.js (room for positive
+//   emotions first, then feelings, links, a hidden pull, a reality check,
+//   affirmations, one step, progress). Nothing is
 //   computed while you type. Crisis wording shows only the 988/911 box, and
 //   nothing is computed or saved.
 //
@@ -10,7 +13,8 @@
 // localStorage so it is still here next time.
 //
 // Panels (each in its own file under js/features/):
-//   Writer (Fern the Fox)       journal + stories + the path game
+//   Writer (Fern the Fox)       journal + stories + the path game + the optional
+//                               public-AI comfort prompt (writer/comfort.js)
 //   Historian (Hazel the Owl)   history, checkpoints
 //   Analyzer (Remy the Raccoon) the nine movers in words
 //   Scribe (Toby the Tortoise)  export / import .mf code
@@ -47,6 +51,8 @@
     /** Start the base from the current state (after restore, import, or accepting a step), and set the text box. */
     resetBase(text) { base = state.e.slice(); $("input").value = text; reading = null; resets.forEach(fn => fn()); },
     faith: () => $("faith").checked,
+    /** True while the crisis box is showing. */
+    inCrisis: () => inCrisis,
     update, save, crisis, note, copy, renderAll,
     /** Mark the card as out of date after a number changed. */
     stale() { if (reading) note("Numbers changed. Tap Update to see the new reading."); },
@@ -69,6 +75,9 @@
   /** Show or hide the crisis box. While it shows, the rest of the app is hidden. */
   function crisis(on) {
     inCrisis = on;
+    // The public AI button is disabled in a crisis, and any prompt is cleared.
+    $("comfort-go").disabled = on;
+    if (on) { $("comfort").classList.add("hidden"); $("comfort-prompt").value = ""; }
     $("crisis-wrap").classList.toggle("hidden", !on);
     $("body").classList.toggle("hidden", on);
     if (on) {
@@ -102,7 +111,11 @@
   /** Fill the words-first card from the last reading. */
   function renderCard() {
     const c = MF.Words.card(state, reading, { faith: app.faith(), seed: 1 });
+    $("room").textContent = c.room;
     $("feel").textContent = c.feeling;
+    const soft = (id, list) => { const el = $(id); el.innerHTML = ""; list.forEach(t => { const p = document.createElement("p"); p.textContent = t; el.appendChild(p); }); el.classList.toggle("hidden", !list.length); };
+    soft("conflict", c.conflict);
+    soft("reality", c.reality);
     const fill = (id, list) => { const ul = $(id); ul.innerHTML = ""; list.forEach(t => ul.appendChild(li(t))); };
     fill("connect", c.connect);
     fill("affirm", c.affirmations);
@@ -127,7 +140,7 @@
   }
 
   // ---------- Panels ----------
-  const renders = [MF.Writer, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist].map(f => f.mount(app));
+  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist].map(f => f.mount(app));
   /** Re-render every panel (cheap; panels only display). */
   function renderAll() { renders.forEach(r => r()); }
 

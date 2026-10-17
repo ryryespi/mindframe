@@ -1,4 +1,6 @@
 // features/scientist.js — Ada the Otter, the Scientist.
+// Shows every number behind the card, including the grandiosity signal g,
+// the hidden-conflict strengths c, and the positive-emotion scores.
 //
 // Shows the math behind the words and lets you tinker with it:
 //   • mathLines: e, the master equation with its values, λ, loops, the hidden
@@ -39,6 +41,12 @@ if (typeof module !== "undefined") {
     L.push(`act(): ${m.mover ? `${label(m.mover)} moves most toward home` : "no move"}; stabilizer ${m.stabilizer || "none"}`);
     L.push(`B = 0.8\u00B7B\u208B\u2081 + 0.2\u00B7e: \u2016B \u2212 h\u2016 = ${f2(m.baseline.dB)}${m.baseline.dPrev === null ? "" : ` (yesterday's B: ${f2(m.baseline.dPrev)})`}`);
     if (m.recovery) L.push(`recovery: ${recText(m.recovery)} until d < ${f2(FIXED.eps)} (model estimate)`);
+    // Same pass (core/reality.js): grandiosity, hidden conflicts, positive emotions.
+    const g = m.grand || { g: 0, raw: 0, kinds: [] };
+    L.push(`g = 1 \u2212 e^(\u2212raw), raw = 0.6\u00B7grand + 0.5\u00B7certain-worst + 0.25\u00B7all-or-nothing + 0.1\u00B7min(3, absolutist) = ${f2(g.raw)} \u2192 g = ${f2(g.g)}${g.kinds.length ? ` (${g.kinds.join(", ")})` : ""}; adds 0.5\u00B7g to rumination and fusion`);
+    L.push("conflict c = \u221A(x_i\u00B7y_j): hard/process x \u2265 0.30 with grounding y = e \u2265 0.60 (pull toward) or y = 1 \u2212 e when e \u2264 0.40 (need); clashes in the words c = 0.50");
+    (m.conflicts || []).forEach(c => L.push(c.from === "words" ? `  clash in the words (${c.a}): c = ${f2(c.c)}` : `  ${label(c.a)} ${f2(c.x)} \u00D7 ${c.side === "need" ? `need for ${c.b}` : c.b} ${f2(c.y)}: c = \u221A(${f2(c.x)}\u00B7${f2(c.y)}) = ${f2(c.c)}`));
+    L.push(`positives from gain_j = |e_j \u2212 h_j| \u2212 |next_j \u2212 h_j|: ${(m.positives || []).map(p => `${p.word} ${f2(p.score)}`).join(", ") || "none"}`);
     return L;
   }
 

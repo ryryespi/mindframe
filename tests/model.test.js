@@ -201,7 +201,7 @@ test("routing: accept step lands exactly on master's next; recovery counts maste
 test("routing: no other code path steps e (the old ideal/simulate are gone)", () => {
   ["ideal", "simulate", "step", "lambda", "hidden"].forEach(k => assert.equal(M[k], undefined, k));
   const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
-  const outside = ["js/app.js", "js/features/historian.js", "js/features/writer/writer.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/features/relationship.js"];
+  const outside = ["js/app.js", "js/features/historian.js", "js/features/writer/writer.js", "js/features/writer/comfort.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/features/relationship.js"];
   outside.forEach(f => assert.ok(!/\bcombine\(|\bfromText\([^)]*\)\.w|_parts/.test(read(f)), `${f} does not compute steps itself`));
   assert.ok(/\bmaster\(\$\("input"\)\.value/.test(read("js/app.js")), "the app calls the master function on Update");
 });
@@ -234,7 +234,7 @@ test("variables: validated and kept in range; Reset defaults are the spec", () =
 });
 
 // ---------- the words-first card ----------
-test("band words: < 0.3 a little, 0.3–0.6 quite, > 0.6 strongly", () => {
+test("band words: < 0.3 a little, 0.3–0.6 quite, > 0.6 strongly; the band picks the degree word", () => {
   assert.equal(M.band(0.1), "a little");
   assert.equal(M.band(0.29), "a little");
   assert.equal(M.band(0.3), "quite");
@@ -242,9 +242,9 @@ test("band words: < 0.3 a little, 0.3–0.6 quite, > 0.6 strongly", () => {
   assert.equal(M.band(0.61), "strongly");
   const s = M.defaultState();
   s.e[I("anger")] = 0.86; s.e[I("sadness")] = 0.45; s.e[I("fear")] = 0.15;
-  assert.equal(M.feelingLine(M.master("", s)), "You may be feeling strongly angry, quite sad, and a little anxious.");
+  assert.match(M.feelingLine(M.master("", s)), /^You may be feeling (strongly|deeply) angry, (quite|fairly) sad, and (a little|slightly) anxious\.$/);
   const low = M.defaultState(); low.e[I("connection")] = 0.04;
-  assert.equal(M.feelingLine(M.master("", low)), "You may be feeling strongly alone.");
+  assert.match(M.feelingLine(M.master("", low)), /^You may be feeling (strongly|deeply) alone\.$/);
   assert.match(M.feelingLine(M.master("", M.defaultState())), /Nothing strong/);
 });
 test("feelings list at most three, strongest first", () => {
@@ -253,22 +253,56 @@ test("feelings list at most three, strongest first", () => {
   const f = M.felt(M.master("", s).e);
   assert.deepEqual(f.map(x => x.n), ["rumination", "shame", "anger"]);
 });
-test("link sentences read the W relationships and the stabilizer", () => {
+test("link sentences: verb from the sign and strength of W, softener from the stabilizer", () => {
   const { state, m } = live(S2);
   const c = M.connectLines(state, m);
-  assert.equal(c[0], "When shame grows, it pulls you away from people; connection is what softens it.");
+  assert.match(c[0], /^When the shame is (strong|loud), it (wears down|drains|dims|chips away at|can dim|can wear on) your connection; connection (softens|eases|can soften|takes the edge off|can ease a little) it\.$/);
   assert.ok(c.includes("These feelings tend to ease on their own."));
-  assert.ok(c.includes("If this stays unspoken, sadness may creep in."));
+  assert.ok(c.some(x => /^If this stays unspoken, sadness may (creep in|slip in|grow|rise)\.$/.test(x)));
   const a = live(S1);
-  assert.match(M.connectLines(a.state, a.m)[0], /^When anger grows, .+; slowing down is what softens it\.$/);
+  assert.match(M.connectLines(a.state, a.m)[0], /^When the anger is (strong|loud), it (fuels|feeds|stirs up|adds to|nudges up|can add a little to) the replaying; slowing down .+ it\.$/);
   const u = M.defaultState();
   u.e[I("sadness")] = 0.8; u.e[I("rumination")] = 0.8;
-  assert.ok(M.connectLines(u, M.master("", u)).includes("These feelings are feeding each other right now, so go gently."));
+  assert.ok(M.connectLines(u, M.master("", u)).some(x => /^These feelings are (building on|feeding) each other right now, so go gently\.$/.test(x)));
   const low = M.defaultState(); low.e[I("connection")] = 0.1;
-  assert.equal(M.connectLines(low, M.master("", low))[0], M.LOW_LINK.connection);
+  assert.match(M.connectLines(low, M.master("", low))[0], /^When you feel alone, .+ grow more easily; reaching toward one person .+ it\.$/);
+  // The verb follows the coupling strength: a strong link and a weak link use different verb sets.
+  assert.equal(M.strength(0.6), "strong"); assert.equal(M.strength(-0.35), "mid"); assert.equal(M.strength(0.1), "weak");
+  const strong = M.setWeight(M.defaultState(), "anger", "rumination", 0.9), weak = M.setWeight(M.defaultState(), "anger", "rumination", 0.1);
+  [strong, weak].forEach(x => { x.e[I("anger")] = 0.8; });
+  const vs = M.connectLines(strong, M.master("", strong))[0], vw = M.connectLines(weak, M.master("", weak))[0];
+  assert.ok(M.LINK_VERB.up.strong.some(v => vs.includes(` ${v} the replaying`)), vs);
+  assert.ok(!M.LINK_VERB.up.strong.some(v => vw.includes(` ${v} the replaying`)), vw);
 });
-test("affirmations: per mover, deterministic by seed, from the mover that moves most plus the stabilizer", () => {
-  M.NAMES.forEach(n => assert.ok(M.AFFIRM[n].length >= 3 && M.FAITH_AFFIRM[n].length >= 1, n));
+test("composer: same state and seed give the same words; different numbers give different words", () => {
+  const { state, m } = live(S1);
+  assert.deepEqual(M.lines(state, m, { seed: 1 }), M.lines(state, m, { seed: 1 }));
+  assert.deepEqual(M.card(state, m, { seed: 4, faith: true }), M.card(state, m, { seed: 4, faith: true }));
+  const texts = [S1, S2, "I'm terrified it will all go wrong", "I keep replaying what I said", "I feel calm and close to my friends", "I hope it goes well but I'm scared"];
+  const cards = texts.map(t => { const r = live(t); return M.lines(r.state, r.m, { seed: 1 }).join("\n"); });
+  assert.equal(new Set(cards).size, texts.length, "every reading reads differently");
+  // Only the numbers change: the same mover at two intensities gets different words.
+  const s1 = M.defaultState(), s2 = M.defaultState();
+  s1.e = s1.home.slice(); s2.e = s2.home.slice();
+  s1.e[I("anger")] = 0.2; s2.e[I("anger")] = 0.9;
+  const c1 = M.card(s1, M.master("", s1)), c2 = M.card(s2, M.master("", s2));
+  assert.notEqual(c1.feeling, c2.feeling);
+  assert.notEqual(c1.step, c2.step, "the dose follows d");
+  assert.notDeepEqual(c1.affirmations, c2.affirmations, "the stance follows the band");
+  assert.match(c1.step, /two minutes/);
+  assert.match(c2.step, /five minutes|ten minutes/);
+});
+test("composer: the step is the mover's technique sized by d, and why from the step's gain", () => {
+  ["anger", "shame", "fear", "sadness", "rumination", "avoidance"].forEach(n => {
+    const s = M.defaultState(); s.e[I(n)] = 0.7;
+    const m = M.master("", s);
+    assert.equal(m.mover, n);
+    const st = M.stepLine(m);
+    assert.ok(st.includes(`can ${M.EASE[n][0]}`), st);
+    assert.ok(!DIGIT.test(st));
+  });
+});
+test("affirmations: composed from the reading, deterministic by seed, first person, no promises", () => {
   ["anger", "shame", "fear", "sadness", "rumination", "avoidance", "calm", "connection", "hope"].forEach(n => {
     const s = M.defaultState();
     if (M.GROUND.includes(n)) s.e[I(n)] = 0.1; else s.e[I(n)] = 0.7;
@@ -278,18 +312,18 @@ test("affirmations: per mover, deterministic by seed, from the mover that moves 
       const a1 = M.affirmations(m, { seed }), a2 = M.affirmations(m, { seed });
       assert.deepEqual(a1, a2, "same seed, same affirmations");
       assert.ok(a1.length >= 2 && a1.length <= 3);
-      assert.ok(M.AFFIRM[n].includes(a1[0]) && M.AFFIRM[n].includes(a1[1]) && a1[0] !== a1[1]);
-      if (m.stabilizer && m.stabilizer !== n) assert.ok(M.AFFIRM[m.stabilizer].includes(a1[2]));
-      a1.forEach(x => assert.ok(/^(I|I'm|It's|My|A|Small|Feeling|Going|Things|Sadness|Starting|This)\b/.test(x), `first person / grounded: ${x}`));
+      assert.ok(a1[0].includes(M.ACT[n]), `the first one carries ${n}'s action: ${a1[0]}`);
+      assert.ok(a1[1].includes(m.positives[0].word), "the second names the top positive emotion");
+      a1.forEach(x => {
+        assert.ok(/^(I|Even|Part|There|This|Some|Fear|Sadness|Anger|Shame|The|Avoiding|Restlessness|Loneliness|Discouragement)\b/.test(x), `first person / grounded: ${x}`);
+        assert.ok(!/\b(everything will be|always be fine|never feel|just be happy|perfect|good vibes)\b/i.test(x), x);
+        assert.ok(!DIGIT.test(x));
+      });
     }
     const seen = new Set();
     for (let seed = 1; seed <= 20; seed++) seen.add(M.affirmations(m, { seed }).join("|"));
     assert.ok(seen.size > 1, "seeds vary the choice");
   });
-});
-test("affirmations avoid promises and toxic positivity", () => {
-  const all = [].concat(...Object.values(M.AFFIRM), ...Object.values(M.FAITH_AFFIRM));
-  all.forEach(x => assert.ok(!/\b(everything will be|always be fine|never feel|just be happy|perfect|good vibes)\b/i.test(x), x));
 });
 test("faith adds exactly one affirmation and changes nothing else", () => {
   [S1, S2, "I'm terrified", "I keep replaying it"].forEach(t => {
@@ -297,14 +331,9 @@ test("faith adds exactly one affirmation and changes nothing else", () => {
     const off = M.card(state, m, { seed: 3 }), on = M.card(state, m, { seed: 3, faith: true });
     assert.equal(on.affirmations.length, off.affirmations.length + 1);
     assert.deepEqual(on.affirmations.slice(0, -1), off.affirmations);
-    assert.ok(M.FAITH_AFFIRM[m.mover].includes(on.affirmations[on.affirmations.length - 1]));
-    ["feeling", "connect", "step", "progress"].forEach(k => assert.deepEqual(on[k], off[k]));
-    assert.deepEqual(M.mathLines(state, m), M.mathLines(state, m));
+    assert.match(on.affirmations[on.affirmations.length - 1], /God/);
+    ["room", "feeling", "connect", "conflict", "reality", "step", "progress"].forEach(k => assert.deepEqual(on[k], off[k]));
   });
-  const fa = t => { const { state, m } = live(t); const c = M.card(state, m, { faith: true }); return c.affirmations[c.affirmations.length - 1]; };
-  assert.match(fa("I'm furious"), /patience|anger to God/i);
-  assert.match(fa("I'm ashamed of myself"), /mercy/i);
-  assert.match(fa("I'm terrified"), /trust|God is with me/i);
 });
 test("default output has no digits (cards for many thoughts, faith on and off)", () => {
   const texts = [S1, S2, "", "I'm terrified it will all go wrong", "I keep replaying what I said", "I feel calm", "It's hopeless", "I'm furious at my boss", "I keep putting it off"];
@@ -360,7 +389,7 @@ test("path game: scene one follows the mover and it ends with an affirmation plu
   assert.equal(g.opening, "anger");
   const n = g.ending.length;
   assert.ok(g.ending[n - 1].endsWith("?"));
-  assert.ok(M.AFFIRM[m.mover].some(x => g.ending[n - 2] === `“${x}”`));
+  assert.equal(g.ending[n - 2], `“${M.affirmations(m, { seed: 1 })[0]}”`);
   assert.ok(!DIGIT.test(g.ending.join(" ") + g.scenes.map(sc => sc.text).join(" ")));
   assert.deepEqual(M.game(state, { crisis: true }), { crisis: true });
 });
@@ -437,7 +466,7 @@ test("crisis: a crisis label inside code is refused", () => {
 });
 
 // ---------- one page ----------
-test("single page: index has no tools links; tools.html only redirects; the service worker is v14", () => {
+test("single page: index has no tools links; tools.html only redirects; the service worker is v15", () => {
   const root = path.join(__dirname, "..");
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const tools = fs.readFileSync(path.join(root, "tools.html"), "utf8");
@@ -446,11 +475,11 @@ test("single page: index has no tools links; tools.html only redirects; the serv
   assert.ok(/history\.replaceState/.test(index), "old ?view/?chip links are stripped");
   assert.ok(/location\.replace\("\.\/"\)/.test(tools) && /http-equiv="refresh"/.test(tools));
   assert.ok(!/<textarea|<script src/.test(tools), "tools.html is only a redirect");
-  assert.match(sw, /mindframe-shell-v14/);
+  assert.match(sw, /mindframe-shell-v15/);
   const scripts = [...index.matchAll(/<script src="([^"]+)"/g)].map(x => x[1]);
-  assert.deepEqual(scripts, ["js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/master.js", "js/core/words.js",
+  assert.deepEqual(scripts, ["js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/reality.js", "js/core/master.js", "js/core/words.js",
     "js/features/relationship.js", "js/features/writer/stories.js", "js/features/writer/games.js", "js/features/historian.js",
-    "js/features/writer/writer.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/app.js"]);
+    "js/features/writer/writer.js", "js/features/writer/comfort.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/app.js"]);
   scripts.forEach(s => assert.ok(sw.includes(`./${s}`), `${s} cached`));
   ["presets", "Compare", "Optimize", "Check-in", "Spot the mirage", "Rebuild"].forEach(w => assert.ok(!index.includes(w), `no ${w}`));
 });

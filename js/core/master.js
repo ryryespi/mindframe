@@ -8,15 +8,21 @@
 //   d        = ‖e − h‖;   B_t = 0.8·B_{t−1} + 0.2·e_t;   recovery = steps until d < 0.3
 //   λ        = ρ(W on the active hard/process movers) − d   (> 0: feeding each other)
 //   hidden   = a left-alone projection with the small W dynamics
+//   g        = 1 − e^(−raw grand/absolute wording)        (feeds rumination + fusion)
+//   conflicts= √(x_i·y_j) for opposing pulls both active, plus "I want … but" clashes
+//   positives= positive words from the gains toward home in this step
+//   (the last three come from core/reality.js, computed in this same pass)
 //
 // Also here: act()'s skills and the reframes, the baseline, and the recovery count.
 
 if (typeof module !== "undefined") {
   require("./movers.js");
+  require("./reality.js");
 }
 
 (function (MF) {
   "use strict";
+  const R = MF.Reality;
   const { NAMES, GROUND, REST, FIXED, ACTIVE, MAX_SIM, N, idx, isGround, r2, clamp01, norm, distance, stamp, dayOf, weights, fromText, combine } = MF.Movers;
   // ---------- Vectors, dynamics, λ ----------
 
@@ -162,7 +168,8 @@ if (typeof module !== "undefined") {
    * @param {string} text  what was typed ("" steps from where you are)
    * @param {object} state the session
    * @param {{sim?:boolean, now?:number}} [opts] sim:false skips the recovery count
-   * @returns {object} {crisis:true} or the full reading (e, next, a, b, s, d, λ, links, baseline, recovery…)
+   * @returns {object} {crisis:true} or the full reading (e, next, a, b, s, d, λ, links, baseline, recovery,
+   *   grand {g, kind…}, conflicts[], positives[])
    */
   function master(text, state, opts = {}) {
     calls.master += 1;
@@ -193,8 +200,12 @@ if (typeof module !== "undefined") {
     const today = dayOf(stamp(Number.isFinite(opts.now) ? opts.now : Date.now()));
     const Bprev = baselineOf(state.days.filter(x => x.day < today));
     const B = ema(Bprev, e).map(r2);
+    // Same pass: grandiosity (already folded into e by the word hook), hidden conflicts, positive emotions.
+    const data = words.data || {};
+    const grand = data.grand || R.grandiosity("");
     const out = {
       crisis: false, notes: words.notes, read: words.read, found: words.found || [],
+      grand, conflicts: R.conflicts(e, data.clashes || []), positives: R.positives(e, next, h),
       e, h: h.slice(), a, b, s, next, lambda: lam, unstable,
       d: r2(d), dNext: r2(distance(next, h)),
       top: top ? top.n : null, stabilizer, mover, action,

@@ -1,6 +1,6 @@
 # MindFrame
 
-A calm, local-only practice tool for looking at a thought. One page, one input box, and an **Update** button: nothing is read or shown until you tap Update (or press Ctrl/Cmd + Enter). No network, no account, no API.
+A calm, local-only practice tool for looking at a thought. One page, one input box, and an **Update** button: nothing is read or shown until you tap Update (or press Ctrl/Cmd + Enter). No account and no API key. **The app composes its own replies from the equation and makes no network calls**; a public AI is optional, through one button that shows you the exact prompt first.
 
 **Not therapy, not a diagnosis.** In crisis, call or text **988** (US) or call **911**. Crisis wording shows only that support box; nothing is computed or saved.
 
@@ -51,7 +51,13 @@ s_j    = e_j · Σ_grounding min(0, W_ij)·h_i            (grounding movers pres
 d      = ‖e − h‖
 B_t    = 0.8·B_{t−1} + 0.2·e_t                         (baseline)
 recovery = number of master steps until d < 0.3
+g      = 1 − e^(−raw)   raw = 0.6·grand + 0.5·certain-worst + 0.25·all-or-nothing + 0.1·min(3, absolutist)
+                        (adds 0.5·g to rumination and to avoidance/fusion, before saturation)
+c(i,j) = √(x_i·y_j)     opposing pulls both active (hidden conflicts); 0.5 for clashes in the words
+gain_j = |e_j − h_j| − |next_j − h_j|   → the positive emotions the step points toward
 ```
+
+The last three are computed in the same master pass (`js/core/reality.js`) and returned as `grand`, `conflicts[]` and `positives[]`. No new movers or variables.
 
 * e is the 9-vector in [0, 1]. Hard and process movers rest at 0. Grounding movers rest at 0.5 ("unknown").
 * Home h has calm, connection and hope at 0.8, everything else at 0.
@@ -61,36 +67,47 @@ recovery = number of master steps until d < 0.3
 * Hidden rise: a left-alone projection using the small W in `js/core/movers.js`. For example sadness ↔ rumination 0.4, and connection → shame −0.5.
 * These are design choices informed by the research above, not validated values.
 
-## The card: words, not numbers
+## The card: composed from the equation
 
-The card appears only after Update and shows no numbers. The Scientist panel (Ada the Otter) shows the vector, the master equation with its values, λ, the baseline and the recovery count.
+The card appears only after Update and shows no numbers. **There are no fixed reply lists:** `js/core/words.js` (the composer) builds every sentence from small grammar parts, and the master function's numbers pick the parts:
 
-1. **What you may be feeling:** the one to three strongest movers in feeling words.
-   * Hard and process movers use their value. Grounding movers use how far they sit below neutral.
-   * Intensity words: under 0.3 "a little", 0.3 to 0.6 "quite", over 0.6 "strongly".
-2. **How they connect:**
-   * The strongest W link from the top mover, plus its stabilizer. For example: "When shame grows, it pulls you away from people; connection is what softens it."
-   * λ: if unstable, "These feelings are feeding each other right now, so go gently."; if settling, "These feelings tend to ease on their own."
-   * Hidden rise: "If this stays unspoken, sadness may creep in."
-3. **Affirmations:** two from the mover that moves most toward home in the master step, plus one from the stabilizer. The choice is deterministic by seed. Include faith adds exactly one more.
-4. **One step:** the act() action.
-5. **Progress in words:** today compared with the baseline (for example "a little closer to steady than your recent days"), plus the recovery count in words.
+| Part | Driven by |
+|---|---|
+| feeling word + degree | the mover and its band: under 0.3 "a little/slightly", 0.3 to 0.6 "quite/fairly", over 0.6 "strongly/deeply" |
+| link verb | the sign and strength of the coupling W_ij: strong + "fuels/feeds", mid + "stirs up/adds to", weak + "nudges up"; toward a grounding mover "wears down/dims"; the stabilizer "softens/eases" or "takes the edge off" by \|W\| |
+| direction | the step's gain toward home: which mover eases and whether "a little" (gain < 0.15) |
+| dose of the step | the distance d: "two", "five" or "ten" minutes (d < 0.5, < 1, ≥ 1) |
+| hidden pull | conflicts[] and their strength c (adverbs from each side's band; holding line by c ≥ 0.6) |
+| reality check | grand.g (how sure the thought sounds) and its kinds |
+| progress | Δ = d_prev − d (direction and "a little/noticeably") and the recovery count as words ("a few", "several") |
 
-| Mover | Example affirmations (4 per mover) | Faith affirmation (1 of 2) |
-|---|---|---|
-| anger | My anger shows what matters; I choose how to act. / I can pause before I answer. | patience: God can give me patience for the next moment. |
-| shame | I made mistakes; I am not a mistake. / A hard moment does not decide who I am. | mercy: I am held by mercy, not measured by this moment. |
-| fear | I can feel afraid and still take one safe step. / A worry is a guess, not a fact. | trust: I can trust God with the next hour. |
-| sadness | It's okay to feel this; I'm not alone in it. / This heaviness is real, and it can change. | hope: My hope rests in God, even when I feel low. |
-| rumination | I can set this thought down for now. / Going over it again isn't the same as solving it. | letting go: I can leave this in God's hands for now. |
-| avoidance | I can let this feeling be here without obeying it. / I can take one small step before I feel ready. | courage: God can give me courage for one small step. |
-| calm | I can slow down; this moment will pass. / My breath is something I can steady. | peace: God's peace can meet me in this breath. |
-| connection | I am worth reaching out to. / I can let one person in a little. | I am known and loved by God, and I can reach out to others. |
-| hope | Small steps still count. / I can plan one small thing for tomorrow. | God is not finished with my story. |
+Choices between equal parts are made by a hash of the seed and the numbers, so the same state and seed always give the same card, and different numbers give different wording. The only fixed text kept on purpose is safety wording (the crisis box) and short, true, non-medical phrases such as the true-sized line. Example, anger alone at two intensities (everything else at home):
 
-The affirmations are true, grounded statements, not promises.
+* anger 0.20: "What you may be feeling: slightly angry." / "When the anger is faint, it stirs up the replaying…" / "Pause: step away for two minutes, then name what matters to you here, so the anger can loosen its grip a little."
+* anger 0.90: "What you may be feeling: strongly angry." / "When the anger is loud, it adds to the replaying…" / "A hidden pull: part of you is really angry, while part of you really wants to stay close." / "Pause: step away for five minutes…"
 
-6. **A pattern to notice** (only when one is found): see the Four Horsemen section below.
+Card order:
+
+1. **Room for:** the positive emotions the step points toward (calm, connection, hope, plus gratitude, courage, peace, joy as words, not variables), for example "Room for: courage, calm, and connection, as the fear settles."
+2. **What you may be feeling:** the one to three strongest movers.
+3. **How they connect:** the strongest W link and stabilizer, a loop, λ in words, a hidden rise.
+4. **A hidden pull** (when there is one) and **Reality check** (when g ≥ 0.25).
+5. **Affirmations:** (1) the mover that moves most: a stance by its band plus its action; (2) the top positive emotion; (3) the conflict ("I can hold both"), else the true-sized line, else the stabilizer's action. Include faith adds exactly one more.
+6. **One step** and **progress in words.**
+
+7. **A pattern to notice** (only when one is found): see the Four Horsemen section below.
+
+## Hidden conflicts
+
+Two pulls that are both active at once, derived from the nine movers (no new movers): fear + hope, anger + wanting to stay close (connection ≥ 0.6), shame + a need for connection (connection ≤ 0.4), rumination + wanting calm, avoidance + hope. Hard/process sides need e ≥ 0.3. Strength c = √(x·y). Clashes in the words themselves ("I want … but", "I should … but", "I love … but", "part of me", "torn", "mixed feelings") count with c = 0.5. The card says, for example, "A hidden pull: part of you is very afraid of what could go wrong, while part of you is really hoping it goes well." and adds a gentle line about holding both. Ambivalence is a normal part of change (Miller & Rollnick, *Motivational Interviewing*, 2013).
+
+## Reality check: grand vs. true-sized
+
+`js/core/reality.js` looks for grand or absolute wording ("only I can", "I'm destined", "everyone will see", "I'm better than everyone", "I never fail", "nothing can stop me"), certain-worst wording ("I'll never be happy", "everything is ruined", "everyone hates me"), all-or-nothing ("a total failure") and absolutist words (always, never, completely, everyone, nothing…). It is negation-aware ("I'm not better than anyone" is ignored). The signal g feeds rumination and avoidance/fusion. When g ≥ 0.25 the card shows, without labels or shaming: "Reality check: part of this thought sounds very sure that it all depends on you, or that you can't fall short." then "You matter, and you are also human; one good step is enough." Grounding: Beck's cognitive distortions (magnification, all-or-nothing; Beck, 1976), Burns (1980), and Al-Mosaiwi & Johnstone (2018), who found absolutist words more common in anxiety, depression and suicidal-ideation forums. This is a word signal, not a diagnosis.
+
+## Comfort story from a public AI (optional)
+
+In Fern the Fox's panel, **Comfort story from a public AI** builds a prompt from the analysis only and shows it in an editable box with "Only this text will be shared. Your journal stays on your phone." The prompt contains the card in plain words plus a compact numbers summary (movers with bands, step direction d → d_next and the biggest move, conflicts with c, the grandiosity signal g, positive emotions) and asks for a ~200-word gentle, grounded comfort story with a friendly animal, three affirmations written from that analysis, no medical advice, and a hopeful ending. It never contains the text you typed (every line is composed from numbers, and a second guard drops any line repeating four of your words in a row). **Open in Grok** (`https://grok.com/?q=<encoded>`) and **Open in ChatGPT** (`https://chatgpt.com/?q=<encoded>`) open a new tab and also copy the prompt in case the site doesn't fill it in; Grok may send it as soon as it opens. **Copy prompt** copies only. The button is disabled during a crisis. The app itself makes no network calls.
 
 ## Five friends
 
@@ -98,11 +115,11 @@ Below the card is a row of friendly animals. Each opens one panel; only one is o
 
 | Friend | Role | Personality | Panel |
 |---|---|---|---|
-| **Fern the Fox** (pencil) | Writer | Keeps your journal and spins gentle stories. | A creature story driven by the master step (feeling words, ends with an affirmation and a question), accept the step, the path game, and the journal (the only place your words are kept, and only when you tap Save). |
+| **Fern the Fox** (pencil) | Writer | Keeps your journal and spins gentle stories. | A creature story driven by the master step (feeling words, ends with an affirmation and a question), accept the step, the path game, the optional public-AI comfort prompt, and the journal (the only place your words are kept, and only when you tap Save). |
 | **Hazel the Owl** (glasses, book) | Historian | Remembers your days and how far you've come. | Each day in words, Save checkpoint (numbers only), restore a checkpoint. |
-| **Remy the Raccoon** (magnifying glass) | Analyzer | Turns over each feeling to see how it fits. | All nine movers in words: how present each is, what it feeds, what softens it. |
+| **Remy the Raccoon** (magnifying glass) | Analyzer | Turns over each feeling to see how it fits. | Every hidden pull and any grand wording with its true-sized version, then all nine movers in words: how present each is, what it feeds, what softens it. |
 | **Toby the Tortoise** (quill) | Scribe | Slow and careful; copies your numbers safely. | Export / import `.mf` code, download, Start over. |
-| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery), adjust each mover, and the variables a0, k, a_max, b, decay, home and the main W links, with Reset. |
+| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores), adjust each mover, and the variables a0, k, a_max, b, decay, home and the main W links, with Reset. |
 
 Changing a number in a panel does not redraw the card; it says "Tap Update to see the new reading." Buttons that are themselves an action (Write a story, Accept step, Save checkpoint, Restore) run Update for you.
 
@@ -148,7 +165,7 @@ Code is grouped by feature. Every file starts with a header comment; every funct
 ```
 index.html            the one page: input, Update, card, five friends, five panels
 style.css             calm, muted styles; large tap targets
-sw.js                 offline cache (v14)
+sw.js                 offline cache (v15)
 tools.html            redirects old shortcuts to the one page
 img/                  fox, owl, raccoon, tortoise, otter (original SVGs)
 js/
@@ -157,13 +174,15 @@ js/
     signals.js        word patterns (thinking traps, needs)
     grounding.js      crisis wording and pattern reading
     movers.js         MF.Movers: the nine movers, W, variables, lexicon, fromText
+    reality.js        MF.Reality: grandiosity g, hidden conflicts, positive emotions
     master.js         MF.Master: the master function, recovery, baseline
-    words.js          MF.Words: the words-first card
+    words.js          MF.Words: the composer (every card sentence built from the numbers)
   features/
     writer/           Fern the Fox
       writer.js       MF.Writer: story, path game, journal, panel
       stories.js      creature stories
       games.js        the path game
+      comfort.js      MF.Comfort: the optional public-AI prompt and links
     historian.js      Hazel the Owl: days, checkpoints, restore, history
     analyzer.js       Remy the Raccoon: the nine movers in words
     scribe.js         Toby the Tortoise: mf 2 / mf 1 export and import
@@ -172,19 +191,27 @@ js/
 tests/                node tests (tests/mf.js loads every module)
 ```
 
-Load order in `index.html`: core (signals, grounding, movers, master, words), then features (relationship, stories, games, historian, writer, analyzer, scribe, scientist), then `app.js`.
+Load order in `index.html`: core (signals, grounding, movers, reality, master, words), then features (relationship, stories, games, historian, writer, comfort, analyzer, scribe, scientist), then `app.js`.
 
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
 
+## Model, not validated science
+
+MindFrame is a model built from design assumptions and informed by the research cited here. It is not validated science, not a measurement of you, and not a diagnosis. The thresholds (0.3, 0.6, 0.25) and weights are design choices.
+
 ## References
 
+* Al-Mosaiwi, M., & Johnstone, T. (2018). In an absolute state: Elevated use of absolutist words is a marker specific to anxiety, depression, and suicidal ideation. *Clinical Psychological Science, 6*(4), 529–542. doi:10.1177/2167702617747074
 * Aldao, A., Nolen-Hoeksema, S., & Schweizer, S. (2010). Emotion-regulation strategies across psychopathology: A meta-analytic review. *Clinical Psychology Review, 30*(2), 217–237.
 * Barlow, D. H., Allen, L. B., & Choate, M. L. (2004). Toward a unified treatment for emotional disorders. *Behavior Therapy, 35*(2), 205–230. doi:10.1016/S0005-7894(04)80036-4
+* Beck, A. T. (1976). *Cognitive therapy and the emotional disorders.* New York: International Universities Press.
 * Beck, A. T., Steer, R. A., Kovacs, M., & Garrison, B. (1985). Hopelessness and eventual suicide: A 10-year prospective study of patients hospitalized with suicidal ideation. *American Journal of Psychiatry, 142*, 559–563.
 * Bond, F. W., et al. (2011). Preliminary psychometric properties of the Acceptance and Action Questionnaire–II. *Behavior Therapy, 42*(4), 676–688.
+* Burns, D. D. (1980). *Feeling good: The new mood therapy.* New York: William Morrow.
 * Gillanders, D. T., et al. (2014). The development and initial validation of the Cognitive Fusion Questionnaire. *Behavior Therapy, 45*(1), 83–101.
 * Holt-Lunstad, J., Smith, T. B., & Layton, J. B. (2010). Social relationships and mortality risk: A meta-analytic review. *PLoS Medicine, 7*(7), e1000316.
 * Kim, S., Thibodeau, R., & Jorgensen, R. S. (2011). Shame, guilt, and depressive symptoms: A meta-analytic review. *Psychological Bulletin, 137*(1), 68–96. doi:10.1037/a0021466
+* Miller, W. R., & Rollnick, S. (2013). *Motivational interviewing: Helping people change* (3rd ed.). New York: Guilford Press.
 * Nolen-Hoeksema, S., Wisco, B. E., & Lyubomirsky, S. (2008). Rethinking rumination. *Perspectives on Psychological Science, 3*(5), 400–424.
 * Snyder, C. R. (2002). Hope theory: Rainbows in the mind. *Psychological Inquiry, 13*(4), 249–275.
 * Gottman, J. M. (1994). *What predicts divorce? The relationship between marital processes and marital outcomes.* Hillsdale, NJ: Erlbaum.

@@ -259,7 +259,7 @@ if (typeof module !== "undefined") {
     if (tokN) hp.rumination += Math.min(0.3, (0.5 * selfN) / tokN);
     // Feature hooks (for example the relationship patterns) add small nudges onto
     // existing movers. They never add new movers or variables.
-    const found = [];
+    const found = [], data = {};
     HOOKS.forEach(hook => {
       const r = hook(t);
       if (!r) return;
@@ -267,10 +267,11 @@ if (typeof module !== "undefined") {
       Object.entries(r.neg || {}).forEach(([n, v]) => { if (n in neg) neg[n] += v; });
       (r.notes || []).forEach(x => notes.push(x));
       (r.found || []).forEach(x => found.push(x));
+      Object.assign(data, r.data || {});
     });
     const sat = x => r2(1 - Math.exp(-Math.max(0, x)));
     const w = { e: NAMES.map(n => (isGround[idx[n]] ? 0 : sat(hp[n]))), pos: Object.fromEntries(GROUND.map(n => [n, sat(pos[n])])), neg: Object.fromEntries(GROUND.map(n => [n, sat(neg[n])])) };
-    return { crisis: false, w, notes: [...new Set(notes)], read, found };
+    return { crisis: false, w, notes: [...new Set(notes)], read, found, data };
   }
   /** Word contributions of an empty text. */
   const zeroWords = () => ({ e: new Array(N).fill(0), pos: { calm: 0, connection: 0, hope: 0 }, neg: { calm: 0, connection: 0, hope: 0 } });
@@ -288,7 +289,7 @@ if (typeof module !== "undefined") {
 
   // ---------- Word hooks (features register small nudges here) ----------
   const HOOKS = [];
-  /** Register a word hook: hook(text) → {add?:{mover:raw}, neg?:{grounding:raw}, notes?:string[], found?:any[]}. */
+  /** Register a word hook: hook(text) → {add?:{mover:raw}, neg?:{grounding:raw}, notes?:string[], found?:any[], data?:object}. data is passed through to master() in the same pass. */
   function addWordHook(hook) { if (!HOOKS.includes(hook)) HOOKS.push(hook); }
 
   // ---------- Small shared helpers ----------

@@ -37,8 +37,11 @@
       <div id="body">
         <!-- 2. The reading, in words. Hidden until Update. -->
         <section id="out" class="card hidden" aria-live="polite">
+          <p id="room" class="room"></p>
           <span class="label">What you may be feeling</span><p id="feel"></p>
           <span class="label">How they connect</span><ul id="connect" class="plain"></ul>
+          <div id="conflict" class="soft-box hidden"></div>
+          <div id="reality" class="soft-box hidden"></div>
           <div id="pattern" class="hidden"></div>
           <span class="label">Affirmations</span><ul id="affirm" class="affirm"></ul>
           <span class="label">One step</span><p id="step"></p>
@@ -94,6 +97,20 @@
               <button type="button" id="game-next" class="secondary hidden">Next</button>
             </div>
           </div>
+          <h3>Comfort story from a public AI</h3>
+          <p class="quiet small">Optional. MindFrame writes its own replies from the equation and makes no network calls. This builds a prompt from the reading only (never your words) that you can read, edit, and open in a new tab.</p>
+          <button type="button" id="comfort-go" class="secondary">Comfort story from a public AI</button>
+          <div id="comfort" class="hidden">
+            <p class="small"><strong>Only this text will be shared. Your journal stays on your phone.</strong></p>
+            <label class="visually-hidden" for="comfort-prompt">Prompt for the public AI</label>
+            <textarea id="comfort-prompt" class="short" rows="12"></textarea>
+            <div class="row">
+              <button type="button" id="open-grok" class="secondary">Open in Grok</button>
+              <button type="button" id="open-chatgpt" class="secondary">Open in ChatGPT</button>
+              <button type="button" id="comfort-copy" class="text">Copy prompt</button>
+            </div>
+            <p class="quiet small">Opens in a new tab and copies the prompt too, in case the site doesn't fill it in. Grok may send it as soon as it opens. <span id="comfort-status"></span></p>
+          </div>
           <h3>Journal</h3>
           <p class="quiet small">Only what you save here is kept, on this device.</p>
           <ul id="journal-list" class="journal"></ul>
@@ -113,6 +130,9 @@
         <!-- Analyzer: the nine movers in words -->
         <section id="p-analyzer" class="panel card hidden" aria-label="Analyzer">
           <div class="panel-head"><img src="img/raccoon.svg" alt="" width="40" height="40" /><h2>Remy the Raccoon, Analyzer</h2><button type="button" class="text panel-close" aria-label="Close the Analyzer">Close</button></div>
+          <h3>Hidden pulls and reality check</h3>
+          <ul id="remy-extra" class="plain"></ul>
+          <h3>The nine movers</h3>
           <ul id="breakdown" class="plain"></ul>
         </section>
 
@@ -155,10 +175,11 @@
     </main>
   </div>
 
-  <!-- core: signals → grounding → movers → master → words -->
+  <!-- core: signals → grounding → movers → reality → master → words -->
   <script src="js/core/signals.js"></script>
   <script src="js/core/grounding.js"></script>
   <script src="js/core/movers.js"></script>
+  <script src="js/core/reality.js"></script>
   <script src="js/core/master.js"></script>
   <script src="js/core/words.js"></script>
   <!-- features -->
@@ -167,6 +188,7 @@
   <script src="js/features/writer/games.js"></script>
   <script src="js/features/historian.js"></script>
   <script src="js/features/writer/writer.js"></script>
+  <script src="js/features/writer/comfort.js"></script>
   <script src="js/features/analyzer.js"></script>
   <script src="js/features/scribe.js"></script>
   <script src="js/features/scientist.js"></script>

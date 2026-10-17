@@ -4,6 +4,8 @@
 // lists all nine movers in words: how present each one is (a little, quite,
 // strongly), what it feeds, and what softens it, read from W. Words only; the
 // numbers live with the Scientist.
+// Remy also lists every hidden pull (conflicts) and any grand or absolute
+// wording, with its true-sized version, from the same master reading.
 
 if (typeof module !== "undefined") require("../core/words.js");
 
@@ -57,6 +59,26 @@ if (typeof module !== "undefined") require("../core/words.js");
     });
   }
 
+  /** How strong a pull is, in words, from c. */
+  const pullSize = c => (c >= 0.6 ? "a strong pull" : c >= 0.4 ? "a clear pull" : "a gentle pull");
+  const KIND_WORDS = { grand: "big, everything-on-me wording", catastrophic: "certain-worst wording", allOrNothing: "all-or-nothing wording", absolutist: "always/never wording" };
+  /**
+   * Remy's extra detail, in words: every hidden pull (with its size from c)
+   * and any grand or absolute wording (how sure it sounds, from g).
+   * @param {object} m the master output
+   * @returns {string[]}
+   */
+  function details(m) {
+    const out = (m.conflicts || []).map(c => { const [a, b] = MF.Words.pulls(c); return `Hidden pull (${pullSize(c.c)}${c.from === "words" ? ", in your words" : ""}): part of you ${a}, while part of you ${b}.`; });
+    const g = m.grand;
+    if (g && g.kinds.length && g.g > 0) {
+      out.push(`Grand or absolute wording: ${band(g.g)} present (${g.kinds.map(k => KIND_WORDS[k]).join(", ")}). It adds to the replaying and to believing the thought word for word.`);
+      MF.Words.realityLines(m).forEach(x => out.push(x));
+    }
+    if (!out.length) out.push("No hidden pulls or grand wording stand out right now.");
+    return out;
+  }
+
   // ---------- Panel (browser only) ----------
   /**
    * Mount the Analyzer panel.
@@ -68,7 +90,10 @@ if (typeof module !== "undefined") require("../core/words.js");
     return function render() {
       const ul = $("breakdown"), m = app.m();
       ul.innerHTML = "";
-      if (!m) { ul.appendChild(app.li("Tap Update to see each mover.")); return; }
+      if (!m) { ul.appendChild(app.li("Tap Update to see each mover.")); $("remy-extra").innerHTML = ""; return; }
+      const ex = $("remy-extra");
+      ex.innerHTML = "";
+      details(m).forEach(t => ex.appendChild(app.li(t)));
       breakdown(app.state, m).forEach(x => {
         const li = document.createElement("li");
         const h = document.createElement("strong");
@@ -82,6 +107,6 @@ if (typeof module !== "undefined") require("../core/words.js");
     };
   }
 
-  MF.Analyzer = { level, breakdown, mount };
+  MF.Analyzer = { level, breakdown, details, mount };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Analyzer;

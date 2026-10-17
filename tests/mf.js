@@ -4,11 +4,13 @@
 "use strict";
 const parts = [
   require("../js/core/movers.js"),
+  require("../js/core/reality.js"),
   require("../js/core/master.js"),
   require("../js/core/words.js"),
   require("../js/features/relationship.js"),
   require("../js/features/historian.js"),
   require("../js/features/writer/writer.js"),
+  require("../js/features/writer/comfort.js"),
   require("../js/features/analyzer.js"),
   require("../js/features/scribe.js"),
   require("../js/features/scientist.js"),

@@ -95,3 +95,9 @@ label { color: var(--muted); font-size: 0.92rem; }
 .panel h3 { margin: 1.2rem 0 0.35rem; font-size: 0.95rem; font-weight: 500; }
 #pattern { margin-top: 0.4rem; padding: 0.2rem 0.8rem 0.4rem; border-radius: 0.8rem; background: #f1efe8; }
 .foot { margin-top: 1.5rem; }
+
+/* Card: positive emotions lead; hidden pull and reality check sit in soft boxes */
+.room { font-size: 1.08rem; font-weight: 500; margin: 0 0 0.6rem; }
+.soft-box { margin-top: 0.4rem; padding: 0.2rem 0.8rem 0.4rem; border-radius: 0.8rem; background: #eef1ec; }
+.soft-box p { margin: 0.35rem 0; }
+#comfort-prompt { font-size: 0.85rem; }

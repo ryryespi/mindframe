@@ -19,24 +19,14 @@ if (typeof module !== "undefined") {
   "use strict";
   const { HARD, PROCESS, idx, cap } = MF.Movers;
   const { SKILL, REFRAME, focus } = MF.Master;
-  const { SOFTENER, affirmations } = MF.Words;
+  const { SOFTENER, LINK_VERB, EASE, strength, choose, affirmations } = MF.Words;
+  const { weights, listJoin } = MF.Movers;
   const S = typeof Stories !== "undefined" ? Stories : require("./stories.js");
   const Gm = typeof Games !== "undefined" ? Games : require("./games.js");
   const G = typeof Grounding !== "undefined" ? Grounding : require("../../core/grounding.js");
   // ---------- Stories (driven by the master step) ----------
   const ARC_FOR = { shame: "labeling", sadness: "hopelessness", fear: "catastrophizing", anger: "catastrophizing", rumination: "allOrNothing", avoidance: "fortuneTelling" };
   const STEP_FOR = { calm: SKILL.calm.split(": ")[1].replace(/\.$/, "").toLowerCase(), connection: "send one short message to someone who is kind", hope: "pick one small thing for tomorrow and write it down" };
-  const LOOSEN = {
-    anger: ["the anger loosened its grip", "the anger loosened its grip a little"],
-    shame: ["the shame grew quieter", "the shame grew a little quieter"],
-    fear: ["the fear settled", "the fear settled a little"],
-    sadness: ["the sadness grew lighter", "the sadness grew a little lighter"],
-    rumination: ["the replaying slowed", "the replaying slowed a little"],
-    avoidance: ["the urge to look away eased", "the urge to look away eased a little"],
-    calm: ["their breath slowed", "their breath slowed a little"],
-    connection: ["they felt less alone", "they felt a little less alone"],
-    hope: ["hope came back", "a little hope came back"],
-  };
   /** Which mover the story is about: the strongest one, else the biggest grounding gap. */
   function storyFocus(state, m) { return focus({ e: m.e, home: state.home }).name || m.top || "calm"; }
   /** A creature story driven by the master step, in feeling words, ending with an affirmation and a question. */
@@ -53,8 +43,13 @@ if (typeof module !== "undefined") {
     if (base.crisis) return null;
     const from = m.e[i], to = m.next[i];
     const moved = Math.abs(from - state.home[i]) - Math.abs(to - state.home[i]);
-    const helper = stab && stab !== top ? `They knew ${SOFTENER[stab]} could soften it, so the plan stayed small and real.` : "The plan stayed small and real.";
-    const loosen = `${cap(LOOSEN[top][moved >= 0.15 ? 0 : 1])}. Not all the way. Just closer.`;
+    // Composed from the numbers: the stabilizer's verb from |W[stab][top]|, the
+    // easing verb and "a little" from the step's gain, the room line from master's positives.
+    const sw = stab ? weights(state.w)[idx[stab]][i] : 0;
+    const helper = stab && stab !== top ? `They knew ${SOFTENER[stab]} ${choose(LINK_VERB.soft[strength(sw)], `story-soft|${stab}|${sw}`, opts.seed || 1)} it, so the plan stayed small and real.` : "The plan stayed small and real.";
+    const subject = HARD.includes(top) ? `the ${top}` : top === "rumination" ? "the replaying" : top === "avoidance" ? "the urge to look away" : top;
+    const room = (m.positives || []).length ? ` There was room for ${listJoin(m.positives.map(p => p.word))} now.` : "";
+    const loosen = `${cap(subject)} ${EASE[top][2]}${moved >= 0.15 ? "" : " a little"}. Not all the way. Just closer.${room}`;
     const aff = affirmations(m, { seed: opts.seed || 1 })[0];
     const keep = `They kept one sentence close: \u201C${aff}\u201D`;
     const b = base.sentences;
