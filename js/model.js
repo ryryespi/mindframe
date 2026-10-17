@@ -533,13 +533,15 @@ const Model = (function () {
   function story(state, m, opts = {}) {
     const id = m.ideal;
     if (m.d < 0.005) return null;
-    const top = id.top || focus(state).name || "calm";
+    // Strongest hard/process mover, else the grounding mover with the biggest gap.
+    const top = focus(state).name || id.top || "calm";
     const i = idx[top];
     const arc = HARD.concat(PROCESS).includes(top) ? ARC_FOR[top] : "none";
     const stab = id.stabilizer;
     const guide = stab === "connection" ? "Tidelyn" : stab === "calm" ? "Mistfawn" : stab === "hope" ? "Hivewright" : S.PATTERN_CREATURE[arc] || S.PATTERN_CREATURE.none;
-    const read = { patterns: [arc], reframes: [REFRAME[top] || REFRAME.none] };
-    const base = S.tell({ read, character: guide, step: STEP_FOR[stab] || STEP_FOR.calm, seed: opts.seed || 1, faith: !!opts.faith });
+    // The opening follows the mover; the text's own pattern is used only when it fits that mover.
+    const read = { patterns: (m.read && m.read.patterns) || [], reframes: [REFRAME[top] || REFRAME.none] };
+    const base = S.tell({ read, mover: top, character: guide, step: STEP_FOR[stab] || STEP_FOR.calm, seed: opts.seed || 1, faith: !!opts.faith });
     if (base.crisis) return null;
     const from = state.e[i], to = id.next[i];
     const map = `They kept a small map of feelings, and on it ${label(top)} sat at ${f2(from)}, the farthest point from home.`;
@@ -547,7 +549,7 @@ const Model = (function () {
     const landing = `On the map, ${label(top)} moved from ${f2(from)} to ${f2(to)}, and the way home grew ${f2(Math.max(0, id.d - id.dNext))} shorter. Not all the way. Just closer.`;
     const b = base.sentences;
     const sentences = [b[0], map, helper, ...b.slice(1, -1), landing, b[b.length - 1]];
-    return { guide, tag: base.tag, focus: top, arc, from, to, text: sentences.join(" "), next: id.next };
+    return { guide, tag: base.tag, focus: top, arc, opening: base.opening, openingFrom: base.openingFrom, from, to, text: sentences.join(" "), next: id.next };
   }
 
   function acceptStep(state, ts = Date.now()) {

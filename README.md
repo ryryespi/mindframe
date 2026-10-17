@@ -66,7 +66,7 @@ Only emotions and processes with strong evidence behind them as drivers of distr
 
 Below the card:
 
-* **Story:** a creature story driven by the ideal step. Accept the step, or play the choose-a-path game.
+* **Story:** a creature story driven by the ideal step. It opens with the strongest mover (or the biggest grounding gap: low hope, connection or calm). A thinking-pattern opening is used only when the text shows a pattern that fits that mover. The path game's first scene works the same way. Accept the step, or play the choose-a-path game.
 * **Save checkpoint** (numbers only).
 * **Journal:** the only place your words are kept, and only when you tap it.
 * **Export / Import.**
@@ -108,7 +108,7 @@ eq e' = e + 0.20*(h - e) + 0.10*s(e)   # readable; ignored on import
 * `js/grounding.js`, `js/analyzer.js`: pattern reading and crisis wording.
 * `js/stories.js`, `js/games.js`: stories and the path game.
 * `tools.html` only redirects old shortcuts to the one page.
-* `sw.js` caches the shell for offline use (cache v11).
+* `sw.js` caches the shell for offline use (cache v12).
 
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
 

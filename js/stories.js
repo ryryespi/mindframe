@@ -50,6 +50,47 @@ const Stories = (function () {
     none: ["a heavy thought that felt bigger than it was", "a cloudy thought that would not settle", "an old worry that came back"],
   };
 
+  // Openings by mover: the strongest hard/process mover, or the grounding mover
+  // with the biggest gap (hope, connection, calm mean "low hope" and so on).
+  // Used unless the text has a clear thinking pattern that fits that mover.
+  const MOVER_MIRAGE = {
+    anger: ["a hot, tight thought that someone had wronged {them}", "that it wasn't fair, and the unfairness burned", "a flash of anger that wanted to answer right away"],
+    shame: ["that something about {them} was wrong underneath it all", "that {they} should hide so no one would see", "a small, hot feeling of not being enough"],
+    fear: ["a tight worry that something was about to go wrong", "a jumpy feeling that kept scanning for danger", "a worry that would not sit still"],
+    sadness: ["a heavy, gray feeling that sat on {their} chest", "that something good had been lost", "a tiredness that felt like sorrow"],
+    rumination: ["the same old scene, replaying again and again", "a question that kept circling without an answer", "a loop of going over what had already happened"],
+    avoidance: ["that it would be easier not to face it today", "an urge to put it off one more time", "that if {they} just didn't look, it would go away"],
+    hope: ["that nothing ahead was worth reaching for", "that the road forward had gone dim", "that trying again would not change anything"],
+    connection: ["that no one would notice if {they} disappeared for a while", "that {they} were on the outside, looking in", "a quiet, far-away loneliness"],
+    calm: ["a buzzing restlessness with nowhere to land", "that {they} could not slow down", "a busy, unsettled hum under everything"],
+  };
+  const MOVER_NAMING = {
+    anger: ["The anger was real and it pointed at something that mattered, but it did not have to choose {their} next move.", "Anger can be a signal; {they} could listen to it without letting it drive."],
+    shame: ["The feeling said something was wrong with {them}, but a hard moment is not a verdict on a person.", "Shame wanted {them} to hide, yet hiding was the one thing that would keep it loud."],
+    fear: ["The worry was a body alarm, not a forecast, and alarms can ring when nothing is wrong.", "Fear was trying to protect {them}; {they} could thank it and still check what was real."],
+    sadness: ["The sadness was real, and it could be felt without deciding anything.", "Sad is a weather, not a climate; it can be here and still pass."],
+    rumination: ["Going over it again had not brought an answer, only more of the same.", "The loop felt like thinking, but it was turning in place, not moving forward."],
+    avoidance: ["Putting it off felt like relief, but the relief was small and the weight came back.", "Not looking made it bigger; one small look would make it its true size."],
+    hope: ["Dim is not the same as dark; the next step only needed a little light.", "Hope did not need to be big. It only needed one small next thing."],
+    connection: ["Feeling alone was real, but it was a feeling about now, not proof about everyone.", "Loneliness says no one is there; often someone is, a message away."],
+    calm: ["The body was running fast, and bodies can be slowed down on purpose.", "Restless is a state, not a fact about the day; a slower breath can change it."],
+  };
+  // Thinking patterns that fit each mover. Only these may replace a mover's opening.
+  const MOVER_FITS = {
+    anger: [], shame: ["labeling", "mindReading"], fear: ["fortuneTelling", "catastrophizing", "meaning"],
+    sadness: ["hopelessness"], rumination: ["allOrNothing"], avoidance: ["fortuneTelling"],
+    hope: ["hopelessness", "fortuneTelling"], connection: ["mindReading"], calm: ["catastrophizing"],
+  };
+  const MOVERS = Object.keys(MOVER_MIRAGE);
+
+  // Which lines open the story: the mover's own, or a fitting pattern's.
+  function opening(mover, read) {
+    const arc = arcFor(read);
+    if (!MOVERS.includes(mover)) return { from: "pattern", key: arc, mirage: MIRAGE[arc], naming: NAMING[arc] };
+    if (arc !== "none" && MOVER_FITS[mover].includes(arc)) return { from: "pattern", key: arc, mirage: MIRAGE[arc], naming: NAMING[arc] };
+    return { from: "mover", key: mover, mirage: MOVER_MIRAGE[mover], naming: MOVER_NAMING[mover] };
+  }
+
   const OPENINGS = [
     "{Intro} woke one gray morning with an old thought: {mirage}.",
     "One quiet evening, {intro} sat down and felt a familiar thought arrive: {mirage}.",
@@ -181,7 +222,7 @@ const Stories = (function () {
     return ARCS.includes(top) ? top : "none";
   }
 
-  // opts: { read, thought, reframe, step, faith, you, seed, avoid }
+  // opts: { read, thought, reframe, step, faith, you, seed, avoid, mover }
   // Returns { crisis: true } and nothing else when any text reads as a crisis.
   function tell(opts = {}) {
     const texts = [opts.thought, opts.reframe, opts.step].filter(Boolean);
@@ -209,18 +250,19 @@ const Stories = (function () {
     const p = you
       ? { they: "you", them: "you", themself: "yourself", their: "your", intro: "you", Intro: "You" }
       : { they: "they", them: "them", themself: "themself", their: "their", intro: who.intro, Intro: who.intro };
-    const pro = { they: p.they, them: p.them, themself: p.themself, They: cap(p.they) };
+    const pro = { they: p.they, them: p.them, themself: p.themself, their: p.their, They: cap(p.they) };
 
     const reframe = asReframe(opts.reframe) || asReframe((read && read.reframes && read.reframes[0]) || "This is a thought, not a fact.");
     const step = asStep(opts.step, you) || pick(DEFAULT_STEPS);
     let real = pick(REAL_THINGS);
     if (you) real = real.replace(/\btheir\b/g, "your");
 
+    const op = opening(opts.mover, read);
     const picks = [];
     const pickI = list => { const i = Math.floor(rand() * list.length); picks.push(i); return list[i]; };
     const sentences = [
-      fill(OPENINGS[oi], { ...pro, intro: p.intro, Intro: p.Intro, mirage: fill(pick(MIRAGE[arc]), pro) }),
-      fill(pickI(NAMING[arc]), pro),
+      fill(OPENINGS[oi], { ...pro, intro: p.intro, Intro: p.Intro, mirage: fill(pick(op.mirage), pro) }),
+      fill(pickI(op.naming), pro),
       fill(pickI(NOTICING), { ...pro, real }),
       fill(pickI(SAYING), { ...pro, reframe }),
       fill(pickI(STEPPING), { ...pro, step }),
@@ -234,7 +276,7 @@ const Stories = (function () {
     const tidy = sentences.map(s => cap(s).replace(/([.!?\u2026]["\u201D])\.$/, "$1"));
     sentences.splice(0, sentences.length, ...tidy);
     const text = sentences.join(" ");
-    return { crisis: false, arc, faith, you, character: who.name, tag: `${who.name}, ${who.intro.slice(who.name.length + 2).replace(/,$/, "")}`, key: [oi, ...picks].join("-"), sentences, text };
+    return { crisis: false, arc, opening: op.key, openingFrom: op.from, faith, you, character: who.name, tag: `${who.name}, ${who.intro.slice(who.name.length + 2).replace(/,$/, "")}`, key: [oi, ...picks].join("-"), sentences, text };
   }
 
   // Safe markup, if a caller ever needs HTML. The app itself uses textContent.
@@ -243,9 +285,9 @@ const Stories = (function () {
   }
 
   // Shared with games.js so games use the same story pieces.
-  const parts = { MIRAGE, NAMING, REAL_THINGS, FAITH, LANDING, QUESTIONS, DEFAULT_STEPS, asReframe, asStep, rng, fill, cap };
+  const parts = { MIRAGE, NAMING, MOVER_MIRAGE, MOVER_NAMING, MOVER_FITS, opening, REAL_THINGS, FAITH, LANDING, QUESTIONS, DEFAULT_STEPS, asReframe, asStep, rng, fill, cap };
 
-  return { tell, toHTML, escapeHTML, truncate, arcFor, ARCS, CHARACTERS, PATTERN_CREATURE, parts };
+  return { tell, toHTML, escapeHTML, truncate, arcFor, opening, MOVERS, ARCS, CHARACTERS, PATTERN_CREATURE, parts };
 })();
 
 if (typeof module !== "undefined" && module.exports) module.exports = Stories;

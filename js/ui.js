@@ -218,7 +218,7 @@ $("play").addEventListener("click", () => {
   if (!story) return;
   const text = $("input").value.trim();
   const c = Model.card(state, Model.metrics(state, live));
-  const g = Games.make({ type: "path", thought: text || Games.SAMPLES[story.arc] || Games.SAMPLES.none, reframe: c.reframe, faith: $("faith").checked, seed });
+  const g = Games.make({ type: "path", thought: text || Games.SAMPLES[story.arc] || Games.SAMPLES.none, read: live.read || undefined, mover: story.focus, reframe: c.reframe, faith: $("faith").checked, seed });
   if (g.crisis) { crisis(true); return; }
   game = { g, i: 0, tried: 0 };
   $("game").classList.remove("hidden");

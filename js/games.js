@@ -56,16 +56,17 @@ const Games = (function () {
     const name = S.PATTERN_CREATURE[arc];
     const who = S.CHARACTERS.find(c => c.name === name);
     const pick = list => list[Math.floor(rand() * list.length)];
-    const pro = { they: "they", them: "them", themself: "themself", They: "They" };
+    const pro = { they: "they", them: "them", themself: "themself", their: "their", They: "They" };
     const reframe = P.asReframe(opts.reframe) || P.asReframe((read.reframes && read.reframes[0]) || "This is a thought, not a fact.");
     const step = P.asStep(opts.step, false) || pick(GAME_STEPS);
     const faith = opts.faith === undefined ? arc === "meaning" : !!opts.faith;
+    const op = S.opening(opts.mover, read);
     return {
-      read, arc, faith, reframe, step,
+      read, arc, faith, opening: op.key, openingFrom: op.from, reframe, step,
       creature: name,
       tag: `${name}, ${who.intro.slice(name.length + 2).replace(/,$/, "")}`,
-      mirage: P.fill(pick(P.MIRAGE[arc]), pro),
-      naming: P.fill(pick(P.NAMING[arc]), pro),
+      mirage: P.fill(pick(op.mirage), pro),
+      naming: P.fill(pick(op.naming), pro),
       real: pick(P.REAL_THINGS),
       faithLine: faith ? P.fill(P.FAITH[0], pro) : "",
       landing: P.fill(pick(P.LANDING), pro),
@@ -119,7 +120,8 @@ const Games = (function () {
     return { scenes };
   }
 
-  // opts: { type, read, thought, reframe, step, faith, seed }
+  // opts: { type, read, thought, reframe, step, faith, seed, mover }
+  // mover picks scene 1's thought (see Stories.opening).
   function make(opts = {}) {
     const texts = [opts.thought, opts.reframe, opts.step].filter(Boolean);
     if (texts.some(t => G.isCrisis(t))) return { crisis: true };
@@ -134,7 +136,7 @@ const Games = (function () {
     const steps = body.scenes.length;
     return {
       crisis: false, type, fallback, seed,
-      arc: pc.arc, creature: pc.creature, tag: pc.tag, faith: pc.faith,
+      arc: pc.arc, opening: pc.opening, openingFrom: pc.openingFrom, creature: pc.creature, tag: pc.tag, faith: pc.faith,
       reframe: pc.reframe, step: pc.step,
       ending: [pc.landing, pc.faithLine, pc.question].filter(Boolean),
       steps,

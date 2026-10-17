@@ -265,7 +265,7 @@ test("crisis: a crisis label inside code is refused", () => {
 });
 
 // ---------- one page ----------
-test("single page: index has no tools links; tools.html only redirects; the service worker is v11", () => {
+test("single page: index has no tools links; tools.html only redirects; the service worker is v12", () => {
   const root = path.join(__dirname, "..");
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const tools = fs.readFileSync(path.join(root, "tools.html"), "utf8");
@@ -274,7 +274,7 @@ test("single page: index has no tools links; tools.html only redirects; the serv
   assert.ok(/history\.replaceState/.test(index), "old ?view/?chip links are stripped");
   assert.ok(/location\.replace\("\.\/"\)/.test(tools) && /http-equiv="refresh"/.test(tools));
   assert.ok(!/<textarea|<script src/.test(tools), "tools.html is only a redirect");
-  assert.match(sw, /mindframe-shell-v11/);
+  assert.match(sw, /mindframe-shell-v12/);
   const scripts = [...index.matchAll(/<script src="([^"]+)"/g)].map(x => x[1]);
   assert.deepEqual(scripts, ["js/analyzer.js", "js/grounding.js", "js/stories.js", "js/games.js", "js/model.js", "js/ui.js"]);
   scripts.forEach(s => assert.ok(sw.includes(`./${s}`), `${s} cached`));
