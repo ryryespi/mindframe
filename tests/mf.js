@@ -9,6 +9,8 @@ const parts = [
   require("../js/core/master.js"),
   require("../js/core/words.js"),
   require("../js/features/relationship.js"),
+  require("../js/features/forgiveness.js"),
+  require("../js/features/practices.js"),
   require("../js/features/historian.js"),
   require("../js/features/writer/writer.js"),
   require("../js/features/writer/comfort.js"),

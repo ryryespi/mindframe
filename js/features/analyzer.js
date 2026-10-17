@@ -75,6 +75,13 @@ if (typeof module !== "undefined") require("../core/words.js");
       out.push(`Grand or absolute wording: ${band(g.g)} present (${g.kinds.map(k => KIND_WORDS[k]).join(", ")}). It adds to the replaying and to believing the thought word for word.`);
       MF.Words.realityLines(m).forEach(x => out.push(x));
     }
+    // Forgiveness cues (features/forgiveness.js), in words.
+    const f = m.forgive;
+    if (f && (f.cSelf > 0 || f.cOther > 0)) {
+      const w = c => (c >= 0.7 ? "clearly" : "a little");
+      if (f.cSelf > 0) out.push(`Self-blame wording: ${w(f.cSelf)} present. It adds to the shame and the replaying.`);
+      if (f.cOther > 0) out.push(`Resentment toward someone: ${w(f.cOther)} present. It adds to the anger and the replaying, and dims connection.`);
+    }
     if (!out.length) out.push("No hidden pulls or grand wording stand out right now.");
     return out;
   }

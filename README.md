@@ -142,9 +142,9 @@ Two pulls that are both active at once, derived from the nine movers (no new mov
 
 In Fern the Fox's panel, **Comfort story from a public AI** builds a prompt from the analysis only and shows it in an editable box with "Only this text will be shared. Your journal stays on your phone." The prompt contains the card in plain words plus a compact numbers summary (movers with bands, step direction d → d_next and the biggest move, conflicts with c, the grandiosity signal g, positive emotions) and asks for a ~200-word gentle, grounded comfort story with a friendly animal, three affirmations written from that analysis, no medical advice, and a hopeful ending. It never contains the text you typed (every line is composed from numbers, and a second guard drops any line repeating four of your words in a row). **Open in Grok** (`https://grok.com/?q=<encoded>`) and **Open in ChatGPT** (`https://chatgpt.com/?q=<encoded>`) open a new tab and also copy the prompt in case the site doesn't fill it in; Grok may send it as soon as it opens. **Copy prompt** copies only. The button is disabled during a crisis. The app itself makes no network calls.
 
-## Five friends
+## Six friends
 
-Below the card is a row of friendly animals. Each opens one panel; only one is open at a time. Pictures are original SVGs in `img/`, cached for offline use.
+Below the card, six friendly animals sit in a little meadow. Each opens one panel; only one is open at a time. Pictures are original SVGs in `img/`, cached for offline use. Six is the cap: the patience and mindfulness practices live with Grace rather than in a seventh helper.
 
 | Friend | Role | Personality | Panel |
 |---|---|---|---|
@@ -152,9 +152,79 @@ Below the card is a row of friendly animals. Each opens one panel; only one is o
 | **Hazel the Owl** (glasses, book) | Historian | Remembers your days and how far you've come. | Each day in words, inner peace across your saved days, Save checkpoint (numbers only), restore a checkpoint. |
 | **Remy the Raccoon** (magnifying glass) | Analyzer | Turns over each feeling to see how it fits. | Every hidden pull and any grand wording with its true-sized version, then all nine movers in words: how present each is, what it feeds, what softens it. |
 | **Toby the Tortoise** (quill) | Scribe | Slow and careful; copies your numbers safely. | Export / import `.mf` code, download, Start over. |
-| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores, inner peace P with ∂P/∂e, the lever, n*, e* and the convergence proof sketch), adjust each mover, and the variables a0, k, a_max, b, decay, d0, γ, δ, home and the main W links, with Reset. |
+| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores, inner peace P with ∂P/∂e, the lever, n*, e* and the convergence proof sketch, the forgiveness scores F_self and F_other with the path, ΔP_F and the Grace recommendation, and the practice pick), adjust each mover, and the variables a0, k, a_max, b, decay, d0, γ, δ, home and the main W links, with Reset. |
+| **Grace the Dove** (olive branch) | Peacemaker | Lets go gently, of my own mistakes and others'. | Three tabs: **Forgive myself** (the four Rs), **Forgive someone** (REACH), and **Breathe & be patient** (ten practices and the breathing circle). Optional note boxes stay on the page unless you save them to the journal. |
 
 Changing a number in a panel does not redraw the card; it says "Tap Update to see the new reading." Buttons that are themselves an action (Write a story, Accept step, Save checkpoint, Restore) run Update for you.
+
+## Grace the Dove: forgiveness, patience and mindfulness
+
+**Model and practice aid, not therapy.** Nothing here adds a mover or a variable. Forgiveness works through a word hook and a master pass (`js/features/forgiveness.js`). The practices pick the One step from master's numbers (`js/features/practices.js`).
+
+**Forgiveness cues.** The cues are negation-aware, as with the Four Horsemen. *Self-blame* covers phrases like "my fault", "I blame myself", "I can't forgive myself", "I messed up", "I should have", "I let her down" and "I regret". *Resentment toward someone* covers "I can't forgive him", "resent", "grudge", "she betrayed me", "how could they" and "bitter". With k distinct cues, the cue strength is c = 1 − e^(−0.7k).
+
+The hook nudges existing movers only:
+
+* self: shame +0.2, rumination +0.2;
+* other: anger +0.3, rumination +0.2, connection −0.2.
+
+**The master pass** runs in the same `master()` call, after inner peace:
+
+```
+F_self  = e_shame · (0.4 + 0.6·c_self)
+F_other = e_anger · (0.4 + 0.6·c_other)
+path    = argmax(F_self, F_other) if it is ≥ θ_F = 0.35 (tie → self), else none
+ΔP_F    = P(e + release) − P(e)
+          release: self shame −0.10, rumination −0.05; other anger −0.10, rumination −0.05, connection +0.05 (toward home, capped by the gap)
+Grace   = a path is suggested AND the inner-peace lever is one of that path's movers
+          (self: shame, rumination; other: anger, rumination, connection)
+```
+
+Without a cue, a path needs e_shame (or e_anger) ≥ 0.875. Rumination is in both release vectors because rumination predicts lower forgiveness through anger (McCullough, Bono & Root, 2007).
+
+**On the card**, words only, a forgiveness tile appears when a path is suggested. For example: "Forgiving someone: there's a deep hurt here that still stings. Forgiveness can come slowly, as a gift you choose, for your own peace." The tile for others always says "Forgiving is not excusing what happened, making up, or staying anywhere unsafe." When Grace is recommended, the peace lines add "Grace the Dove can help here: forgiving someone is a gentle way to ease the anger." Faith wording appears only with Include faith on: the Lord's Prayer ("forgive us our debts, as we also forgive our debtors"), Colossians 3:13, and, in Grace's panel, Luke 23:34.
+
+**Grace's guided paths.** Each step is short and has an optional note box. The notes are kept only in the page; they are saved only through "Save these notes to the journal". Crisis wording in a note shows the 988/911 box and clears the notes.
+
+* **Forgive myself:** the four Rs of self-forgiveness: Responsibility, Remorse, Restoration, Renewal (Cornish & Wade, 2015). Renewal uses Neff's self-compassion: mindfulness, common humanity, self-kindness (Neff, 2003). The request named "Worthington's four Rs"; the published four-R model is Cornish & Wade's, so it is credited to them.
+* **Forgive someone:** REACH (Recall, Empathize, Altruistic gift, Commit, Hold on; Worthington, 2006). Forgiveness interventions are supported by a meta-analysis (Wade, Hoyt, Kidwell & Worthington, 2014). The intro follows Enright's process model (uncovering, decision, work, deepening; Enright & Fitzgibbons, 2015). It says plainly that forgiving is not excusing, reconciling, or staying unsafe, and to reach out for help first if you are not safe.
+
+**Patience and mindfulness practices** (the "Breathe & be patient" tab):
+
+| Practice | Kind | Source |
+|---|---|---|
+| STOP | mindfulness | Stahl & Goldstein, 2010 (MBSR) |
+| Three-minute breathing space | mindfulness | Segal, Williams & Teasdale, 2013 (MBCT) |
+| 5-4-3-2-1 senses | mindfulness | a common grounding exercise (no single primary source) |
+| Short body scan | mindfulness | Kabat-Zinn, 1990 |
+| Name it to tame it (affect labeling) | mindfulness | Lieberman et al., 2007 |
+| Self-compassion break | mindfulness | Neff, 2003 |
+| Pause and breathe (longer exhale) | patience | Zaccaro et al., 2018 |
+| Reframe the wait (reappraisal) | patience | Gross, 1998; Schnitker, 2012 |
+| Urge surfing | patience | Bowen & Marlatt, 2009 |
+| Gratitude for what's here | patience | Emmons & McCullough, 2003 |
+
+Patience is treated as a trainable strength linked to well-being (Schnitker, 2012). A waiting/impatience hook ("taking forever", "can't wait", "impatient", "stuck in traffic") gives c_wait = 1 − e^(−0.7k) and nudges anger +0.2 and calm −0.2.
+
+**Which practice becomes the One step.** Let n be the inner-peace lever, or master's mover if there is no lever:
+
+* rumination → labeling if another hard mover is ≥ 0.3, else STOP;
+* anger → reframe the wait if c_wait ≥ 0.3, else pause and longer exhale;
+* fear → reframe the wait if c_wait ≥ 0.3, else the breathing space;
+* avoidance → urge surfing;
+* shame → self-compassion break;
+* sadness → gratitude if hope is ≥ 0.3, else the earlier small-action step;
+* calm → reframe the wait if c_wait ≥ 0.3, else five senses if d ≥ 0.5, else the body scan;
+* hope → gratitude;
+* connection → the earlier message step.
+
+The card reads "<practice>: <instruction with dose words>, so <mover> can <ease>." A "Try it with Grace" button opens that practice.
+
+**The breathing circle** is optional: in for four seconds, out for six (a longer exhale, six breaths a minute). The number of breaths follows the dose (three, four or five). It makes no sound. With reduced motion, the circle stays still and only the words and a soft color change.
+
+## The look: sky, meadow and tiles
+
+The header is a small illustrated sky over a meadow (inline SVG, no external assets). After Update, its colors follow the inner-peace band (`body[data-peace]`): overcast lavender for "a little", dawn peach for "growing", morning blue for "close", and a clear sky for "steady". In dark mode (`prefers-color-scheme`) it is a night sky with a moon and stars. Card sections are soft tiles with small line icons. They fade in gently after Update, with no motion when `prefers-reduced-motion` is set. Text keeps WCAG AA contrast in both themes (this is tested), and buttons are at least 44 px tall.
 
 ## Four Horsemen (relationship patterns)
 
@@ -196,11 +266,11 @@ eq step = act(clip01(e + 0.25*(h - e) + 0.10*s(e)))   # readable; ignored on imp
 Code is grouped by feature. Every file starts with a header comment; every function has a JSDoc. Files share one namespace, `MF` (`window.MF` in the browser, `global.MF` in Node tests).
 
 ```
-index.html            the one page: input, Update, card, five friends, five panels
-style.css             calm, muted styles; large tap targets
-sw.js                 offline cache (v16)
+index.html            the one page: scene, input, Update, card tiles, six friends, six panels
+style.css             calm styles, dark mode, reduced motion; large tap targets
+sw.js                 offline cache (v17)
 tools.html            redirects old shortcuts to the one page
-img/                  fox, owl, raccoon, tortoise, otter (original SVGs)
+img/                  fox, owl, raccoon, tortoise, otter, dove (original SVGs)
 js/
   app.js              page shell: state, Update, the card, opening panels
   core/               the model; no page code
@@ -222,16 +292,18 @@ js/
     scribe.js         Toby the Tortoise: mf 2 / mf 1 export and import
     scientist.js      Ada the Otter: the math, sliders and variables
     relationship.js   the Four Horsemen pattern helper
+    forgiveness.js    Grace the Dove: forgiveness cues, master pass, card words, guided paths
+    practices.js      MF.Practices: patience & mindfulness library, the step pick, the breathing circle
 tests/                node tests (tests/mf.js loads every module)
 ```
 
-Load order in `index.html`: core (signals, grounding, movers, reality, peace, master, words), then features (relationship, stories, games, historian, writer, comfort, analyzer, scribe, scientist), then `app.js`.
+Load order in `index.html`: core (signals, grounding, movers, reality, peace, master, words), then features (relationship, forgiveness, practices, stories, games, historian, writer, comfort, analyzer, scribe, scientist), then `app.js`.
 
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
 
 ## Model, not validated science
 
-MindFrame is a model built from design assumptions and informed by the research cited here. It is not validated science, not a measurement of you, and not a diagnosis. The thresholds (0.3, 0.6, 0.25, the peace threshold 0.8) and weights (including d0, γ, δ) are design choices.
+MindFrame is a model built from design assumptions and informed by the research cited here. It is not validated science, not a measurement of you, and not a diagnosis. The thresholds (0.3, 0.6, 0.25, the peace threshold 0.8, the forgiveness threshold θ_F = 0.35, c_wait ≥ 0.3) and weights (including d0, γ, δ, the hook nudges and the release vectors) are design choices.
 
 ## References
 
@@ -240,25 +312,38 @@ MindFrame is a model built from design assumptions and informed by the research 
 * Barlow, D. H., Allen, L. B., & Choate, M. L. (2004). Toward a unified treatment for emotional disorders. *Behavior Therapy, 35*(2), 205–230. doi:10.1016/S0005-7894(04)80036-4
 * Beck, A. T. (1976). *Cognitive therapy and the emotional disorders.* New York: International Universities Press.
 * Beck, A. T., Steer, R. A., Kovacs, M., & Garrison, B. (1985). Hopelessness and eventual suicide: A 10-year prospective study of patients hospitalized with suicidal ideation. *American Journal of Psychiatry, 142*, 559–563.
+* Bowen, S., & Marlatt, A. (2009). Surfing the urge: Brief mindfulness-based intervention for college student smokers. *Psychology of Addictive Behaviors, 23*(4), 666–671. doi:10.1037/a0017127
 * Bond, F. W., et al. (2011). Preliminary psychometric properties of the Acceptance and Action Questionnaire–II. *Behavior Therapy, 42*(4), 676–688.
 * Burns, D. D. (1980). *Feeling good: The new mood therapy.* New York: William Morrow.
+* Cornish, M. A., & Wade, N. G. (2015). A therapeutic model of self-forgiveness with intervention strategies for counselors. *Journal of Counseling & Development, 93*(1), 96–104. doi:10.1002/j.1556-6676.2015.00185.x
 * Desbordes, G., Gard, T., Hoge, E. A., Hölzel, B. K., Kerr, C., Lazar, S. W., Olendzki, A., & Vago, D. R. (2015). Moving beyond mindfulness: Defining equanimity as an outcome measure in meditation and contemplative research. *Mindfulness, 6*(2), 356–372. doi:10.1007/s12671-013-0269-8
+* Emmons, R. A., & McCullough, M. E. (2003). Counting blessings versus burdens: An experimental investigation of gratitude and subjective well-being in daily life. *Journal of Personality and Social Psychology, 84*(2), 377–389.
+* Enright, R. D., & Fitzgibbons, R. P. (2015). *Forgiveness therapy: An empirical guide for resolving anger and restoring hope.* Washington, DC: APA. doi:10.1037/14526-000
 * Gillanders, D. T., et al. (2014). The development and initial validation of the Cognitive Fusion Questionnaire. *Behavior Therapy, 45*(1), 83–101.
 * Holt-Lunstad, J., Smith, T. B., & Layton, J. B. (2010). Social relationships and mortality risk: A meta-analytic review. *PLoS Medicine, 7*(7), e1000316.
+* Kabat-Zinn, J. (1990). *Full catastrophe living.* New York: Delacorte.
 * Kabat-Zinn, J. (2003). Mindfulness-based interventions in context: Past, present, and future. *Clinical Psychology: Science and Practice, 10*(2), 144–156. doi:10.1093/clipsy/bpg016
 * Kim, S., Thibodeau, R., & Jorgensen, R. S. (2011). Shame, guilt, and depressive symptoms: A meta-analytic review. *Psychological Bulletin, 137*(1), 68–96. doi:10.1037/a0021466
+* Lieberman, M. D., Eisenberger, N. I., Crockett, M. J., Tom, S. M., Pfeifer, J. H., & Way, B. M. (2007). Putting feelings into words: Affect labeling disrupts amygdala activity in response to affective stimuli. *Psychological Science, 18*(5), 421–428.
+* McCullough, M. E., Bono, G., & Root, L. M. (2007). Rumination, emotion, and forgiveness: Three longitudinal studies. *Journal of Personality and Social Psychology, 92*(3), 490–505. doi:10.1037/0022-3514.92.3.490
 * Lee, Y.-C., Lin, Y.-C., Huang, C.-L., & Fredrickson, B. L. (2013). The construct and measurement of peace of mind. *Journal of Happiness Studies, 14*(2), 571–590. doi:10.1007/s10902-012-9343-5
 * Miller, W. R., & Rollnick, S. (2013). *Motivational interviewing: Helping people change* (3rd ed.). New York: Guilford Press.
+* Neff, K. D. (2003). Self-compassion: An alternative conceptualization of a healthy attitude toward oneself. *Self and Identity, 2*(2), 85–101.
 * Nolen-Hoeksema, S., Wisco, B. E., & Lyubomirsky, S. (2008). Rethinking rumination. *Perspectives on Psychological Science, 3*(5), 400–424.
+* Schnitker, S. A. (2012). An examination of patience and well-being. *The Journal of Positive Psychology, 7*(4), 263–280. doi:10.1080/17439760.2012.697185
+* Segal, Z. V., Williams, J. M. G., & Teasdale, J. D. (2013). *Mindfulness-based cognitive therapy for depression* (2nd ed.). New York: Guilford Press.
 * Snyder, C. R. (2002). Hope theory: Rainbows in the mind. *Psychological Inquiry, 13*(4), 249–275.
 * Gross, J. J. (1998). The emerging field of emotion regulation: An integrative review. *Review of General Psychology, 2*(3), 271–299.
 * Gottman, J. M. (1994). *What predicts divorce? The relationship between marital processes and marital outcomes.* Hillsdale, NJ: Erlbaum.
 * Gottman, J. M., & Levenson, R. W. (1992). Marital processes predictive of later dissolution: Behavior, physiology, and health. *Journal of Personality and Social Psychology, 63*(2), 221–233. doi:10.1037/0022-3514.63.2.221
 * Gottman, J. M., & Levenson, R. W. (2000). The timing of divorce: Predicting when a couple will divorce over a 14-year period. *Journal of Marriage and Family, 62*(3), 737–745.
 * Heyman, R. E., & Slep, A. M. S. (2001). The hazards of predicting divorce without crossvalidation. *Journal of Marriage and Family, 63*(2), 473–479. doi:10.1111/j.1741-3737.2001.00473.x
-* Zaccaro, A., et al. (2018). How breath-control can change your life: A systematic review on psycho-physiological correlates of slow breathing. *Frontiers in Human Neuroscience, 12*, 353.
+* Stahl, B., & Goldstein, E. (2010). *A mindfulness-based stress reduction workbook.* Oakland, CA: New Harbinger.
+* Wade, N. G., Hoyt, W. T., Kidwell, J. E. M., & Worthington, E. L., Jr. (2014). Efficacy of psychotherapeutic interventions to promote forgiveness: A meta-analysis. *Journal of Consulting and Clinical Psychology, 82*(1), 154–170. doi:10.1037/a0035268
+* Worthington, E. L., Jr. (2006). *Forgiveness and reconciliation: Theory and application.* New York: Routledge.
+* Zaccaro, A., et al. (2018). How breath-control can change your life: A systematic review on psycho-physiological correlates of slow breathing. *Frontiers in Human Neuroscience, 12*, 353. doi:10.3389/fnhum.2018.00353
 
 ## Privacy
 
-* Everything stays in this browser's localStorage: the .mf numbers, the faith toggle, and the journal (explicit saves only).
+* Everything stays in this browser's localStorage: the .mf numbers, the faith toggle, and the journal (explicit saves only). Grace's note boxes are never stored unless you tap "Save these notes to the journal".
 * Start over clears the numbers. Clear journal clears the journal.

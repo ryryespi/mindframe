@@ -2,7 +2,8 @@
 // Shows every number behind the card, including the grandiosity signal g,
 // the hidden-conflict strengths c, the positive-emotion scores, and inner
 // peace: P with its factors, the gradient, the lever, n*, e*, and the
-// convergence proof sketch.
+// convergence proof sketch; the forgiveness scores F_self, F_other, the
+// path, ΔP_F and the Grace recommendation; and the practice pick.
 //
 // Shows the math behind the words and lets you tinker with it:
 //   • mathLines: e, the master equation with its values, λ, loops, the hidden
@@ -64,6 +65,13 @@ if (typeof module !== "undefined") {
       L.push("convergence: grounding next \u2212 h = (1 \u2212 a)(e \u2212 h); hard/process 0 \u2264 next \u2264 (1 \u2212 a)e (s \u2264 0, clip at 0 = h)");
       L.push(`  \u21D2 \u2016next \u2212 h\u2016 \u2264 (1 \u2212 a)\u2016e \u2212 h\u2016 with a \u2265 min(a0, a_max, a_cap) = ${f2(Math.min(V2.aBase, V2.aMax, FIXED.aCap))} > 0: a contraction to e* = h, where P = 1 (rounding to 0.01 stops within 0.005/a)`);
     }
+    // Forgiveness (features/forgiveness.js) and the practice pick (features/practices.js).
+    const f = m.forgive;
+    if (f) {
+      L.push(`F_self = e_shame\u00B7(0.4 + 0.6\u00B7c_self) = ${f2(m.e[idx.shame])}\u00B7(0.4 + 0.6\u00B7${f2(f.cSelf)}) = ${f2(f.Fself)};  F_other = e_anger\u00B7(0.4 + 0.6\u00B7c_other) = ${f2(m.e[idx.anger])}\u00B7(0.4 + 0.6\u00B7${f2(f.cOther)}) = ${f2(f.Fother)}`);
+      L.push(`forgiveness path (\u03B8_F = 0.35): ${f.path || "none"};  \u0394P_F self ${f.dP.self >= 0 ? "+" : ""}${f.dP.self.toFixed(3)}, other ${f.dP.other >= 0 ? "+" : ""}${f.dP.other.toFixed(3)};  Grace recommended: ${f.grace ? "yes (lever in the path's movers)" : "no"}`);
+    }
+    if ("wait" in m) L.push(`practice = pick(lever, e, d, c_wait = ${f2(m.wait || 0)}) \u2192 ${m.practice ? `${m.practice.id} for ${label(m.practice.mover)}` : "none (the mover's own step)"}`);
     return L;
   }
 

@@ -15,6 +15,8 @@
 //   P        = 1/(1 + (d/d0)²)·(1 − γ·C_max)·(1 − δ·g)       inner peace (core/peace.js)
 //   lever    = argmax_i ΔP_i for a move of e_i toward h_i by 0.05
 //   solve    = iterate the master map to its fixed point e*; n* = steps until P ≥ 0.8
+//   passes   = feature passes in the same call (features/forgiveness.js adds
+//              forgive {F_self, F_other, path, dP, grace}); they never move e
 //
 // Convergence (proof sketch; exact map, before rounding). With hard/process
 // homes at 0 (always true in the app), for every mover j:
@@ -237,8 +239,16 @@ if (typeof module !== "undefined") {
       out.peace.grad = PEACE.gradient(e, h, V, data.clashes || [], grand.g);
       out.peace.solve = solvePeace({ ...state, e }, out.peace.P);
     }
+    // Feature passes (for example forgiveness), same call: they read this
+    // reading and add their own field. They never change e, next or peace.P.
+    PASSES.forEach(fn => fn(out, { state, data, h, V, clashes: data.clashes || [], sim: opts.sim !== false }));
     return out;
   }
+
+  // ---------- Feature passes ----------
+  const PASSES = [];
+  /** Register a pass: fn(out, {state, data, h, V, clashes, sim}) adds a field to master's output in the same call. */
+  function addPass(fn) { if (!PASSES.includes(fn)) PASSES.push(fn); }
 
   // ---------- Solve for inner peace ----------
   /**
@@ -299,7 +309,7 @@ if (typeof module !== "undefined") {
   }
 
   MF.Master = {
-    SKILL, REFRAME, master, calls, recovery, solvePeace, recText, refreshIdeal, focus, baselineSeries, baselineOf,
+    SKILL, REFRAME, master, addPass, calls, recovery, solvePeace, recText, refreshIdeal, focus, baselineSeries, baselineOf,
     // Building blocks master uses (exported for tests only; features call master).
     _parts: { step, lambda, hidden, loops, sVec, act, ema, simulate },
   };

@@ -114,6 +114,6 @@ if (typeof module !== "undefined") require("../core/movers.js");
     return (found || []).map(k => ({ title: `A pattern to notice: ${HORSEMEN[k].name}`, antidote: HORSEMEN[k].antidote, example: HORSEMEN[k].example }));
   }
 
-  MF.Relationship = { HORSEMEN, ORDER, detect, hook, section };
+  MF.Relationship = { HORSEMEN, ORDER, NEGATORS, clean, negated, detect, hook, section };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Relationship;

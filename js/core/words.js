@@ -17,6 +17,10 @@
 //   inner peace    P's band (a little / growing / close / steady), n* as number
 //                  words, the lever (ease X / grow Y), and how much the hidden
 //                  pull (1 − P_c) and the grand thought (1 − P_g) take away
+//   features       optional: when features/practices.js is loaded, the One step
+//                  uses its picked practice (m.practice); when features/forgiveness.js
+//                  is loaded, the card gets its forgiveness tile (m.forgive) and
+//                  Grace's peace line. Both read master's numbers only.
 //
 // Choices between equal parts (for example "fuels" or "feeds") are made by a
 // hash of the seed and the numbers themselves (choose()), so the same state
@@ -294,7 +298,7 @@ if (typeof module !== "undefined") {
     else if (m.stabilizer && m.stabilizer !== main) out.push(`I can ${ACT[m.stabilizer]}.`);
     if (opts.faith) {
       const span = m.d >= 1 ? "this hard day" : m.d >= 0.5 ? "the next hour" : "this moment";
-      out.push(choose([`God can give me ${pos ? pos.word : "peace"} for ${span}.`, `I can bring this ${isGround[idx[main]] ? LOW_NOUN[main] : NOUN[main]} to God and ask for ${pos ? pos.word : "peace"}.`], `faith|${main}|${k2(m.d)}`, seed));
+      out.push(choose([`God can give me ${pos ? pos.word : "peace"} for ${span}.`, `I can bring this ${(isGround[idx[main]] ? LOW_NOUN[main] : NOUN[main]).replace(/^the /, "")} to God and ask for ${pos ? pos.word : "peace"}.`], `faith|${main}|${k2(m.d)}`, seed));
     }
     return out;
   }
@@ -323,7 +327,11 @@ if (typeof module !== "undefined") {
     const n = (m.peace && m.peace.lever && m.peace.lever.name) || m.mover;
     if (!n) return "Keep going: notice one good thing and stay with it for a breath.";
     const g = gainOf(m, idx[n]);
-    return `${cap(TECHNIQUE[n](dose(m.d)))}, so ${subj(n)} can ${EASE[n][0]}${g < 0.15 ? " a little" : ""}.`;
+    // A patience or mindfulness practice when features/practices.js picked one
+    // for this mover (m.practice, from its master pass); else the mover's technique.
+    const lib = MF.Practices && m.practice && m.practice.mover === n ? MF.Practices.LIBRARY[m.practice.id] : null;
+    const how = lib ? lib.say(dose(m.d)) : TECHNIQUE[n](dose(m.d));
+    return `${cap(how)}, so ${subj(n)} can ${EASE[n][0]}${g < 0.15 ? " a little" : ""}.`;
   }
 
   // ---------- Inner peace ----------
@@ -332,6 +340,8 @@ if (typeof module !== "undefined") {
   const countWord = n => (n <= 20 ? NUMBER[n] : "many");
   /** What the lever acts on, as an object of "easing" / "growing". */
   const LEVER_NOUN = { fear: "the fear", sadness: "the sadness", anger: "the anger", shame: "the shame", rumination: "the replaying", avoidance: "the urge to avoid things", calm: "calm", connection: "connection", hope: "hope" };
+  /** Endings for the peace band line (no "growing, and it can grow"). */
+  const PEACE_TAIL = { "a little": [", for now.", ", and it can grow."], growing: [", little by little.", ", and gently rising."], close: [", nearly there.", ", within reach."] };
   /** "a little" when a factor takes less than 0.15 of peace, else "some". */
   const takes = x => (x >= 0.15 ? "some" : "a little");
   /**
@@ -344,7 +354,7 @@ if (typeof module !== "undefined") {
     const p = m.peace;
     if (!p) return [];
     const b = PEACE.band(p.P);
-    const out = [`Inner peace: ${b}${b === "steady" ? "." : choose([", for now.", ", and it can grow."], `peace|${k2(p.P)}`, seed)}`];
+    const out = [`Inner peace: ${b}${b === "steady" ? "." : choose(PEACE_TAIL[b], `peace|${k2(p.P)}`, seed)}`];
     const lv = p.lever && p.lever.name ? `${p.lever.kind === "grow" ? "growing" : "easing"} ${LEVER_NOUN[p.lever.name]}` : "keeping things gentle";
     const sv = p.solve;
     if (sv && sv.n === 0) out.push(`Path to peace: you're there right now; the biggest help is ${lv}.`);
@@ -385,20 +395,23 @@ if (typeof module !== "undefined") {
   // ---------- The card ----------
   /**
    * The default card, words only, every line composed from the master output.
-   * @returns {{room:string, peace:string[], peaceFaith:string|null, feeling:string, connect:string[], conflict:string[], reality:string[], affirmations:string[], step:string, progress:string}}
+   * @returns {{room:string, peace:string[], peaceFaith:string|null, feeling:string, connect:string[], conflict:string[], reality:string[], forgive:string[], affirmations:string[], step:string, practice:{id:string,name:string}|null, progress:string}}
    */
   function card(state, m, opts = {}) {
     const seed = Number.isFinite(opts.seed) ? opts.seed : 1;
     return {
       room: roomLine(m),
-      peace: peaceLines(m, seed),
+      // Grace's line joins the peace lines when the lever is one of a forgiveness path's movers.
+      peace: peaceLines(m, seed).concat(MF.Forgive && MF.Forgive.peaceLine(m) ? [MF.Forgive.peaceLine(m)] : []),
       peaceFaith: opts.faith && m.peace ? PEACE_FAITH : null,
       feeling: feelingLine(m, seed),
       connect: connectLines(state, m, seed),
       conflict: conflictLines(m, seed),
       reality: realityLines(m),
+      forgive: MF.Forgive ? MF.Forgive.cardLines(m, opts) : [],
       affirmations: affirmations(m, opts),
       step: stepLine(m),
+      practice: MF.Practices && m.practice ? { id: m.practice.id, name: MF.Practices.LIBRARY[m.practice.id].name } : null,
       progress: progressLine(m),
     };
   }
@@ -410,7 +423,7 @@ if (typeof module !== "undefined") {
       ...c.peace, ...(c.peaceFaith ? [c.peaceFaith] : []),
       `What you may be feeling: ${c.feeling.replace(/^You may be feeling /, "")}`,
       `How they connect: ${c.connect.join(" ")}`,
-      ...c.conflict, ...c.reality,
+      ...c.conflict, ...c.reality, ...c.forgive,
       "Affirmations:", ...c.affirmations.map(x => `  ${x}`),
       `One step: ${c.step}`,
       c.progress,

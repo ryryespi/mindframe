@@ -1,5 +1,6 @@
 // app.js — the app shell: one text box, an Update button, the words-first
-// card, and five animal helpers that each open one panel.
+// card (soft tiles with small icons), the sky-and-meadow scene, and six animal
+// helpers that each open one panel.
 //
 //   Update (or Ctrl/Cmd+Enter) → master(text, state) → the card, every line
 //   composed from master's numbers by core/words.js (room for positive
@@ -19,6 +20,14 @@
 //   Analyzer (Remy the Raccoon) the nine movers in words
 //   Scribe (Toby the Tortoise)  export / import .mf code
 //   Scientist (Ada the Otter)   the math + adjust numbers and variables
+//   Peacemaker (Grace the Dove) forgive myself, forgive someone, and the
+//                               patience & mindfulness practices with the
+//                               breathing circle (forgiveness.js, practices.js)
+//
+// The scene: after Update, body[data-peace] is set to the inner-peace band
+// (a-little, growing, close, steady) and style.css shifts the sky and meadow
+// colors to match; it is cleared on reset and in a crisis. Dark mode follows
+// prefers-color-scheme; motion follows prefers-reduced-motion.
 
 (function () {
   "use strict";
@@ -35,7 +44,7 @@
   let base = state.e.slice();   // where you were before the words in the box
   let reading = null;           // the last master output (null until Update)
   let inCrisis = false;
-  const resets = [];
+  const resets = [], crises = [], closes = [];
 
   // ---------- The app shell the feature panels use ----------
   const app = {
@@ -58,6 +67,12 @@
     stale() { if (reading) note("Numbers changed. Tap Update to see the new reading."); },
     /** Register something to clear when the base resets (for example an open story). */
     onReset(fn) { resets.push(fn); },
+    /** Register something to clear when the crisis box shows (for example Grace's notes, the breathing circle). */
+    onCrisis(fn) { crises.push(fn); },
+    /** Register something to stop when the helper panels close or switch (the breathing circle). */
+    onPanelClose(fn) { closes.push(fn); },
+    /** Open one helper's panel by id ("grace", "writer", …). */
+    open: who => openPanel(document.querySelector(`[aria-controls="p-${who}"]`), true),
     startOver,
   };
 
@@ -82,6 +97,8 @@
     $("body").classList.toggle("hidden", on);
     if (on) {
       reading = null;
+      delete document.body.dataset.peace;
+      crises.forEach(fn => fn());
       $("out").classList.add("hidden");
       $("crisis").innerHTML = `<p><strong>You don't have to carry this alone.</strong> What you're feeling matters, and help is available right now.</p>
         <p>Call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline, US, free, 24/7). If you're in immediate danger, call <strong>911</strong>.</p>
@@ -111,12 +128,21 @@
   /** Fill the words-first card from the last reading. */
   function renderCard() {
     const c = MF.Words.card(state, reading, { faith: app.faith(), seed: 1 });
+    // The scene follows the inner-peace band (colors only; words stay on the card).
+    if (reading.peace) document.body.dataset.peace = MF.Peace.band(reading.peace.P).replace(" ", "-");
     $("room").textContent = c.room;
     $("feel").textContent = c.feeling;
     const soft = (id, list) => { const el = $(id); el.innerHTML = ""; list.forEach(t => { const p = document.createElement("p"); p.textContent = t; el.appendChild(p); }); el.classList.toggle("hidden", !list.length); };
     soft("peace", c.peace.concat(c.peaceFaith ? [c.peaceFaith] : []));
     soft("conflict", c.conflict);
     soft("reality", c.reality);
+    soft("forgive", c.forgive);
+    // A tile is shown only when it has something to say.
+    [["t-conflict", c.conflict], ["t-reality", c.reality], ["t-forgive", c.forgive]].forEach(([id, l]) => $(id).classList.toggle("hidden", !l.length));
+    $("step-try").classList.toggle("hidden", !c.practice);
+    $("step-try").dataset.practice = c.practice ? c.practice.id : "";
+    $("step-try").textContent = c.practice ? `Try it with Grace: ${c.practice.name}` : "";
+    $("forgive-open").dataset.path = reading.forgive && reading.forgive.path ? reading.forgive.path : "";
     const fill = (id, list) => { const ul = $(id); ul.innerHTML = ""; list.forEach(t => ul.appendChild(li(t))); };
     fill("connect", c.connect);
     fill("affirm", c.affirmations);
@@ -136,32 +162,43 @@
       ex.textContent = `Try: \u201C${r.example}\u201D`;
       box.append(h, a, ex);
     });
-    box.classList.toggle("hidden", !rel.length);
-    $("out").classList.remove("hidden");
+    $("t-pattern").classList.toggle("hidden", !rel.length);
+    const out = $("out");
+    out.classList.remove("hidden");
+    // A soft, staggered fade-in for the visible tiles (none with reduced motion; see style.css).
+    let i = 0;
+    out.querySelectorAll(".tile").forEach(t => { if (!t.classList.contains("hidden")) t.style.setProperty("--i", i++); });
+    out.classList.remove("fresh"); void out.offsetWidth; out.classList.add("fresh");
   }
 
   // ---------- Panels ----------
-  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist].map(f => f.mount(app));
+  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices].map(f => f.mount(app));
   /** Re-render every panel (cheap; panels only display). */
   function renderAll() { renders.forEach(r => r()); }
 
   // The animal row: each friend opens one panel; tapping again closes it.
-  document.querySelectorAll(".friend").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = btn.getAttribute("aria-controls"), panel = $(id), open = panel.classList.contains("hidden");
-      document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
-      document.querySelectorAll(".friend").forEach(b => b.setAttribute("aria-expanded", "false"));
-      if (open) {
-        panel.classList.remove("hidden");
-        btn.setAttribute("aria-expanded", "true");
-        panel.scrollIntoView({ block: "start", behavior: "smooth" });
-      }
-    });
-  });
+  const calmMotion = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /** Open (or, with force false, toggle) the panel a friend button controls; one panel at a time. */
+  function openPanel(btn, force) {
+    const panel = $(btn.getAttribute("aria-controls")), open = force || panel.classList.contains("hidden");
+    document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+    document.querySelectorAll(".friend").forEach(b => b.setAttribute("aria-expanded", "false"));
+    closes.forEach(fn => fn());
+    if (open) {
+      panel.classList.remove("hidden");
+      btn.setAttribute("aria-expanded", "true");
+      panel.scrollIntoView({ block: "start", behavior: calmMotion() ? "auto" : "smooth" });
+    }
+  }
+  document.querySelectorAll(".friend").forEach(btn => btn.addEventListener("click", () => openPanel(btn, false)));
   document.querySelectorAll(".panel-close").forEach(b => b.addEventListener("click", () => {
     b.closest(".panel").classList.add("hidden");
     document.querySelectorAll(".friend").forEach(x => x.setAttribute("aria-expanded", "false"));
+    closes.forEach(fn => fn());
   }));
+  // From the card into Grace's panel: the One step's practice, or the suggested forgiveness path.
+  $("step-try").addEventListener("click", () => { app.open("grace"); app.grace.show("practice"); app.practices.select($("step-try").dataset.practice); });
+  $("forgive-open").addEventListener("click", () => { app.open("grace"); app.grace.show($("forgive-open").dataset.path || "self"); });
 
   // ---------- Input ----------
   $("update").addEventListener("click", update);
@@ -179,6 +216,7 @@
   $("faith").addEventListener("change", () => {
     localStorage.setItem(FAITH_KEY, app.faith() ? "1" : "0");
     if (reading) renderCard();
+    renderAll();
   });
   $("copy").addEventListener("click", () => { if (reading) copy(MF.Words.lines(state, reading, { faith: app.faith(), seed: 1 }).join("\n"), "copied"); });
 
@@ -203,6 +241,7 @@
     localStorage.removeItem(KEY);
     state = defaultState();
     app.resetBase("");
+    delete document.body.dataset.peace;
     $("out").classList.add("hidden");
     renderAll();
     note("");
