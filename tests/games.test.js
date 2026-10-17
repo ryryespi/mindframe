@@ -28,24 +28,11 @@ function playThrough(game) {
     }
     return true;
   }
-  if (game.type === "spot") {
-    game.items.forEach(it => assert.ok(["mirage", "real"].includes(it.kind)));
-    return true;
-  }
-  // tiles: always take the first remaining tile that fits.
-  const left = game.tiles.slice();
-  const placed = [];
-  while (left.length) {
-    const i = left.findIndex(t => Gm.tileFits(game, placed.length, t.word));
-    assert.ok(i >= 0, "a fitting tile always exists");
-    placed.push(left.splice(i, 1)[0].word);
-  }
-  assert.deepEqual(placed, game.target);
-  return true;
+  return false;
 }
 
 for (const arc of ARCS) {
-  test(`${arc}: all three game types are valid and finishable across 25 seeds`, () => {
+  test(`${arc}: the path game is valid and finishable across 25 seeds`, () => {
     for (let seed = 0; seed < 25; seed++) for (const type of Gm.TYPES) for (const faith of [false, true]) {
       const g = Gm.make({ type, thought: Gm.SAMPLES[arc], seed, faith });
       assert.equal(g.crisis, false);
@@ -64,17 +51,6 @@ for (const arc of ARCS) {
         });
         assert.equal(g.steps, 4);
       }
-      if (type === "spot") {
-        assert.equal(g.items.length, 6);
-        assert.equal(g.items.filter(i => i.kind === "mirage").length, 3);
-        assert.equal(g.items.filter(i => i.kind === "real").length, 3);
-        g.items.forEach(i => assert.ok(i.why.length > 0));
-      }
-      if (type === "tiles") {
-        assert.ok(g.target.length >= 3 && g.target.length <= Gm.MAX_TILE_WORDS);
-        assert.equal(g.tiles.length, g.target.length);
-        assert.notDeepEqual(g.tiles.map(t => t.word), g.target, "tiles start shuffled");
-      }
       assert.ok(playThrough(g));
     }
   });
@@ -88,28 +64,9 @@ test("the reframe appears as a grounded choice in the path game", () => {
   const g = Gm.make({ type: "path", thought: "I'm cursed", reframe: "Today was hard and I can still do one good thing", seed: 2 });
   assert.ok(g.scenes[2].choices.some(c => c.grounded && c.text.includes("Today was hard and I can still do one good thing.")));
 });
-test("the user's reframe is a 'real' line in spot the mirage", () => {
-  const g = Gm.make({ type: "spot", thought: "Nothing I do ever works", reframe: "Some things work", seed: 2 });
-  assert.ok(g.items.some(i => i.kind === "real" && i.text === "Some things work."));
-});
-test("tiles use a short reframe whole", () => {
-  const g = Gm.make({ type: "tiles", thought: "x", reframe: "I can still do one good thing", seed: 1 });
-  assert.equal(g.type, "tiles");
-  assert.deepEqual(g.target, ["I", "can", "still", "do", "one", "good", "thing."]);
-});
-test("tiles take the first short sentence of a long reframe", () => {
-  const g = Gm.make({ type: "tiles", thought: "x", reframe: "This is hard. And I have handled a great many hard and confusing and tiring things before now.", seed: 1 });
-  assert.deepEqual(g.target, ["This", "is", "hard."]);
-});
-test("tiles fall back to the path game when no sentence is short enough", () => {
-  const g = Gm.make({ type: "tiles", thought: "x", reframe: "I can still do one good thing today even if it is small and slow and quiet and hard to see", seed: 1 });
-  assert.equal(g.type, "path");
-  assert.equal(g.fallback, true);
-  assert.equal(g.scenes.length, 4);
-});
-test("repeated words in tiles are still solvable", () => {
-  const g = Gm.make({ type: "tiles", thought: "x", reframe: "Some days are hard and some days are not", seed: 9 });
-  assert.ok(playThrough(g));
+test("only the path game is left (spot and tiles were removed)", () => {
+  assert.deepEqual(Gm.TYPES, ["path"]);
+  assert.equal(Gm.make({ type: "spot", thought: "x", seed: 1 }).type, "path");
 });
 
 const CRISIS = ["I want to end it all", "I want to die", "I might hurt myself"];
@@ -128,8 +85,6 @@ test("HTML in user text stays plain text in game data (UI uses textContent)", ()
   const g = Gm.make({ type: "path", thought: "I'm cursed", reframe: evil, step: "<b>walk</b>", seed: 1 });
   assert.ok(g.scenes[2].choices.some(c => c.text.includes("<img src=x onerror=alert(1)>")), "kept as literal text");
   assert.equal(S.escapeHTML(g.scenes[2].choices.find(c => c.grounded && c.text.includes("img")).text).includes("<img"), false);
-  const t = Gm.make({ type: "tiles", thought: "x", reframe: "<script>bad()</script> is just text", seed: 1 });
-  assert.ok(t.tiles.every(x => typeof x.word === "string"));
 });
 
 test("deterministic per seed; different seeds vary", () => {

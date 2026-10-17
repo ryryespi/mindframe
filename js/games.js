@@ -1,11 +1,8 @@
 // games.js — small offline games made from the same pieces as the stories.
 //
-// Three games, all built on the phone from templates (no network, no model):
+// One game, built on the phone from templates (no network, no model):
 //   path    Choose a path: 4 scenes. Each has one mirage choice and 1-2
 //           grounded ones. The mirage gets kind feedback and a retry. No game over.
-//   spot    Spot the mirage: sort 6 short lines into "mirage" or "real".
-//   tiles   Rebuild the sentence: tap shuffled word tiles to rebuild the reframe.
-//           Long reframes fall back to the path game.
 // A steadiness meter (0..100) rises with grounded choices and never drops.
 // Nothing here is saved. The UI may keep a count of games played.
 
@@ -14,8 +11,7 @@ const Games = (function () {
   const S = typeof Stories !== "undefined" ? Stories : require("./stories.js");
   const P = S.parts;
 
-  const TYPES = ["path", "spot", "tiles"];
-  const MAX_TILE_WORDS = 14;
+  const TYPES = ["path"];
 
   // A thought to play with when nothing was typed. One per pattern.
   const SAMPLES = {
@@ -28,25 +24,6 @@ const Games = (function () {
     hopelessness: "What's the use of trying.",
     none: "Today felt heavy.",
   };
-
-  // First-person mirage lines for the sorting game, with a kind "why".
-  const SPOT_MIRAGE = {
-    meaning: [["This must be a sign I'm being punished.", "A hard event, with a hidden meaning added on top."], ["Bad luck follows me everywhere.", "Feels true, but it is a story, not something you can see."], ["I'm cursed, so why try.", "The curse is the mirage. The trying is real."]],
-    fortuneTelling: [["Tomorrow is definitely going to go badly.", "A guess about a day that hasn't happened."], ["There's no way this works out.", "No one can see the ending yet."], ["I already know how this ends.", "Predicting, not knowing."]],
-    mindReading: [["They all think I'm strange.", "A guess at other minds. No one said it."], ["Her short text means she's upset with me.", "There are many reasons for a short text."], ["Everyone noticed my mistake.", "Most people are busy with their own day."]],
-    allOrNothing: [["Nothing I do ever works.", "\u201CNothing\u201D and \u201Cever\u201D are big words that rarely fit."], ["I always mess everything up.", "\u201CAlways\u201D erases the times it went fine."], ["It's completely ruined.", "Real things are usually partly okay."]],
-    labeling: [["I'm a total failure.", "A mistake is something you did, not who you are."], ["I'm just not good enough.", "A harsh label, not a fact."], ["I'm such an idiot.", "You'd never say that to a friend."]],
-    catastrophizing: [["This small problem will ruin everything.", "It jumps to the worst ending and skips the likely ones."], ["I can't handle any of this.", "You've handled hard things before."], ["It's going to be a disaster.", "Worst case is not the same as most likely."]],
-    hopelessness: [["There's no point in trying.", "Heavy is not the same as hopeless."], ["It will never get better.", "Feelings move, even slowly."], ["Nothing can help me now.", "One small thing can still help a little."]],
-    none: [["This feeling will last forever.", "Feelings rise and fall."], ["Everything is wrong today.", "Usually some things are okay too."], ["I'll never feel calm again.", "\u201CNever\u201D is a guess, not a fact."]],
-  };
-
-  const SPOT_REAL = [
-    ["Today was hard, and I'm still here.", "Both parts are true and you can see them."],
-    ["I can take one small step right now.", "A step you can actually take."],
-    ["I don't know how this ends yet.", "Honest about what you can and can't see."],
-    ["One hard day is not a whole life.", "True to size."],
-  ];
 
   // Scene choices for the path game. Mirage choices are written gently.
   const PATH_MIRAGE = [
@@ -142,36 +119,6 @@ const Games = (function () {
     return { scenes };
   }
 
-  function spotGame(pc, rand) {
-    const mirage = SPOT_MIRAGE[pc.arc].map(([text, why]) => ({ text, kind: "mirage", why }));
-    const realPool = [
-      [`I can see ${pc.real}.`.replace(/\btheir\b/g, "my"), "Something you can actually see."],
-      [pc.reframe, "Your truer sentence."],
-    ].concat(shuffle(SPOT_REAL, rand));
-    const real = realPool.slice(0, 3).map(([text, why]) => ({ text, kind: "real", why }));
-    return { items: shuffle(mirage.concat(real), rand) };
-  }
-
-  const words = s => s.replace(/[\u201C\u201D"]/g, "").split(/\s+/).filter(Boolean);
-
-  // Uses the whole reframe if it is short, otherwise its first short sentence.
-  function tileSentence(reframe) {
-    const fits = s => { const n = words(s).length; return n >= 3 && n <= MAX_TILE_WORDS && !s.endsWith("\u2026"); };
-    if (fits(reframe)) return reframe;
-    const parts = reframe.match(/[^.!?]+[.!?]/g) || [];
-    return parts.map(x => x.trim()).find(fits) || null;
-  }
-
-  function tilesGame(pc, rand) {
-    const sentence = tileSentence(pc.reframe);
-    if (!sentence) return null;
-    const target = words(sentence);
-    let tiles = shuffle(target.map((w, i) => ({ id: i, word: w })), rand);
-    // Make sure the shuffle is not already the answer.
-    if (tiles.every((t, i) => t.word === target[i])) tiles = tiles.slice(1).concat(tiles[0]);
-    return { sentence, target, tiles };
-  }
-
   // opts: { type, read, thought, reframe, step, faith, seed }
   function make(opts = {}) {
     const texts = [opts.thought, opts.reframe, opts.step].filter(Boolean);
@@ -181,16 +128,10 @@ const Games = (function () {
     const rand = P.rng(seed);
     const pc = pieces(opts, rand);
     if (pc.read.crisis) return { crisis: true };
-    let type = TYPES.includes(opts.type) ? opts.type : "path";
-    let body;
-    let fallback = false;
-    if (type === "tiles") {
-      body = tilesGame(pc, rand);
-      if (!body) { type = "path"; fallback = true; }
-    }
-    if (type === "path") body = pathGame(pc, rand);
-    if (type === "spot") body = spotGame(pc, rand);
-    const steps = type === "path" ? body.scenes.length : type === "spot" ? body.items.length : body.target.length;
+    const type = "path";
+    const body = pathGame(pc, rand);
+    const fallback = false;
+    const steps = body.scenes.length;
     return {
       crisis: false, type, fallback, seed,
       arc: pc.arc, creature: pc.creature, tag: pc.tag, faith: pc.faith,
@@ -208,12 +149,7 @@ const Games = (function () {
     return Math.max(0, Math.min(100, Math.round((100 * (firstTry + 0.5 * retried)) / steps)));
   }
 
-  // Helper for the tile game: is this word the next one?
-  function tileFits(game, placedCount, word) {
-    return game.target[placedCount] === word;
-  }
-
-  return { TYPES, SAMPLES, MAX_TILE_WORDS, make, steadiness, tileFits, words };
+  return { TYPES, SAMPLES, make, steadiness };
 })();
 
 if (typeof module !== "undefined" && module.exports) module.exports = Games;

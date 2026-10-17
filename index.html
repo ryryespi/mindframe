@@ -14,134 +14,113 @@
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script>
-    // Old links (?view=, ?chip=, ?thought=) open the Tools page with the same choice.
-    if (/[?&](view|chip|thought)=/.test(location.search)) location.replace("tools.html" + location.search);
+    // Old links (?view=, ?chip=, ?thought=) all open this one tool. Nothing from the link is used.
+    if (/[?&](view|chip|thought)=/.test(location.search)) history.replaceState(null, "", location.pathname + location.hash);
   </script>
 </head>
 <body>
   <!-- Always visible. Crisis support lives here even when the rest of the page changes. -->
-  <p class="safety-banner">
-    In crisis, call or text <strong>988</strong> (US). MindFrame is practice, not therapy.
-  </p>
+  <p class="safety-banner">In crisis, call or text <strong>988</strong> (US). MindFrame is practice, not therapy.</p>
 
   <div class="app">
-    <header class="top">
-      <h1>MindFrame</h1>
-      <a class="text" id="to-tools" href="tools.html">Tools</a>
-    </header>
+    <header class="top"><h1>MindFrame</h1></header>
 
     <main>
-      <!-- The Equation Workspace: words in, equations out, as you type. -->
-      <label class="visually-hidden" for="ws-input">What's on your mind?</label>
-      <textarea id="ws-input" rows="4" placeholder="What's on your mind?"></textarea>
-      <p class="quiet small" id="ws-base-note">The equations update as you type. Your words are never saved, only the numbers.</p>
+      <label class="visually-hidden" for="input">What's on your mind?</label>
+      <textarea id="input" rows="4" placeholder="What's on your mind?"></textarea>
+      <p class="quiet small" id="base-note">Updates as you type. Your words are never saved unless you tap Journal; only the numbers are kept.</p>
 
-      <div id="ws-crisis-wrap" class="hidden">
-        <div id="ws-crisis" class="crisis" tabindex="-1"></div>
-      </div>
+      <div id="crisis-wrap" class="hidden"><div id="crisis" class="crisis" tabindex="-1"></div></div>
 
-      <div id="ws-body">
-        <section class="out ws-sec" aria-live="polite">
-          <div class="out-bar"><button type="button" class="text" id="ws-copy-lines">Copy</button><span class="quiet small" id="ws-copied"></span></div>
-          <ul id="ws-lines" class="ws-lines"></ul>
-          <p id="ws-ideal-words" class="ws-words"></p>
-          <div class="ws-buttons">
-            <button type="button" id="ws-save" class="secondary">Save checkpoint</button>
-            <button type="button" id="ws-story-go" class="secondary">Generate story</button>
-          </div>
-          <label class="small quiet ws-check"><input type="checkbox" id="ws-faith" /> Include faith</label>
-        </section>
-
-        <section id="ws-story" class="ws-sec card hidden">
-          <p id="ws-story-tag" class="creature-tag"></p>
-          <p id="ws-story-text"></p>
-          <p id="ws-preview" class="eq-line"></p>
-          <div class="ws-buttons">
-            <button type="button" id="ws-accept" class="secondary">Accept step</button>
-            <button type="button" id="ws-story-again" class="text">Another story</button>
-          </div>
-        </section>
-
-        <section class="ws-sec">
-          <h2>Checkpoints</h2>
-          <p id="ws-cps-empty" class="quiet small">None yet. Save one to come back to it.</p>
-          <ol id="ws-cps" class="ws-cps"></ol>
-        </section>
-
-        <section class="ws-sec">
-          <h2>Every day</h2>
-          <p class="quiet small">Each day keeps its last saved state. The baseline B moves a little toward each new day: B = (1 − β)·B + β·D.</p>
-          <ul id="ws-week" class="ws-lines"></ul>
-          <p id="ws-today" class="ws-words"></p>
-        </section>
-
-        <details id="ws-cath" class="ws-sec ws-vars">
-          <summary>Catholic factors</summary>
-          <p class="quiet small">Virtues and tendencies as numbers from 0 to 1, read from your words and adjustable here (your words add to these). A reflective aid, not spiritual direction and not a judgment of anyone's soul: a feeling is not a sin, and a tendency is not a verdict. For deeper guidance, talk with a priest or a spiritual director. Choose the Catholic framework, or Include faith, to see these in the equations.</p>
-          <p id="ws-ig" class="eq-line"></p>
-          <div id="ws-cath-grid" class="ws-var-grid"></div>
-          <div class="ws-buttons">
-            <button type="button" id="ws-cath-use" class="secondary">Use the Catholic framework</button>
-            <button type="button" id="ws-cath-reset" class="text">Reset factors</button>
-          </div>
-          <details id="ws-gifts" class="ws-sub">
-            <summary>Gifts and fruits of the Holy Spirit</summary>
-            <p class="quiet small">The twelve fruits (CCC 1832) as labels for the home vector, and the seven gifts (CCC 1831) beside the virtue each perfects, as St. Thomas Aquinas pairs them (simplified).</p>
-            <ul id="ws-fruits" class="ws-lines"></ul>
-            <ul id="ws-gifts-list" class="ws-lines"></ul>
+      <div id="body">
+        <section id="out" class="card" aria-live="polite">
+          <ul id="movers" class="movers"></ul>
+          <p id="dline" class="mono"></p>
+          <span class="label">Reading</span><p id="reading"></p>
+          <span class="label">Reframe</span><p id="reframe"></p><p id="test" class="quiet"></p>
+          <span class="label">Next skill</span><p id="skill"></p>
+          <span class="label">Ideal step</span><p id="step" class="mono"></p><p id="recovery" class="mono"></p>
+          <p id="faith-line" class="hidden"></p>
+          <label class="check small"><input type="checkbox" id="faith" /> Include faith</label>
+          <details id="adjust" class="sec">
+            <summary>Adjust numbers</summary>
+            <p class="quiet small">Set any mover by hand. New words add to these.</p>
+            <div id="sliders" class="sliders"></div>
           </details>
-        </details>
-
-        <details id="ws-vars" class="ws-sec ws-vars">
-          <summary>Variables</summary>
-          <p class="quiet small">Every number the equations use. Frameworks are sets of these values: design choices inspired by each approach, not validated versions of them. Recovery estimates come from the model, not a prediction of real recovery.</p>
-          <label class="small" for="ws-fw">Framework</label>
-          <select id="ws-fw"></select>
-          <p id="ws-fw-note" class="quiet small"></p>
-          <div id="ws-var-grid" class="ws-var-grid"></div>
-          <p id="ws-var-notes" class="quiet small"></p>
-          <div class="ws-buttons">
-            <button type="button" id="ws-vars-reset" class="secondary">Reset to defaults</button>
-            <button type="button" id="ws-compare" class="secondary">Compare frameworks</button>
-            <button type="button" id="ws-optimize" class="secondary">Optimize</button>
-          </div>
-          <ul id="ws-compare-list" class="ws-compare"></ul>
-          <div id="ws-opt" class="card hidden">
-            <p id="ws-opt-text" class="eq-line"></p>
-            <div class="ws-buttons">
-              <button type="button" id="ws-opt-accept" class="secondary">Use it</button>
-              <button type="button" id="ws-opt-discard" class="text">Discard</button>
-            </div>
-          </div>
-          <div class="ws-buttons">
-            <label class="visually-hidden" for="ws-fw-name">Framework name</label>
-            <input type="text" id="ws-fw-name" placeholder="name, e.g. my-plan" maxlength="24" />
-            <button type="button" id="ws-fw-save" class="secondary">Save as framework</button>
-          </div>
-          <p id="ws-fw-msg" class="quiet small"></p>
-        </details>
-
-        <section class="ws-sec">
-          <h2>Code</h2>
-          <p class="quiet small">Your session as plain .mf code: numbers and labels only. It is kept on this device for next time. Export it to keep a copy; import it to restore.</p>
-          <pre id="ws-code" class="ws-code"></pre>
-          <div class="ws-buttons">
-            <button type="button" id="ws-copy-code" class="secondary">Copy code</button>
-            <button type="button" id="ws-download" class="secondary">Download .mf.txt</button>
-            <button type="button" id="ws-import-open" class="secondary">Import</button>
-          </div>
-          <div id="ws-import" class="hidden">
-            <label class="visually-hidden" for="ws-import-text">Paste .mf code</label>
-            <textarea id="ws-import-text" class="short" rows="6" placeholder="Paste code that starts with mf 1"></textarea>
-            <label class="small quiet" for="ws-import-file">Or choose a file</label>
-            <input type="file" id="ws-import-file" accept=".txt,.mf,text/plain" />
-            <ul id="ws-import-errors" class="ws-errors"></ul>
-            <button type="button" id="ws-import-go" class="primary">Restore from code</button>
-          </div>
-          <button type="button" id="ws-clear" class="text">Start over</button>
+          <div class="row"><button type="button" class="text" id="copy">Copy</button><span class="quiet small" id="copied"></span></div>
         </section>
 
-        <p class="quiet small">A model built from design assumptions, not validated science and not a diagnosis. The home vector is one picture of a steadier place, not a rule for how you should feel.</p>
+        <div class="row">
+          <button type="button" id="story-go" class="secondary">Story</button>
+          <button type="button" id="save" class="secondary">Save checkpoint</button>
+          <button type="button" id="journal-save" class="secondary">Journal</button>
+          <button type="button" id="code-open" class="secondary">Export / Import</button>
+        </div>
+        <p id="note" class="quiet small" aria-live="polite"></p>
+
+        <section id="story" class="card hidden">
+          <p id="story-tag" class="creature-tag"></p>
+          <p id="story-text"></p>
+          <p id="preview" class="mono"></p>
+          <div class="row">
+            <button type="button" id="accept" class="secondary">Accept step</button>
+            <button type="button" id="play" class="secondary">Play this story</button>
+            <button type="button" id="story-again" class="text">Another story</button>
+          </div>
+          <div id="game" class="hidden">
+            <p id="game-count" class="quiet small"></p>
+            <h2 id="game-title" tabindex="-1"></h2>
+            <p id="game-text"></p>
+            <p id="game-prompt" class="quiet"></p>
+            <div id="game-choices" class="choices"></div>
+            <p id="game-feedback" class="feedback"></p>
+            <button type="button" id="game-next" class="secondary hidden">Next</button>
+          </div>
+        </section>
+
+        <details id="journal-sec" class="sec">
+          <summary>Journal</summary>
+          <p class="quiet small">Only what you save with Journal, kept on this device.</p>
+          <ul id="journal-list" class="journal"></ul>
+          <button type="button" id="journal-clear" class="text hidden">Clear journal</button>
+        </details>
+
+        <details id="history" class="sec">
+          <summary>History</summary>
+          <p class="quiet small">One point per day (the last checkpoint or accepted step), and a 7-day baseline B. Arrows show each day's direction.</p>
+          <ul id="week" class="lines"></ul>
+          <p id="today" class="quiet small"></p>
+          <h2>Checkpoints</h2>
+          <p id="cps-empty" class="quiet small">None yet. Save one to come back to it.</p>
+          <ol id="cps" class="cps"></ol>
+        </details>
+
+        <details id="vars" class="sec">
+          <summary>Variables</summary>
+          <p class="quiet small">The home targets, step size, decay, and the main links between movers. Design choices, not validated values.</p>
+          <div id="var-grid" class="var-grid"></div>
+          <p id="var-notes" class="quiet small"></p>
+          <button type="button" id="vars-reset" class="secondary">Reset to defaults</button>
+        </details>
+
+        <details id="code-sec" class="sec">
+          <summary>Export / Import</summary>
+          <p class="quiet small">Your session as plain .mf code: numbers and labels only, kept on this device for next time.</p>
+          <pre id="code" class="code"></pre>
+          <div class="row">
+            <button type="button" id="copy-code" class="secondary">Copy code</button>
+            <button type="button" id="download" class="secondary">Download .mf.txt</button>
+          </div>
+          <label class="visually-hidden" for="import-text">Paste .mf code</label>
+          <textarea id="import-text" class="short" rows="5" placeholder="Paste code that starts with mf 2 (mf 1 also works)"></textarea>
+          <label class="small" for="import-file">Or choose a file</label>
+          <input type="file" id="import-file" accept=".txt,.mf,text/plain" />
+          <ul id="import-errors" class="errors"></ul>
+          <button type="button" id="import-go" class="primary">Restore from code</button>
+          <div class="row"><button type="button" id="clear" class="text">Start over</button></div>
+        </details>
+
+        <p class="quiet small">A model built from design assumptions and informed by research, not validated science and not a diagnosis. The home vector is one picture of a steadier place, not a rule for how you should feel.</p>
       </div>
     </main>
   </div>
@@ -149,9 +128,8 @@
   <script src="js/analyzer.js"></script>
   <script src="js/grounding.js"></script>
   <script src="js/stories.js"></script>
-  <script src="js/emotions.js"></script>
-  <script src="js/catholic.js"></script>
-  <script src="js/workspace.js"></script>
-  <script src="js/workspace-ui.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/ui.js"></script>
 </body>
 </html>

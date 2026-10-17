@@ -4,7 +4,7 @@
 // http://localhost:8000/. On GitHub Pages it is /mindframe/.
 // A leading slash would skip that folder and break one of those two.
 
-const CACHE = "mindframe-shell-v10";
+const CACHE = "mindframe-shell-v11";
 
 const FILES = [
   "./",
@@ -15,20 +15,9 @@ const FILES = [
   "./js/analyzer.js",
   "./js/grounding.js",
   "./js/stories.js",
-  "./js/psi.js",
   "./js/games.js",
-  "./js/emotions.js",
-  "./js/catholic.js",
-  "./js/workspace.js",
-  "./js/cbt-techniques.js",
-  "./js/bots.js",
-  "./js/app.js",
-  "./js/equations-ui.js",
-  "./js/ground-ui.js",
-  "./js/play-ui.js",
-  "./js/checkin-ui.js",
-  "./js/start.js",
-  "./js/workspace-ui.js",
+  "./js/model.js",
+  "./js/ui.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
 ];
@@ -55,7 +44,7 @@ self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
   event.respondWith(
-    // Pages keep their ?view= or ?chip= part, so match pages without it.
+    // Old links may carry ?view= or ?chip=, so match pages without the query.
     caches.match(request, { ignoreSearch: request.mode === "navigate" }).then(cached => {
       if (cached) return cached;
       return fetch(request).then(response => {
