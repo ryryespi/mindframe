@@ -8,6 +8,8 @@ const $w = id => document.getElementById(id);
 let wsState = Workspace.defaultState();
 let wsBase = wsState.e.slice(); // the restored or accepted vector; new words add to it
 let wsBaseG = wsState.ego.g;      // same for the ego grip
+let wsBaseCath = Catholic.copy(wsState.cath); // and the Catholic factors
+const FAITH_KEY = "mindframe-faith";
 let wsNotes = [];
 let wsMarkers = {};
 let wsOpt = null;
@@ -26,6 +28,7 @@ function wsLoad() {
 function wsSetBase() {
   wsBase = wsState.e.slice();
   wsBaseG = wsState.ego.g;
+  wsBaseCath = Catholic.copy(wsState.cath);
   wsNotes = [];
   wsMarkers = {};
 }
@@ -55,7 +58,8 @@ function wsUpdate() {
   const words = Workspace.fromText($w("ws-input").value);
   if (words.crisis) { wsCrisis(true); return; }
   if (wsInCrisis) wsCrisis(false);
-  wsState = { ...wsState, e: Workspace.combine(wsBase, words.e), ego: { ...wsState.ego, g: Workspace.combine1(wsBaseG, words.ego.g) } };
+  const r = Workspace.applyWords({ e: wsBase, g: wsBaseG, cath: wsBaseCath }, words, wsState.vars);
+  wsState = { ...wsState, e: r.e, ego: { ...wsState.ego, g: r.g }, cath: r.cath };
   wsNotes = words.notes;
   wsMarkers = words.ego.markers;
   wsRender();
@@ -66,7 +70,7 @@ function wsRender() {
   const m = Workspace.metrics(wsState, wsNotes, wsMarkers);
   const ul = $w("ws-lines");
   ul.innerHTML = "";
-  Workspace.lines(wsState, m).forEach(l => {
+  Workspace.lines(wsState, m, { faith: $w("ws-faith").checked }).forEach(l => {
     const li = document.createElement("li");
     li.textContent = l;
     ul.appendChild(li);
@@ -76,6 +80,7 @@ function wsRender() {
   wsRenderCheckpoints();
   wsRenderWeek();
   wsRenderVars();
+  wsRenderCath(m);
   $w("ws-code").textContent = Workspace.serialize(Workspace.refreshIdeal(wsState));
 }
 
@@ -143,7 +148,11 @@ function wsTell() {
 
 $w("ws-story-go").addEventListener("click", () => { wsSeed = 1; wsTell(); });
 $w("ws-story-again").addEventListener("click", () => { wsSeed += 1; wsTell(); });
-$w("ws-faith").addEventListener("change", () => { if (wsStory) wsTell(); });
+$w("ws-faith").checked = localStorage.getItem(FAITH_KEY) === "1";
+$w("ws-faith").addEventListener("change", () => {
+  localStorage.setItem(FAITH_KEY, $w("ws-faith").checked ? "1" : "0");
+  if (wsStory) wsTell(); else wsRender();
+});
 
 $w("ws-accept").addEventListener("click", () => {
   if (!wsStory || wsInCrisis) return;
@@ -249,6 +258,8 @@ const WS_GROUPS = [
   ["Steps toward home", ["aBase", "aMin", "aMax", "aCap", "b", "bU", "eps"]],
   ["Dynamics", ["d", "dt", "rise", "k"]],
   ["Ego and days", ["target", "r", "rCap", "kShame", "kAnger", "kConn", "kCalm", "beta"]],
+  ["Catholic: virtue pull", ["cv", "vHome", "kvFaith", "kvHope", "kvCharity", "kvPatience", "kvFortitude", "kvTemperance", "kvHumility"]],
+  ["Catholic: tendencies", ["ktPride", "ktGreed", "ktLust", "ktEnvy", "ktGluttony", "ktWrath", "ktSloth"]],
 ];
 
 function wsInput(kind, key, label, min, max, step, note) {
@@ -336,15 +347,13 @@ function wsVarChanged(ev) {
   wsOpt = null;
   $w("ws-opt").classList.add("hidden");
   inp.blur();
-  wsRender();
-  wsSave();
+  wsUpdate();
 }
 
 function wsUseFramework(name) {
   wsState = Workspace.applyFramework(wsState, Workspace.findFramework(wsState, name));
   $w("ws-var-notes").textContent = "";
-  wsRender();
-  wsSave();
+  wsUpdate();
 }
 
 $w("ws-fw").addEventListener("change", () => {
@@ -407,8 +416,57 @@ $w("ws-fw-save").addEventListener("click", () => {
   wsSave();
 });
 
+// ---------- Catholic factors ----------
+function wsBuildCath() {
+  const grid = $w("ws-cath-grid");
+  grid.innerHTML = "";
+  const head = t => { const h = document.createElement("h3"); h.textContent = t; grid.appendChild(h); };
+  head("Theological virtues (CCC 1812\u20131829)");
+  Catholic.THEOLOGICAL.forEach(k => grid.appendChild(wsInput("virtue", k, k, 0, 1, 0.01, `virtue: ${k}`)));
+  head("Cardinal virtues (CCC 1805\u20131809)");
+  Catholic.CARDINAL.forEach(k => grid.appendChild(wsInput("virtue", k, k, 0, 1, 0.01, `virtue: ${k}`)));
+  head("Capital tendencies \u2194 contrary virtues (CCC 1866)");
+  Catholic.PAIRS.forEach(([t, v]) => {
+    grid.appendChild(wsInput("tendency", t, t, 0, 1, 0.01, `tendency: ${t} (a pull, not a verdict)`));
+    grid.appendChild(wsInput(v === "temperance" ? "virtue-dup" : "virtue", v, `\u2194 ${v}`, 0, 1, 0.01, `contrary virtue: ${v}`));
+  });
+  grid.addEventListener("change", wsCathChanged);
+}
+
+function wsRenderCath(m) {
+  const f = wsState.cath, cv = m.catholic;
+  $w("ws-cath-grid").querySelectorAll("input").forEach(inp => {
+    const { kind, key } = inp.dataset;
+    const v = kind === "tendency" ? f.t[key] : f.v[key];
+    if (document.activeElement !== inp) inp.value = Number(v).toFixed(2);
+  });
+  const ig = cv.ignatian;
+  $w("ws-ig").textContent = `Ignatian index I = ${ig.I > 0 ? "+" : ig.I < 0 ? "\u2212" : ""}${Math.abs(ig.I).toFixed(2)} (${ig.state}): ${Catholic.IGNATIAN_TEXT[ig.state]}.`;
+  const fill = (id, list) => { const ul = $w(id); ul.innerHTML = ""; list.forEach(t => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); }); };
+  fill("ws-fruits", Catholic.fruitsView(wsState.home, Workspace.NAMES, f, wsState.vars.vHome).map(x =>
+    x.kind === "e" ? `fruit: ${x.fruit} \u2192 home ${x.key} ${x.target.toFixed(2)}` : `fruit: ${x.fruit} \u2192 virtue ${x.key} target ${x.target.toFixed(2)} (now ${x.now.toFixed(2)})`));
+  fill("ws-gifts-list", Catholic.giftsView(f).map(x => `gift: ${x.gift} \u2192 ${x.virtue} ${x.v.toFixed(2)}`));
+}
+
+function wsCathChanged(ev) {
+  const inp = ev.target;
+  if (!inp.dataset || !inp.dataset.kind) return;
+  const { kind, key } = inp.dataset;
+  const x = Math.min(1, Math.max(0, Math.round((Number(inp.value) || 0) * 100) / 100));
+  if (kind === "tendency") wsBaseCath.t[key] = x; else wsBaseCath.v[key] = x;
+  inp.blur();
+  wsUpdate();
+}
+
+$w("ws-cath-use").addEventListener("click", () => wsUseFramework("catholic"));
+$w("ws-cath-reset").addEventListener("click", () => {
+  wsBaseCath = Catholic.defaultFactors();
+  wsUpdate();
+});
+
 // ---------- Start ----------
 wsBuildVars();
+wsBuildCath();
 wsLoad();
 wsRender();
 

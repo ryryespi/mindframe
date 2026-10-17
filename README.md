@@ -73,7 +73,7 @@ r  = 0.25;  when λ > 0:  r = min(rCap = 0.15, r/(1 + 4λ))
 
 When `g` is below `g*` (very low self-worth), the same rule raises it toward `g*`. Each change `Δ = |g − g'|` also nudges, never past home, shame by −0.3·Δ, anger by −0.3·Δ, connection by +0.2·Δ and calm by +0.2·Δ. The **structure** line names where you are (defending, comparing, proving, self-attack, replaying, self-focus, low self-respect, steady self-respect) and where you are heading: **humble confidence**, meaning g near g* with calm and connection at 0.5 or more.
 
-When the ego gap `|g − g*|` is bigger than any hard feeling's gap, the story is about letting go of defending or comparing while keeping self-respect. Pell is the guide, and the one step fits the main marker. An optional faith line about grace or humility appears only when **Include a faith line** is ticked.
+When the ego gap `|g − g*|` is bigger than any hard feeling's gap, the story is about letting go of defending or comparing while keeping self-respect. Pell is the guide, and the one step fits the main marker. An optional faith line about grace or humility appears only when **Include faith** is ticked (it also shows the Catholic factor lines).
 
 ### Every day: a vector into the baseline
 
@@ -116,6 +116,7 @@ Once days are recorded, the step size uses the baseline's distance `‖B − [h,
 | Self-compassion (Neff-inspired) | connection→shame −0.8, connection→loneliness −0.7, kShame 0.45, kConn 0.3 |
 | Stoic-inspired | calm→fear and calm→anger −0.6, home calm 0.9 and joy 0.5, aBase 0.18, b 0.12 |
 | Faith & grace | home hope and connection 0.9, hope→sadness −0.5, hope→fear −0.3, ego target 0.25, r 0.3 |
+| Catholic (virtues & discernment) | virtue pull cv 0.15, home hope and connection 0.9, hope→sadness −0.5, connection→loneliness −0.7, ego target 0.25, r 0.3 (see Catholic factors) |
 
 Editing any value switches to "custom variables". **Save as framework** keeps the current values under a name (a–z, 0–9, dashes). Saved frameworks are written into the code, so they export and import with the session.
 
@@ -128,6 +129,83 @@ Editing any value switches to "custom variables". **Save as framework** keeps th
 **Checkpoints.** **Save checkpoint** adds the current vector, with a time and λ. Tap a checkpoint to restore it. **Generate story** writes a short fictional story with a creature guide (from Stories). It names the feeling farthest from home and the stabilizer, and it ends with the move toward home ("loneliness moved from 0.94 to 0.76"). It also shows a preview of `e'`. **Accept step** makes `e'` the current state and saves it as checkpoint `step-n`, so the next equation is built from there. Each accepted step is smaller or larger depending on where you are, which keeps the sequence balanced as it goes.
 
 **Save space.** The whole session is kept on the device as `.mf` code (`localStorage` key `mindframe-workspace`) and comes back on the next visit. **Copy code** and **Download .mf.txt** export it. **Import** (paste or file) restores it. **Start over** clears it.
+
+### Catholic factors: virtues, tendencies, discernment
+
+For Catholic users, the Workspace can read a second set of numbers next to the emotions. **This is a reflective aid, not spiritual direction, and not a judgment of anyone's soul.** A feeling is not a sin, and a tendency is a pull, not a verdict. The numbers are design assumptions, not theology and not validated science. For deeper guidance, please talk with a priest or a spiritual director.
+
+The factor vector `c` has four parts, every value from 0 to 1:
+
+| Part | Values | Source |
+|---|---|---|
+| Theological virtues | faith, hope, charity | CCC 1812–1829 |
+| Cardinal virtues | prudence, justice, fortitude, temperance | CCC 1805–1809 |
+| Capital tendencies ↔ contrary virtues | pride ↔ humility, greed (avarice) ↔ generosity, lust ↔ chastity, envy ↔ kindness, gluttony ↔ temperance, wrath ↔ patience, sloth ↔ diligence | CCC 1866 names the capital sins; the contrary virtues are the traditional pairing |
+| Ignatian discernment | consolation and desolation word scores c, d, and the index I | St. Ignatius, *Spiritual Exercises*, Rules for the Discernment of Spirits, 313–336 |
+
+The seven gifts of the Holy Spirit (CCC 1831) and the twelve fruits (CCC 1832) are shown in the panel as labels: each fruit names a home value (joy → joy, peace → calm, charity → connection, faithfulness → hope, and so on) or a virtue target, and each gift sits beside the virtue it perfects, as St. Thomas Aquinas pairs them (simplified). God's mercy (CCC 1846–1848) is the frame for every suggestion.
+
+**From words.** A small lexicon reads virtues ("I was patient", "I prayed", "I helped"), tendencies ("angry", "jealous", "lazy", "binged") and spiritual words ("far from God", "prayer feels dry", "close to God", "at peace"). Each phrase is one hit; "so", "really" or "very" before it make it 1.5 hits; "not" or "never" before it make it 0. Then `s = 1 − exp(−0.6·hits)`. New words add to the stored factors, the same way they add to e:
+
+```
+t = 1 − (1 − t_base)(1 − t_words)                       tendencies start at 0
+v = clamp(v_base + (1 − v_base)·p_words − ½·t_words(contrary) − ½·neg_words)   virtues start at 0.5
+```
+
+You can also set every value by hand in the collapsed **Catholic factors** panel. Only the numbers are kept, never the words.
+
+**Ignatian index.** Consolation is "every increase of hope, faith and charity, and all interior joy" (SE 316); desolation is darkness, disquiet, "lazy, tepid, sad, and as if separated from" God (SE 317). The model reads both from the emotion vector and the words:
+
+```
+Pe = 0.8·mean(joy, hope, calm, connection) + 0.4·max(0, mean(faith, hope, charity) − 0.5)
+De = 0.6·max(sadness, fear, loneliness) + 0.2·max(anger, shame, guilt)
+C = 1 − (1 − Pe)(1 − c)      D = 1 − (1 − De)(1 − d)      I = C − D ∈ [−1, 1]
+```
+
+I ≤ −0.2 is desolation: "make no new changes now (SE 318); pray a little more and be patient: consolation will return (SE 321)". I ≥ 0.2 is consolation: "receive it with gratitude and store up strength for harder days (SE 323)". In between is a quiet time.
+
+**Coupling to the engine.** The couplings are off while the virtue pull `cv` is 0 (the default). The **Catholic** framework sets `cv = 0.15`. Every coefficient is a variable in the Variables panel:
+
+| Variable | Default | Effect |
+|---|---|---|
+| `cv` | 0 (Catholic 0.15) | virtue pull c_v; 0 turns the couplings off |
+| `vHome` | 0.7 | virtue target v_h (the home vector extended with virtues) |
+| `kvFaith` / `kvHope` / `kvCharity` | 0.3 / 0.4 / 0.4 | faith raises hope; hope eases sadness; charity raises connection and eases loneliness |
+| `kvPatience` / `kvFortitude` / `kvTemperance` | 0.4 / 0.3 / 0.3 | patience eases anger; fortitude eases fear; temperance raises calm |
+| `kvHumility` | 0.5 | humility speeds the ego release toward g* |
+| `ktWrath` / `ktEnvy` / `ktSloth` | 0.3 / 0.25 / 0.3 | wrath raises anger; envy raises shame and anger; sloth raises sadness |
+| `ktPride` / `ktGreed` / `ktLust` / `ktGluttony` | 0.3 / 0.2 / 0.2 / 0.2 | pride raises the ego grip g; greed raises fear; lust and gluttony lower calm |
+
+```
+words:  e_j ← 1 − (1 − e_j)(1 − Σ_k τ_kj·t_k)        tendencies in the words amplify what they feed (once)
+        g   ← 1 − (1 − g)(1 − ktPride·t_pride)
+step:   e' = e + a(h − e) + b·s(e) + c_v·V(e)        never past home
+        V_j = Σ_virtues κ_vj·v·(h_j − e_j) + v*·Σ τ_k*j·(h_j − e_j)
+              k* = the strongest tendency, v* = its contrary virtue (the "virtue pull")
+        c_v = cv, or cv/(1 + 4λ) when the mix is unstable
+        r ← r + cv·kvHumility·v_humility, then the usual unstable cap
+        v*' = v* + a(v_h − v*)        t*' = t*·(1 − a(0.5 + v*'))
+```
+
+V only ever moves a value toward its home, so the virtue pull can shorten the way home but never push past it. With no strong tendency, the practiced virtue is the weakest one below 0.5, or else hope.
+
+**Practice.** One concrete, optional practice, chosen in this order: the strongest tendency (≥ 0.2) → its contrary virtue (humility → the Litany of Humility or naming what someone else did well; patience → pause and pray before you answer; kindness → pray for the person you envy by name; diligence → one small duty offered to God; and so on); desolation → a short Ignatian examen, and no big changes now; heavy shame or guilt → a reminder of God's mercy, with Confession there "whenever you feel ready, never as pressure"; otherwise the weakest virtue, or gratitude.
+
+**Lines.** With the Catholic framework, or with **Include faith** checked, the Workspace adds:
+
+```
+theological: faith 0.50, hope 0.50, charity 0.50
+cardinal: prudence 0.50, justice 0.50, fortitude 0.50, temperance 0.50
+virtue: patience 0.21 ↔ wrath 0.59 → pull patience
+virtue step: patience 0.21 → 0.32, wrath 0.59 → 0.48 (v_h = 0.70)
+Ignatian: desolation −0.69 → make no new changes now (SE 318); pray a little more and be patient: consolation will return (SE 321)
+ideal: e′ = e + 0.22·(h − e) + 0.10·s(e) + 0.15·V(e); g′ = g − 0.34·(g − 0.25) → d′ = 1.36
+practice (optional): patience → pause and pray before you answer: one slow breath, then “Jesus, I trust in you”
+```
+
+**Include faith** only shows the lines; it does not change the step. **Stories** in the Catholic framework turn on one virtue (or the examen, or mercy), with one short prayer and a reminder that a tendency is not an identity.
+
+![Workspace Catholic factors](screenshots/workspace-catholic.png)
 
 ### The .mf code language
 
@@ -145,15 +223,18 @@ baseline beta=v [name=v ... g=v]       β, and the baseline (rebuilt from the da
 day YYYY-MM-DD name=v ... g=v          one day vector per day (dates go forward; at most 60)
 framework name=x key=v ... target=v beta=v k=n h.name=v w.from>to=v
                                        a saved framework (not a preset name; at most 20)
+virtue name=v ...                      Catholic virtues that differ from 0.50
+tendency name=v ...                    Catholic tendencies above 0
+ignatian I c=v d=v                     the Ignatian index (readable, recomputed) and the word scores c, d
 cp n YYYY-MM-DDTHH:MM label=x name=v ... g=v lambda=v
                                        checkpoint n (numbers go up; label a–z, 0–9, dashes)
-ideal a=v b=v r=v                      the step sizes for the current state (r optional)
+ideal a=v b=v r=v [cv=v]               the step sizes for the current state (r optional; cv when the virtue pull is on)
 eq e' = e + a*(h - e) + b*s(e); g' = g - r*(g - g*)
                                        readable copy of the ideal line (rebuilt on save, ignored on read)
 # comment                              ignored, as are blank lines
 ```
 
-Older `mf 1` codes without `ego`, `vars`, `baseline`, `day` or `framework` lines still import. The ego grip starts at g*, the variables at their defaults, and there are no days.
+Older `mf 1` codes without `ego`, `vars`, `baseline`, `day`, `virtue`, `tendency`, `ignatian` or `framework` lines still import (virtues at 0.50, tendencies at 0). The ego grip starts at g*, the variables at their defaults, and there are no days.
 
 Values are 0 to 1 and kept to two decimals. Emotion names: joy, hope, calm, connection, fear, anger, sadness, shame, guilt, loneliness. Limits: 400 lines, 50 checkpoints, 40 weights, 60 days, 20 frameworks. Writing then reading gives back exactly the same code. Example (the ego sentence on 10-16, one accepted step on 10-17, and a saved framework):
 
@@ -297,7 +378,7 @@ python3 serve.py
 
 Then open [http://localhost:8000](http://localhost:8000).
 
-Tests (no dependencies): `node tests/frameworks.test.js`, `node tests/ego.test.js`, `node tests/workspace.test.js`, `node tests/emotions.test.js`, `node tests/grounding.test.js`, `node tests/stories.test.js`, `node tests/psi.test.js`, `node tests/games.test.js`.
+Tests (no dependencies): `node tests/catholic.test.js`, `node tests/frameworks.test.js`, `node tests/ego.test.js`, `node tests/workspace.test.js`, `node tests/emotions.test.js`, `node tests/grounding.test.js`, `node tests/stories.test.js`, `node tests/psi.test.js`, `node tests/games.test.js`.
 
 ## Research paper
 
@@ -319,6 +400,7 @@ js/grounding.js         Grounding Loop: mirage reading, update rule, history
 js/stories.js           story templates and creature guides
 js/psi.js               check-in math: Ψ, weights, next skill, weekly summary
 js/games.js             path, spot-the-mirage, and word-tile games
+js/catholic.js          Catholic factors: virtues, tendencies, Ignatian index, practices
 js/emotions.js          equation engine: emotion vector, W, dynamics, loops, λ, language
 js/workspace.js         Workspace math: home, hidden variables, ideal step, ego release, daily baseline,
                         variables and frameworks, recovery estimate, optimizer, .mf code, step story
@@ -331,7 +413,7 @@ js/play-ui.js           Play output and the steadiness meter
 js/checkin-ui.js        Check-in output, weights, chart, weekly card
 js/start.js             first choice on open, old ?view= links
 js/workspace-ui.js      the Workspace page
-tests/                  node tests for frameworks, ego, workspace, emotions, grounding, stories, psi, games
-screenshots/            Workspace, story, variables; Tools with Equations, Reframe, Story, Play, Insights, crisis
+tests/                  node tests for Catholic factors, frameworks, ego, workspace, emotions, grounding, stories, psi, games
+screenshots/            Workspace, story, variables, Catholic factors; Tools with Equations, Reframe, Story, Play, Insights, crisis
 paper/                  research papers (PDF and LaTeX)
 ```

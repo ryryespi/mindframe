@@ -49,13 +49,13 @@
             <button type="button" id="ws-save" class="secondary">Save checkpoint</button>
             <button type="button" id="ws-story-go" class="secondary">Generate story</button>
           </div>
+          <label class="small quiet ws-check"><input type="checkbox" id="ws-faith" /> Include faith</label>
         </section>
 
         <section id="ws-story" class="ws-sec card hidden">
           <p id="ws-story-tag" class="creature-tag"></p>
           <p id="ws-story-text"></p>
           <p id="ws-preview" class="eq-line"></p>
-          <label class="small quiet ws-check"><input type="checkbox" id="ws-faith" /> Include a faith line</label>
           <div class="ws-buttons">
             <button type="button" id="ws-accept" class="secondary">Accept step</button>
             <button type="button" id="ws-story-again" class="text">Another story</button>
@@ -74,6 +74,23 @@
           <ul id="ws-week" class="ws-lines"></ul>
           <p id="ws-today" class="ws-words"></p>
         </section>
+
+        <details id="ws-cath" class="ws-sec ws-vars">
+          <summary>Catholic factors</summary>
+          <p class="quiet small">Virtues and tendencies as numbers from 0 to 1, read from your words and adjustable here (your words add to these). A reflective aid, not spiritual direction and not a judgment of anyone's soul: a feeling is not a sin, and a tendency is not a verdict. For deeper guidance, talk with a priest or a spiritual director. Choose the Catholic framework, or Include faith, to see these in the equations.</p>
+          <p id="ws-ig" class="eq-line"></p>
+          <div id="ws-cath-grid" class="ws-var-grid"></div>
+          <div class="ws-buttons">
+            <button type="button" id="ws-cath-use" class="secondary">Use the Catholic framework</button>
+            <button type="button" id="ws-cath-reset" class="text">Reset factors</button>
+          </div>
+          <details id="ws-gifts" class="ws-sub">
+            <summary>Gifts and fruits of the Holy Spirit</summary>
+            <p class="quiet small">The twelve fruits (CCC 1832) as labels for the home vector, and the seven gifts (CCC 1831) beside the virtue each perfects, as St. Thomas Aquinas pairs them (simplified).</p>
+            <ul id="ws-fruits" class="ws-lines"></ul>
+            <ul id="ws-gifts-list" class="ws-lines"></ul>
+          </details>
+        </details>
 
         <details id="ws-vars" class="ws-sec ws-vars">
           <summary>Variables</summary>
@@ -133,6 +150,7 @@
   <script src="js/grounding.js"></script>
   <script src="js/stories.js"></script>
   <script src="js/emotions.js"></script>
+  <script src="js/catholic.js"></script>
   <script src="js/workspace.js"></script>
   <script src="js/workspace-ui.js"></script>
 </body>

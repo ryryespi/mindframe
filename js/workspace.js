@@ -30,11 +30,21 @@
 //            alignment = cos(v_t, h − B_{t−1}).
 //   λ        on the active hard feelings only (see lambdaHard).
 //   T_rec    ideal steps until ‖[e, g] − [h, g*]‖ < eps (simulated, ≤ 200).
+//   Catholic (see catholic.js; on when the virtue pull cv > 0):
+//            words: tendencies amplify the hard feelings they feed,
+//              e_j ← 1 − (1 − e_j)(1 − Σ_k τ_kj·t_k), g ← 1 − (1 − g)(1 − τ_pride·t_pride)
+//            ideal e' = e + a(h − e) + b·s(e) + c_v·V(e), never past home, with
+//              V_j = Σ_virtues κ_vj·v·(h_j − e_j) + v*·Σ τ_k*j·(h_j − e_j)
+//              where k* is the strongest tendency and v* its contrary virtue;
+//              c_v = cv, or cv/(1 + 4λ) when λ > 0.
+//            ego r ← r + cv·kvHumility·v_humility (then the unstable cap).
+//            factors: v*' = v* + a(v_h − v*),  t*' = t*·(1 − a(0.5 + v*')).
 
 const Workspace = (function () {
   const E = typeof Emotions !== "undefined" ? Emotions : require("./emotions.js");
   const G = typeof Grounding !== "undefined" ? Grounding : require("./grounding.js");
   const S = typeof Stories !== "undefined" ? Stories : require("./stories.js");
+  const C = typeof Catholic !== "undefined" ? Catholic : require("./catholic.js");
 
   const NAMES = E.NAMES;
   const N = NAMES.length;
@@ -63,7 +73,33 @@ const Workspace = (function () {
     ["kAnger", 0.3, 0, 0.6, "ego release lowers anger by kAnger·Δ"],
     ["kConn", 0.2, 0, 0.6, "ego release raises connection by kConn·Δ"],
     ["kCalm", 0.2, 0, 0.6, "ego release raises calm by kCalm·Δ"],
+    // Catholic couplings (off while cv = 0; the Catholic framework sets cv = 0.15)
+    ["cv", 0, 0, 0.5, "virtue pull c_v: 0 turns the Catholic couplings off"],
+    ["vHome", 0.7, 0.3, 1, "virtue target v_h in the home vector"],
+    ["kvFaith", 0.3, 0, 1, "faith raises hope"],
+    ["kvHope", 0.4, 0, 1, "hope (the virtue) eases sadness"],
+    ["kvCharity", 0.4, 0, 1, "charity raises connection and eases loneliness"],
+    ["kvPatience", 0.4, 0, 1, "patience eases anger"],
+    ["kvFortitude", 0.3, 0, 1, "fortitude eases fear"],
+    ["kvTemperance", 0.3, 0, 1, "temperance raises calm"],
+    ["kvHumility", 0.5, 0, 1, "humility speeds the ego release toward g*"],
+    ["ktPride", 0.3, 0, 0.6, "pride tendency raises the ego grip g"],
+    ["ktGreed", 0.2, 0, 0.6, "greed tendency raises fear"],
+    ["ktLust", 0.2, 0, 0.6, "lust tendency lowers calm (restlessness)"],
+    ["ktEnvy", 0.25, 0, 0.6, "envy tendency raises shame and anger"],
+    ["ktGluttony", 0.2, 0, 0.6, "gluttony tendency lowers calm"],
+    ["ktWrath", 0.3, 0, 0.6, "wrath tendency raises anger"],
+    ["ktSloth", 0.3, 0, 0.6, "sloth tendency raises sadness"],
   ];
+  // Which emotion each coupling moves (sign: + raises, − lowers).
+  const VIRTUE_LINKS = {
+    faith: [["kvFaith", "hope", 1]], hope: [["kvHope", "sadness", -1]], charity: [["kvCharity", "connection", 1], ["kvCharity", "loneliness", -1]],
+    patience: [["kvPatience", "anger", -1]], fortitude: [["kvFortitude", "fear", -1]], temperance: [["kvTemperance", "calm", 1]],
+  };
+  const TENDENCY_LINKS = {
+    pride: [["ktPride", "g", 1]], greed: [["ktGreed", "fear", 1]], lust: [["ktLust", "calm", -1]], envy: [["ktEnvy", "shame", 1], ["ktEnvy", "anger", 1]],
+    gluttony: [["ktGluttony", "calm", -1]], wrath: [["ktWrath", "anger", 1]], sloth: [["ktSloth", "sadness", 1]],
+  };
   // Kept on their own code lines: ego target, baseline beta, horizon k.
   const EXTRA_SPEC = [
     ["target", 0.3, 0.1, 0.6, "appropriate ego g*: healthy self-respect"],
@@ -105,6 +141,7 @@ const Workspace = (function () {
     return {
       v: VERSION, home: fromObj(HOME), e: zero(), ego: { g: SPEC.target.def, target: SPEC.target.def }, steps: SPEC.k.def,
       vars: defaultVars(), framework: "default", w: [], beta: SPEC.beta.def, baseline: null, days: [], frameworks: [], cps: [], ideal: null,
+      cath: C.defaultFactors(),
     };
   }
 
@@ -190,11 +227,32 @@ const Workspace = (function () {
   // Words -> vector and ego. Crisis text gives { crisis: true } and nothing else.
   function fromText(text) {
     const t = String(text || "");
-    if (!t.trim()) return { crisis: false, e: zero(), notes: [], ego: { g: 0, markers: {}, focus: 0 } };
+    if (!t.trim()) return { crisis: false, e: zero(), notes: [], ego: { g: 0, markers: {}, focus: 0 }, cath: null };
     if (G.isCrisis(t)) return { crisis: true };
     const r = E.analyze(t);
     if (r.crisis) return { crisis: true };
-    return { crisis: false, e: r.e.map(r2), notes: r.notes.slice(), ego: egoScore(t) };
+    return { crisis: false, e: r.e.map(r2), notes: r.notes.slice(), ego: egoScore(t), cath: C.score(t) };
+  }
+
+  const catholicOn = (state, opts = {}) => state.vars.cv > 0 || !!opts.faith;
+
+  // Words add to a base { e, g, cath }. With the Catholic couplings on, the
+  // tendencies in the words amplify the hard feelings they feed (once).
+  function applyWords(base, words, vars = defaultVars()) {
+    let we = words.e.slice(), wg = words.ego.g;
+    if (vars.cv > 0 && words.cath) {
+      Object.entries(TENDENCY_LINKS).forEach(([k, links]) => {
+        const t = words.cath.t[k] || 0;
+        if (!t) return;
+        links.forEach(([key, name, sign]) => {
+          const x = vars[key] * t;
+          if (name === "g") wg = combine1(wg, x);
+          else if (sign > 0) we[idx[name]] = combine1(we[idx[name]], x);
+          else we[idx[name]] = r2(we[idx[name]] * (1 - x));
+        });
+      });
+    }
+    return { e: combine(base.e, we), g: combine1(base.g, wg), cath: C.combine(base.cath, words.cath) };
   }
 
   // ---------- Hidden variables ----------
@@ -243,13 +301,41 @@ const Workspace = (function () {
     const refDmax = opts.refDmax || dmax(h);
     let a = clamp(V.aBase * (0.5 + refD / refDmax), V.aMin, V.aMax);
     let b = V.b, r = V.r;
+    const cath = opts.cath || null;
+    const catholic = V.cv > 0 && cath;
+    if (catholic) r = r + V.cv * V.kvHumility * cath.v.humility;
+    let cvEff = catholic ? V.cv : 0;
     const unstable = lam !== null && lam > 0;
     if (unstable) {
       a = Math.max(V.aMin, Math.min(V.aCap, a / (1 + 4 * lam)));
       b = V.bU;
       r = Math.max(0.02, Math.min(V.rCap, r / (1 + 4 * lam)));
+      cvEff = cvEff / (1 + 4 * lam);
     }
-    a = r2(a); b = r2(b); r = r2(r);
+    a = r2(a); b = r2(b); r = r2(r); cvEff = r2(cvEff);
+    // The virtue pull V(e): each virtue presses its emotions toward home, and the
+    // contrary virtue of the strongest tendency presses on what that tendency feeds.
+    const Vpull = zero();
+    let pullInfo = null, cathNext = cath ? C.copy(cath) : null;
+    if (catholic) {
+      Object.entries(VIRTUE_LINKS).forEach(([v, links]) => links.forEach(([key, name]) => { Vpull[idx[name]] += V[key] * cath.v[v] * (h[idx[name]] - e[idx[name]]); }));
+      const k = C.activeTendency(cath);
+      const weak = C.weakestVirtue(cath);
+      const vk = k ? C.VIRTUE_OF[k] : cath.v[weak] < C.V0 ? weak : "hope";
+      if (k) TENDENCY_LINKS[k].forEach(([key, name]) => { if (name !== "g") Vpull[idx[name]] += V[key] * cath.v[vk] * (h[idx[name]] - e[idx[name]]); });
+      // The practiced virtue grows toward v_h; its tendency fades faster the stronger it is.
+      const v0 = cath.v[vk];
+      let v1 = v0 < V.vHome ? r2(Math.min(V.vHome, v0 + a * (V.vHome - v0))) : v0;
+      if (v1 === v0 && v0 < V.vHome) v1 = r2(Math.min(V.vHome, v0 + 0.01));
+      cathNext.v[vk] = v1;
+      if (k) {
+        const t0 = cath.t[k];
+        let t1 = r2(Math.max(0, t0 * (1 - a * (0.5 + v1))));
+        if (t1 === r2(t0) && t0 > 0) t1 = r2(Math.max(0, t0 - 0.01));
+        cathNext.t[k] = t1;
+      }
+      pullInfo = { tendency: k, t: k ? cath.t[k] : null, tNext: k ? cathNext.t[k] : null, virtue: vk, v: v0, vNext: v1 };
+    }
     const toward = (x, y, home) => (x > home ? Math.max(home, y) : Math.min(home, y));
     // Ego: g' = g − r(g − g*), never past g*, at least 0.01 when not there.
     let gNext = r2(toward(g, g - r * (g - target), target));
@@ -260,6 +346,7 @@ const Workspace = (function () {
     const next = e.map((x, j) => {
       let y = x + a * (h[j] - x);
       if (!HELPFUL[j] && x > h[j]) y += b * x * pull[j];
+      if (cvEff) y += cvEff * Vpull[j];
       y = r2(clamp01(toward(x, y, h[j])));
       if (y === x && x !== h[j]) y = r2(x + (h[j] > x ? 0.01 : -0.01));
       // Ego release coupling, also never past home.
@@ -280,7 +367,7 @@ const Workspace = (function () {
     const targets = work.filter(w => w.kind === "loop").slice(0, 1).flatMap(w => [w.a, w.b]);
     if (!targets.length && strongest) targets.push(NAMES[strongest.j]);
     const stab = targets.length ? E.stabilizer(targets, W) : null;
-    return { a, b, r, lambda: lam, unstable, d: r2(d), next, dNext: r2(distance(next, h)), g: r2(g), gNext, target, egoGap, egoTop, work, stabilizer: stab, targets };
+    return { a, b, r, cv: cvEff, pull: pullInfo, cathNext, lambda: lam, unstable, d: r2(d), next, dNext: r2(distance(next, h)), g: r2(g), gNext, target, egoGap, egoTop, work, stabilizer: stab, targets };
   }
 
   // ---------- Days and the baseline ----------
@@ -346,14 +433,14 @@ const Workspace = (function () {
   // Simulate ideal steps from here (no new words) until ‖[e,g] − [h,g*]‖ < eps.
   function simulate(state, maxIter = MAX_SIM) {
     const W = weights(state.w), V = state.vars, H = homeAug(state);
-    let e = state.e.slice(), g = state.ego.g;
+    let e = state.e.slice(), g = state.ego.g, cath = state.cath;
     for (let n = 0; n <= maxIter; n++) {
       const D = distance(aug(e, g), H);
       if (D < V.eps) return { steps: n, reached: true, final: r2(D) };
       if (n === maxIter) return { steps: maxIter, reached: false, final: r2(D) };
-      const id = ideal(e, { home: state.home, W, vars: V, g, target: state.ego.target });
+      const id = ideal(e, { home: state.home, W, vars: V, g, target: state.ego.target, cath });
       if (id.next.every((x, i) => x === e[i]) && id.gNext === g) return { steps: n, reached: false, final: r2(D) };
-      e = id.next; g = id.gNext;
+      e = id.next; g = id.gNext; cath = id.cathNext;
     }
   }
 
@@ -388,6 +475,8 @@ const Workspace = (function () {
       vars: { aBase: 0.18, b: 0.12 }, home: { calm: 0.9, joy: 0.5 }, w: [["calm", "fear", -0.6], ["calm", "anger", -0.6]] },
     { id: "faith", title: "Faith & grace", note: "hope and connection, humility: a gentle ego target",
       vars: { r: 0.3 }, target: 0.25, home: { hope: 0.9, connection: 0.9 }, w: [["hope", "sadness", -0.5], ["hope", "fear", -0.3]] },
+    { id: "catholic", title: "Catholic (virtues & discernment)", note: "theological and cardinal virtues, capital tendencies with their contrary virtues, Ignatian discernment. A reflective aid, not spiritual direction.",
+      vars: { cv: 0.15, r: 0.3 }, target: 0.25, home: { hope: 0.9, connection: 0.9 }, w: [["hope", "sadness", -0.5], ["connection", "loneliness", -0.7]] },
   ];
   const PRESET_IDS = new Set(PRESETS.map(p => p.id));
 
@@ -477,7 +566,7 @@ const Workspace = (function () {
   function metrics(state, notes = [], markers = null) {
     const W = weights(state.w), V = state.vars;
     const e = state.e, h = state.home;
-    const opts = { home: h, W, vars: V, g: state.ego.g, target: state.ego.target };
+    const opts = { home: h, W, vars: V, g: state.ego.g, target: state.ego.target, cath: state.cath };
     if (state.baseline) { opts.refD = distance(aug(state.baseline.e, state.baseline.g), homeAug(state)); opts.refDmax = dmax(homeAug(state)); }
     const L = loops(e, W, V.d);
     const week = lastWeek(state);
@@ -488,9 +577,16 @@ const Workspace = (function () {
       ego: { g: state.ego.g, target: state.ego.target, markers: markers || {}, structure: structure(state, markers) },
       baseline: state.baseline ? { dB: r2(distance(aug(state.baseline.e, state.baseline.g), homeAug(state))), days: state.days.length } : null,
       today: week.length && week[week.length - 1].day === dayOf(stamp(Date.now())) ? week[week.length - 1] : null,
-      week, recovery: recovery(state),
+      week, recovery: recovery(state), catholic: catholicView(state),
     };
   }
+
+  function catholicView(state) {
+    const f = state.cath, eo = toObjAll(state.e);
+    const ig = C.ignatian(eo, f);
+    return { factors: f, ignatian: ig, practice: C.practice(f, eo, ig), mercy: C.mercyDue(eo), active: C.activeTendency(f) };
+  }
+  const toObjAll = v => Object.fromEntries(NAMES.map((n, i) => [n, v[i]]));
 
   // The structure you are in now, and the one you are moving toward.
   function structure(state, markers) {
@@ -525,7 +621,23 @@ const Workspace = (function () {
     return `ego g = ${f2(g)} \u2192 ${f2(id.gNext)} (raise toward g* = ${f2(target)}: self-respect)`;
   }
 
-  function lines(state, m) {
+  function catholicLines(state, m) {
+    const L = [], cv = m.catholic, f = cv.factors, id = m.ideal;
+    L.push(`theological: ${C.THEOLOGICAL.map(k => `${k} ${f2(f.v[k])}`).join(", ")}`);
+    L.push(`cardinal: ${C.CARDINAL.map(k => `${k} ${f2(f.v[k])}`).join(", ")}`);
+    const act = C.TENDENCIES.filter(k => f.t[k] >= 0.1).sort((a, b) => f.t[b] - f.t[a] || C.TENDENCIES.indexOf(a) - C.TENDENCIES.indexOf(b)).slice(0, 3);
+    act.forEach((k, i) => {
+      const v = C.VIRTUE_OF[k];
+      L.push(`virtue: ${v} ${f2(f.v[v])} ↔ ${k} ${f2(f.t[k])}${i === 0 ? ` → pull ${v}` : ""}`);
+    });
+    if (!act.length) { const w = C.weakestVirtue(f); L.push(`virtue: no strong tendency; weakest virtue ${w} ${f2(f.v[w])}`); }
+    if (id.pull) L.push(`virtue step: ${id.pull.virtue} ${f2(id.pull.v)} → ${f2(id.pull.vNext)}${id.pull.tendency ? `, ${id.pull.tendency} ${f2(id.pull.t)} → ${f2(id.pull.tNext)}` : ""} (v_h = ${f2(state.vars.vHome)})`);
+    const ig = cv.ignatian;
+    L.push(`Ignatian: ${ig.state === "quiet" ? "quiet" : ig.state} ${sgn(ig.I)} → ${C.IGNATIAN_TEXT[ig.state]}`);
+    return L;
+  }
+
+  function lines(state, m, opts = {}) {
     const L = [];
     const id = m.ideal;
     L.push(`e = ${vecText(state.e)}`);
@@ -542,7 +654,9 @@ const Workspace = (function () {
     if (mk.length) L.push(`ego markers: ${mk.sort((a, b) => b[1] - a[1]).map(([k, n]) => `${EGO_MARKERS[k].label} ${n}`).join(", ")}`);
     const st = m.ego.structure;
     L.push(st.now === st.toward ? `structure: humble confidence (g near g*, calm and connection high)` : `structure: ${st.now} \u2192 toward humble confidence`);
-    L.push(`ideal: e\u2032 = e + ${f2(id.a)}\u00B7(h \u2212 e) + ${f2(id.b)}\u00B7s(e); g\u2032 = g \u2212 ${f2(id.r)}\u00B7(g \u2212 ${f2(id.target)}) \u2192 d\u2032 = ${f2(id.dNext)}`);
+    const cathOn = catholicOn(state, opts);
+    if (cathOn) catholicLines(state, m).forEach(x => L.push(x));
+    L.push(`ideal: e\u2032 = e + ${f2(id.a)}\u00B7(h \u2212 e) + ${f2(id.b)}\u00B7s(e)${id.cv ? ` + ${f2(id.cv)}\u00B7V(e)` : ""}; g\u2032 = g \u2212 ${f2(id.r)}\u00B7(g \u2212 ${f2(id.target)}) \u2192 d\u2032 = ${f2(id.dNext)}`);
     if (m.baseline) L.push(`baseline: \u2016B \u2212 h\u2016 = ${f2(m.baseline.dB)} (\u03B2 = ${f2(state.beta)}, ${m.baseline.days} day${m.baseline.days === 1 ? "" : "s"})`);
     if (m.today && m.today.cos !== null) L.push(`today: cos(v, h \u2212 B) = ${sgn(m.today.cos)} ${ARROW[m.today.dir]}`);
     L.push(`recovery: ${recText(m.recovery)} to d < ${f2(state.vars.eps)} with ${titleOf(state, state.framework)} (model estimate)`);
@@ -551,6 +665,11 @@ const Workspace = (function () {
       : `${w.name} ${w.dir === "up" ? "\u2191" : "\u2193"} (gap ${f2(w.gap)})`));
     if (work.length) L.push(`work on: ${work.join("; ")}`);
     if (id.stabilizer) L.push(`stabilizer: ${id.stabilizer.name} \u2192 ${id.stabilizer.skill}, with ${id.stabilizer.creature}`);
+    if (cathOn) {
+      const p = m.catholic.practice;
+      L.push(`practice (optional): ${p.key} \u2192 ${p.do}`);
+      if (m.catholic.mercy && p.key !== "mercy") L.push(`mercy: ${C.MERCY_LINE}`);
+    }
     return L;
   }
 
@@ -561,7 +680,8 @@ const Workspace = (function () {
     const why = id.unstable ? " The mix is unstable, so the step is kept small." : "";
     const helper = id.stabilizer ? ` Let ${id.stabilizer.name} press on ${id.targets.join(" and ")} (try: ${id.stabilizer.skill}).` : "";
     const ego = id.egoGap >= 0.005 ? (id.g > id.target ? ` Loosen the ego grip from ${f2(id.g)} to ${f2(id.gNext)}, keeping self-respect.` : ` Raise self-respect from ${f2(id.g)} to ${f2(id.gNext)}.`) : "";
-    return `Move ${pct}% of the way home.${helper}${ego}${why} Distance ${f2(id.d)} \u2192 ${f2(id.dNext)}.`;
+    const virtue = id.pull && id.pull.tendency ? ` Let ${id.pull.virtue} pull on ${id.pull.tendency}.` : id.pull ? ` Grow in ${id.pull.virtue}.` : "";
+    return `Move ${pct}% of the way home.${helper}${virtue}${ego}${why} Distance ${f2(id.d)} \u2192 ${f2(id.dNext)}.`;
   }
 
   function weekLines(state, now = Date.now()) {
@@ -581,9 +701,12 @@ const Workspace = (function () {
   //   steps k                  vars framework=x key=v ...
   //   w from>to=v              baseline beta=v [name=v ... g=v]
   //   day YYYY-MM-DD name=v ... g=v
+  //   virtue name=v ...        (only virtues not at 0.50)
+  //   tendency name=v ...      (only tendencies above 0)
+  //   ignatian I c=v d=v       (I is readable and recomputed; c, d are the word scores)
   //   framework name=x key=v ... target=v beta=v k=n h.name=v w.from>to=v
   //   cp n YYYY-MM-DDTHH:MM label=x name=v ... g=v lambda=v
-  //   ideal a=v b=v [r=v]      eq ...   (readable, rebuilt on save, ignored on read)
+  //   ideal a=v b=v [r=v] [cv=v]   eq ...   (readable, rebuilt on save, ignored on read)
   //   # comment
   const NUM = "-?(?:\\d+(?:\\.\\d*)?|\\.\\d+)";
   const PAIR = new RegExp(`^([a-z]+)=(${NUM})$`);
@@ -618,11 +741,16 @@ const Workspace = (function () {
     state.w.forEach(o => out.push(`w ${o.from}>${o.to}=${num(o.w)}`));
     out.push(join([`baseline beta=${num(state.beta)}`, state.baseline ? vecCode(state.baseline.e) : "", state.baseline ? `g=${num(state.baseline.g)}` : ""]));
     state.days.forEach(x => out.push(join([`day ${x.day}`, vecCode(x.e), `g=${num(x.g)}`])));
+    const f = state.cath;
+    const vs = C.VIRTUES.filter(k => f.v[k] !== C.V0), ts = C.TENDENCIES.filter(k => f.t[k] > 0);
+    if (vs.length) out.push(join(["virtue", ...vs.map(k => `${k}=${num(f.v[k])}`)]));
+    if (ts.length) out.push(join(["tendency", ...ts.map(k => `${k}=${num(f.t[k])}`)]));
+    if (vs.length || ts.length || f.c || f.d || state.vars.cv > 0) out.push(`ignatian ${num(C.ignatian(toObjAll(state.e), f).I)} c=${num(f.c)} d=${num(f.d)}`);
     state.frameworks.forEach(f => out.push(frameworkCode(f)));
     state.cps.forEach(c => out.push(join([`cp ${c.n} ${c.t} label=${c.label}`, vecCode(c.e), `g=${num(c.g)}`, `lambda=${num(c.lambda)}`])));
     if (state.ideal) {
-      out.push(`ideal a=${num(state.ideal.a)} b=${num(state.ideal.b)} r=${num(state.ideal.r)}`);
-      out.push(`eq e' = e + ${num(state.ideal.a)}*(h - e) + ${num(state.ideal.b)}*s(e); g' = g - ${num(state.ideal.r)}*(g - ${num(state.ego.target)})`);
+      out.push(`ideal a=${num(state.ideal.a)} b=${num(state.ideal.b)} r=${num(state.ideal.r)}${state.ideal.cv ? ` cv=${num(state.ideal.cv)}` : ""}`);
+      out.push(`eq e' = e + ${num(state.ideal.a)}*(h - e) + ${num(state.ideal.b)}*s(e)${state.ideal.cv ? ` + ${num(state.ideal.cv)}*V(e)` : ""}; g' = g - ${num(state.ideal.r)}*(g - ${num(state.ego.target)})`);
     }
     return out.join("\n") + "\n";
   }
@@ -742,6 +870,28 @@ const Workspace = (function () {
           state.days.push({ day: dk, e: vec, g: r2(Number.isFinite(ex.g) ? ex.g : SPEC.target.def) });
           break;
         }
+        case "virtue":
+        case "tendency": {
+          const names = kw === "virtue" ? C.VIRTUES : C.TENDENCIES;
+          rest.forEach(tok => {
+            const m = tok.match(PAIR);
+            if (!m || !names.includes(m[1])) { err(n, `\u201C${tok}\u201D should be one of ${names.join(", ")}, like ${names[0]}=0.50.`); return; }
+            const x = Number(m[2]);
+            if (in01(n, m[1], x)) state.cath[kw === "virtue" ? "v" : "t"][m[1]] = r2(x);
+          });
+          break;
+        }
+        case "ignatian": {
+          const [ix, ...vals] = rest;
+          const I = Number(ix);
+          if (!new RegExp(`^${NUM}$`).test(ix || "") || I < -1 || I > 1) { err(n, "ignatian looks like ignatian -0.45 c=0.00 d=0.50 (the first number from -1 to 1)."); break; }
+          vals.forEach(tok => {
+            const m = tok.match(PAIR);
+            if (!m || !["c", "d"].includes(m[1])) { err(n, "ignatian looks like ignatian -0.45 c=0.00 d=0.50."); return; }
+            if (in01(n, m[1], Number(m[2]))) state.cath[m[1]] = r2(Number(m[2]));
+          });
+          break;
+        }
         case "framework": {
           const [nm, ...vals] = rest;
           const name = readLabel(n, nm, "name");
@@ -788,15 +938,15 @@ const Workspace = (function () {
           break;
         }
         case "ideal": {
-          const m = line.match(new RegExp(`^ideal a=(${NUM}) b=(${NUM})(?: r=(${NUM}))?$`));
-          const ok = m && [m[1], m[2], m[3] ?? "0"].every(x => Number(x) >= 0 && Number(x) <= 1);
+          const m = line.match(new RegExp(`^ideal a=(${NUM}) b=(${NUM})(?: r=(${NUM}))?(?: cv=(${NUM}))?$`));
+          const ok = m && [m[1], m[2], m[3] ?? "0", m[4] ?? "0"].every(x => Number(x) >= 0 && Number(x) <= 1);
           if (!ok) { err(n, "ideal looks like ideal a=0.10 b=0.15 r=0.12 (each 0 to 1)."); break; }
-          state.ideal = { a: r2(Number(m[1])), b: r2(Number(m[2])), r: r2(Number(m[3] ?? state.vars.r)) };
+          state.ideal = { a: r2(Number(m[1])), b: r2(Number(m[2])), r: r2(Number(m[3] ?? state.vars.r)), cv: r2(Number(m[4] ?? 0)) };
           break;
         }
         case "eq": break; // readable copy of the ideal line
         case "mf": err(n, "the header appears twice."); break;
-        default: err(n, `\u201C${kw}\u201D isn't a keyword (mf, home, e, ego, steps, vars, w, baseline, day, framework, cp, ideal, eq).`);
+        default: err(n, `\u201C${kw}\u201D isn't a keyword (mf, home, e, ego, steps, vars, w, baseline, day, virtue, tendency, ignatian, framework, cp, ideal, eq).`);
       }
     });
     if (crisis) return { ok: false, crisis: true, errors: [] };
@@ -905,9 +1055,46 @@ const Workspace = (function () {
     return { guide: who.name, tag: `${who.name}, ${who.intro.slice(who.name.length + 2).replace(/,$/, "")}`, focus: "ego", arc: "ego", from: id.g, to: id.gNext, sentences: s, text, next: id.next, gNext: id.gNext };
   }
 
+  // Catholic mode: a virtue is the turning point. Calm, realistic, one prayer line, never shaming.
+  function catholicStory(state, m, opts) {
+    const id = m.ideal, cv = m.catholic, f = cv.factors, rand = S.parts.rng(opts.seed || 1);
+    const pick = list => list[Math.floor(rand() * list.length)];
+    const p = cv.practice;
+    const k = p.why === "tendency" ? p.tendency : null;
+    const desol = cv.ignatian.state === "desolation";
+    const who = S.CHARACTERS.find(c => c.name === (k === "wrath" || k === "envy" ? "Mistfawn" : desol ? "Nim" : "Sela"));
+    const s = [];
+    const mercy = p.key === "mercy";
+    s.push(`${who.intro} ${pick(C.OPEN[k || (desol ? "desolation" : mercy ? "mercy" : "weak")])}`);
+    if (k) {
+      s.push(`They kept a small map of the soul, and on it ${k} sat at ${f2(f.t[k])} and ${p.key} at ${f2(f.v[p.key])}.`);
+      s.push(pick(C.NOT_VERDICT));
+    } else if (mercy) {
+      const n = state.e[idx.shame] >= state.e[idx.guilt] ? "shame" : "guilt";
+      s.push(`They kept a small map of the soul, and on it ${n} sat at ${f2(state.e[idx[n]])}, the farthest point from home.`);
+    } else s.push(`They kept a small map of the soul, and on it the Ignatian needle pointed to ${sgn(cv.ignatian.I)}.`);
+    if (desol) s.push(pick(C.DESOLATION_WORDS));
+    s.push(`So they chose ${k ? p.key : p.key === "examen" ? "the examen" : mercy ? "to let mercy in" : p.key}, not as a feeling but as one small act: they ${p.act}.`);
+    if (mercy) s.push("Confession would be there whenever they felt ready. No rush, no pressure.");
+    // One prayer line: the act itself when it is a prayer, otherwise a short one.
+    if (!/pray/i.test(p.act)) s.push(C.PRAYER[p.key] || C.PRAYER.default);
+    const pi = id.pull;
+    const top = NAMES.map((n, i) => ({ n, i, drop: state.e[i] - id.next[i] })).filter(x => !HELPFUL[x.i]).sort((a, b) => b.drop - a.drop)[0];
+    const moved = pi ? `${pi.virtue} rose from ${f2(pi.v)} to ${f2(pi.vNext)}` : "";
+    const eased = top && top.drop > 0 ? `${top.n} eased from ${f2(state.e[top.i])} to ${f2(id.next[top.i])}` : "";
+    s.push(`On the map, ${[moved, eased].filter(Boolean).join(" and ") || "things moved a little"}. Not all the way. Just closer.`);
+    s.push(C.QUESTION[p.key] || C.QUESTION.default);
+    const text = s.map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(" ");
+    return { guide: who.name, tag: `${who.name}, ${who.intro.slice(who.name.length + 2).replace(/,$/, "")}`, focus: p.key, arc: "catholic", from: pi ? pi.v : null, to: pi ? pi.vNext : null, sentences: s, text, next: id.next, gNext: id.gNext };
+  }
+
   function story(state, m, opts = {}) {
     const id = m.ideal;
     const h = state.home;
+    if (state.vars.cv > 0 && m.catholic) {
+      const cv = m.catholic;
+      if (["tendency", "desolation", "mercy"].includes(cv.practice.why)) return catholicStory(state, m, opts);
+    }
     if (!m.d && id.egoGap < 0.005) return null;
     if (id.egoTop || (!m.d && id.egoGap >= 0.005)) return egoStory(state, m, opts);
     const gaps = NAMES.map((n, i) => ({ n, i, gap: Math.abs(h[i] - state.e[i]), hard: !HELPFUL[i] && state.e[i] > h[i] }));
@@ -932,18 +1119,19 @@ const Workspace = (function () {
   // Take the ideal step: e and g move, a checkpoint is saved, and today's day vector updates.
   function acceptStep(state, ts = Date.now()) {
     const m = metrics(state);
-    const s = { ...state, e: m.ideal.next.slice(), ego: { ...state.ego, g: m.ideal.gNext } };
+    const s = { ...state, e: m.ideal.next.slice(), ego: { ...state.ego, g: m.ideal.gNext }, cath: m.ideal.cathNext ? C.copy(m.ideal.cathNext) : state.cath };
     const n = state.cps.filter(c => /^step-\d+$/.test(c.label)).length + 1;
     return refreshIdeal(addCheckpoint(s, `step-${n}`, ts));
   }
 
   function refreshIdeal(state) {
     const m = metrics(state);
-    return { ...state, ideal: { a: m.ideal.a, b: m.ideal.b, r: m.ideal.r } };
+    return { ...state, ideal: { a: m.ideal.a, b: m.ideal.b, r: m.ideal.r, cv: m.ideal.cv } };
   }
 
   return {
     VERSION, HOME, NAMES, VAR_SPEC, EXTRA_SPEC, SPEC, VAR_KEYS, PRESETS, MAIN_PAIRS, EGO_MARKERS, MAX_CHECKPOINTS, MAX_SIM,
+    VIRTUE_LINKS, TENDENCY_LINKS, catholicOn, applyWords, catholicView, catholicLines,
     defaultState, defaultVars, validateVars, clampExtra, lambdaHard, distance, cosine, dmax, combine, combine1, weights, setWeight, defaultWeight,
     egoScore, fromText, hidden, ideal, metrics, lines, idealWords, weekLines, todayWords,
     baselineSeries, withBaseline, recordDay, dailyView, lastWeek,

@@ -48,8 +48,8 @@ test("W pairs: setWeight overrides one entry and removes it when back to default
 });
 
 // ---------- Presets ----------
-test("seven presets load, each only a set of variable values within range", () => {
-  assert.deepEqual(W.PRESETS.map(p => p.id), ["default", "dbt", "cbt", "act", "self-compassion", "stoic", "faith"]);
+test("eight presets load (with Catholic), each only a set of variable values within range", () => {
+  assert.deepEqual(W.PRESETS.map(p => p.id), ["default", "dbt", "cbt", "act", "self-compassion", "stoic", "faith", "catholic"]);
   W.PRESETS.forEach(p => {
     const f = W.presetFramework(p.id);
     assert.ok(inBounds(f.vars), p.id);
@@ -137,14 +137,14 @@ test("days use the observed step rate", () => {
 test("compare: every preset, sorted by T_rec, with not-reached last", () => {
   const s = live(EGO);
   const rows = W.compare(s);
-  assert.equal(rows.length, 7);
+  assert.equal(rows.length, W.PRESETS.length);
   for (let i = 1; i < rows.length; i++) {
     const a = rows[i - 1], b = rows[i];
     assert.ok(a.reached >= b.reached && (a.reached !== b.reached || a.steps <= b.steps));
   }
   const withCustom = W.saveFramework({ ...s, vars: W.validateVars({ ...s.vars, aMin: 0.01, aMax: 0.05, aBase: 0.05, aCap: 0.01, b: 0, bU: 0, eps: 0.05 }).vars }, "slow").state;
   const rows2 = W.compare(withCustom);
-  assert.equal(rows2.length, 8);
+  assert.equal(rows2.length, W.PRESETS.length + 1);
   assert.equal(rows2[rows2.length - 1].name, "slow");
   assert.deepEqual(withCustom.e, s.e, "comparing changes nothing");
 });
