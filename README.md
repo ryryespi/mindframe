@@ -301,6 +301,15 @@ Load order in `index.html`: core (signals, grounding, movers, reality, peace, ma
 
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
 
+## Papers
+
+[MindFrame: A Master-Function Model for Grounded Reflection, Inner Peace, and Forgiveness](paper/MindFrame-Grace-Peace-Paper.pdf) is the research paper on the master-function model, inner peace, and forgiveness. The source is `paper/MindFrame-Grace-Peace-Paper.tex`; figures are in `paper/grace-peace-fig/`.
+
+Also in `paper/`:
+
+* [MindFrame: An Inner Language for Self-Talk, an Integrated Low-Overload Framework, and the Ψ Daily Reflection Index](paper/MindFrame_Combined_Paper.pdf) combines MindFrame with the Psi daily reflection index.
+* [MindFrame: Toward an Inner Language and an Integrated, Low-Overload Framework for Self-Talk Support](paper/MindFrame_Paper.pdf) is the original concept paper.
+
 ## Model, not validated science
 
 MindFrame is a model built from design assumptions and informed by the research cited here. It is not validated science, not a measurement of you, and not a diagnosis. The thresholds (0.3, 0.6, 0.25, the peace threshold 0.8, the forgiveness threshold θ_F = 0.35, c_wait ≥ 0.3) and weights (including d0, γ, δ, the hook nudges and the release vectors) are design choices.
