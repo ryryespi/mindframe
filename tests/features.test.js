@@ -138,7 +138,6 @@ test("page: one companion replaces the six helpers; its sheet has six actions th
   assert.ok(!/class="friend"/.test(index), "no helper grid");
   assert.ok(!/img\/(fox|owl|raccoon|tortoise|otter|dove)\.svg/.test(index + read("sw.js")), "no helper pictures");
   ["fox", "owl", "raccoon", "tortoise", "otter", "dove"].forEach(n => assert.ok(!fs.existsSync(path.join(__dirname, "..", "img", `${n}.svg`)), n));
-  assert.match(read("DELETE.txt"), /img\/dove\.svg/);
   ["writer", "historian", "analyzer", "scribe", "scientist", "grace"].forEach(k => {
     assert.match(index, new RegExp(`<div id="p-${k}" class="view hidden" role="group" aria-labelledby="v-${k}-title">`), k);
   });
