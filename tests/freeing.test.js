@@ -216,25 +216,25 @@ test("words: the freeing tile is words only, faith wording only with faith on, a
 });
 
 // ---------- 5. Export (mf 3) ----------
-test("export: mf 3 round trip with pick, extra and mix; the readable free line is rebuilt and ignored on read", () => {
+test("export: mf 4 (was mf 3) round trip with pick, extra and mix; the readable free line is rebuilt and ignored on read", () => {
   const st0 = M.defaultState();
   const m = M.masterPick(SPEC, st0);
   const st = M.refreshIdeal({ ...st0, e: m.e, pick: { e: m.pick.base, extras: m.pick.extras }, mix: m.freeing.target });
   const code = M.serialize(st);
-  assert.match(code, /^mf 3\n/);
+  assert.match(code, /^mf 4\n/);
   assert.match(code, /\npick shame=0\.80 calm=0\.45 connection=0\.45 hope=0\.45\n/);
   assert.match(code, /\nextra blame putdown\n/);
   assert.match(code, /\nmix calm=0\.80 connection=0\.80 hope=0\.80\n/);
   assert.match(code, /\nfree Now: ashamed strongly, .* \u2192 Freeing mix: ashamed off, .*\n$/);
   const p = M.parse(code);
   assert.equal(p.ok, true);
-  assert.equal(p.from, 3);
+  assert.equal(p.from, 4);
   assert.deepEqual(p.state.pick, st.pick);
   assert.deepEqual(p.state.mix, st.mix);
   assert.equal(M.serialize(p.state), code);
   // A tampered free line changes nothing (it is rebuilt from the numbers).
   assert.equal(M.serialize(M.parse(code.replace(/free Now:[^\n]*/, "free anything at all")).state), code);
-  assert.ok(!/[A-Z]/.test(code.split("\nfree ")[0].replace(/^mf 3/, "")), "numbers and labels only before the readable line");
+  assert.ok(!/[A-Z]/.test(code.split("\nfree ")[0].replace(/^mf 4/, "")), "numbers and labels only before the readable line");
 });
 test("export: mf 2 and mf 1 still import; unknown extra chips are a friendly error", () => {
   const two = "mf 2\nhome calm=0.80 connection=0.80 hope=0.80\ne shame=0.60 calm=0.50 connection=0.50 hope=0.50\n";
@@ -244,7 +244,7 @@ test("export: mf 2 and mf 1 still import; unknown extra chips are a friendly err
   assert.equal(p.state.pick, null);
   assert.equal(p.state.mix, null);
   assert.equal(p.state.e[I("shame")], 0.6);
-  assert.match(M.serialize(p.state), /^mf 3\n/);
+  assert.match(M.serialize(p.state), /^mf 4\n/);
   assert.equal(M.parse("mf 1\ne fear=0.20 guilt=0.50").ok, true);
   const bad = M.parse("mf 3\nextra blame shout");
   assert.equal(bad.ok, false);
@@ -281,7 +281,7 @@ test("deterministic: the same pick gives the same reading and the same freeing m
   const st = M.defaultState();
   assert.equal(nums(M.masterPick(SPEC, st, { now: NOW })), nums(M.masterPick(SPEC, st, { now: NOW })));
 });
-test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy freeing mix, sw v19, README", () => {
+test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy freeing mix, sw v20, README", () => {
   const index = read("index.html"), sw = read("sw.js"), r = read("README.md"), css = read("style.css");
   assert.match(index, /<button type="button" id="mode-write" aria-pressed="true">Write<\/button>/);
   assert.match(index, /<button type="button" id="mode-pick" aria-pressed="false">Pick feelings<\/button>/);
@@ -290,7 +290,7 @@ test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy f
   assert.match(index, /id="copy-mix" class="secondary">Copy freeing mix</);
   assert.match(css, /\.feel-chip \{[^}]*min-height: 2\.9rem/);
   assert.match(css, /\.mode button \{[^}]*min-height: 2\.75rem/);
-  assert.match(sw, /mindframe-shell-v19/);
+  assert.match(sw, /mindframe-shell-v20/);
   ["./js/features/freeing.js", "./js/features/picker.js"].forEach(f => assert.ok(sw.includes(f), f));
   ["## Pick feelings", "## The freeing mix", "J(e) = P(e) \u2212 \u03BC\u00B7N(e)", "mf 3", "Tangney, J. P. (2000)", "Gilbert, P., & Procter, S. (2006)", "Gilbert, P. (2009)", "Burns, D. D. (1980)", "Interior Castle", "Romans 12:3", "1 John 4:19"].forEach(x => assert.ok(r.includes(x), x));
 });

@@ -1,31 +1,29 @@
 // app.js — the app shell: one text box (or the feelings picker), an Update button, the words-first
-// card (soft tiles with small icons), the sky-and-meadow scene, and six animal
-// helpers that each open one panel.
+// card (soft tiles with small icons), the sky-and-meadow scene, and your
+// companion (a little fawn, features/companion.js) that opens one sheet.
 //
 //   Update (or Ctrl/Cmd+Enter) → master(text, state) → the card, every line
 //   (in "Pick feelings" mode: masterPick(pick, state), the same master path on
 //   the picked vector; features/picker.js),
-//   composed from master's numbers by core/words.js (room for positive
-//   emotions first, then inner peace and the path to it, then feelings, links, a hidden pull, a reality check,
-//   affirmations, one step, progress). Nothing is
+//   composed from master's numbers by core/words.js. Nothing is
 //   computed while you type. Crisis wording shows only the 988/911 box, and
-//   nothing is computed or saved.
+//   nothing is computed, saved or grown.
 //
-// Privacy: your words are never stored, except what you save in the Writer's
-// journal. The session (numbers and labels only) is kept as .mf code in
-// localStorage so it is still here next time.
+// Privacy: your words are never stored, except what you save in the journal.
+// The session (numbers and labels only, plus the companion's name and growth)
+// is kept as .mf code in localStorage so it is still here next time.
 //
-// Panels (each in its own file under js/features/):
-//   Writer (Fern the Fox)       journal + stories + the path game + the optional
-//                               public-AI comfort prompt (writer/comfort.js)
-//   Historian (Hazel the Owl)   history, checkpoints
-//   Analyzer (Remy the Raccoon) the nine movers in words
-//   Scribe (Toby the Tortoise)  export / import .mf code
-//   Scientist (Ada the Otter)   the math + adjust numbers and variables
-//   The freeing mix (freeing.js) is a card tile and a line in Toby's panel.
-//   Peacemaker (Grace the Dove) forgive myself, forgive someone, and the
-//                               patience & mindfulness practices with the
-//                               breathing circle (forgiveness.js, practices.js)
+// The companion sheet: home (name, stage, growth, six actions), then one view
+// per action, each in its own file under js/features/:
+//   Write a story      journal + stories + the path game + the optional
+//                      public-AI comfort prompt (writer/writer.js, writer/comfort.js)
+//   My days            history, checkpoints (historian.js)
+//   Look closer        every insight and the nine movers in words (analyzer.js)
+//   Save & share code  the freeing mix line and export / import .mf code (scribe.js, freeing.js)
+//   Show the math      the math + adjust numbers and variables (scientist.js)
+//   Forgive & breathe  forgive myself, forgive someone, and the patience &
+//                      mindfulness practices with the breathing circle
+//                      (forgiveness.js, practices.js)
 //
 // The scene: after Update, body[data-peace] is set to the inner-peace band
 // (a-little, growing, close, steady) and style.css shifts the sky and meadow
@@ -70,18 +68,22 @@
     stale() { if (reading) note("Numbers changed. Tap Update to see the new reading."); },
     /** Register something to clear when the base resets (for example an open story). */
     onReset(fn) { resets.push(fn); },
-    /** Register something to clear when the crisis box shows (for example Grace's notes, the breathing circle). */
+    /** Register something to clear when the crisis box shows (for example the forgiveness notes, the breathing circle). */
     onCrisis(fn) { crises.push(fn); },
-    /** Register something to stop when the helper panels close or switch (the breathing circle). */
+    /** Register something to stop when the sheet closes or switches view (the breathing circle). */
     onPanelClose(fn) { closes.push(fn); },
-    /** Open one helper's panel by id ("grace", "writer", …). */
-    open: who => openPanel(document.querySelector(`[aria-controls="p-${who}"]`), true),
+    /** Open the companion sheet on one view by id ("grace", "writer", …), or its home with null. */
+    open: who => openPanel(who),
+    /** A caring action for the companion's growth (set by features/companion.js). */
+    care: () => 0,
     startOver,
   };
 
   /** Save the session as .mf code (never during a crisis) and keep the Scribe's code current. */
   function save() {
     if (inCrisis) return;
+    // The companion's name, points and days ride along in the mf 4 code.
+    if (app.companion) state = { ...state, pet: app.companion.snapshot() };
     const code = MF.Scribe.serialize(refreshIdeal(state));
     localStorage.setItem(KEY, code);
     $("code").textContent = code;
@@ -97,13 +99,14 @@
     $("comfort-go").disabled = on;
     if (on) { $("comfort").classList.add("hidden"); $("comfort-prompt").value = ""; }
     $("crisis-wrap").classList.toggle("hidden", !on);
+    // The companion stays calm and quiet in a crisis (no line, no growth), and is itself again after.
+    if (!on && app.redrawPet) app.redrawPet();
     $("body").classList.toggle("hidden", on);
     if (on) {
       reading = null;
       delete document.body.dataset.peace;
       crises.forEach(fn => fn());
       $("out").classList.add("hidden");
-    $("card-tools").classList.add("hidden");
       $("card-tools").classList.add("hidden");
       closeSheet(false);
       $("crisis").innerHTML = `<p><strong>You don't have to carry this alone.</strong> What you're feeling matters, and help is available right now.</p>
@@ -116,9 +119,11 @@
   /**
    * Run master on what's in the box and show the card. The only place the
    * reading is made; Update, Ctrl/Cmd+Enter and explicit buttons call it.
+   * @param {{care?: boolean}} [opts] care: false when the reading is not a new
+   *   check-in (a restored code or checkpoint), so the companion is not awarded
    * @returns {boolean} false when the text reads as a crisis
    */
-  function update() {
+  function update(opts) {
     const picking = app.picker && app.picker.mode() === "pick";
     // Safety first: crisis wording still in the text box shows the 988/911 box even in pick mode.
     if (picking && Grounding.isCrisis($("input").value)) { crisis(true); return false; }
@@ -127,11 +132,12 @@
     if (out.crisis) { crisis(true); return false; }
     if (inCrisis) crisis(false);
     reading = out;
-    // The session keeps the reading's e, the picked levels (pick mode only) and the freeing mix (mf 3).
+    // The session keeps the reading's e, the picked levels (pick mode only) and the freeing mix (mf 3 and up).
     state = { ...state, e: out.e.slice(), pick: picking ? { e: out.pick.base.slice(), extras: out.pick.extras.slice() } : null, mix: out.freeing ? out.freeing.target.slice() : null };
     if (picking) base = out.e.slice();
     note("");
     renderCard();
+    if (!opts || opts.care !== false) app.care("update");
     renderAll();
     save();
     return true;
@@ -160,7 +166,7 @@
     $("free-try").classList.toggle("hidden", !(c.freeing && c.freeing.tryIt));
     $("step-try").classList.toggle("hidden", !c.practice);
     $("step-try").dataset.practice = c.practice ? c.practice.id : "";
-    $("step-try").textContent = c.practice ? `Try it with Grace: ${c.practice.name}` : "";
+    $("step-try").textContent = c.practice ? `Try it together: ${c.practice.name}` : "";
     $("forgive-open").dataset.path = reading.forgive && reading.forgive.path ? reading.forgive.path : "";
     const fill = (id, list) => { const ul = $(id); ul.innerHTML = ""; list.forEach(t => ul.appendChild(li(t))); };
     fill("connect", c.connect);
@@ -217,42 +223,60 @@
   $("more-toggle").addEventListener("click", () => setMore(!expanded()));
 
   // ---------- Panels ----------
-  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker].map(f => f.mount(app));
+  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker, MF.Companion].map(f => f.mount(app));
   /** Re-render every panel (cheap; panels only display). */
   function renderAll() { renders.forEach(r => r()); }
 
-  // The animal row: each friend opens one panel as a bottom sheet over the page
-  // (a modal dialog: focus moves in and stays in; Close, Esc or the shade closes it,
-  // and focus goes back to the friend who opened it). Tapping the friend again closes it.
-  let opener = null;
+  // ---------- The companion sheet ----------
+  // One bottom sheet over the page (a modal dialog: focus moves in and stays in;
+  // Close, Esc or the shade closes it, and focus goes back to what opened it).
+  // It opens on the companion's home (name, stage, growth, six actions); each
+  // action shows one view (the old helpers' panels) in the same sheet, with Back.
+  const VIEWS = ["writer", "historian", "analyzer", "scribe", "scientist", "grace"];
+  let opener = null, view = null;
+  /** The sheet element. */
+  const sheetEl = () => $("p-companion");
   /** The open sheet, or null. */
-  const openSheet = () => document.querySelector(".panel:not(.hidden)");
-  /** Close the open sheet; with restore, give focus back to the friend button. */
+  const openSheet = () => (sheetEl().classList.contains("hidden") ? null : sheetEl());
+  /** Show one view in the open sheet (null = the companion's home) and move focus to its title. */
+  function showView(who) {
+    if (view !== who) closes.forEach(fn => fn());
+    view = who;
+    $("pet-home").classList.toggle("hidden", !!who);
+    VIEWS.forEach(v => $("p-" + v).classList.toggle("hidden", v !== who));
+    $("sheet-back").classList.toggle("hidden", !who);
+    $("sheet-back").setAttribute("aria-label", `Back to ${app.companion ? app.companion.get().name : "your companion"}`);
+    sheetEl().scrollTop = 0;
+    (who ? $(`v-${who}-title`) : $("pet-title")).focus({ preventScroll: true });
+  }
+  /**
+   * Open the sheet on a view (or the home) — never during a crisis.
+   * @param {string|null} who a view id ("grace", "writer", …) or null
+   */
+  function openPanel(who) {
+    if (inCrisis) return;
+    if (!openSheet()) {
+      const active = document.activeElement;
+      opener = active && active !== document.body && !active.closest(".panel") ? active : $("pet-top");
+      sheetEl().classList.remove("hidden");
+      $("sheet-backdrop").classList.remove("hidden");
+      document.body.classList.add("sheet-open");
+      document.querySelectorAll(".pet-btn").forEach(b => b.setAttribute("aria-expanded", "true"));
+      view = undefined;
+    }
+    showView(who || null);
+  }
+  /** Close the sheet; with restore, give focus back to what opened it. */
   function closeSheet(restore = true) {
-    const was = openSheet();
-    document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
-    document.querySelectorAll(".friend").forEach(b => b.setAttribute("aria-expanded", "false"));
+    const was = !!openSheet();
+    sheetEl().classList.add("hidden");
+    document.querySelectorAll(".pet-btn").forEach(b => b.setAttribute("aria-expanded", "false"));
     $("sheet-backdrop").classList.add("hidden");
     document.body.classList.remove("sheet-open");
     closes.forEach(fn => fn());
-    if (was && restore && opener && document.contains(opener)) opener.focus();
+    view = null;
+    if (was && restore) (opener && document.contains(opener) && opener.getClientRects().length && !opener.disabled ? opener : $("pet-top")).focus();
     if (was) opener = null;
-  }
-  /** Open (or, with force false, toggle) the panel a friend button controls; one panel at a time. */
-  function openPanel(btn, force) {
-    const panel = $(btn.getAttribute("aria-controls")), open = force || panel.classList.contains("hidden");
-    const keep = opener;
-    closeSheet(false);
-    if (!open) { btn.focus(); return; }
-    // Focus goes back to whatever opened the sheet (a friend, or a card button such as Try it).
-    const active = document.activeElement;
-    opener = !force ? btn : (active && active !== document.body && !active.closest(".panel") ? active : keep || btn);
-    panel.classList.remove("hidden");
-    btn.setAttribute("aria-expanded", "true");
-    $("sheet-backdrop").classList.remove("hidden");
-    document.body.classList.add("sheet-open");
-    panel.scrollTop = 0;
-    panel.querySelector("h2").focus({ preventScroll: true });
   }
   /** The focusable things inside a sheet, in tab order. */
   const focusables = el => [...el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
@@ -273,10 +297,17 @@
   // Focus that wanders out (a click on the page behind) is brought back in.
   document.addEventListener("focusin", e => { const panel = openSheet(); if (panel && !panel.contains(e.target)) panel.querySelector("h2").focus({ preventScroll: true }); });
   $("sheet-backdrop").addEventListener("click", () => closeSheet(true));
-  document.querySelectorAll(".friend").forEach(btn => btn.addEventListener("click", () => openPanel(btn, false)));
+  // The companion (in the header and beside the card) opens and closes the sheet.
+  document.querySelectorAll(".pet-btn").forEach(btn => btn.addEventListener("click", () => (openSheet() ? closeSheet(true) : openPanel(null))));
   document.querySelectorAll(".panel-close").forEach(b => b.addEventListener("click", () => closeSheet(true)));
-  // From the card into Grace's panel: the One step's practice, or the suggested forgiveness path.
-  $("step-try").addEventListener("click", () => { app.open("grace"); app.grace.show("practice"); app.practices.select($("step-try").dataset.practice); });
+  $("sheet-back").addEventListener("click", () => {
+    const from = view;
+    showView(null);
+    const row = document.querySelector(`.act[data-view="${from}"]`);
+    if (row) row.focus();
+  });
+  // From the card into Forgive & breathe: the One step's practice (a caring action), or the suggested forgiveness path.
+  $("step-try").addEventListener("click", () => { app.care("step"); app.open("grace"); app.grace.show("practice"); app.practices.select($("step-try").dataset.practice); });
   $("forgive-open").addEventListener("click", () => { app.open("grace"); app.grace.show($("forgive-open").dataset.path || "self"); });
 
   // ---------- Input ----------

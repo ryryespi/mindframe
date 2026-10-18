@@ -29,7 +29,7 @@ test("nine movers in three groups", () => {
   assert.deepEqual(M.PROCESS, ["rumination", "avoidance"]);
   assert.equal(M.label("avoidance"), "avoidance/fusion");
   assert.equal(M.label("fear"), "fear/anxiety");
-  assert.equal(M.VERSION, 3);
+  assert.equal(M.VERSION, 4);
 });
 
 // ---------- lexicon ----------
@@ -403,14 +403,14 @@ test("mf 3 exact round trip (state, weights, vars, days, checkpoints, ideal), an
   s = M.acceptStep(s, Date.parse("2026-10-16T08:30:00"));
   s = M.refreshIdeal(s);
   const code = M.serialize(s);
-  assert.match(code, /^mf 3\n/);
+  assert.match(code, /^mf 4\n/);
   const p = M.parse(code);
   assert.equal(p.ok, true);
   assert.equal(M.serialize(p.state), code);
   assert.deepEqual(p.state.e, s.e);
   assert.deepEqual(p.state.cps, s.cps);
   assert.deepEqual(p.state.days, s.days);
-  const p2 = M.parse(code.replace(/^mf 3/, "mf 2"));
+  const p2 = M.parse(code.replace(/^mf 4/, "mf 2"));
   assert.equal(p2.ok, true);
   assert.equal(p2.from, 2);
   assert.deepEqual(p2.state.e, s.e);
@@ -446,12 +446,12 @@ test("mf 1 import (best effort via the mapping)", () => {
   assert.equal(p.state.cps.length, 1);
   assert.equal(p.state.days.length, 1);
   assert.ok(p.notes.length >= 2);
-  assert.match(M.serialize(p.state), /^mf 3\n/, "saved back as mf 3");
+  assert.match(M.serialize(p.state), /^mf 4\n/, "saved back as mf 4");
 });
 test("friendly errors for bad code", () => {
   assert.equal(M.parse("").ok, false);
-  assert.match(M.parse("hello").errors[0].msg, /mf 3/);
-  assert.match(M.parse("mf 9").errors[0].msg, /versions 1, 2 and 3/);
+  assert.match(M.parse("hello").errors[0].msg, /mf 4/);
+  assert.match(M.parse("mf 9").errors[0].msg, /versions 1, 2, 3 and 4/);
   const bad = M.parse("mf 2\ne fear=2");
   assert.equal(bad.ok, false);
 });
@@ -470,7 +470,7 @@ test("crisis: a crisis label inside code is refused", () => {
 });
 
 // ---------- one page ----------
-test("single page: index has no tools links; tools.html only redirects; the service worker is v19", () => {
+test("single page: index has no tools links; tools.html only redirects; the service worker is v20", () => {
   const root = path.join(__dirname, "..");
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const tools = fs.readFileSync(path.join(root, "tools.html"), "utf8");
@@ -479,11 +479,11 @@ test("single page: index has no tools links; tools.html only redirects; the serv
   assert.ok(/history\.replaceState/.test(index), "old ?view/?chip links are stripped");
   assert.ok(/location\.replace\("\.\/"\)/.test(tools) && /http-equiv="refresh"/.test(tools));
   assert.ok(!/<textarea|<script src/.test(tools), "tools.html is only a redirect");
-  assert.match(sw, /mindframe-shell-v19/);
+  assert.match(sw, /mindframe-shell-v20/);
   const scripts = [...index.matchAll(/<script src="([^"]+)"/g)].map(x => x[1]);
   assert.deepEqual(scripts, ["js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/reality.js", "js/core/peace.js", "js/core/master.js", "js/core/words.js",
     "js/features/relationship.js", "js/features/forgiveness.js", "js/features/practices.js", "js/features/freeing.js", "js/features/picker.js", "js/features/writer/stories.js", "js/features/writer/games.js", "js/features/historian.js",
-    "js/features/writer/writer.js", "js/features/writer/comfort.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/app.js"]);
+    "js/features/writer/writer.js", "js/features/writer/comfort.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/features/companion.js", "js/app.js"]);
   scripts.forEach(s => assert.ok(sw.includes(`./${s}`), `${s} cached`));
   ["presets", "Compare", "Optimize", "Check-in", "Spot the mirage", "Rebuild"].forEach(w => assert.ok(!index.includes(w), `no ${w}`));
 });

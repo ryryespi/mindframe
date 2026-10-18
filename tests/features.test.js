@@ -133,22 +133,22 @@ test("page: an Update button, Ctrl/Cmd+Enter, and no auto-update on typing", () 
   const onInput = app.match(/\$\("input"\)\.addEventListener\("input",[^\n]*/);
   assert.ok(onInput && !/update\(|master\(/.test(onInput[0]), "typing only shows a note");
 });
-test("page: six friendly animals (the cap), each with a picture, name, role and a panel", () => {
+test("page: one companion replaces the six helpers; its sheet has six actions that open the old panels as views", () => {
   const index = read("index.html");
-  const friends = [...index.matchAll(/<button type="button" class="friend" aria-controls="(p-[a-z]+)" aria-expanded="false" aria-label="([^"]+)">\s*<img src="(img\/[a-z]+\.svg)"/g)];
-  assert.deepEqual(friends.map(f => f[1]), ["p-writer", "p-historian", "p-analyzer", "p-scribe", "p-scientist", "p-grace"]);
-  assert.ok(friends.length <= 6, "six helpers at most");
-  friends.forEach(f => {
-    assert.ok(index.includes(`id="${f[1]}" class="panel card hidden"`), f[1]);
-    assert.ok(fs.existsSync(path.join(__dirname, "..", f[3])), f[3]);
-    assert.match(read(f[3]), /<title id="t">/);
-    assert.ok(read("sw.js").includes(`./${f[3]}`), `${f[3]} cached`);
+  assert.ok(!/class="friend"/.test(index), "no helper grid");
+  assert.ok(!/img\/(fox|owl|raccoon|tortoise|otter|dove)\.svg/.test(index + read("sw.js")), "no helper pictures");
+  ["fox", "owl", "raccoon", "tortoise", "otter", "dove"].forEach(n => assert.ok(!fs.existsSync(path.join(__dirname, "..", "img", `${n}.svg`)), n));
+  assert.match(read("DELETE.txt"), /img\/dove\.svg/);
+  ["writer", "historian", "analyzer", "scribe", "scientist", "grace"].forEach(k => {
+    assert.match(index, new RegExp(`<div id="p-${k}" class="view hidden" role="group" aria-labelledby="v-${k}-title">`), k);
   });
-  ["Fern the Fox", "Hazel the Owl", "Remy the Raccoon", "Toby the Tortoise", "Ada the Otter", "Grace the Dove"].forEach(n => assert.ok(index.includes(n), n));
+  assert.equal((index.match(/class="panel card hidden"/g) || []).length, 1, "one sheet");
+  assert.match(index, /<section id="p-companion" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="pet-title">/);
+  assert.ok(read("sw.js").includes("./js/features/companion.js"));
 });
 test("code: every js file has a header comment, and every function a JSDoc or a one-line comment", () => {
   const files = ["js/app.js", ...["core", "features", "features/writer"].flatMap(d => fs.readdirSync(path.join(__dirname, "../js", d)).filter(f => f.endsWith(".js")).map(f => `js/${d}/${f}`))];
-  assert.equal(files.length, 21);
+  assert.equal(files.length, 22);
   files.forEach(f => {
     const src = read(f);
     assert.match(src.split("\n")[0], /^\/\/ js\/|^\/\/ /, `${f} header`);

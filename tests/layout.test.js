@@ -79,15 +79,18 @@ test("headline: one line with the peace band and Room for, no digits", () => {
   });
 });
 
-test("helpers: icon + name only; each panel is a dialog with its role and personality at the top", () => {
-  const friends = [...index.matchAll(/<button type="button" class="friend"[^>]*>\s*<img src="img\/[a-z]+\.svg" alt="" width="44" height="44" \/><strong>(\w+)<\/strong>\s*<\/button>/g)].map(x => x[1]);
-  assert.deepEqual(friends, ["Fern", "Hazel", "Remy", "Toby", "Ada", "Grace"]);
-  ["writer", "historian", "analyzer", "scribe", "scientist", "grace"].forEach(k => {
-    assert.match(index, new RegExp(`<section id="p-${k}" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-${k}-title">`));
-    assert.match(index, new RegExp(`<h2 id="p-${k}-title" tabindex="-1">[^<]+</h2><p class="persona">[A-Z][a-z]+ &middot; [^<]+</p>`));
-  });
+test("companion: one sheet (dialog) with the name, stage, growth bar and six actions; the old panels are views inside it", () => {
+  assert.ok(!/class="friend"/.test(index));
+  assert.match(index, /<section id="p-companion" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="pet-title">/);
+  assert.match(index, /<h2 id="pet-title" tabindex="-1">Willow<\/h2><p id="pet-sub" class="persona"><\/p>/);
+  assert.match(index, /id="pet-growth" class="bar" role="progressbar" aria-label="Growth" aria-valuemin="0" aria-valuemax="100"/);
+  assert.match(index, /<button type="button" id="sheet-back" class="back hidden" aria-label="Back">/);
+  ["writer", "historian", "analyzer", "scribe", "scientist", "grace"].forEach(k => assert.match(index, new RegExp(`<div id="p-${k}" class="view hidden" role="group" aria-labelledby="v-${k}-title">\\s*<h3 class="view-title" id="v-${k}-title" tabindex="-1">`)));
+  assert.match(index, /<button type="button" id="pet-top" class="pet-top pet-btn" aria-haspopup="dialog" aria-controls="p-companion"/);
+  assert.match(index, /<div id="buddy" class="buddy"><button type="button" id="pet-card" class="pet-btn"/);
   assert.match(index, /<div id="sheet-backdrop" class="backdrop hidden"><\/div>/);
-  assert.match(css, /\.friend \{[^}]*min-height: 4\.6rem/);
+  assert.match(css, /\.pet-btn \{[^}]*min-width: 2\.75rem; min-height: 2\.75rem/);
+  assert.match(css, /\.act \{[^}]*min-height: 3\.4rem/);
 });
 
 test("sheet: Esc and Close and the shade close it, Tab wraps inside, focus returns, crisis closes it", () => {
@@ -97,7 +100,7 @@ test("sheet: Esc and Close and the shade close it, Tab wraps inside, focus retur
   assert.match(app, /first\.focus\(\)/);
   assert.match(app, /\$\("sheet-backdrop"\)\.addEventListener\("click", \(\) => closeSheet\(true\)\)/);
   assert.match(app, /\.panel-close"\)\.forEach\(b => b\.addEventListener\("click", \(\) => closeSheet\(true\)\)\)/);
-  assert.match(app, /opener\.focus\(\)/);
+  assert.match(app, /\? opener : \$\("pet-top"\)\)\.focus\(\)/);
   assert.match(app, /crises\.forEach\(fn => fn\(\)\);[\s\S]{0,200}closeSheet\(false\)/);
   assert.match(css, /\.panel \{ position: fixed;[^}]*overflow-y: auto/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{ \.panel \{ animation: none !important; \} \}/);
@@ -128,8 +131,8 @@ test("input: segmented Write / Pick, one chip grid with dots (the word kept for 
   assert.match(css, /\.feel-chips \{ display: grid; grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
   assert.match(css, /\.feel-chip \{[^}]*min-height: 2\.9rem/);
   assert.match(css, /\.primary \{[^}]*min-height: 3\.25rem/);
-  const top = index.slice(0, index.indexOf('<nav class="friends"'));
-  assert.equal((top.match(/class="primary"/g) || []).length, 1, "one primary button above the helpers: Update");
+  const top = index.slice(0, index.indexOf('<section id="out"'));
+  assert.equal((top.match(/class="primary"/g) || []).length, 1, "one primary button above the card: Update");
   assert.match(top, /id="update" class="primary">Update</);
 });
 

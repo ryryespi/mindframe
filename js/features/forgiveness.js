@@ -1,4 +1,4 @@
-// features/forgiveness.js — Grace the Dove: forgiving yourself and forgiving
+// features/forgiveness.js — "Forgive & breathe" (was Grace the Dove): forgiving yourself and forgiving
 // someone, hooked into the master function with no new movers.
 //
 // 1. Word hook (in fromText, before master steps). Cues, negation-aware:
@@ -153,7 +153,7 @@ if (typeof module !== "undefined") {
     if (!f || !f.grace) return null;
     const lv = m.peace.lever;
     const noun = { shame: "the shame", rumination: "the replaying", anger: "the anger", connection: "connection" }[lv.name];
-    return `Grace the Dove can help here: forgiving ${f.path === "self" ? "yourself" : "someone"} is a gentle way to ${lv.kind === "grow" ? "grow" : "ease"} ${noun}.`;
+    return `Forgive & breathe can help here: forgiving ${f.path === "self" ? "yourself" : "someone"} is a gentle way to ${lv.kind === "grow" ? "grow" : "ease"} ${noun}.`;
   }
 
   // ---------- The guided paths (Grace's panel) ----------
@@ -241,12 +241,17 @@ if (typeof module !== "undefined") {
         notes[p][at[p]] = box.value;
       });
       root.querySelector(".path-back").addEventListener("click", () => { at[p] = Math.max(0, at[p] - 1); draw(); });
-      root.querySelector(".path-next").addEventListener("click", () => { at[p] = at[p] === PATHS[p].steps.length - 1 ? 0 : at[p] + 1; draw(); root.querySelector(".path-k").focus(); });
+      root.querySelector(".path-next").addEventListener("click", () => {
+        // Walking a path to its last step is a practice finished (a caring action for the companion).
+        if (at[p] === PATHS[p].steps.length - 1) app.care("practice");
+        at[p] = at[p] === PATHS[p].steps.length - 1 ? 0 : at[p] + 1; draw(); root.querySelector(".path-k").focus();
+      });
       root.querySelector(".path-save").addEventListener("click", () => {
         const kept = PATHS[p].steps.map((s, i) => (notes[p][i] || "").trim() ? `${s.k}: ${notes[p][i].trim()}` : null).filter(Boolean);
         if (!kept.length) { app.note("Write in a step's box first; nothing is saved otherwise."); return; }
         MF.Writer.journalAdd(localStorage, `${PATHS[p].title}\n${kept.join("\n")}`);
         app.note("Saved in your journal on this device.");
+        app.care("journal");
         app.renderAll();
       });
     });
@@ -254,7 +259,7 @@ if (typeof module !== "undefined") {
     return function render() {
       const m = app.m();
       const hint = $("grace-hint");
-      if (!m || !m.forgive) hint.textContent = "Tap Update and Grace will suggest a path. You can open either one any time.";
+      if (!m || !m.forgive) hint.textContent = "Tap Update for a suggested path. You can open either one any time.";
       else if (m.forgive.path === "self") hint.textContent = "From your reading: forgiving yourself may help most right now.";
       else if (m.forgive.path === "other") hint.textContent = "From your reading: forgiving someone may help most right now, at your own pace.";
       else hint.textContent = "From your reading: no forgiveness path stands out. Both are here if you want them.";

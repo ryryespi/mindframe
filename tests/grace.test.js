@@ -90,9 +90,9 @@ test("Grace recommendation: a path is suggested AND the peace lever is one of it
   });
   const m = M.master(SELF, M.defaultState());
   assert.equal(m.forgive.grace, true);
-  assert.equal(M.card(M.defaultState(), m).peace.at(-1), "Grace the Dove can help here: forgiving yourself is a gentle way to ease the shame.");
+  assert.equal(M.card(M.defaultState(), m).peace.at(-1), "Forgive & breathe can help here: forgiving yourself is a gentle way to ease the shame.");
   const quiet = M.master("I'm furious at the traffic", M.defaultState());
-  assert.ok(!M.card(M.defaultState(), quiet).peace.some(x => /Grace/.test(x)));
+  assert.ok(!M.card(M.defaultState(), quiet).peace.some(x => /Forgive & breathe|Grace/.test(x)));
 });
 test("card: the forgiveness tile in words only, with the safety line for others", () => {
   const st = M.defaultState();
@@ -148,21 +148,19 @@ test("determinism: same text, same forgiveness reading and words", () => {
   assert.deepEqual(M.master(SELF, st, { now: 0 }).forgive, M.master(SELF, st, { now: 0 }).forgive);
   assert.deepEqual(M.lines(st, M.master(OTHER, st, { now: 0 }), { faith: true }), M.lines(st, M.master(OTHER, st, { now: 0 }), { faith: true }));
 });
-test("page: Grace is the sixth helper, with an original dove picture and a panel with three tabs", () => {
-  const index = read("index.html"), svg = read("img/dove.svg");
-  assert.match(index, /aria-label="Grace the Dove, Peacemaker: forgiveness, patience and mindfulness"/);
-  assert.match(index, /Lets go gently, of my own mistakes and others'\./);
-  assert.match(svg, /<title id="t">Grace the Dove, the Peacemaker<\/title>/);
-  assert.ok(!/href=|xlink|<image/.test(svg), "self-contained");
+test("page: Forgive & breathe (was Grace) is one of the companion's six actions, a view with three tabs", () => {
+  const index = read("index.html"), pet = read("js/features/companion.js");
+  assert.match(pet, /\{ view: "grace", title: "Forgive & breathe", sub: "Forgiveness paths, patience and the breathing circle", ico: "i-dove" \}/);
+  assert.match(index, /<div id="p-grace" class="view hidden" role="group" aria-labelledby="v-grace-title">\s*<h3 class="view-title" id="v-grace-title" tabindex="-1">Forgive &amp; breathe<\/h3>/);
   ["tab-self", "tab-other", "tab-practice"].forEach(id => assert.ok(index.includes(`id="${id}"`), id));
   assert.match(index, /role="tablist"/);
-  assert.ok(read("sw.js").includes("./img/dove.svg"));
+  assert.ok(!/Grace/.test(index.replace(/<!--[\s\S]*?-->/g, "")), "no helper names left on the page");
 });
 
-test("README: Grace, the equations, the practices, the safety line, and verified citations", () => {
+test("README: Forgive & breathe, the equations, the practices, the safety line, and verified citations", () => {
   const r = read("README.md");
-  [/## Grace the Dove: forgiveness, patience and mindfulness/, /F_self  = e_shame · \(0\.4 \+ 0\.6·c_self\)/, /θ_F = 0\.35/, /Forgiving is not excusing what happened, making up, or staying anywhere unsafe\./,
-    /Cornish, M\. A\., & Wade, N\. G\. \(2015\)/, /Worthington, E\. L\., Jr\. \(2006\)/, /Enright, R\. D\., & Fitzgibbons/, /Neff, K\. D\. \(2003\)/, /McCullough, M\. E\., Bono/, /Lieberman, M\. D\./, /Bowen, S\., & Marlatt/, /Schnitker, S\. A\. \(2012\)/, /Segal, Z\. V\./, /offline cache \(v19\)/, /## Six friends/, /prefers-reduced-motion/].forEach(re => assert.match(r, re));
+  [/## Forgive & breathe: forgiveness, patience and mindfulness/, /F_self  = e_shame · \(0\.4 \+ 0\.6·c_self\)/, /θ_F = 0\.35/, /Forgiving is not excusing what happened, making up, or staying anywhere unsafe\./,
+    /Cornish, M\. A\., & Wade, N\. G\. \(2015\)/, /Worthington, E\. L\., Jr\. \(2006\)/, /Enright, R\. D\., & Fitzgibbons/, /Neff, K\. D\. \(2003\)/, /McCullough, M\. E\., Bono/, /Lieberman, M\. D\./, /Bowen, S\., & Marlatt/, /Schnitker, S\. A\. \(2012\)/, /Segal, Z\. V\./, /offline cache \(v20\)/, /## Your companion/, /prefers-reduced-motion/].forEach(re => assert.match(r, re));
 });
 
 console.log(`\n${passed} passed`);

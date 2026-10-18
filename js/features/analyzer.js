@@ -1,4 +1,4 @@
-// features/analyzer.js — Remy the Raccoon, the Analyzer.
+// features/analyzer.js — "Look closer" (was Remy the Raccoon, the Analyzer).
 //
 // Turns over every mover to see how it fits with the others. After Update it
 // lists all nine movers in words: how present each one is (a little, quite,

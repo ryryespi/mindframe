@@ -4,7 +4,7 @@
 // http://localhost:8000/. On GitHub Pages it is /mindframe/.
 // A leading slash would skip that folder and break one of those two.
 
-const CACHE = "mindframe-shell-v19";
+const CACHE = "mindframe-shell-v20";
 
 const FILES = [
   "./",
@@ -32,13 +32,8 @@ const FILES = [
   "./js/features/analyzer.js",
   "./js/features/scribe.js",
   "./js/features/scientist.js",
+  "./js/features/companion.js",
   "./js/app.js",
-  "./img/fox.svg",
-  "./img/owl.svg",
-  "./img/raccoon.svg",
-  "./img/tortoise.svg",
-  "./img/otter.svg",
-  "./img/dove.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
 ];

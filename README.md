@@ -63,7 +63,7 @@ The last three are computed in the same master pass (`js/core/reality.js`) and r
 
 * e is the 9-vector in [0, 1]. Hard and process movers rest at 0. Grounding movers rest at 0.5 ("unknown").
 * Home h has calm, connection and hope at 0.8, everything else at 0.
-* Defaults (all but a_cap and b_U adjustable in the Scientist panel): a0 = 0.20, k = 0.05, a_max = 0.25, a_cap = 0.12, b = 0.10, b_U = 0.15.
+* Defaults (all but a_cap and b_U adjustable in Show the math): a0 = 0.20, k = 0.05, a_max = 0.25, a_cap = 0.12, b = 0.10, b_U = 0.15.
 * act() turns the stepped vector into one small action, for the mover that moves most toward home.
 * λ = ρ(W on the active hard/process movers) − decay. λ > 0 means the feelings are feeding each other.
 * Hidden rise: a left-alone projection using the small W in `js/core/movers.js`. For example sadness ↔ rumination 0.4, and connection → shame −0.5.
@@ -111,7 +111,7 @@ P_c = 1 − γ·C_max            C_max = the strongest hidden conflict c; γ = 0
 P_g = 1 − δ·max(g, u)        the true-size factor: g = grandiosity (too big), u = false humility (too small); δ = 0.3
 ```
 
-d0, γ and δ are adjustable in Ada's panel. P = 1 exactly at home and is lower everywhere else (each factor is at most 1). P_d is smooth and strictly decreasing, so there is always a direction to move.
+d0, γ and δ are adjustable in Show the math. P = 1 exactly at home and is lower everywhere else (each factor is at most 1). P_d is smooth and strictly decreasing, so there is always a direction to move.
 
 **Solving for inner peace:**
 
@@ -121,9 +121,9 @@ d0, γ and δ are adjustable in Ada's panel. P = 1 exactly at home and is lower 
   * Hence ‖next − h‖ ≤ (1 − a)‖e − h‖ with a ≥ min(a0, a_max, a_cap) ≥ 0.05. The master map is a **contraction** toward h for any b ≥ 0 and any W: d_t ≤ 0.95^t·d_0. Its unique fixed point is e\* = h, where P = 1.
   * Because the app rounds every step to 0.01, the computed iteration stops at a lattice point within 0.005/a of h per mover (≤ 0.03 with the defaults), where P ≥ 0.95. Tests check the contraction inequality on the exact map (three settings, 180 random starts) and the rounded fixed point (80 random starts).
 * **n\*:** the number of master steps until P ≥ 0.8 (the peace threshold), counted from the current reading. Tests match it against a direct simulation.
-* **The most helpful lever:** the mover whose move toward home by 0.05 raises P most (a finite difference; Ada also shows the central-difference gradient ∂P/∂e_i). The One step is the lever's technique, composed as before.
+* **The most helpful lever:** the mover whose move toward home by 0.05 raises P most (a finite difference; Show the math also shows the central-difference gradient ∂P/∂e_i). The One step is the lever's technique, composed as before.
 
-On the card, under "Room for": "Inner peace: a little / growing / close / steady" (P < 0.4, < 0.6, < 0.8, ≥ 0.8), "Path to peace: about five gentle steps; the biggest help right now is easing the anger", and how much the hidden pull and the grand thought take away. With Include faith on, one more line: "May the peace of God, which surpasses all understanding, guard your heart and mind (from Philippians)." Hazel shows inner peace across your saved days in words. The comfort prompt includes P, its band, n\* and the lever. Crisis wording shows no peace score, only 988/911.
+On the card, under "Room for": "Inner peace: a little / growing / close / steady" (P < 0.4, < 0.6, < 0.8, ≥ 0.8), "Path to peace: about five gentle steps; the biggest help right now is easing the anger", and how much the hidden pull and the grand thought take away. With Include faith on, one more line: "May the peace of God, which surpasses all understanding, guard your heart and mind (from Philippians)." My days shows inner peace across your saved days in words. The comfort prompt includes P, its band, n\* and the lever. Crisis wording shows no peace score, only 988/911.
 
 Conceptual basis (nothing is measured):
 
@@ -149,7 +149,7 @@ Above the text box, a small toggle: **Write** (the default) or **Pick feelings**
 |---|---|---|---|---|
 | Value | 0.00 | 0.15 | 0.45 | 0.80 |
 
-Calm, connected and hopeful start at "quite" (close to their 0.5 rest), because "off" for them means "not at all calm"; the others start off. Two extra chips map onto existing movers as nudges (no new movers), exactly like the matching words: **blaming myself** is one self-blame cue (shame +0.2, replaying +0.2, c_self = 0.50 for Grace's forgiveness pass) and **putting myself down** is one false-humility cue (shame +0.2, hope −0.2, u = 0.50). Update runs `masterPick()`, the same master path the text uses. The picker has no text, so there is no crisis path in it; crisis wording still in the text box shows the 988/911 box, and the 988 line stays at the top of the page as always. The picked levels are kept with the session (mf 3 `pick` and `extra` lines), so the chips come back as you left them.
+Calm, connected and hopeful start at "quite" (close to their 0.5 rest), because "off" for them means "not at all calm"; the others start off. Two extra chips map onto existing movers as nudges (no new movers), exactly like the matching words: **blaming myself** is one self-blame cue (shame +0.2, replaying +0.2, c_self = 0.50 for the forgiveness pass) and **putting myself down** is one false-humility cue (shame +0.2, hope −0.2, u = 0.50). Update runs `masterPick()`, the same master path the text uses. The picker has no text, so there is no crisis path in it; crisis wording still in the text box shows the 988/911 box, and the 988 line stays at the top of the page as always. The picked levels are kept with the session (mf 3 `pick` and `extra` lines), so the chips come back as you left them.
 
 ## The freeing mix
 
@@ -173,36 +173,54 @@ For ashamed strongly + blaming myself + putting myself down (calm, connected, ho
 * step 2: shame 0.45 → 0.15, connection 0.45 → 0.80, replaying 0.18 → 0 (P → 0.80)
 * step 3: shame 0.15 → 0 (P → 0.85)
 
-**On the card**, words only, a "Your freeing mix" tile appears when shame is at least 0.3, or self-blame or a put-down is present: "Your freeing mix: ease the shame and the replaying; grow calm, connection, and hope.", "Three gentle steps, one band at a time: inner peace could go from a little peace to steady, and shame only goes down.", "True humility sees you at your real size: not worse than others, not better; worthy of kindness and still learning.", and One step, the self-compassion break (Neff). With self-blame present, the tile routes to Grace's **Forgive myself** path. With Include faith on: "Think of yourself with sober judgment (from Romans). To be humble is to walk in truth (Teresa of Ávila), and your worth rests on God's love, not on your record: we love because he first loved us (from First John)." (Romans 12:3; Teresa of Ávila, *The Interior Castle*, Sixth Dwelling Places, ch. 10, §7, in the Kavanaugh & Rodriguez translation: "to be humble is to walk in truth"; 1 John 4:19.) Ada shows the objective, the constraints, each step with its P and J, and P, N and J before and after.
+**On the card**, words only, a "Your freeing mix" tile appears when shame is at least 0.3, or self-blame or a put-down is present: "Your freeing mix: ease the shame and the replaying; grow calm, connection, and hope.", "Three gentle steps, one band at a time: inner peace could go from a little peace to steady, and shame only goes down.", "True humility sees you at your real size: not worse than others, not better; worthy of kindness and still learning.", and One step, the self-compassion break (Neff). With self-blame present, the tile routes to the **Forgive myself** path (button: "Forgive myself"). With Include faith on: "Think of yourself with sober judgment (from Romans). To be humble is to walk in truth (Teresa of Ávila), and your worth rests on God's love, not on your record: we love because he first loved us (from First John)." (Romans 12:3; Teresa of Ávila, *The Interior Castle*, Sixth Dwelling Places, ch. 10, §7, in the Kavanaugh & Rodriguez translation: "to be humble is to walk in truth"; 1 John 4:19.) Show the math shows the objective, the constraints, each step with its P and J, and P, N and J before and after.
 
-**Export.** Toby shows the freeing mix as one compact readable line, with **Copy freeing mix**:
+**Export.** Save & share code shows the freeing mix as one compact readable line, with **Copy freeing mix**:
 
 ```
 Now: ashamed strongly, replaying a little, calm quite, connected quite, hopeful quite, blaming myself, putting myself down → Freeing mix: ashamed off, replaying off, calm strongly, connected strongly, hopeful strongly
 ```
 
-A hard or process feeling is listed when it isn't off on either side, and a grounding one when its level changes or isn't "quite". The same line, and the mix as numbers, are in the mf 3 code, and the comfort-AI prompt carries the line and the put-down signal (never your words).
+A hard or process feeling is listed when it isn't off on either side, and a grounding one when its level changes or isn't "quite". The same line, and the mix as numbers, are in the mf 4 code, and the comfort-AI prompt carries the line and the put-down signal (never your words).
 
 ## Comfort story from a public AI (optional)
 
-In Fern the Fox's panel, **Comfort story from a public AI** builds a prompt from the analysis only and shows it in an editable box with "Only this text will be shared. Your journal stays on your phone." The prompt contains the card in plain words plus a compact numbers summary (movers with bands, step direction d → d_next and the biggest move, conflicts with c, the grandiosity signal g, positive emotions) and asks for a ~200-word gentle, grounded comfort story with a friendly animal, three affirmations written from that analysis, no medical advice, and a hopeful ending. It never contains the text you typed (every line is composed from numbers, and a second guard drops any line repeating four of your words in a row). **Open in Grok** (`https://grok.com/?q=<encoded>`) and **Open in ChatGPT** (`https://chatgpt.com/?q=<encoded>`) open a new tab and also copy the prompt in case the site doesn't fill it in; Grok may send it as soon as it opens. **Copy prompt** copies only. The button is disabled during a crisis. The app itself makes no network calls.
+In **Write a story**, **Comfort story from a public AI** builds a prompt from the analysis only and shows it in an editable box with "Only this text will be shared. Your journal stays on your phone." The prompt contains the card in plain words plus a compact numbers summary (movers with bands, step direction d → d_next and the biggest move, conflicts with c, the grandiosity signal g, positive emotions) and asks for a ~200-word gentle, grounded comfort story with a friendly animal, three affirmations written from that analysis, no medical advice, and a hopeful ending. It never contains the text you typed (every line is composed from numbers, and a second guard drops any line repeating four of your words in a row). **Open in Grok** (`https://grok.com/?q=<encoded>`) and **Open in ChatGPT** (`https://chatgpt.com/?q=<encoded>`) open a new tab and also copy the prompt in case the site doesn't fill it in; Grok may send it as soon as it opens. **Copy prompt** copies only. The button is disabled during a crisis. The app itself makes no network calls.
 
-## Six friends
+## Your companion
 
-Below the card, six friendly animals sit in a little meadow. Each opens one panel as a bottom sheet; only one is open at a time. Pictures are original SVGs in `img/`, cached for offline use. Six is the cap: the patience and mindfulness practices live with Grace rather than in a seventh helper.
+One gentle animal stands for you: **a little fawn**, an original inline SVG drawn by `js/features/companion.js` (no image files). On first use a small box offers to name it; the default is **Willow**, and you can skip. The name is stored on this device only (and in the mf 4 code if you export it). The fawn sits in the header sky (small but always visible), and after Update it appears beside the card with one short line. Tapping it opens **one bottom sheet**: its name, its stage, a growth bar, and six actions. It replaced the six helpers of earlier versions (see DELETE.txt).
 
-| Friend | Role | Personality | Panel |
-|---|---|---|---|
-| **Fern the Fox** (pencil) | Writer | Keeps your journal and spins gentle stories. | A creature story driven by the master step (feeling words, ends with an affirmation and a question), accept the step, the path game, the optional public-AI comfort prompt, and the journal (the only place your words are kept, and only when you tap Save). |
-| **Hazel the Owl** (glasses, book) | Historian | Remembers your days and how far you've come. | Each day in words, inner peace across your saved days, Save checkpoint (numbers only), restore a checkpoint. |
-| **Remy the Raccoon** (magnifying glass) | Analyzer | Turns over each feeling to see how it fits. | Every hidden pull and any grand wording with its true-sized version, then all nine movers in words: how present each is, what it feeds, what softens it. |
-| **Toby the Tortoise** (quill) | Scribe | Slow and careful; copies your numbers safely. | The freeing mix as one readable line with Copy freeing mix, export / import `.mf` code (mf 3), download, Start over. |
-| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores, inner peace P with ∂P/∂e, the lever, n*, e* and the convergence proof sketch, the forgiveness scores F_self and F_other with the path, ΔP_F and the Grace recommendation, the practice pick, the false-humility signal u, and the freeing-mix optimization: objective, constraints, each step with P and J), adjust each mover, and the variables a0, k, a_max, b, decay, d0, γ, δ, home and the main W links, with Reset. |
-| **Grace the Dove** (olive branch) | Peacemaker | Lets go gently, of my own mistakes and others'. | Three tabs: **Forgive myself** (the four Rs), **Forgive someone** (REACH), and **Breathe & be patient** (ten practices and the breathing circle). Optional note boxes stay on the page unless you save them to the journal. |
+**Growth comes only from caring actions, never from how the feelings read.** Points only go up, and only through:
+
+| Caring action | Points | Counts per day |
+|---|---|---|
+| An Update (a check-in) | 1 | 3 |
+| A One step tried ("Try it together", the self-compassion break, or Accept step) | 2 | 2 |
+| A journal save (the journal or the forgiveness notes) | 2 | 2 |
+| A practice finished (the breathing circle, or a forgiveness path walked to its last step) | 2 | 2 |
+| Coming back on a new day | 3 | 1 |
+
+Five stages: **Newborn** (0, curled asleep in a leaf nest), **Little** (8, sitting, big-eyed), **Young** (25, standing on wobbly legs), **Grown** (55, a small flower by one ear), **Wise** (100, a crown of leaves with a little star). A hard reading never takes points away or changes the stage, and there are no streaks to lose: coming back after a gap just says "Welcome back. I'm glad you're here." A crisis awards nothing. **Reset growth** in the sheet starts again from a newborn (journal and readings stay).
+
+**Mood follows the reading, gently.** After Update the pose comes from the strongest hard mover at 0.3 or more: resting curled up (sadness), ears down and close (fear), slow breaths (anger), tucked in with a small heart (shame), watching a leaf drift (replaying), peeking beside a sprout (avoiding). With no strong hard mover it glows softly when calm or hope is at least 0.6 or peace is close or steady. The aura color follows the inner-peace band (lavender, peach, mint, gold). Its eyes are always open and soft or closed and content, with a small smile: never a frown or a punished look. It speaks one first-person line composed from the numbers, like the card: an opener chosen by the pose and the inner-peace lever, for example "I'm here with you, breathing slowly. Let's ease the anger together." or "I'm curled up close to you. Let's ease the sadness together." A gentle idle breath plays only without `prefers-reduced-motion`. In a crisis the companion stays calm and quiet: no line, no sheet, no growth; only the 988/911 box shows.
+
+**The six actions** open the earlier panels inside the same sheet, with a back arrow:
+
+| Action | Was | View |
+|---|---|---|
+| **Write a story** | Fern the Fox | A creature story driven by the master step (feeling words, ends with an affirmation and a question), accept the step, the path game, the optional public-AI comfort prompt, and the journal (the only place your words are kept, and only when you tap Save). |
+| **My days** | Hazel the Owl | The progress line, each day in words, inner peace across your saved days, Save checkpoint (numbers only), restore a checkpoint. |
+| **Look closer** | Remy the Raccoon | Every insight and how they connect, every hidden pull and any grand wording with its true-sized version, then all nine movers in words. |
+| **Save & share code** | Toby the Tortoise | The freeing mix as one readable line with Copy freeing mix, export / import `.mf` code (mf 4), download, Start over. |
+| **Show the math** | Ada the Otter | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores, inner peace P with ∂P/∂e, the lever, n*, e* and the convergence proof sketch, the forgiveness scores F_self and F_other with the path, ΔP_F and the forgiveness recommendation, the practice pick, the false-humility signal u, and the freeing-mix optimization), adjust each mover, and the variables, with Reset. |
+| **Forgive & breathe** | Grace the Dove | Three tabs: **Forgive myself** (the four Rs), **Forgive someone** (REACH), and **Breathe & be patient** (ten practices and the breathing circle). Optional note boxes stay on the page unless you save them to the journal. |
+
+The sheet is a modal dialog (`role="dialog"`, `aria-modal`): focus moves to its title and stays inside (Tab wraps), Close, Esc or tapping the shade closes it, and focus goes back to what opened it.
 
 Changing a number in a panel does not redraw the card; it says "Tap Update to see the new reading." Buttons that are themselves an action (Write a story, Accept step, Save checkpoint, Restore) run Update for you.
 
-## Grace the Dove: forgiveness, patience and mindfulness
+## Forgive & breathe: forgiveness, patience and mindfulness
 
 **Model and practice aid, not therapy.** Nothing here adds a mover or a variable. Forgiveness works through a word hook and a master pass (`js/features/forgiveness.js`). The practices pick the One step from master's numbers (`js/features/practices.js`).
 
@@ -221,15 +239,15 @@ F_other = e_anger · (0.4 + 0.6·c_other)
 path    = argmax(F_self, F_other) if it is ≥ θ_F = 0.35 (tie → self), else none
 ΔP_F    = P(e + release) − P(e)
           release: self shame −0.10, rumination −0.05; other anger −0.10, rumination −0.05, connection +0.05 (toward home, capped by the gap)
-Grace   = a path is suggested AND the inner-peace lever is one of that path's movers
+recommend = a path is suggested AND the inner-peace lever is one of that path's movers
           (self: shame, rumination; other: anger, rumination, connection)
 ```
 
 Without a cue, a path needs e_shame (or e_anger) ≥ 0.875. Rumination is in both release vectors because rumination predicts lower forgiveness through anger (McCullough, Bono & Root, 2007).
 
-**On the card**, words only, a forgiveness tile appears when a path is suggested. For example: "Forgiving someone: there's a deep hurt here that still stings. Forgiveness can come slowly, as a gift you choose, for your own peace." The tile for others always says "Forgiving is not excusing what happened, making up, or staying anywhere unsafe." When Grace is recommended, the peace lines add "Grace the Dove can help here: forgiving someone is a gentle way to ease the anger." Faith wording appears only with Include faith on: the Lord's Prayer ("forgive us our debts, as we also forgive our debtors"), Colossians 3:13, and, in Grace's panel, Luke 23:34.
+**On the card**, words only, a forgiveness tile appears when a path is suggested. For example: "Forgiving someone: there's a deep hurt here that still stings. Forgiveness can come slowly, as a gift you choose, for your own peace." The tile for others always says "Forgiving is not excusing what happened, making up, or staying anywhere unsafe." When the forgiveness path is recommended, the peace lines add "Forgive & breathe can help here: forgiving someone is a gentle way to ease the anger." Faith wording appears only with Include faith on: the Lord's Prayer ("forgive us our debts, as we also forgive our debtors"), Colossians 3:13, and, in Grace's panel, Luke 23:34.
 
-**Grace's guided paths.** Each step is short and has an optional note box. The notes are kept only in the page; they are saved only through "Save these notes to the journal". Crisis wording in a note shows the 988/911 box and clears the notes.
+**The guided paths.** Each step is short and has an optional note box. The notes are kept only in the page; they are saved only through "Save these notes to the journal". Crisis wording in a note shows the 988/911 box and clears the notes.
 
 * **Forgive myself:** the four Rs of self-forgiveness: Responsibility, Remorse, Restoration, Renewal (Cornish & Wade, 2015). Renewal uses Neff's self-compassion: mindfulness, common humanity, self-kindness (Neff, 2003). The request named "Worthington's four Rs"; the published four-R model is Cornish & Wade's, so it is credited to them.
 * **Forgive someone:** REACH (Recall, Empathize, Altruistic gift, Commit, Hold on; Worthington, 2006). Forgiveness interventions are supported by a meta-analysis (Wade, Hoyt, Kidwell & Worthington, 2014). The intro follows Enright's process model (uncovering, decision, work, deepening; Enright & Fitzgibbons, 2015). It says plainly that forgiving is not excusing, reconciling, or staying unsafe, and to reach out for help first if you are not safe.
@@ -263,11 +281,11 @@ Patience is treated as a trainable strength linked to well-being (Schnitker, 201
 * hope → gratitude;
 * connection → the earlier message step.
 
-The card reads "<practice>: <instruction with dose words>, so <mover> can <ease>." A "Try it with Grace" button opens that practice.
+The card reads "<practice>: <instruction with dose words>, so <mover> can <ease>." A "Try it together" button opens that practice.
 
 **The breathing circle** is optional: in for four seconds, out for six (a longer exhale, six breaths a minute). The number of breaths follows the dose (three, four or five). It makes no sound. With reduced motion, the circle stays still and only the words and a soft color change.
 
-## A short card, details in the helpers
+## A short card, details in the companion's sheet
 
 The card is kept short so it fits a phone screen. By default it shows at most four tiles:
 
@@ -276,11 +294,11 @@ The card is kept short so it fits a phone screen. By default it shows at most fo
 3. **One insight**: the strongest one, picked by the numbers (`MF.Words.insight`). The candidates are the freeing mix (max of e_shame, self-blame c_self and put-down u), forgiveness (max of F_self and F_other), the reality check (max of g and u), a relationship pattern (0.7 when found), and the hidden pull (C_max). Ties go in that order. The tile shows its first two lines and its button.
 4. **One step**, with its "Try it" button and two affirmations.
 
-A single **See more** button reveals the rest: the path to peace, "How they connect", the other insights, every affirmation, and the progress line. Every output is also in a helper's panel. Remy has all the insights and the connections. Grace shows the forgiveness lines. Hazel shows the progress line. Include faith and Copy sit in a slim row under the card. Copy still copies the full card.
+A single **See more** button reveals the rest: the path to peace, "How they connect", the other insights, every affirmation, and the progress line. Every output is also in the companion's sheet: Look closer has all the insights and the connections, Forgive & breathe shows the forgiveness lines, and My days shows the progress line. Include faith and Copy sit in a slim row under the card. Copy still copies the full card.
 
 **Input.** Write / Pick feelings is a segmented control. The picker is one grid of eleven compact chips, three per row: the nine movers, then the two extra chips. Each chip shows its level as dots (none, one, two or three); the word stays for screen readers. Clear is a small text link. Update is one big button.
 
-**Helpers as bottom sheets.** The six helpers are small icon tiles with names (two rows of three). Each panel opens as a bottom sheet over the page and starts with the helper's role and personality. It is a modal dialog (`role="dialog"`, `aria-modal`). Focus moves to its title and stays inside (Tab wraps). Close, Esc or tapping the shade closes it, and focus goes back to the button that opened it. A crisis closes any open sheet. The slide-up is off with `prefers-reduced-motion`.
+**One bottom sheet.** Your companion's sheet (see above) holds every detail view; it is a modal dialog that opens over the page. A crisis closes it. The slide-up is off with `prefers-reduced-motion`.
 
 **Chrome.** The sky header is shorter, and the privacy line is shown once in small text. The 988 banner is slimmer but still sticky at the top, above any sheet. The layout has no sideways scroll at 360 to 412 px, in light and dark (tested in the browser).
 
@@ -305,10 +323,10 @@ Sources: Gottman & Levenson (1992), "Marital processes predictive of later disso
 
 **Caveat:** the high predictive accuracies reported in this work (for example around 90%) come from small samples (dozens of couples) and are debated, notably because the models were not cross-validated (Heyman & Slep, 2001, "The hazards of predicting divorce without crossvalidation," *J Marriage Fam, 63*(2), 473–479). MindFrame uses the four patterns as a pattern helper for one message, not a predictor of any relationship.
 
-## Code (`mf 3`)
+## Code (`mf 4`)
 
 ```
-mf 3
+mf 4
 home calm=0.80 connection=0.80 hope=0.80
 e sadness=0.67 anger=0.86 calm=0.50 connection=0.50 hope=0.28 rumination=0.10 avoidance=0.45
 vars aBase=0.30                 # only non-defaults
@@ -321,10 +339,11 @@ pick shame=0.80 calm=0.45 connection=0.45 hope=0.45     # the picked feelings (P
 extra blame putdown                                     # the extra chips
 mix calm=0.80 connection=0.80 hope=0.80                 # the freeing mix from the last Update
 free Now: ashamed strongly, … → Freeing mix: …         # readable; rebuilt on save, ignored on import
+pet points=31 days=6 name=Willow                        # your companion (the name URL-encoded)
 ```
 
-* Numbers and labels only, never your words.
-* mf 3 round-trips exactly. mf 2 is mf 3 without the pick, extra, mix and free lines, and still imports exactly.
+* Numbers and labels only, never your words. The one chosen word is your companion's name; crisis wording in it is refused.
+* mf 4 round-trips exactly. mf 3 is mf 4 without the pet line (importing it leaves your companion as it is). mf 2 is mf 3 without the pick, extra, mix and free lines. Both still import exactly.
 * mf 1 codes import on a best-effort basis through the mapping above. Old variables and frameworks are dropped, with a note.
 
 ## Structure
@@ -332,13 +351,13 @@ free Now: ashamed strongly, … → Freeing mix: …         # readable; rebuilt
 Code is grouped by feature. Every file starts with a header comment; every function has a JSDoc. Files share one namespace, `MF` (`window.MF` in the browser, `global.MF` in Node tests).
 
 ```
-index.html            the one page: scene, Write / Pick feelings, input, Update, the short card (+ See more), six friends, six sheet panels
+index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with six views
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v19)
+sw.js                 offline cache (v20)
 tools.html            redirects old shortcuts to the one page
-img/                  fox, owl, raccoon, tortoise, otter, dove (original SVGs)
+DELETE.txt            files removed in push20 (the six helper SVGs)
 js/
-  app.js              page shell: state, Update, the card (insight slot, See more), helper sheets (focus trap, Esc)
+  app.js              page shell: state, Update, the card (insight slot, See more), the companion sheet (views, Back, focus trap, Esc)
   core/               the model; no page code
     signals.js        word patterns (thinking traps, needs)
     grounding.js      crisis wording and pattern reading
@@ -348,17 +367,18 @@ js/
     master.js         MF.Master: the master function (text, state-vector and picker entries), recovery, baseline
     words.js          MF.Words: the composer (every card sentence built from the numbers)
   features/
-    writer/           Fern the Fox
+    writer/           Write a story
       writer.js       MF.Writer: story, path game, journal, panel
       stories.js      creature stories
       games.js        the path game
       comfort.js      MF.Comfort: the optional public-AI prompt and links
-    historian.js      Hazel the Owl: days, checkpoints, restore, history
-    analyzer.js       Remy the Raccoon: the nine movers in words
-    scribe.js         Toby the Tortoise: mf 3 / mf 2 / mf 1 export and import
-    scientist.js      Ada the Otter: the math, sliders and variables
+    historian.js      My days: days, checkpoints, restore, history
+    analyzer.js       Look closer: every insight and the nine movers in words
+    scribe.js         Save & share code: mf 4 / mf 3 / mf 2 / mf 1 export and import
+    scientist.js      Show the math: the math, sliders and variables
+    companion.js      MF.Companion: your fawn (growth rules, stages, mood, its line, the SVG, the sheet home)
     relationship.js   the Four Horsemen pattern helper
-    forgiveness.js    Grace the Dove: forgiveness cues, master pass, card words, guided paths
+    forgiveness.js    Forgive & breathe: forgiveness cues, master pass, card words, guided paths
     practices.js      MF.Practices: patience & mindfulness library, the step pick, the breathing circle
     freeing.js        MF.Freeing: the freeing mix (master pass, card words, the export line, Copy freeing mix)
     picker.js         MF.Picker: the Write / Pick feelings toggle and the feelings chips
@@ -426,5 +446,5 @@ MindFrame is a model built from design assumptions and informed by the research 
 
 ## Privacy
 
-* Everything stays in this browser's localStorage: the .mf numbers, the faith toggle, and the journal (explicit saves only). Grace's note boxes are never stored unless you tap "Save these notes to the journal".
+* Everything stays in this browser's localStorage: the .mf numbers, the faith toggle, your companion (name and growth points), and the journal (explicit saves only). The forgiveness note boxes are never stored unless you tap "Save these notes to the journal".
 * Start over clears the numbers. Clear journal clears the journal.

@@ -1,4 +1,4 @@
-// features/writer/writer.js — Fern the Fox, the Writer.
+// features/writer/writer.js — "Write a story" (was Fern the Fox, the Writer).
 //
 // Keeps your journal and writes gentle stories:
 //   • story(): a creature story driven by the master step, told in feeling
@@ -111,10 +111,11 @@ if (typeof module !== "undefined") {
     $("story-again").addEventListener("click", () => { seed += 1; tell(); });
     $("accept").addEventListener("click", () => {
       if (!current) return;
+      app.care("step");
       app.state = MF.Historian.acceptStep(app.state);
       app.resetBase("");
       hide();
-      app.update();
+      app.update({ care: false });
       app.note("Step accepted and saved as a checkpoint. The next reading starts from here.");
     });
     $("play").addEventListener("click", () => {
@@ -166,6 +167,7 @@ if (typeof module !== "undefined") {
       if (!journalAdd(localStorage, text)) { app.note("Write something above to save it in your journal."); return; }
       render();
       app.note("Saved in your journal on this device.");
+      app.care("journal");
     });
     $("journal-clear").addEventListener("click", () => {
       if (!confirm("Clear every journal entry on this device?")) return;

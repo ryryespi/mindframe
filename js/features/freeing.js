@@ -153,7 +153,7 @@ if (typeof module !== "undefined") {
   const TRUE_HUMILITY = "True humility sees you at your real size: not worse than others, not better; worthy of kindness and still learning.";
   /** Faith wording (only with Include faith on). */
   const FAITH = "Think of yourself with sober judgment (from Romans). To be humble is to walk in truth (Teresa of \u00C1vila), and your worth rests on God's love, not on your record: we love because he first loved us (from First John).";
-  const GRACE = "Grace's Forgive myself path can help you own your part and set the rest down.";
+  const GRACE = "The Forgive myself path can help you own your part and set the rest down.";
 
   /**
    * The "Your freeing mix" tile, in words (empty when it isn't relevant).
@@ -218,7 +218,7 @@ if (typeof module !== "undefined") {
   function mount(app) {
     const { $ } = app;
     const current = () => (app.state.mix ? line(app.state.e, app.state.mix, app.state.pick ? app.state.pick.extras : []) : "");
-    $("free-try").addEventListener("click", () => { app.open("grace"); app.grace.show("practice"); app.practices.select("kindness"); });
+    $("free-try").addEventListener("click", () => { app.care("step"); app.open("grace"); app.grace.show("practice"); app.practices.select("kindness"); });
     $("free-grace").addEventListener("click", () => { app.open("grace"); app.grace.show("self"); });
     $("copy-mix").addEventListener("click", () => { const t = current(); if (t) app.copy(t, "mix-copied"); });
     return function render() {

@@ -1,6 +1,7 @@
 /* MindFrame: calm, phone-first (Pixel), single screen.
    Layout: a sky-and-meadow scene header, the input and Update, the reading as
-   soft tiles with small icons, then six helpers sitting in a meadow.
+   soft tiles with small icons, and your companion (a little fawn) in the
+   scene and beside the card; it opens one bottom sheet.
    Color: paper and sage by day, a quiet night sky in dark mode
    (prefers-color-scheme). After Update, body[data-peace] shifts the sky with
    the inner-peace band. The crisis box is the one place with a warm alert color.
@@ -152,20 +153,6 @@ label { color: var(--muted); font-size: 0.92rem; }
 .affirm { list-style: none; margin: 0.3rem 0 0; padding: 0; }
 .affirm li { margin: 0.35rem 0; padding: 0.45rem 0.75rem; border-left: 3px solid var(--soft); background: var(--affirm); border-radius: 0 0.6rem 0.6rem 0; }
 
-/* The meadow: six helpers sitting on soft grass */
-.meadow { margin-top: 1.5rem; padding: 0.8rem 0.7rem 1.1rem; border-radius: 1.6rem; background:
-  radial-gradient(120% 60% at 20% 105%, var(--meadow2) 0 60%, transparent 61%),
-  radial-gradient(120% 60% at 85% 108%, var(--meadow2) 0 58%, transparent 59%),
-  linear-gradient(var(--meadow1), var(--meadow1)); }
-.meadow-title { margin: 0 0 0.5rem 0.4rem; font-family: var(--serif); font-size: 1rem; color: var(--muted); }
-.friends { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.55rem; }
-.friend { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.1rem; min-height: 4.6rem; min-width: 0; padding: 0.4rem 0.25rem; border: 1px solid var(--line); border-radius: 1.2rem; background: var(--card); color: var(--ink); text-align: center; box-shadow: 0 2px 0 rgba(60, 80, 60, 0.06); transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.friend:hover { transform: translateY(-2px); }
-.friend img { width: 44px; height: 44px; margin-bottom: 0.1rem; }
-.friend strong { font-size: 0.9rem; font-weight: 600; }
-.friend .role { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.friend .who { font-size: 0.74rem; line-height: 1.3; color: var(--muted); margin-top: 0.2rem; }
-.friend[aria-expanded="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .panel { scroll-margin-top: 4.5rem; }
 .panel-head { display: flex; align-items: center; gap: 0.6rem; }
 .panel-head h2 { flex: 1; margin: 0; font-family: var(--serif); font-size: 1.08rem; }
@@ -224,8 +211,8 @@ label { color: var(--muted); font-size: 0.92rem; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; }
-  .scene-art stop, .scene-art .sun, .scene-art path, .scene-art .clouds, .friend, .feel-chip { transition: none !important; }
-  .friend:hover { transform: none; }
+  .scene-art stop, .scene-art .sun, .scene-art path, .scene-art .clouds, .feel-chip, .pet-btn { transition: none !important; }
+  .pet-breath, .pet-leaf { animation: none !important; }
   .panel { animation: none !important; }
   .breath-circle, .breath-circle.in, .breath-circle.hold, .breath-circle.out { transform: scale(0.85) !important; transition: filter var(--dur) linear; }
   .breath-circle.in, .breath-circle.hold { filter: brightness(1.12) saturate(1.2); }
@@ -251,8 +238,6 @@ main { padding: 0.75rem 1rem 2rem; }
 .card-tools .check { font-size: 0.85rem; }
 .card-tools .text { color: var(--ink); }
 .reading { margin-top: 1rem; }
-.meadow { margin-top: 1.1rem; padding: 0.6rem 0.6rem 0.75rem; }
-.friends { gap: 0.45rem; }
 .persona { margin: 0.05rem 0 0 !important; font-size: 0.8rem; line-height: 1.35; color: var(--muted); }
 .panel-title { flex: 1; min-width: 0; }
 .panel-head h2 { flex: none; }
@@ -273,3 +258,49 @@ body.sheet-open { overflow: hidden; }
 .panel :is(input, select, textarea) { max-width: 100%; }
 .movers li { grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr) 2.6rem; }
 @media (prefers-reduced-motion: reduce) { .panel { animation: none !important; } }
+
+/* ---------- Push20: your companion (a little fawn; js/features/companion.js) ---------- */
+.pet-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 2.75rem; min-height: 2.75rem; padding: 0; border: 0; border-radius: 1rem; background: none; color: inherit; cursor: pointer; transition: transform 0.2s ease; }
+.pet-btn:disabled { cursor: default; }
+.pet-btn svg { display: block; }
+.pet-top { position: absolute; right: 0.6rem; bottom: 0.1rem; width: 4.25rem; height: 4.25rem; }
+.pet-top:hover:not(:disabled) { transform: translateY(-2px); }
+.scene-text { padding-right: 5rem; }
+.buddy { display: flex; align-items: center; gap: 0.55rem; margin: -0.2rem 0 0; }
+.buddy .pet-btn { flex: none; width: 4.5rem; height: 4.5rem; }
+.pet-say { position: relative; flex: 1; min-width: 0; margin: 0 !important; padding: 0.55rem 0.8rem; border-radius: 1rem; background: var(--affirm); font-size: 0.92rem; line-height: 1.4; }
+.buddy .pet-say::before { content: ""; position: absolute; left: -6px; top: 50%; margin-top: -6px; border: 6px solid transparent; border-left: 0; border-right-color: var(--affirm); }
+.name-box { display: flex; gap: 0.6rem; align-items: flex-start; margin-top: 0.9rem; padding: 0.75rem 0.8rem; border: 1px solid var(--line); border-radius: 1.1rem; background: var(--card); }
+.name-pet { flex: none; }
+.name-main { flex: 1; min-width: 0; }
+.name-main p { margin: 0 0 0.45rem; }
+.name-row { display: flex; gap: 0.45rem; }
+.name-row input { flex: 1; min-width: 0; min-height: 2.75rem; padding: 0.4rem 0.7rem; border: 1px solid var(--line); border-radius: 0.8rem; background: var(--bg); }
+.name-row .secondary { flex: none; }
+.pet-mini { flex: none; display: inline-flex; }
+.back { flex: none; min-width: 2.75rem; min-height: 2.75rem; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink); font-size: 1.15rem; line-height: 1; }
+.view-title { margin: 0.9rem 0 0.4rem !important; font-family: var(--serif); font-size: 1.05rem !important; font-weight: 500 !important; }
+.view-title:focus { outline: none; }
+.pet-hero { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.75rem; }
+.pet-big { flex: none; display: inline-flex; }
+.pet-hero .pet-say { background: var(--affirm); }
+.growth { margin: 0.6rem 0 0.2rem; }
+.growth-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.growth-top .label { margin: 0; }
+.bar { height: 0.7rem; margin: 0.35rem 0 0.2rem; border-radius: 999px; background: var(--tile); border: 1px solid var(--line); overflow: hidden; }
+.bar .fill { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--soft); transition: width 0.6s ease; }
+.growth .quiet { margin: 0.3rem 0 0.5rem; }
+.acts { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+.act { display: flex; align-items: center; gap: 0.7rem; width: 100%; min-height: 3.4rem; padding: 0.5rem 0.75rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--tile); color: var(--ink); text-align: left; }
+.act .ico { flex: none; width: 1.3rem; height: 1.3rem; fill: none; stroke: var(--ico); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.act-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.act-text strong { font-size: 0.95rem; font-weight: 600; }
+.act-text small { font-size: 0.78rem; color: var(--muted); line-height: 1.3; }
+.act-go { flex: none; font-size: 1.3rem; color: var(--muted); }
+.pet-tools { margin-top: 0.6rem; gap: 1rem; }
+/* A soft idle breath and a drifting leaf (none with reduced motion). */
+.pet-breath { transform-box: fill-box; transform-origin: 50% 100%; animation: pet-breathe 4.8s ease-in-out infinite; }
+.pet-leaf { animation: pet-drift 6s ease-in-out infinite; }
+@keyframes pet-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.03); } }
+@keyframes pet-drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(6px, 4px); } }
+@media (prefers-reduced-motion: reduce) { .pet-breath, .pet-leaf { animation: none !important; } .bar .fill { transition: none; } }

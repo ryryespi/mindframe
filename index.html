@@ -45,9 +45,9 @@
         <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sky1"/><stop offset="1" class="sky2"/></linearGradient></defs>
         <rect width="400" height="100" fill="url(#sky)"/>
         <g class="stars"><circle cx="40" cy="14" r="1.2"/><circle cx="96" cy="26" r="0.9"/><circle cx="150" cy="10" r="1.1"/><circle cx="220" cy="22" r="0.8"/><circle cx="262" cy="9" r="1.2"/><circle cx="372" cy="20" r="1"/></g>
-        <circle class="sun" cx="330" cy="34" r="14"/>
-        <g class="clouds"><ellipse cx="236" cy="40" rx="26" ry="6"/><ellipse cx="252" cy="36" rx="15" ry="6"/></g>
-        <path class="birds" d="M276 18q3-3 6 0q3-3 6 0M292 27q2.5-2.5 5 0q2.5-2.5 5 0"/>
+        <circle class="sun" cx="236" cy="30" r="13"/>
+        <g class="clouds"><ellipse cx="170" cy="40" rx="26" ry="6"/><ellipse cx="186" cy="36" rx="15" ry="6"/></g>
+        <path class="birds" d="M196 16q3-3 6 0q3-3 6 0M210 24q2.5-2.5 5 0q2.5-2.5 5 0"/>
         <path class="hill2" d="M0 74C60 60 120 62 180 70S300 60 400 66V100H0Z"/>
         <path class="hill1" d="M0 86C70 76 150 79 220 85S340 79 400 82V100H0Z"/>
       </svg>
@@ -55,6 +55,8 @@
         <h1>MindFrame</h1>
         <p class="tagline">A quiet place to look at a thought.</p>
       </div>
+      <!-- Your companion lives here (drawn by js/features/companion.js); tap to open its sheet. -->
+      <button type="button" id="pet-top" class="pet-top pet-btn" aria-haspopup="dialog" aria-controls="p-companion" aria-expanded="false" aria-label="Your companion. Open"></button>
     </header>
 
     <main>
@@ -74,6 +76,17 @@
       <button type="button" id="update" class="primary">Update</button>
       <p class="quiet small privacy">Private: your words stay on this device unless you save them to the journal.</p>
 
+      <!-- First use: name your companion (or skip and keep the default). Stored on this device only. -->
+      <div id="name-box" class="name-box hidden">
+        <span id="name-pet" class="name-pet" aria-hidden="true"></span>
+        <div class="name-main">
+          <p class="small"><strong>A little fawn has come to keep you company.</strong> It grows as you take care of yourself. What would you like to call it?</p>
+          <label class="visually-hidden" for="pet-name">Your companion's name</label>
+          <div class="name-row"><input type="text" id="pet-name" maxlength="20" placeholder="Willow" autocomplete="off" /><button type="button" id="name-save" class="secondary">Name it</button></div>
+          <button type="button" id="name-skip" class="text small">Skip (call it Willow)</button>
+        </div>
+      </div>
+
       <div id="crisis-wrap" class="hidden"><div id="crisis" class="crisis" tabindex="-1"></div></div>
 
       <div id="body">
@@ -82,20 +95,22 @@
         <section id="out" class="card reading hidden" aria-live="polite">
           <!-- By default at most four short tiles: the headline (inner peace + room for),
                the feeling, the one insight the numbers pick (moved into #insight-slot),
-               and One step with two affirmations. Everything else is under See more. -->
+               and One step with two affirmations. Everything else is under See more.
+               Your companion sits beside the card with one line (not a tile). -->
+          <div id="buddy" class="buddy"><button type="button" id="pet-card" class="pet-btn" aria-haspopup="dialog" aria-controls="p-companion" aria-expanded="false" aria-label="Your companion. Open"></button><p id="pet-say" class="pet-say"></p></div>
           <div class="tile tile-head" id="t-head"><svg class="ico" aria-hidden="true"><use href="#i-leaf"/></svg><p id="headline" class="room"></p></div>
           <div class="tile" id="t-feel"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg>What you may be feeling</span><p id="feel"></p></div>
           <div id="insight-slot" class="insight-slot"></div>
-          <div class="tile tile-step" id="t-step"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-sprout"/></svg>One step</span><p id="step"></p><button type="button" id="step-try" class="secondary hidden">Try it with Grace</button><ul id="affirm-top" class="affirm-slim" aria-label="Affirmations"></ul></div>
+          <div class="tile tile-step" id="t-step"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-sprout"/></svg>One step</span><p id="step"></p><button type="button" id="step-try" class="secondary hidden">Try it together</button><ul id="affirm-top" class="affirm-slim" aria-label="Affirmations"></ul></div>
           <button type="button" id="more-toggle" class="more-toggle" aria-expanded="false" aria-controls="more">See more</button>
           <div id="more" class="more hidden">
             <div class="tile tile-peace" id="t-peace"><svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg><p id="room" class="small"></p><div id="peace" class="peace-box"></div></div>
             <div class="tile" id="t-connect"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>How they connect</span><ul id="connect" class="plain"></ul></div>
             <div class="tile tile-soft hidden" id="t-conflict"><svg class="ico" aria-hidden="true"><use href="#i-pull"/></svg><div id="conflict" class="soft-box"></div></div>
             <div class="tile tile-soft hidden" id="t-reality"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg><div id="reality" class="soft-box"></div></div>
-            <div class="tile tile-forgive hidden" id="t-forgive"><svg class="ico" aria-hidden="true"><use href="#i-dove"/></svg><div id="forgive" class="soft-box"></div><button type="button" id="forgive-open" class="secondary">Open Grace's guide</button></div>
+            <div class="tile tile-forgive hidden" id="t-forgive"><svg class="ico" aria-hidden="true"><use href="#i-dove"/></svg><div id="forgive" class="soft-box"></div><button type="button" id="forgive-open" class="secondary">Open the forgiveness guide</button></div>
             <div class="tile tile-free hidden" id="t-free"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><div id="free" class="soft-box"></div><p id="free-step" class="free-step"></p>
-              <div class="row"><button type="button" id="free-try" class="secondary">Try the self-compassion break</button><button type="button" id="free-grace" class="secondary hidden">Forgive myself with Grace</button></div></div>
+              <div class="row"><button type="button" id="free-try" class="secondary">Try the self-compassion break</button><button type="button" id="free-grace" class="secondary hidden">Forgive myself</button></div></div>
             <div class="tile tile-soft hidden" id="t-pattern"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg><div id="pattern" class="soft-box"></div></div>
             <div class="tile" id="t-affirm"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg>Affirmations</span><ul id="affirm" class="affirm"></ul></div>
             <p id="progress" class="quiet small"></p>
@@ -107,38 +122,31 @@
         </div>
         <p id="note" class="quiet small" aria-live="polite"></p>
 
-        <!-- 3. Six friends sitting in the meadow; each opens one panel. -->
-        <div class="meadow">
-        <p class="meadow-title">Your helpers</p>
-        <nav class="friends" aria-label="Helpers">
-          <button type="button" class="friend" aria-controls="p-writer" aria-expanded="false" aria-label="Fern the Fox, Writer: journal and stories">
-            <img src="img/fox.svg" alt="" width="44" height="44" /><strong>Fern</strong>
-          </button>
-          <button type="button" class="friend" aria-controls="p-historian" aria-expanded="false" aria-label="Hazel the Owl, Historian: history and checkpoints">
-            <img src="img/owl.svg" alt="" width="44" height="44" /><strong>Hazel</strong>
-          </button>
-          <button type="button" class="friend" aria-controls="p-analyzer" aria-expanded="false" aria-label="Remy the Raccoon, Analyzer: the nine movers in words">
-            <img src="img/raccoon.svg" alt="" width="44" height="44" /><strong>Remy</strong>
-          </button>
-          <button type="button" class="friend" aria-controls="p-scribe" aria-expanded="false" aria-label="Toby the Tortoise, Scribe: export and import">
-            <img src="img/tortoise.svg" alt="" width="44" height="44" /><strong>Toby</strong>
-          </button>
-          <button type="button" class="friend" aria-controls="p-scientist" aria-expanded="false" aria-label="Ada the Otter, Scientist: the math and adjust numbers">
-            <img src="img/otter.svg" alt="" width="44" height="44" /><strong>Ada</strong>
-          </button>
-          <button type="button" class="friend" aria-controls="p-grace" aria-expanded="false" aria-label="Grace the Dove, Peacemaker: forgiveness, patience and mindfulness">
-            <img src="img/dove.svg" alt="" width="44" height="44" /><strong>Grace</strong>
-          </button>
-        </nav>
-        </div>
-
-        <!-- Each helper's panel opens as a bottom sheet over the page (role=dialog,
-             focus kept inside, Close / Esc / tapping the shade closes it). -->
+        <!-- 3. One bottom sheet for your companion (role=dialog, focus kept inside,
+             Close / Esc / tapping the shade closes it): its name, stage and growth,
+             then six actions that open the views below inside the same sheet. -->
         <div id="sheet-backdrop" class="backdrop hidden"></div>
+        <section id="p-companion" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="pet-title">
+          <div class="panel-head"><span class="grab" aria-hidden="true"></span>
+            <button type="button" id="sheet-back" class="back hidden" aria-label="Back">&larr;</button>
+            <span id="pet-mini" class="pet-mini" aria-hidden="true"></span>
+            <div class="panel-title"><h2 id="pet-title" tabindex="-1">Willow</h2><p id="pet-sub" class="persona"></p></div>
+            <button type="button" class="text panel-close" aria-label="Close">Close</button></div>
 
-        <!-- Writer: journal + stories + path game -->
-        <section id="p-writer" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-writer-title">
-          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/fox.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-writer-title" tabindex="-1">Fern the Fox</h2><p class="persona">Writer &middot; Keeps your journal and spins gentle stories.</p></div><button type="button" class="text panel-close" aria-label="Close the Writer">Close</button></div>
+          <div id="pet-home" class="view">
+            <div class="pet-hero"><span id="pet-big" class="pet-big"></span><p id="pet-home-say" class="pet-say"></p></div>
+            <div class="growth">
+              <div class="growth-top"><span class="label">Growth</span><span id="pet-stage" class="small"></span></div>
+              <div id="pet-growth" class="bar" role="progressbar" aria-label="Growth" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="fill"></span></div>
+              <p class="quiet small">I grow when you check in, try a step, save to your journal, finish a practice, or come back another day. Hard days never make me smaller. <span id="pet-days"></span></p>
+            </div>
+            <div id="pet-actions" class="acts"></div>
+            <div class="row pet-tools"><button type="button" id="pet-rename" class="text small">Rename</button><button type="button" id="pet-reset" class="text small">Reset growth</button></div>
+          </div>
+
+        <!-- Write a story: journal + stories + path game -->
+          <div id="p-writer" class="view hidden" role="group" aria-labelledby="v-writer-title">
+            <h3 class="view-title" id="v-writer-title" tabindex="-1">Write a story</h3>
           <div class="row">
             <button type="button" id="story-go" class="secondary">Write a story</button>
             <button type="button" id="journal-save" class="secondary">Save to journal</button>
@@ -179,22 +187,22 @@
           <p class="quiet small">Only what you save here is kept, on this device.</p>
           <ul id="journal-list" class="journal"></ul>
           <button type="button" id="journal-clear" class="text hidden">Clear journal</button>
-        </section>
+          </div>
 
-        <!-- Historian: history + checkpoints -->
-        <section id="p-historian" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-historian-title">
-          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/owl.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-historian-title" tabindex="-1">Hazel the Owl</h2><p class="persona">Historian &middot; Remembers your days and how far you've come.</p></div><button type="button" class="text panel-close" aria-label="Close the Historian">Close</button></div>
+        <!-- My days: history + checkpoints -->
+          <div id="p-historian" class="view hidden" role="group" aria-labelledby="v-historian-title">
+            <h3 class="view-title" id="v-historian-title" tabindex="-1">My days</h3>
           <p id="hazel-progress" class="small"></p>
           <ul id="week" class="plain"></ul>
           <button type="button" id="save" class="secondary">Save checkpoint</button>
           <h3>Checkpoints</h3>
           <p id="cps-empty" class="quiet small">None yet. Save one to come back to it.</p>
           <ol id="cps" class="cps"></ol>
-        </section>
+          </div>
 
-        <!-- Analyzer: the nine movers in words -->
-        <section id="p-analyzer" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-analyzer-title">
-          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/raccoon.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-analyzer-title" tabindex="-1">Remy the Raccoon</h2><p class="persona">Analyzer &middot; Turns over each feeling to see how it fits.</p></div><button type="button" class="text panel-close" aria-label="Close the Analyzer">Close</button></div>
+        <!-- Look closer: every insight and the nine movers in words -->
+          <div id="p-analyzer" class="view hidden" role="group" aria-labelledby="v-analyzer-title">
+            <h3 class="view-title" id="v-analyzer-title" tabindex="-1">Look closer</h3>
           <h3>All insights from your reading</h3>
           <ul id="remy-insights" class="plain"></ul>
           <h3>How they connect</h3>
@@ -203,11 +211,11 @@
           <ul id="remy-extra" class="plain"></ul>
           <h3>The nine movers</h3>
           <ul id="breakdown" class="plain"></ul>
-        </section>
+          </div>
 
-        <!-- Scribe: export / import -->
-        <section id="p-scribe" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-scribe-title">
-          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/tortoise.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-scribe-title" tabindex="-1">Toby the Tortoise</h2><p class="persona">Scribe &middot; Slow and careful; copies your numbers safely.</p></div><button type="button" class="text panel-close" aria-label="Close the Scribe">Close</button></div>
+        <!-- Save & share code: export / import -->
+          <div id="p-scribe" class="view hidden" role="group" aria-labelledby="v-scribe-title">
+            <h3 class="view-title" id="v-scribe-title" tabindex="-1">Save &amp; share code</h3>
           <p class="quiet small">Your session as plain .mf code: numbers and labels only, never your words.</p>
           <div class="mix-box">
             <span class="label">Your freeing mix</span>
@@ -220,17 +228,17 @@
             <button type="button" id="download" class="secondary">Download .mf.txt</button>
           </div>
           <label class="visually-hidden" for="import-text">Paste .mf code</label>
-          <textarea id="import-text" class="short" rows="5" placeholder="Paste code that starts with mf 3 (mf 2 and mf 1 also work)"></textarea>
+          <textarea id="import-text" class="short" rows="5" placeholder="Paste code that starts with mf 4 (mf 3, mf 2 and mf 1 also work)"></textarea>
           <label class="small" for="import-file">Or choose a file</label>
           <input type="file" id="import-file" accept=".txt,.mf,text/plain" />
           <ul id="import-errors" class="errors"></ul>
           <button type="button" id="import-go" class="primary">Restore from code</button>
           <div class="row"><button type="button" id="clear" class="text">Start over</button></div>
-        </section>
+          </div>
 
-        <!-- Scientist: the math + adjust numbers and variables -->
-        <section id="p-scientist" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-scientist-title">
-          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/otter.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-scientist-title" tabindex="-1">Ada the Otter</h2><p class="persona">Scientist &middot; Loves equations and lets you tinker.</p></div><button type="button" class="text panel-close" aria-label="Close the Scientist">Close</button></div>
+        <!-- Show the math: the math + adjust numbers and variables -->
+          <div id="p-scientist" class="view hidden" role="group" aria-labelledby="v-scientist-title">
+            <h3 class="view-title" id="v-scientist-title" tabindex="-1">Show the math</h3>
           <p class="quiet small">Every result comes from one function: step = act(clip01(e + a(e)(h &minus; e) + b&middot;s(e))). Model numbers, not measurements of you.</p>
           <ul id="movers" class="movers"></ul>
           <ul id="math-lines" class="lines"></ul>
@@ -242,14 +250,14 @@
           <div id="var-grid" class="var-grid"></div>
           <p id="var-notes" class="quiet small"></p>
           <button type="button" id="vars-reset" class="secondary">Reset to defaults</button>
-        </section>
+          </div>
 
-        <!-- Grace: forgive myself, forgive someone, and the patience & mindfulness practices -->
-        <section id="p-grace" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-grace-title">
-          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/dove.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-grace-title" tabindex="-1">Grace the Dove</h2><p class="persona">Peacemaker &middot; Lets go gently, of my own mistakes and others'.</p></div><button type="button" class="text panel-close" aria-label="Close the Peacemaker">Close</button></div>
+        <!-- Forgive & breathe: forgive myself, forgive someone, and the patience & mindfulness practices -->
+          <div id="p-grace" class="view hidden" role="group" aria-labelledby="v-grace-title">
+            <h3 class="view-title" id="v-grace-title" tabindex="-1">Forgive &amp; breathe</h3>
           <p id="grace-hint" class="quiet small"></p>
           <div id="grace-reading" class="soft-box small"></div>
-          <div id="grace-tabs" class="tabs" role="tablist" aria-label="Grace's paths">
+          <div id="grace-tabs" class="tabs" role="tablist" aria-label="Forgive and breathe">
             <button type="button" role="tab" id="tab-self" data-tab="self" aria-controls="grace-self" aria-selected="true">Forgive myself</button>
             <button type="button" role="tab" id="tab-other" data-tab="other" aria-controls="grace-other" aria-selected="false" tabindex="-1">Forgive someone</button>
             <button type="button" role="tab" id="tab-practice" data-tab="practice" aria-controls="grace-practice" aria-selected="false" tabindex="-1">Breathe &amp; be patient</button>
@@ -292,6 +300,7 @@
               <p class="quiet small">No sound. With reduced motion on, the circle stays still and only the words and color change.</p>
             </div>
           </div>
+          </div>
         </section>
 
         <p class="quiet small foot">A model built from design assumptions and informed by research, not validated science and not a diagnosis.</p>
@@ -321,6 +330,7 @@
   <script src="js/features/analyzer.js"></script>
   <script src="js/features/scribe.js"></script>
   <script src="js/features/scientist.js"></script>
+  <script src="js/features/companion.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,12 +1,14 @@
-// features/scribe.js — Toby the Tortoise, the Scribe.
+// features/scribe.js — "Save & share code" (was Toby the Tortoise, the Scribe).
 //
 // Writes your session down as plain .mf code and reads it back:
-//   • serialize: state → mf 3 (numbers and labels only, never your words)
-//   • parse: mf 3 and mf 2 exactly (round trip; mf 2 is mf 3 without the
-//     pick/extra/mix lines), mf 1 best effort via mapOld, friendly line
-//     errors, and crisis wording in a label is refused
+//   • serialize: state → mf 4 (numbers and labels only, never your words;
+//     the one chosen word is your companion's name)
+//   • parse: mf 4, mf 3 and mf 2 exactly (round trip; mf 3 is mf 4 without the
+//     pet line, mf 2 is mf 3 without the pick/extra/mix lines), mf 1 best
+//     effort via mapOld, friendly line errors, and crisis wording in a label
+//     or the companion's name is refused
 //
-//   mf 3
+//   mf 4
 //   home calm=v connection=v hope=v
 //   e name=v ...              (hard/process when > 0; grounding always)
 //   vars key=v ...            (only values that differ from the default)
@@ -18,6 +20,7 @@
 //   extra blame putdown       (mf 3: the extra chips you picked)
 //   mix name=v ...            (mf 3: the freeing mix from the last Update)
 //   free Now: … → Freeing mix: …   (mf 3: readable, rebuilt on save, ignored on read)
+//   pet points=n days=n name=Willow   (mf 4: your companion; the name URL-encoded)
 //   # comment
 
 if (typeof module !== "undefined") {
@@ -41,9 +44,11 @@ if (typeof module !== "undefined") {
   /** Join the non-empty parts with spaces. */
   const join = parts => parts.filter(Boolean).join(" ");
 
+  /** A companion name kept plain (MF.Companion.cleanName when loaded). */
+  const petName = n => (MF.Companion ? MF.Companion.cleanName(n) : String(n || "Willow").replace(/[^\p{L}\p{M} '\-]/gu, "").trim().slice(0, 20) || "Willow");
   /** The extra chips the code may name (registered by features with MF.Movers.addPickExtra). */
   const EXTRA_IDS = () => MF.Movers.EXTRAS.map(c => c.id);
-  /** State → .mf code (mf 3). Numbers and labels only, never words. */
+  /** State → .mf code (mf 4). Numbers and labels only, never your words (plus the companion's name). */
   function serialize(state) {
     const out = [`mf ${VERSION}`];
     out.push(`home ${GROUND.map(n => `${n}=${num(state.home[idx[n]])}`).join(" ")}`);
@@ -65,6 +70,7 @@ if (typeof module !== "undefined") {
       out.push(join(["mix", vecCode(state.mix)]));
       if (MF.Freeing) out.push(`free ${MF.Freeing.line(state.e, state.mix, state.pick ? state.pick.extras : [])}`);
     }
+    if (state.pet) out.push(`pet points=${Math.max(0, Math.floor(state.pet.points || 0))} days=${Math.max(0, Math.floor(state.pet.days || 0))} name=${encodeURIComponent(petName(state.pet.name))}`);
     return out.join("\n") + "\n";
   }
 
@@ -140,7 +146,7 @@ if (typeof module !== "undefined") {
   }
 
   /**
-   * Read .mf code (mf 2 exactly, mf 1 best effort) with friendly line errors.
+   * Read .mf code (mf 4, 3 and 2 exactly, mf 1 best effort) with friendly line errors.
    * @returns {{ok:true,state:object,from:number,notes?:string[]}|{ok:false,errors:Array,crisis?:boolean}}
    */
   function parse(text) {
@@ -149,11 +155,11 @@ if (typeof module !== "undefined") {
     const raw = String(text || "").replace(/\r\n?/g, "\n").split("\n");
     if (raw.length > MAX_LINES) return { ok: false, errors: [{ line: 0, msg: `That code is too long (more than ${MAX_LINES} lines).` }] };
     const first = raw.findIndex(l => l.replace(/#.*$/, "").trim());
-    if (first < 0) return { ok: false, errors: [{ line: 0, msg: "Nothing to import yet. Paste code that starts with \u201Cmf 3\u201D (mf 2 and mf 1 also work)." }] };
+    if (first < 0) return { ok: false, errors: [{ line: 0, msg: "Nothing to import yet. Paste code that starts with \u201Cmf 4\u201D (mf 3, mf 2 and mf 1 also work)." }] };
     const head = raw[first].replace(/#.*$/, "").trim().split(/\s+/);
-    if (head[0] !== "mf") return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: the code should start with \u201Cmf 3\u201D (or mf 2, mf 1).` }] };
+    if (head[0] !== "mf") return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: the code should start with \u201Cmf 4\u201D (or mf 3, mf 2, mf 1).` }] };
     if (head[1] === "1") return parseOld(raw.slice(first + 1));
-    if (head[1] !== String(VERSION) && head[1] !== "2") return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: this is version ${head[1] || "?"}; this app reads versions 1, 2 and 3.` }] };
+    if (!["2", "3", String(VERSION)].includes(head[1])) return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: this is version ${head[1] || "?"}; this app reads versions 1, 2, 3 and 4.` }] };
     const from = Number(head[1]);
     const state = defaultState();
     let crisis = false, sawHome = false;
@@ -246,8 +252,25 @@ if (typeof module !== "undefined") {
         }
         case "mix": state.mix = readVec(rest, n).vec; break;
         case "free": break;
+        case "pet": {
+          // mf 4: the companion (points and days are whole numbers; the name is URL-encoded).
+          const pet = { points: 0, days: 0, name: "Willow" };
+          rest.forEach(tok => {
+            const m = tok.match(/^(points|days|name)=(.*)$/);
+            if (!m) { err(n, `\u201C${tok}\u201D should look like points=12, days=3 or name=Willow.`); return; }
+            if (m[1] === "name") {
+              let nm = "";
+              try { nm = decodeURIComponent(m[2]); } catch (e) { err(n, "the companion's name can't be read."); return; }
+              if (G.isCrisis(nm)) { crisis = true; return; }
+              pet.name = petName(nm);
+            } else if (!/^\d{1,6}$/.test(m[2])) err(n, `${m[1]}=${m[2]} must be a whole number.`);
+            else pet[m[1]] = Number(m[2]);
+          });
+          state.pet = pet;
+          break;
+        }
         case "mf": err(n, "the header appears twice."); break;
-        default: err(n, `\u201C${kw}\u201D isn't a keyword (mf, home, e, vars, w, day, cp, ideal, eq, pick, extra, mix, free).`);
+        default: err(n, `\u201C${kw}\u201D isn't a keyword (mf, home, e, vars, w, day, cp, ideal, eq, pick, extra, mix, free, pet).`);
       }
     });
     if (crisis) return { ok: false, crisis: true, errors: [] };
@@ -288,11 +311,13 @@ if (typeof module !== "undefined") {
       const p = parse($("import-text").value);
       if (p.crisis) { app.crisis(true); return; }
       if (!p.ok) { errors(p.errors.slice(0, 8).map(x => x.msg)); return; }
+      // An mf 4 code brings the companion's name and growth with it (mf 1-3 leave it as it is).
+      if (p.state.pet && app.companion) app.companion.restore(p.state.pet);
       app.state = p.state;
       app.resetBase("");
       $("import-text").value = "";
       errors([]);
-      app.update();
+      app.update({ care: false });
       app.note(p.from === 1 ? p.notes.join(" ") : "Restored from code. New words add to it.");
     });
     $("clear").addEventListener("click", () => {

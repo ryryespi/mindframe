@@ -1,4 +1,4 @@
-// features/historian.js — Hazel the Owl, the Historian.
+// features/historian.js — "My days" (was Hazel the Owl, the Historian).
 //
 // Remembers your days and checkpoints (numbers and labels only, never words):
 //   • addCheckpoint / restore: save a moment and come back to it
@@ -129,7 +129,7 @@ if (typeof module !== "undefined") {
         btn.addEventListener("click", () => {
           app.state = restore(app.state, cp.n);
           app.resetBase("");
-          app.update();
+          app.update({ care: false });
           app.note(`Back at checkpoint ${cp.label}. New words add to it.`);
         });
         item.appendChild(btn);

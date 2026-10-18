@@ -36,7 +36,7 @@ if (typeof module !== "undefined") {
   const isGround = NAMES.map(n => GROUND.includes(n));
   const REST = NAMES.map(n => (GROUND.includes(n) ? 0.5 : 0));
   const HOME = { calm: 0.8, connection: 0.8, hope: 0.8 };
-  const VERSION = 3;
+  const VERSION = 4;
   const LABEL_RE = /^[a-z0-9-]{1,24}$/;
   const ACTIVE = 0.1, MAX_SIM = 200, MAX_CHECKPOINTS = 50, MAX_DAYS = 60, MAX_LINES = 400, MAX_W = 30;
 
@@ -393,7 +393,7 @@ if (typeof module !== "undefined") {
   }
   /** A fresh session: rest vector, home, default variables, no history, no picked feelings or freeing mix yet. */
   function defaultState() {
-    return { v: VERSION, home: homeVec(), e: rest(), vars: defaultVars(), w: [], days: [], cps: [], ideal: null, pick: null, mix: null };
+    return { v: VERSION, home: homeVec(), e: rest(), vars: defaultVars(), w: [], days: [], cps: [], ideal: null, pick: null, mix: null, pet: null };
   }
 
   MF.Movers = {

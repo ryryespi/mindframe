@@ -1,4 +1,4 @@
-// features/writer/comfort.js — Fern the Fox's "Comfort story from a public AI".
+// features/writer/comfort.js — "Comfort story from a public AI" (in Write a story).
 //
 // The app composes its own replies from the equation and makes NO network
 // calls. This optional button builds a prompt you can read and edit, then
@@ -15,6 +15,7 @@
 //     forgiveness scores and suggested path, and the One step's practice with its source
 //   • the forgiveness tile's lines, plus a note that forgiving is not excusing,
 //     reconciling, or staying unsafe, when a path is suggested
+//   • your companion's name and stage, so the story can feature it (never your words)
 //   • a request for a ~200-word comfort story with a friendly animal plus
 //     three affirmations written FROM that analysis, with no medical advice
 // It never contains the text you typed: every line is composed from numbers,
@@ -91,7 +92,7 @@ if (typeof module !== "undefined") {
    * Build the prompt from the reading only. Returns null in a crisis or with no reading.
    * @param {object} state the session
    * @param {object} m master output
-   * @param {{faith?:boolean, seed?:number, raw?:string}} [opts] raw is used only by scrub()
+   * @param {{faith?:boolean, seed?:number, raw?:string, pet?:{name:string, stage:string, animal:string}}} [opts] raw is used only by scrub(); pet is the companion
    * @returns {string|null}
    */
   function buildPrompt(state, m, opts = {}) {
@@ -111,6 +112,8 @@ if (typeof module !== "undefined") {
     ];
     const out = [ASK, "", ABOUT, "", "In words:", ...scrub(words, opts.raw), "", "Numbers (0 to 1):", ...numbers(m).map(x => `- ${x}`)];
     if (m.forgive && m.forgive.path) out.push("", "If the story touches forgiveness, keep it gentle and unhurried: forgiving is not excusing what happened, reconciling, or staying anywhere unsafe.");
+    // The user's companion may star in the story (its name and stage only; never the typed text).
+    if (opts.pet && opts.pet.name) out.push("", `Companion: please make the friendly animal my companion, a little ${opts.pet.animal || "fawn"} named ${opts.pet.name} (${String(opts.pet.stage || "young").toLowerCase()} stage), gentle and kind.`);
     if (opts.faith) out.push("", "Faith: please include one gentle line of Christian faith, for example the peace of God that surpasses understanding (Philippians 4:7).");
     return out.join("\n");
   }
@@ -137,7 +140,7 @@ if (typeof module !== "undefined") {
     app.onReset(hide);
     $("comfort-go").addEventListener("click", () => {
       if (!app.update()) { hide(); return; }
-      const p = buildPrompt(app.state, app.m(), { faith: app.faith(), raw: $("input").value });
+      const p = buildPrompt(app.state, app.m(), { faith: app.faith(), raw: $("input").value, pet: app.companion ? app.companion.about() : null });
       if (!p) { hide(); return; }
       $("comfort-prompt").value = p;
       $("comfort").classList.remove("hidden");

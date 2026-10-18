@@ -1,4 +1,4 @@
-// features/scientist.js — Ada the Otter, the Scientist.
+// features/scientist.js — "Show the math" (was Ada the Otter, the Scientist).
 // Shows every number behind the card, including the grandiosity signal g,
 // the hidden-conflict strengths c, the positive-emotion scores, and inner
 // peace: P with its factors, the gradient, the lever, n*, e*, and the

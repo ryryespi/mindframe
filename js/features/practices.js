@@ -1,5 +1,5 @@
-// features/practices.js — patience and mindfulness practices (hosted by Grace
-// the Dove, in the "Breathe & be patient" tab), and the rule that picks one as
+// features/practices.js — patience and mindfulness practices (in "Forgive &
+// breathe", the "Breathe & be patient" tab), and the rule that picks one as
 // the card's One step from master's numbers.
 //
 //   • LIBRARY: ten short practices, each with a card instruction (dose words
@@ -229,7 +229,7 @@ if (typeof module !== "undefined") {
       let k = 0;
       $("breath-go").textContent = "Stop";
       const tick = () => {
-        if (k >= plan.length) { stop("Done. Notice how you feel now."); return; }
+        if (k >= plan.length) { stop("Done. Notice how you feel now."); app.care("practice"); return; }
         const s = plan[k], c = $("breath-circle");
         c.style.setProperty("--dur", `${s.ms}ms`);
         c.className = `breath-circle ${s.phase}`;
@@ -247,7 +247,7 @@ if (typeof module !== "undefined") {
 
     return function render() {
       const m = app.m(), pk = m ? m.practice : null;
-      $("practice-suggest").textContent = pk ? `Suggested now: ${LIBRARY[pk.id].name}, from your reading.` : "Pick any practice. After Update, Grace suggests one from your reading.";
+      $("practice-suggest").textContent = pk ? `Suggested now: ${LIBRARY[pk.id].name}, from your reading.` : "Pick any practice. After Update, one is suggested from your reading.";
       // A new reading brings its suggestion forward; otherwise keep what was picked.
       if (m !== seen) { seen = m; picked = false; }
       select(picked && chosen ? chosen : pk ? pk.id : chosen || "pause");
