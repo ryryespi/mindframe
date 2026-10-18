@@ -63,6 +63,8 @@ if (typeof module !== "undefined") {
       `Positive emotions it points toward: ${(m.positives || []).map(p => p.word).join(", ") || "calm"}`,
       ...(m.peace ? [`Inner peace P: ${f2(m.peace.P)} (${MF.Peace.band(m.peace.P)}); steps until P >= 0.80: ${m.peace.solve ? (m.peace.solve.n === null ? "not reached" : m.peace.solve.n) : "?"}; biggest lever: ${m.peace.lever && m.peace.lever.name ? `${m.peace.lever.kind === "grow" ? "growing" : "easing"} ${m.peace.lever.name}` : "none"}`] : []),
       ...(m.forgive ? [`Forgiveness: self F=${f2(m.forgive.Fself)}, others F=${f2(m.forgive.Fother)} (threshold 0.35); suggested path: ${m.forgive.path === "self" ? "forgiving yourself" : m.forgive.path === "other" ? "forgiving someone" : "none"}`] : []),
+      ...(m.small && m.small.u > 0 ? [`Putting yourself down (false humility) signal: ${f2(m.small.u)}${m.small.kinds.length ? ` (${m.small.kinds.join(", ")})` : " (chosen in the feelings picker)"}`] : []),
+      ...(m.freeing && MF.Freeing ? [`Freeing mix (inner peace ${f2(m.freeing.P0)} -> ${f2(m.freeing.P1)}, shame only goes down): ${MF.Freeing.line(m.e, m.freeing.target, m.pick ? m.pick.extras : [])}`] : []),
       ...(m.practice && MF.Practices ? [`Practice for the one step: ${MF.Practices.LIBRARY[m.practice.id].name} (${MF.Practices.LIBRARY[m.practice.id].source})`] : []),
     ];
   }
@@ -103,6 +105,7 @@ if (typeof module !== "undefined") {
       ...c.conflict.map(x => `- ${x}`),
       ...c.reality.map(x => `- ${x}`),
       ...(c.forgive || []).map(x => `- ${x}`),
+      ...(c.freeing ? c.freeing.lines.map(x => `- ${x}`) : []),
       `- Suggested step: ${c.step}`,
       `- Affirmations the app composed: ${c.affirmations.join(" / ")}`,
     ];

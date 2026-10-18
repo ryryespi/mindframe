@@ -2,6 +2,8 @@
 // else steps the numbers.
 //
 //   e        = score(text)                       (words added to where you are)
+//              or a picked vector                 (masterState / masterPick: the feelings picker)
+//              — both then run the one shared path reading(e, …) below
 //   step     = act(clip01(e + a(e)·(h − e) + b·s(e)))
 //   a(e)     = min(a_max, a0 + k·‖e − h‖), capped at a_cap when λ > 0 (then b = b_U)
 //   s_j      = e_j·Σ_grounding min(0, W_ij)·h_i for hard/process movers above home
@@ -12,11 +14,14 @@
 //   conflicts= √(x_i·y_j) for opposing pulls both active, plus "I want … but" clashes
 //   positives= positive words from the gains toward home in this step
 //   (the last three come from core/reality.js, computed in this same pass)
-//   P        = 1/(1 + (d/d0)²)·(1 − γ·C_max)·(1 − δ·g)       inner peace (core/peace.js)
+//   u        = 1 − e^(−0.7·k) false-humility cues (putting yourself down; reality.js)
+//   P        = 1/(1 + (d/d0)²)·(1 − γ·C_max)·(1 − δ·max(g, u))  inner peace (core/peace.js):
+//              the true-size factor counts too big (g) and too small (u) alike
 //   lever    = argmax_i ΔP_i for a move of e_i toward h_i by 0.05
 //   solve    = iterate the master map to its fixed point e*; n* = steps until P ≥ 0.8
 //   passes   = feature passes in the same call (features/forgiveness.js adds
-//              forgive {F_self, F_other, path, dP, grace}); they never move e
+//              forgive {F_self, F_other, path, dP, grace}; features/freeing.js adds
+//              freeing, the freeing mix); they never move e
 //
 // Convergence (proof sketch; exact map, before rounding). With hard/process
 // homes at 0 (always true in the app), for every mover j:
@@ -41,7 +46,7 @@ if (typeof module !== "undefined") {
 (function (MF) {
   "use strict";
   const R = MF.Reality, PEACE = MF.Peace;
-  const { NAMES, GROUND, REST, FIXED, ACTIVE, MAX_SIM, N, idx, isGround, r2, clamp01, norm, distance, stamp, dayOf, weights, fromText, combine } = MF.Movers;
+  const { NAMES, GROUND, REST, FIXED, ACTIVE, MAX_SIM, N, idx, isGround, r2, clamp01, norm, distance, stamp, dayOf, weights, fromText, fromPick, combine } = MF.Movers;
   // ---------- Vectors, dynamics, λ ----------
 
   /** One left-alone dynamics step: e ← clamp01(e + dt·(Wᵀ(e − rest) − d·(e − rest))). */
@@ -179,7 +184,8 @@ if (typeof module !== "undefined") {
   // ======================================================================
   const calls = { master: 0 };
   /**
-   * THE MASTER FUNCTION. Every feature calls this.
+   * THE MASTER FUNCTION, text entry. Words are scored, added to where you are,
+   * and the result goes through the one shared path (reading()).
    *   e    = score(text) added to state.e
    *   step = act(clip01(e + a(e)(h − e) + b·s(e)))
    *   a(e) = min(a_max, a0 + k‖e − h‖), capped at a_cap when λ > 0
@@ -187,14 +193,43 @@ if (typeof module !== "undefined") {
    * @param {object} state the session
    * @param {{sim?:boolean, now?:number}} [opts] sim:false skips the recovery count
    * @returns {object} {crisis:true} or the full reading (e, next, a, b, s, d, λ, links, baseline, recovery,
-   *   grand {g, kind…}, conflicts[], positives[], peace {P, Pd, Pc, Pg, lever, grad, solve {n, eStar, PStar}})
+   *   grand {g, kind…}, small {u, kinds…}, conflicts[], positives[], peace {P, Pd, Pc, Pg, lever, grad, solve {n, eStar, PStar}})
    */
   function master(text, state, opts = {}) {
-    calls.master += 1;
     const words = fromText(typeof text === "string" ? text : "");
-    if (words.crisis) return { crisis: true };
+    if (words.crisis) { calls.master += 1; return { crisis: true }; }
+    return reading(combine(state.e, words.w), words, state, opts);
+  }
+  /**
+   * THE MASTER FUNCTION, state-vector entry: the same path with e given
+   * directly (the feelings picker, or any vector). words carries the notes and
+   * the feature data (for example the extra chips); omit it for none.
+   * master(text, state) ≡ masterState(combine(state.e, fromText(text).w), state, opts, fromText(text)).
+   * @param {number[]} e the 9-vector to read
+   * @param {object} state the session
+   * @param {object} [opts] as for master()
+   * @param {{notes?:string[], read?:object, found?:any[], data?:object}} [words]
+   */
+  function masterState(e, state, opts = {}, words = {}) {
+    return reading(e.map(x => r2(clamp01(Number(x) || 0))), words, state, opts);
+  }
+  /**
+   * THE MASTER FUNCTION, picker entry: picked levels and extra chips → a vector
+   * (MF.Movers.fromPick) → masterState(). There is no text, so there is no crisis path here;
+   * the 988 line stays on screen as always.
+   * @param {{levels?:object, extras?:string[]}} pick
+   */
+  function masterPick(pick, state, opts = {}) {
+    const p = fromPick(pick);
+    const out = masterState(p.e, state, opts, p);
+    out.pick = { base: p.base, extras: p.extras };
+    return out;
+  }
+
+  /** The one shared path: everything after the vector e is known. */
+  function reading(e, words, state, opts) {
+    calls.master += 1;
     const h = state.home, W = weights(state.w), V = state.vars;
-    const e = combine(state.e, words.w);
     const lam = lambda(e, W, V.d);
     const unstable = lam !== null && lam > 0;
     const d = distance(e, h);
@@ -221,9 +256,12 @@ if (typeof module !== "undefined") {
     // Same pass: grandiosity (already folded into e by the word hook), hidden conflicts, positive emotions.
     const data = words.data || {};
     const grand = data.grand || R.grandiosity("");
+    // The true-size principle, both sides: too big (g) and too small (u, false humility).
+    const small = data.small || R.smallness("");
+    const tsize = Math.max(grand.g, small.u);
     const out = {
-      crisis: false, notes: words.notes, read: words.read, found: words.found || [],
-      grand, conflicts: R.conflicts(e, data.clashes || []), positives: R.positives(e, next, h),
+      crisis: false, notes: words.notes || [], read: words.read || null, found: words.found || [],
+      grand, small, tsize, conflicts: R.conflicts(e, data.clashes || []), positives: R.positives(e, next, h),
       e, h: h.slice(), a, b, s, next, lambda: lam, unstable,
       d: r2(d), dNext: r2(distance(next, h)),
       top: top ? top.n : null, stabilizer, mover, action,
@@ -232,11 +270,11 @@ if (typeof module !== "undefined") {
     };
     // Inner peace, same pass: P for this reading, then (outside the inner
     // simulation) the lever, the gradient, and the solve for e* and n*.
-    out.peace = PEACE.score(e, h, V, out.conflicts, grand.g);
+    out.peace = PEACE.score(e, h, V, out.conflicts, tsize);
     if (opts.sim !== false) {
       out.recovery = recovery({ ...state, e });
-      out.peace.lever = PEACE.lever(e, h, V, data.clashes || [], grand.g);
-      out.peace.grad = PEACE.gradient(e, h, V, data.clashes || [], grand.g);
+      out.peace.lever = PEACE.lever(e, h, V, data.clashes || [], tsize);
+      out.peace.grad = PEACE.gradient(e, h, V, data.clashes || [], tsize);
       out.peace.solve = solvePeace({ ...state, e }, out.peace.P);
     }
     // Feature passes (for example forgiveness), same call: they read this
@@ -309,7 +347,7 @@ if (typeof module !== "undefined") {
   }
 
   MF.Master = {
-    SKILL, REFRAME, master, addPass, calls, recovery, solvePeace, recText, refreshIdeal, focus, baselineSeries, baselineOf,
+    SKILL, REFRAME, master, masterState, masterPick, addPass, calls, recovery, solvePeace, recText, refreshIdeal, focus, baselineSeries, baselineOf,
     // Building blocks master uses (exported for tests only; features call master).
     _parts: { step, lambda, hidden, loops, sVec, act, ema, simulate },
   };

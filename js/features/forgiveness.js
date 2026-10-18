@@ -9,6 +9,8 @@
 //    c = 1 − e^(−0.7·k) for k distinct cues (one 0.50, two 0.75).
 //    Nudges onto existing movers only: self → shame +0.2, rumination +0.2;
 //    other → anger +0.3, rumination +0.2, connection −0.2. data.forgive = {cSelf, cOther}.
+//    The feelings picker's "blaming myself" chip is one self cue (c_self = 0.50,
+//    the same self nudges), registered with MF.Movers.addPickExtra.
 // 2. Master pass (same master() call, after inner peace):
 //      F_self  = e_shame · (0.4 + 0.6·c_self)
 //      F_other = e_anger · (0.4 + 0.6·c_other)
@@ -80,6 +82,9 @@ if (typeof module !== "undefined") {
     return { add, neg, notes, data: { forgive: { cSelf: q.cSelf, cOther: q.cOther } } };
   }
   MF.Movers.addWordHook(hook);
+  /** The "blaming myself" chip in the feelings picker: one self-blame cue (c_self = 0.50), the same nudges as the words. */
+  const BLAME = { id: "blame", label: "blaming myself", fn: () => ({ add: { shame: 0.2, rumination: 0.2 }, notes: ["self-blame (forgiveness)"], data: { forgive: { cSelf: 0.5, cOther: 0 } } }) };
+  MF.Movers.addPickExtra(BLAME);
 
   /** What each path is modeled to move, toward home (capped by the gap). */
   const RELEASE = { self: { shame: 0.10, rumination: 0.05 }, other: { anger: 0.10, rumination: 0.05, connection: 0.05 } };
@@ -257,6 +262,6 @@ if (typeof module !== "undefined") {
     };
   }
 
-  MF.Forgive = { THETA, SELF, OTHER, RELEASE, PATH_MOVERS, SAFE, FAITH, PATHS, cues, hook, pass, released, cardLines, peaceLine, mount };
+  MF.Forgive = { BLAME, THETA, SELF, OTHER, RELEASE, PATH_MOVERS, SAFE, FAITH, PATHS, cues, hook, pass, released, cardLines, peaceLine, mount };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Forgive;

@@ -10,6 +10,7 @@
   --bg: #f3f0ea; --ink: #3a352f; --muted: #645d55; --line: #e1dbd1; --card: #fbfaf7;
   --accent: #4b5a51; --on-accent: #f6f3ee; --soft: #8d9a91; --warm: #b49a86;
   --tile: #f7f5f0; --tile-peace: #edf1f2; --tile-soft: #eef1ec; --tile-forgive: #f0eef5; --tile-step: #f1f3ea; --affirm: #f2f0ea;
+  --tile-free: #f3efe6; --lvl1: #eef1ec; --lvl2: #d5e0d8; --lvl3: #4b5a51; --on-lvl3: #f6f3ee;
   --ico: #6f8577;
   --crisis-bg: #f4e4e0; --crisis-ink: #5c3a36; --banner: #ebe6df;
   --sky1: #e6e2ee; --sky2: #f7efe5; --sun: #f3d9a8; --cloud: #ffffff; --stars: 0; --hill2: #cdd9c6; --hill1: #aec3a9; --bird: #8e8a99;
@@ -29,6 +30,7 @@ body[data-peace="steady"]   { --sky1: #bfdcea; --sky2: #e7f3ea; --sun: #f6cf6e; 
     --bg: #161a1f; --ink: #ebe6de; --muted: #b9b1a6; --line: #333a42; --card: #1f242b;
     --accent: #a9c2b3; --on-accent: #12171b; --soft: #7f9a8c; --warm: #b49a86;
     --tile: #232930; --tile-peace: #222c33; --tile-soft: #232c28; --tile-forgive: #29263a; --tile-step: #252b25; --affirm: #262c33;
+    --tile-free: #2b2a24; --lvl1: #26302b; --lvl2: #34473c; --lvl3: #a9c2b3; --on-lvl3: #12171b;
     --ico: #a9c2b3;
     --crisis-bg: #3b2725; --crisis-ink: #f4dad4; --banner: #1d2228;
     --sky1: #1b2131; --sky2: #2b3245; --sun: #ece6d3; --cloud: #3a4256; --stars: 1; --hill2: #2c3a35; --hill1: #23302b; --bird: #7d8296;
@@ -100,6 +102,8 @@ label { color: var(--muted); font-size: 0.92rem; }
 .tile-peace { background: var(--tile-peace); }
 .tile-soft { background: var(--tile-soft); }
 .tile-forgive { background: var(--tile-forgive); }
+.tile-free { background: var(--tile-free); }
+.free-step { margin: 0.4rem 0 0.2rem; }
 .tile-step { background: var(--tile-step); }
 .tile .secondary { margin-top: 0.45rem; font-size: 0.9rem; }
 .reading > .quiet, .reading > .row { margin: 0.2rem 0.3rem 0; }
@@ -196,9 +200,30 @@ label { color: var(--muted); font-size: 0.92rem; }
 .breath-phase { font-family: var(--serif); font-size: 1.15rem; margin: 0.2rem 0; }
 
 /* Reduced motion: no movement anywhere; the circle keeps still and only its color changes. */
+/* Write / Pick feelings toggle and the feelings chips (features/picker.js). */
+.mode { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; margin: 0 0 0.7rem; padding: 0.25rem; border-radius: 999px; background: var(--tile); border: 1px solid var(--line); }
+.mode button { min-height: 2.75rem; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 0.95rem; }
+.mode button[aria-pressed="true"] { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+.picker { background: var(--card); border: 1px solid var(--line); border-radius: 1.1rem; padding: 0.7rem 0.75rem 0.5rem; }
+.picker > p { margin: 0 0 0.45rem; }
+.picker-also { margin-top: 0.6rem !important; }
+.feel-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.4rem; }
+.feel-chips.extras { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.feel-chip { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 3.4rem; padding: 0.35rem 0.3rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--card); color: var(--ink); font-size: 0.86rem; line-height: 1.2; text-align: center; transition: background-color 0.2s ease; }
+.feel-chip .feel-word { font-weight: 600; }
+.feel-chip .feel-level { font-size: 0.76rem; color: var(--muted); }
+.feel-chip[data-level="a-little"] { background: var(--lvl1); border-color: var(--soft); }
+.feel-chip[data-level="quite"] { background: var(--lvl2); border-color: var(--accent); }
+.feel-chip[data-level="strongly"] { background: var(--lvl3); border-color: var(--lvl3); color: var(--on-lvl3); }
+.feel-chip[data-level="strongly"] .feel-level { color: var(--on-lvl3); }
+.feel-chip.extra { min-height: 2.9rem; font-weight: 500; }
+.feel-chip.extra[aria-pressed="true"] { background: var(--lvl3); border-color: var(--lvl3); color: var(--on-lvl3); font-weight: 600; }
+.mix-box { margin: 0.5rem 0 0.7rem; padding: 0.7rem 0.8rem; border-radius: 1rem; background: var(--tile-free); }
+.mix-line { margin: 0.2rem 0 0.5rem; font-size: 0.92rem; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; }
-  .scene-art stop, .scene-art .sun, .scene-art path, .scene-art .clouds, .friend { transition: none !important; }
+  .scene-art stop, .scene-art .sun, .scene-art path, .scene-art .clouds, .friend, .feel-chip { transition: none !important; }
   .friend:hover { transform: none; }
   .breath-circle, .breath-circle.in, .breath-circle.hold, .breath-circle.out { transform: scale(0.85) !important; transition: filter var(--dur) linear; }
   .breath-circle.in, .breath-circle.hold { filter: brightness(1.12) saturate(1.2); }

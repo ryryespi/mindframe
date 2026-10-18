@@ -1,4 +1,5 @@
-// core/reality.js — hidden conflicts, grandiose vs. true-sized thinking, and the
+// core/reality.js — hidden conflicts, true-sized thinking (not grandiose, not
+// putting yourself down), and the
 // positive emotions a step points toward. Used INSIDE master() in the same pass.
 //
 // Nothing here adds a mover or a variable. Three things are derived:
@@ -13,6 +14,27 @@
 //     "In an absolute state," Clinical Psychological Science 6(4):529–542, who
 //     found absolutist words (always, never, completely, …) more common in
 //     anxiety, depression and suicidal-ideation forums. A word signal, not a diagnosis.
+//
+//  1b. False humility u ∈ [0, 1], the other side of the same true-size check
+//     (not bigger, not smaller). Self-deprecation and disqualifying the
+//     positive, negation-aware ("I don't think I'm worthless" does not count):
+//       worthless    "I'm worthless", "I'm nothing", "I'm useless", "I'm not worth it"
+//       undeserving  "I don't deserve love / good things / it" (not "this":
+//                    "I don't deserve this" is often about being mistreated), "who am I to", "I'm not good enough / worthy"
+//       disqualify   "it was just luck", "I only got lucky", "anyone could have done it",
+//                    "it doesn't count", "they're just being nice"
+//       compare      "everyone is better than me", "I'm worse than everyone"
+//       u = 1 − e^(−0.7·k), k distinct cues (one 0.50, two 0.75); the
+//       "putting myself down" chip counts as one cue (u = 0.50).
+//     Nudges onto existing movers only: shame +0.2, hope −0.2. Inner peace
+//     uses the true-size factor 1 − δ·max(g, u), so too small costs peace the
+//     same way too big does.
+//     Grounding: Tangney (2000), J Soc Clin Psychol 19(1):70–82 (true humility
+//     is an accurate view of oneself, not low self-regard); Burns (1980),
+//     Feeling Good ("disqualifying the positive"); Neff (2003), Self and
+//     Identity 2(2):85–101; Gilbert & Procter (2006), Clin Psychol Psychother
+//     13(6):353–379 and Gilbert (2009), Adv Psychiatr Treat 15(3):199–208
+//     (shame and self-criticism; compassion-focused therapy).
 //
 //  2. Hidden conflicts: opposing pulls that are both active.
 //       c(i, j) = √(x_i · y_j), shown when both sides pass their threshold
@@ -86,6 +108,32 @@ if (typeof module !== "undefined") require("./movers.js");
   }
   /** Show the reality check when g reaches this. */
   const G_SHOW = 0.25;
+
+  // ---------- 1b. False humility (too small) ----------
+  /** Self-deprecation and disqualifying-the-positive cues, by kind. */
+  const SMALL = [
+    { kind: "worthless", res: [/\b(i'?m|i am) (so |just |completely |totally |really )?(worthless|useless|a nobody|no good|a waste of space)\b/, /\b(i'?m|i am) (just )?nothing(?! (like|but|if|without|compared))\b/, /\b(i'?m|i am) not worth (it|anything|much|the trouble|loving)\b/, /\bi have nothing to offer\b/] },
+    { kind: "undeserving", res: [/\bi (don'?t|do not) deserve (to (be|have|feel)|love|good things|kindness|happiness|anything|anyone|help|forgiveness|them|him|her|you|it|success|better|praise)\b/, /\bwho am i to\b/, /\b(i'?m|i am) not (worthy|good enough|deserving)\b/, /\b(i'?m|i am) unworthy\b/] },
+    { kind: "disqualify", res: [/\b(it|that) was (just|only|pure|dumb) luck\b/, /\bi (just|only) got lucky\b/, /\banyone could have (done|managed) (it|that)\b/, /\b(it|that) (doesn'?t|didn'?t) (really )?count\b/, /\bthey'?re (just|only) being nice\b/] },
+    { kind: "compare", res: [/\b(everyone|everybody) (else )?is better than me\b/, /\b(i'?m|i am) (worse|less) than (everyone|everybody|anyone|all of them)\b/, /\beveryone else is (so much )?better\b/] },
+  ];
+  /**
+   * The false-humility signal for a text (negation-aware; crisis text gives 0).
+   * @param {string} text
+   * @returns {{u:number, k:number, kinds:string[], chip:boolean}}
+   */
+  function smallness(text) {
+    const t = clean(text);
+    if (!t.trim() || G.isCrisis(t)) return { u: 0, k: 0, kinds: [], chip: false };
+    let k = 0;
+    const kinds = [];
+    SMALL.forEach(grp => grp.res.forEach(re => { if (hits(t, re).length) { k += 1; if (!kinds.includes(grp.kind)) kinds.push(grp.kind); } }));
+    return { u: r2(1 - Math.exp(-0.7 * k)), k, kinds, chip: false };
+  }
+  /** Show the "too small" reality check when u reaches this (one cue is enough). */
+  const U_SHOW = 0.25;
+  /** The "putting myself down" chip: one cue, the same nudges as the words. */
+  const PUTDOWN = { id: "putdown", label: "putting myself down", fn: () => ({ add: { shame: 0.2 }, neg: { hope: 0.2 }, notes: ["putting yourself down"], data: { small: { u: 0.5, k: 1, kinds: [], chip: true } } }) };
 
   // ---------- 2. Hidden conflicts ----------
   /** Clashes in the words themselves (value vs. feeling). */
@@ -165,17 +213,20 @@ if (typeof module !== "undefined") require("./movers.js");
     return out.slice(0, 3);
   }
 
-  /** The word hook: grandiosity nudges rumination and fusion; clashes pass through as data. */
+  /** The word hook: grandiosity nudges rumination and fusion; false humility nudges shame up and hope down; clashes pass through as data. */
   function hook(text) {
-    const gr = grandiosity(text), clashes = textConflicts(text);
-    if (!gr.g && !clashes.length) return null;
+    const gr = grandiosity(text), clashes = textConflicts(text), sm = smallness(text);
+    if (!gr.g && !clashes.length && !sm.u) return null;
     const add = gr.g ? { rumination: 0.5 * gr.g, avoidance: 0.5 * gr.g } : {};
+    const neg = {};
     const notes = gr.g >= G_SHOW ? ["grand or absolute wording"] : [];
+    if (sm.u) { add.shame = 0.2; neg.hope = 0.2; notes.push("putting yourself down"); }
     if (clashes.length) notes.push("mixed feelings in the words");
-    return { add, notes, data: { grand: gr, clashes } };
+    return { add, neg, notes, data: { grand: gr, clashes, small: sm } };
   }
   MF.Movers.addWordHook(hook);
+  MF.Movers.addPickExtra(PUTDOWN);
 
-  MF.Reality = { GRAND, ABSOLUTIST, G_SHOW, PAIRS, T_HARD, T_HIGH, T_NEED, POSITIVE, TEXT_CLASH, grandiosity, textConflicts, conflicts, positives, hook };
+  MF.Reality = { GRAND, ABSOLUTIST, G_SHOW, SMALL, U_SHOW, PUTDOWN, smallness, PAIRS, T_HARD, T_HIGH, T_NEED, POSITIVE, TEXT_CLASH, grandiosity, textConflicts, conflicts, positives, hook };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Reality;

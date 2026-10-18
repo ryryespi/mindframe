@@ -73,7 +73,13 @@ if (typeof module !== "undefined") require("../core/words.js");
     const g = m.grand;
     if (g && g.kinds.length && g.g > 0) {
       out.push(`Grand or absolute wording: ${band(g.g)} present (${g.kinds.map(k => KIND_WORDS[k]).join(", ")}). It adds to the replaying and to believing the thought word for word.`);
-      MF.Words.realityLines(m).forEach(x => out.push(x));
+      MF.Words.realityLines({ ...m, small: null }).forEach(x => out.push(x));
+    }
+    // The other side of the true-size check: putting yourself down (core/reality.js).
+    const sm = m.small;
+    if (sm && sm.u > 0) {
+      out.push(`Putting yourself down: ${sm.chip ? "you marked it in the feelings picker" : "present in the wording"}. It adds to the shame and dims hope.`);
+      MF.Words.realityLines({ ...m, grand: null }).forEach(x => out.push(x));
     }
     // Forgiveness cues (features/forgiveness.js), in words.
     const f = m.forgive;
@@ -82,7 +88,7 @@ if (typeof module !== "undefined") require("../core/words.js");
       if (f.cSelf > 0) out.push(`Self-blame wording: ${w(f.cSelf)} present. It adds to the shame and the replaying.`);
       if (f.cOther > 0) out.push(`Resentment toward someone: ${w(f.cOther)} present. It adds to the anger and the replaying, and dims connection.`);
     }
-    if (!out.length) out.push("No hidden pulls or grand wording stand out right now.");
+    if (!out.length) out.push("No hidden pulls, grand wording or put-downs stand out right now.");
     return out;
   }
 

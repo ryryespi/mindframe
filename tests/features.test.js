@@ -148,7 +148,7 @@ test("page: six friendly animals (the cap), each with a picture, name, role and 
 });
 test("code: every js file has a header comment, and every function a JSDoc or a one-line comment", () => {
   const files = ["js/app.js", ...["core", "features", "features/writer"].flatMap(d => fs.readdirSync(path.join(__dirname, "../js", d)).filter(f => f.endsWith(".js")).map(f => `js/${d}/${f}`))];
-  assert.equal(files.length, 19);
+  assert.equal(files.length, 21);
   files.forEach(f => {
     const src = read(f);
     assert.match(src.split("\n")[0], /^\/\/ js\/|^\/\/ /, `${f} header`);

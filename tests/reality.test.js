@@ -136,7 +136,7 @@ test("analyzer: lists every hidden pull and the grand wording, in words", () => 
   assert.ok(d.some(x => /^Grand or absolute wording:/.test(x)));
   assert.ok(d.includes("You matter, and you are also human; one good step is enough."));
   d.forEach(x => assert.ok(!DIGIT.test(x), x));
-  assert.deepEqual(A.details(M.master("", M.defaultState())), ["No hidden pulls or grand wording stand out right now."]);
+  assert.deepEqual(A.details(M.master("", M.defaultState())), ["No hidden pulls, grand wording or put-downs stand out right now."]);
 });
 
 // ---------- the public-AI comfort prompt ----------

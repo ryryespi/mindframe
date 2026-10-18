@@ -258,16 +258,41 @@ if (typeof module !== "undefined") {
     absolutist: "Some of the time, with some people, is usually closer to true.",
   };
   /** How sure the thought sounds, from the band of g. */
+  /** What a put-down claims, by kind (core/reality.js SMALL). */
+  const SMALL_CLAIM = {
+    worthless: "you are worth nothing",
+    undeserving: "you don't deserve good things",
+    disqualify: "what went well was only luck",
+    compare: "everyone is better than you",
+  };
+  /** The true-size answer to a put-down: not bigger, not smaller (Burns, 1980: disqualifying the positive). */
+  const SMALL_TRUE = {
+    worthless: "Not bigger, not smaller: you are a person with real worth, having a hard time.",
+    undeserving: "Not bigger, not smaller: kindness isn't a prize you earn; you can receive it while you keep learning.",
+    disqualify: "Not bigger, not smaller: what went well counts too; you can name your part in it plainly.",
+    compare: "Not bigger, not smaller: you are not worse than others, and you don't need to be better.",
+    chip: "Not bigger, not smaller: you can name what went wrong and what went right, both at their real size.",
+  };
   const SURE = { strongly: "very sure", quite: "sure", "a little": "a bit sure" };
   /**
    * The reality check when grand.g ≥ 0.25: the thought's claim (by kind) at the
    * certainty of g's band, then the true-sized version. No labels, no shaming.
    */
   function realityLines(m) {
-    const gr = m.grand;
-    if (!gr || gr.g < G_SHOW || !gr.kinds.length) return [];
-    const kinds = gr.kinds.slice(0, 2);
-    return [`Reality check: part of this thought sounds ${SURE[band(gr.g)]} that ${kinds.map(k => CLAIM[k]).join(", and that ")}.`, TRUE_SIZE[kinds[0]]];
+    const gr = m.grand, out = [];
+    if (gr && gr.g >= G_SHOW && gr.kinds.length) {
+      const kinds = gr.kinds.slice(0, 2);
+      out.push(`Reality check: part of this thought sounds ${SURE[band(gr.g)]} that ${kinds.map(k => CLAIM[k]).join(", and that ")}.`, TRUE_SIZE[kinds[0]]);
+    }
+    // The other side of the same check: too small (false humility).
+    const sm = m.small;
+    if (sm && sm.u >= MF.Reality.U_SHOW) {
+      out.push(sm.kinds.length
+        ? `Reality check: part of this thought sounds ${SURE[band(sm.u)]} that ${sm.kinds.slice(0, 2).map(k => SMALL_CLAIM[k]).join(", and that ")}. That is smaller than true.`
+        : "Reality check: you marked putting yourself down. That voice makes you sound smaller than you are.");
+      out.push(SMALL_TRUE[sm.kinds[0] || "chip"]);
+    }
+    return out;
   }
 
   // ---------- Affirmations ----------
@@ -361,7 +386,11 @@ if (typeof module !== "undefined") {
     else if (sv && sv.n !== null) out.push(`Path to peace: about ${countWord(sv.n)} gentle step${sv.n === 1 ? "" : "s"}; the biggest help right now is ${lv}.`);
     else out.push(`Path to peace: this may take longer, and you don't have to do it alone; the biggest help right now is ${lv}.`);
     if (1 - p.Pc >= 0.03) out.push(`The hidden pull takes ${takes(1 - p.Pc)} of your peace; holding both parts kindly gives it back.`);
-    if (1 - p.Pg >= 0.03) out.push(`The grand thought takes ${takes(1 - p.Pg)} too; seeing it at its true size makes room for peace.`);
+    // The true-size factor counts too big (g) and too small (u); name the side that sets it.
+    const smallSide = m.small && m.small.u > (m.grand ? m.grand.g : 0);
+    if (1 - p.Pg >= 0.03) out.push(smallSide
+      ? `Putting yourself down takes ${takes(1 - p.Pg)} too; seeing yourself at your true size makes room for peace.`
+      : `The grand thought takes ${takes(1 - p.Pg)} too; seeing it at its true size makes room for peace.`);
     return out;
   }
   /** Faith wording for peace (only with Include faith on). */
@@ -409,6 +438,7 @@ if (typeof module !== "undefined") {
       conflict: conflictLines(m, seed),
       reality: realityLines(m),
       forgive: MF.Forgive ? MF.Forgive.cardLines(m, opts) : [],
+      freeing: MF.Freeing ? MF.Freeing.cardLines(m, opts) : null,
       affirmations: affirmations(m, opts),
       step: stepLine(m),
       practice: MF.Practices && m.practice ? { id: m.practice.id, name: MF.Practices.LIBRARY[m.practice.id].name } : null,
@@ -424,6 +454,7 @@ if (typeof module !== "undefined") {
       `What you may be feeling: ${c.feeling.replace(/^You may be feeling /, "")}`,
       `How they connect: ${c.connect.join(" ")}`,
       ...c.conflict, ...c.reality, ...c.forgive,
+      ...(c.freeing ? [...c.freeing.lines, c.freeing.step] : []),
       "Affirmations:", ...c.affirmations.map(x => `  ${x}`),
       `One step: ${c.step}`,
       c.progress,

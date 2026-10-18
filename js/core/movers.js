@@ -7,6 +7,9 @@
 //   • W, the small table of who amplifies (+) or dampens (−) whom
 //   • the merged lexicon: fromText(text) → word contributions, combine() adds
 //     them to where you are
+//   • the feelings picker: pick levels (off / a little / quite / strongly at
+//     the band midpoints 0, 0.15, 0.45, 0.80) → a state vector, plus extra
+//     chips that features register as nudges onto existing movers (fromPick)
 //   • small shared helpers (rounding, distance, timestamps, seeded random)
 //
 // Pure logic, no DOM, nothing stored, nothing sent. A model built from design
@@ -33,7 +36,7 @@ if (typeof module !== "undefined") {
   const isGround = NAMES.map(n => GROUND.includes(n));
   const REST = NAMES.map(n => (GROUND.includes(n) ? 0.5 : 0));
   const HOME = { calm: 0.8, connection: 0.8, hope: 0.8 };
-  const VERSION = 2;
+  const VERSION = 3;
   const LABEL_RE = /^[a-z0-9-]{1,24}$/;
   const ACTIVE = 0.1, MAX_SIM = 200, MAX_CHECKPOINTS = 50, MAX_DAYS = 60, MAX_LINES = 400, MAX_W = 30;
 
@@ -296,6 +299,65 @@ if (typeof module !== "undefined") {
   /** Register a word hook: hook(text) → {add?:{mover:raw}, neg?:{grounding:raw}, notes?:string[], found?:any[], data?:object}. data is passed through to master() in the same pass. */
   function addWordHook(hook) { if (!HOOKS.includes(hook)) HOOKS.push(hook); }
 
+  // ---------- The feelings picker (state vector in, no text) ----------
+  // Each mover chip is tapped through four levels. The values are the
+  // midpoints of the word bands the card uses (a little < 0.3 ≤ quite ≤ 0.6 <
+  // strongly), with "off" at 0:
+  //   off 0.00 · a little 0.15 · quite 0.45 · strongly 0.80
+  // (strongly is the midpoint of 0.6–1.0). Grounding chips (calm, connected,
+  // hopeful) start at "quite", near their rest of 0.5, because "off" for them
+  // means "not at all calm", which is itself a strong reading; the others start off.
+  const LEVELS = { off: 0, "a little": 0.15, quite: 0.45, strongly: 0.8 };
+  const LEVEL_ORDER = ["off", "a little", "quite", "strongly"];
+  /** Plain words for the chips. */
+  const PICK_WORD = { fear: "afraid", sadness: "sad", anger: "angry", shame: "ashamed", calm: "calm", connection: "connected", hope: "hopeful", rumination: "replaying thoughts", avoidance: "avoiding" };
+  /** The chip order on screen. */
+  const PICK_ORDER = ["fear", "sadness", "anger", "shame", "calm", "connection", "hope", "rumination", "avoidance"];
+  /** A chip's starting level. */
+  const pickDefault = n => (GROUND.includes(n) ? "quite" : "off");
+  /** The level word for a value: off below 0.075 (halfway to "a little"), else the card's band. */
+  const levelOf = x => (x < 0.075 ? "off" : x > 0.6 ? "strongly" : x >= 0.3 ? "quite" : "a little");
+  /** The next level when a chip is tapped (strongly wraps to off). */
+  const nextLevel = l => LEVEL_ORDER[(LEVEL_ORDER.indexOf(l) + 1) % LEVEL_ORDER.length];
+  /** Picked levels {mover: level word} → the 9-vector (missing movers take their starting level). */
+  const pickVector = (levels = {}) => NAMES.map(n => LEVELS[levels[n] in LEVELS ? levels[n] : pickDefault(n)]);
+  /** The 9-vector → level words (the inverse of pickVector on the band midpoints). */
+  const vectorLevels = v => Object.fromEntries(NAMES.map((n, i) => [n, levelOf(v[i])]));
+
+  const EXTRAS = [];
+  /**
+   * Register an extra chip (features only; no new movers). fn() returns the
+   * same shape as a word hook: {add?, neg?, notes?, data?}.
+   * @param {{id:string, label:string, fn:function}} chip
+   */
+  function addPickExtra(chip) { if (!EXTRAS.some(c => c.id === chip.id)) EXTRAS.push(chip); }
+  /**
+   * The picker's version of fromText: picked levels and extra chips → the
+   * reading's vector and the same {notes, found, data} master() takes from words.
+   * Extras are nudges added exactly as word hooks are (saturating, onto the
+   * picked vector with combine()). No text, so no crisis check is needed here.
+   * @param {{levels?:object, extras?:string[]}} pick
+   * @returns {{crisis:false, picked:true, base:number[], e:number[], w:object, notes:string[], read:null, found:[], data:object, extras:string[]}}
+   */
+  function fromPick(pick = {}) {
+    const base = pickVector(pick.levels || {});
+    const hp = Object.fromEntries(HARD.concat(PROCESS).map(n => [n, 0]));
+    const neg = Object.fromEntries(GROUND.map(n => [n, 0]));
+    const notes = [], data = {}, extras = [];
+    EXTRAS.forEach(c => {
+      if (!(pick.extras || []).includes(c.id)) return;
+      extras.push(c.id);
+      const r = c.fn() || {};
+      Object.entries(r.add || {}).forEach(([n, v]) => { if (n in hp) hp[n] += v; });
+      Object.entries(r.neg || {}).forEach(([n, v]) => { if (n in neg) neg[n] += v; });
+      (r.notes || []).forEach(x => notes.push(x));
+      Object.assign(data, r.data || {});
+    });
+    const sat = x => r2(1 - Math.exp(-Math.max(0, x)));
+    const w = { e: NAMES.map(n => (isGround[idx[n]] ? 0 : sat(hp[n]))), pos: { calm: 0, connection: 0, hope: 0 }, neg: Object.fromEntries(GROUND.map(n => [n, sat(neg[n])])) };
+    return { crisis: false, picked: true, base, e: combine(base, w), w, notes, read: null, found: [], data, extras: extras.sort() };
+  }
+
   // ---------- Small shared helpers ----------
   /** Euclidean length of a vector. */
   const norm = v => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
@@ -329,13 +391,14 @@ if (typeof module !== "undefined") {
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-  /** A fresh session: rest vector, home, default variables, no history. */
+  /** A fresh session: rest vector, home, default variables, no history, no picked feelings or freeing mix yet. */
   function defaultState() {
-    return { v: VERSION, home: homeVec(), e: rest(), vars: defaultVars(), w: [], days: [], cps: [], ideal: null };
+    return { v: VERSION, home: homeVec(), e: rest(), vars: defaultVars(), w: [], days: [], cps: [], ideal: null, pick: null, mix: null };
   }
 
   MF.Movers = {
     VERSION, NAMES, HARD, GROUND, PROCESS, LABEL, HOME, REST, FIXED, VAR_SPEC, SPEC, VAR_KEYS, ACTIVE, MAX_SIM, MAX_CHECKPOINTS, MAX_DAYS, MAX_LINES, MAX_W, LABEL_RE, N, idx, isGround, r2, clamp, clamp01, rest, fromObj, homeVec, norm, distance, stamp, dayOf, f2, sgn, label, cap, listJoin, rng, defaultState, defaultVars, validateVars, weights, defaultWeight, setWeight, fromText, combine, EDGES, MAIN_PAIRS, addWordHook,
+    LEVELS, LEVEL_ORDER, PICK_WORD, PICK_ORDER, EXTRAS, pickDefault, levelOf, nextLevel, pickVector, vectorLevels, addPickExtra, fromPick,
   };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Movers;

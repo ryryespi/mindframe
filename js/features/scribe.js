@@ -1,11 +1,12 @@
 // features/scribe.js — Toby the Tortoise, the Scribe.
 //
 // Writes your session down as plain .mf code and reads it back:
-//   • serialize: state → mf 2 (numbers and labels only, never your words)
-//   • parse: mf 2 exactly (round trip), mf 1 best effort via mapOld, friendly
-//     line errors, and crisis wording in a label is refused
+//   • serialize: state → mf 3 (numbers and labels only, never your words)
+//   • parse: mf 3 and mf 2 exactly (round trip; mf 2 is mf 3 without the
+//     pick/extra/mix lines), mf 1 best effort via mapOld, friendly line
+//     errors, and crisis wording in a label is refused
 //
-//   mf 2
+//   mf 3
 //   home calm=v connection=v hope=v
 //   e name=v ...              (hard/process when > 0; grounding always)
 //   vars key=v ...            (only values that differ from the default)
@@ -13,6 +14,10 @@
 //   day YYYY-MM-DD name=v ...
 //   cp n YYYY-MM-DDTHH:MM label=x name=v ... lambda=v
 //   ideal a=v b=v             eq ... (readable, rebuilt on save, ignored on read)
+//   pick name=v ...           (mf 3: the feelings you picked, at the band midpoints)
+//   extra blame putdown       (mf 3: the extra chips you picked)
+//   mix name=v ...            (mf 3: the freeing mix from the last Update)
+//   free Now: … → Freeing mix: …   (mf 3: readable, rebuilt on save, ignored on read)
 //   # comment
 
 if (typeof module !== "undefined") {
@@ -36,7 +41,9 @@ if (typeof module !== "undefined") {
   /** Join the non-empty parts with spaces. */
   const join = parts => parts.filter(Boolean).join(" ");
 
-  /** State → .mf code (mf 2). Numbers and labels only, never words. */
+  /** The extra chips the code may name (registered by features with MF.Movers.addPickExtra). */
+  const EXTRA_IDS = () => MF.Movers.EXTRAS.map(c => c.id);
+  /** State → .mf code (mf 3). Numbers and labels only, never words. */
   function serialize(state) {
     const out = [`mf ${VERSION}`];
     out.push(`home ${GROUND.map(n => `${n}=${num(state.home[idx[n]])}`).join(" ")}`);
@@ -49,6 +56,14 @@ if (typeof module !== "undefined") {
     if (state.ideal) {
       out.push(`ideal a=${num(state.ideal.a)} b=${num(state.ideal.b)}`);
       out.push(`eq step = act(clip01(e + ${num(state.ideal.a)}*(h - e) + ${num(state.ideal.b)}*s(e)))`);
+    }
+    if (state.pick) {
+      out.push(join(["pick", vecCode(state.pick.e)]));
+      if (state.pick.extras && state.pick.extras.length) out.push(`extra ${state.pick.extras.join(" ")}`);
+    }
+    if (state.mix) {
+      out.push(join(["mix", vecCode(state.mix)]));
+      if (MF.Freeing) out.push(`free ${MF.Freeing.line(state.e, state.mix, state.pick ? state.pick.extras : [])}`);
     }
     return out.join("\n") + "\n";
   }
@@ -134,11 +149,12 @@ if (typeof module !== "undefined") {
     const raw = String(text || "").replace(/\r\n?/g, "\n").split("\n");
     if (raw.length > MAX_LINES) return { ok: false, errors: [{ line: 0, msg: `That code is too long (more than ${MAX_LINES} lines).` }] };
     const first = raw.findIndex(l => l.replace(/#.*$/, "").trim());
-    if (first < 0) return { ok: false, errors: [{ line: 0, msg: "Nothing to import yet. Paste code that starts with \u201Cmf 2\u201D." }] };
+    if (first < 0) return { ok: false, errors: [{ line: 0, msg: "Nothing to import yet. Paste code that starts with \u201Cmf 3\u201D (mf 2 and mf 1 also work)." }] };
     const head = raw[first].replace(/#.*$/, "").trim().split(/\s+/);
-    if (head[0] !== "mf") return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: the code should start with \u201Cmf 2\u201D.` }] };
+    if (head[0] !== "mf") return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: the code should start with \u201Cmf 3\u201D (or mf 2, mf 1).` }] };
     if (head[1] === "1") return parseOld(raw.slice(first + 1));
-    if (head[1] !== String(VERSION)) return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: this is version ${head[1] || "?"}; this app reads versions 1 and 2.` }] };
+    if (head[1] !== String(VERSION) && head[1] !== "2") return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: this is version ${head[1] || "?"}; this app reads versions 1, 2 and 3.` }] };
+    const from = Number(head[1]);
     const state = defaultState();
     let crisis = false, sawHome = false;
     const readVec = (toks, line, extra = {}) => {
@@ -221,12 +237,21 @@ if (typeof module !== "undefined") {
           break;
         }
         case "eq": break;
+        case "pick": state.pick = { e: readVec(rest, n).vec, extras: state.pick ? state.pick.extras : [] }; break;
+        case "extra": {
+          const ids = EXTRA_IDS(), bad = rest.filter(x => !ids.includes(x));
+          if (bad.length) { err(n, `\u201C${bad[0]}\u201D isn't an extra chip (${ids.join(", ")}).`); break; }
+          state.pick = { e: state.pick ? state.pick.e : state.e.slice(), extras: [...new Set(rest)] };
+          break;
+        }
+        case "mix": state.mix = readVec(rest, n).vec; break;
+        case "free": break;
         case "mf": err(n, "the header appears twice."); break;
-        default: err(n, `\u201C${kw}\u201D isn't a keyword (mf, home, e, vars, w, day, cp, ideal, eq).`);
+        default: err(n, `\u201C${kw}\u201D isn't a keyword (mf, home, e, vars, w, day, cp, ideal, eq, pick, extra, mix, free).`);
       }
     });
     if (crisis) return { ok: false, crisis: true, errors: [] };
-    return errors.length ? { ok: false, errors } : { ok: true, state, from: 2 };
+    return errors.length ? { ok: false, errors } : { ok: true, state, from };
   }
 
 

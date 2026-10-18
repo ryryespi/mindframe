@@ -1,6 +1,6 @@
 # MindFrame
 
-A calm, local-only practice tool for looking at a thought. One page, one input box, and an **Update** button: nothing is read or shown until you tap Update (or press Ctrl/Cmd + Enter). No account and no API key. **The app composes its own replies from the equation and makes no network calls**; a public AI is optional, through one button that shows you the exact prompt first.
+A calm, local-only practice tool for looking at a thought. One page, one input box (or **Pick feelings** chips), and an **Update** button: nothing is read or shown until you tap Update (or press Ctrl/Cmd + Enter). No account and no API key. **The app composes its own replies from the equation and makes no network calls**; a public AI is optional, through one button that shows you the exact prompt first.
 
 **Not therapy, not a diagnosis.** In crisis, call or text **988** (US) or call **911**. Crisis wording shows only that support box; nothing is computed or saved.
 
@@ -41,7 +41,7 @@ Only emotions and processes with strong evidence behind them as drivers of distr
 
 ## The master function
 
-Every feature calls one function, `MF.Master.master(text, state)` in `js/core/master.js`. That covers the live card, the story, the path game, checkpoints, accepting a step, recovery, the baseline, import and restore. Nothing else steps e.
+Every feature calls one function, `MF.Master.master(text, state)` in `js/core/master.js`. It has a state-vector entry with the same path, `masterState(e, state, opts, words)`, and the feelings picker's entry `masterPick(pick, state)`. Text → score → `reading(e, …)` and picked → vector → `reading(e, …)` share one internal path, so `master(text, state)` equals `masterState(combine(state.e, fromText(text).w), state, {}, fromText(text))` exactly (tested). That covers the live card, the story, the path game, checkpoints, accepting a step, recovery, the baseline, import and restore. Nothing else steps e.
 
 ```
 e      = score(text)                                   (the words, added to where you are)
@@ -55,7 +55,8 @@ g      = 1 − e^(−raw)   raw = 0.6·grand + 0.5·certain-worst + 0.25·all-or
                         (adds 0.5·g to rumination and to avoidance/fusion, before saturation)
 c(i,j) = √(x_i·y_j)     opposing pulls both active (hidden conflicts); 0.5 for clashes in the words
 gain_j = |e_j − h_j| − |next_j − h_j|   → the positive emotions the step points toward
-P      = 1/(1 + (d/d0)²) · (1 − γ·C_max) · (1 − δ·g)     inner peace, in [0, 1]
+u      = 1 − e^(−0.7·k)  false-humility cues (putting yourself down); shame +0.2, hope −0.2
+P      = 1/(1 + (d/d0)²) · (1 − γ·C_max) · (1 − δ·max(g, u))   inner peace, in [0, 1]
 ```
 
 The last three are computed in the same master pass (`js/core/reality.js`) and returned as `grand`, `conflicts[]` and `positives[]`. No new movers or variables.
@@ -107,7 +108,7 @@ Card order:
 P   = P_d · P_c · P_g
 P_d = 1 / (1 + (d/d0)²)      d = ‖e − h‖; d0 = 0.6, so P_d = 0.8 at d = 0.3 ("close to steady")
 P_c = 1 − γ·C_max            C_max = the strongest hidden conflict c; γ = 0.3
-P_g = 1 − δ·g                g = the grandiosity signal; δ = 0.3
+P_g = 1 − δ·max(g, u)        the true-size factor: g = grandiosity (too big), u = false humility (too small); δ = 0.3
 ```
 
 d0, γ and δ are adjustable in Ada's panel. P = 1 exactly at home and is lower everywhere else (each factor is at most 1). P_d is smooth and strictly decreasing, so there is always a direction to move.
@@ -138,6 +139,50 @@ Two pulls that are both active at once, derived from the nine movers (no new mov
 
 `js/core/reality.js` looks for grand or absolute wording ("only I can", "I'm destined", "everyone will see", "I'm better than everyone", "I never fail", "nothing can stop me"), certain-worst wording ("I'll never be happy", "everything is ruined", "everyone hates me"), all-or-nothing ("a total failure") and absolutist words (always, never, completely, everyone, nothing…). It is negation-aware ("I'm not better than anyone" is ignored). The signal g feeds rumination and avoidance/fusion. When g ≥ 0.25 the card shows, without labels or shaming: "Reality check: part of this thought sounds very sure that it all depends on you, or that you can't fall short." then "You matter, and you are also human; one good step is enough." Grounding: Beck's cognitive distortions (magnification, all-or-nothing; Beck, 1976), Burns (1980), and Al-Mosaiwi & Johnstone (2018), who found absolutist words more common in anxiety, depression and suicidal-ideation forums. This is a word signal, not a diagnosis.
 
+**The other side: putting yourself down.** The same true-size check (not bigger, not smaller) looks for false humility: self-deprecation and disqualifying the positive (Burns, 1980), negation-aware. Kinds: *worthless* ("I'm worthless", "I'm nothing", "I'm not worth it"), *undeserving* ("I don't deserve love / good things / it", "who am I to", "I'm not good enough"; "I don't deserve this" is left alone because it is often about being mistreated), *disqualify* ("it was just luck", "I only got lucky", "anyone could have done it", "they're just being nice"), and *compare* ("everyone is better than me", "I'm worse than everyone"). "I don't think I'm worthless" and "it wasn't just luck" are ignored. The signal u = 1 − e^(−0.7·k) (one cue 0.50, two 0.75) nudges shame +0.2 and hope −0.2 (existing movers only), and inner peace uses max(g, u), so too small costs peace the same way too big does. The card says, for example, "Reality check: part of this thought sounds very sure that what went well was only luck, and that everyone is better than you. That is smaller than true." then "Not bigger, not smaller: what went well counts too; you can name your part in it plainly." The "putting myself down" chip in the feelings picker counts as one cue. Grounding: true humility is an accurate view of oneself, not low self-regard (Tangney, 2000); disqualifying the positive (Burns, 1980); self-compassion (Neff, 2003); shame and self-criticism and compassion-focused therapy (Gilbert & Procter, 2006; Gilbert, 2009).
+
+## Pick feelings
+
+Above the text box, a small toggle: **Write** (the default) or **Pick feelings**. Pick feelings shows the nine movers as chips in plain words: afraid, sad, angry, ashamed, calm, connected, hopeful, replaying thoughts, avoiding. Each tap goes off → a little → quite → strongly → off. The values are the midpoints of the word bands the card uses (a little < 0.3 ≤ quite ≤ 0.6 < strongly):
+
+| Level | off | a little | quite | strongly |
+|---|---|---|---|---|
+| Value | 0.00 | 0.15 | 0.45 | 0.80 |
+
+Calm, connected and hopeful start at "quite" (close to their 0.5 rest), because "off" for them means "not at all calm"; the others start off. Two extra chips map onto existing movers as nudges (no new movers), exactly like the matching words: **blaming myself** is one self-blame cue (shame +0.2, replaying +0.2, c_self = 0.50 for Grace's forgiveness pass) and **putting myself down** is one false-humility cue (shame +0.2, hope −0.2, u = 0.50). Update runs `masterPick()`, the same master path the text uses. The picker has no text, so there is no crisis path in it; crisis wording still in the text box shows the 988/911 box, and the 988 line stays at the top of the page as always. The picked levels are kept with the session (mf 3 `pick` and `extra` lines), so the chips come back as you left them.
+
+## The freeing mix
+
+**Model, not validated science.** `js/features/freeing.js` adds a master pass that solves, from the reading, for the combination of feelings that best frees you from shame, self-blame and false humility, while obeying the master function. No new movers or variables, and it never moves e.
+
+```
+J(e) = P(e) − μ·N(e)                     μ = 0.5
+N(e) = e_shame + c_self·e_rumination + u·max(0, h_hope − e_hope)    (the nudge load)
+moves:    each step, at most K = 3 movers move, each by exactly one band toward home
+          on the ladder 0, 0.15, 0.45, 0.80 (clipped at h_j, never past it)
+feasible: P(e') ≥ P(e) and e'_shame ≤ e_shame
+step:     e ← argmax J over every feasible move set (130 subsets, exhaustive), until J
+          rises by no more than 0.001, or after T = 3 steps
+```
+
+P is master's inner peace with the reading's text clashes and true-size signal held fixed. N is shame itself plus the movers the self-blame cue (replaying) and the put-down cue (hope) push on. Every move goes toward home, which is the master step's own direction: master's next_j always lies between e_j and h_j (the contraction proof above). So, by construction and tested over 160 random picks: P(target) ≥ P(now), shame never rises, J rises every step, no mover moves more than one band per step, every moved mover agrees in sign with master's next step, and each step equals an independent brute-force optimum.
+
+For ashamed strongly + blaming myself + putting myself down (calm, connected, hopeful at quite):
+
+* step 1: shame 0.87 → 0.45, calm 0.45 → 0.80, hope 0.37 → 0.80 (P 0.19 → 0.43)
+* step 2: shame 0.45 → 0.15, connection 0.45 → 0.80, replaying 0.18 → 0 (P → 0.80)
+* step 3: shame 0.15 → 0 (P → 0.85)
+
+**On the card**, words only, a "Your freeing mix" tile appears when shame is at least 0.3, or self-blame or a put-down is present: "Your freeing mix: ease the shame and the replaying; grow calm, connection, and hope.", "Three gentle steps, one band at a time: inner peace could go from a little peace to steady, and shame only goes down.", "True humility sees you at your real size: not worse than others, not better; worthy of kindness and still learning.", and One step, the self-compassion break (Neff). With self-blame present, the tile routes to Grace's **Forgive myself** path. With Include faith on: "Think of yourself with sober judgment (from Romans). To be humble is to walk in truth (Teresa of Ávila), and your worth rests on God's love, not on your record: we love because he first loved us (from First John)." (Romans 12:3; Teresa of Ávila, *The Interior Castle*, Sixth Dwelling Places, ch. 10, §7, in the Kavanaugh & Rodriguez translation: "to be humble is to walk in truth"; 1 John 4:19.) Ada shows the objective, the constraints, each step with its P and J, and P, N and J before and after.
+
+**Export.** Toby shows the freeing mix as one compact readable line, with **Copy freeing mix**:
+
+```
+Now: ashamed strongly, replaying a little, calm quite, connected quite, hopeful quite, blaming myself, putting myself down → Freeing mix: ashamed off, replaying off, calm strongly, connected strongly, hopeful strongly
+```
+
+A hard or process feeling is listed when it isn't off on either side, and a grounding one when its level changes or isn't "quite". The same line, and the mix as numbers, are in the mf 3 code, and the comfort-AI prompt carries the line and the put-down signal (never your words).
+
 ## Comfort story from a public AI (optional)
 
 In Fern the Fox's panel, **Comfort story from a public AI** builds a prompt from the analysis only and shows it in an editable box with "Only this text will be shared. Your journal stays on your phone." The prompt contains the card in plain words plus a compact numbers summary (movers with bands, step direction d → d_next and the biggest move, conflicts with c, the grandiosity signal g, positive emotions) and asks for a ~200-word gentle, grounded comfort story with a friendly animal, three affirmations written from that analysis, no medical advice, and a hopeful ending. It never contains the text you typed (every line is composed from numbers, and a second guard drops any line repeating four of your words in a row). **Open in Grok** (`https://grok.com/?q=<encoded>`) and **Open in ChatGPT** (`https://chatgpt.com/?q=<encoded>`) open a new tab and also copy the prompt in case the site doesn't fill it in; Grok may send it as soon as it opens. **Copy prompt** copies only. The button is disabled during a crisis. The app itself makes no network calls.
@@ -151,8 +196,8 @@ Below the card, six friendly animals sit in a little meadow. Each opens one pane
 | **Fern the Fox** (pencil) | Writer | Keeps your journal and spins gentle stories. | A creature story driven by the master step (feeling words, ends with an affirmation and a question), accept the step, the path game, the optional public-AI comfort prompt, and the journal (the only place your words are kept, and only when you tap Save). |
 | **Hazel the Owl** (glasses, book) | Historian | Remembers your days and how far you've come. | Each day in words, inner peace across your saved days, Save checkpoint (numbers only), restore a checkpoint. |
 | **Remy the Raccoon** (magnifying glass) | Analyzer | Turns over each feeling to see how it fits. | Every hidden pull and any grand wording with its true-sized version, then all nine movers in words: how present each is, what it feeds, what softens it. |
-| **Toby the Tortoise** (quill) | Scribe | Slow and careful; copies your numbers safely. | Export / import `.mf` code, download, Start over. |
-| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores, inner peace P with ∂P/∂e, the lever, n*, e* and the convergence proof sketch, the forgiveness scores F_self and F_other with the path, ΔP_F and the Grace recommendation, and the practice pick), adjust each mover, and the variables a0, k, a_max, b, decay, d0, γ, δ, home and the main W links, with Reset. |
+| **Toby the Tortoise** (quill) | Scribe | Slow and careful; copies your numbers safely. | The freeing mix as one readable line with Copy freeing mix, export / import `.mf` code (mf 3), download, Start over. |
+| **Ada the Otter** (goggles, flask) | Scientist | Loves equations and lets you tinker. | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores, inner peace P with ∂P/∂e, the lever, n*, e* and the convergence proof sketch, the forgiveness scores F_self and F_other with the path, ΔP_F and the Grace recommendation, the practice pick, the false-humility signal u, and the freeing-mix optimization: objective, constraints, each step with P and J), adjust each mover, and the variables a0, k, a_max, b, decay, d0, γ, δ, home and the main W links, with Reset. |
 | **Grace the Dove** (olive branch) | Peacemaker | Lets go gently, of my own mistakes and others'. | Three tabs: **Forgive myself** (the four Rs), **Forgive someone** (REACH), and **Breathe & be patient** (ten practices and the breathing circle). Optional note boxes stay on the page unless you save them to the journal. |
 
 Changing a number in a panel does not redraw the card; it says "Tap Update to see the new reading." Buttons that are themselves an action (Write a story, Accept step, Save checkpoint, Restore) run Update for you.
@@ -243,10 +288,10 @@ Sources: Gottman & Levenson (1992), "Marital processes predictive of later disso
 
 **Caveat:** the high predictive accuracies reported in this work (for example around 90%) come from small samples (dozens of couples) and are debated, notably because the models were not cross-validated (Heyman & Slep, 2001, "The hazards of predicting divorce without crossvalidation," *J Marriage Fam, 63*(2), 473–479). MindFrame uses the four patterns as a pattern helper for one message, not a predictor of any relationship.
 
-## Code (`mf 2`)
+## Code (`mf 3`)
 
 ```
-mf 2
+mf 3
 home calm=0.80 connection=0.80 hope=0.80
 e sadness=0.67 anger=0.86 calm=0.50 connection=0.50 hope=0.28 rumination=0.10 avoidance=0.45
 vars aBase=0.30                 # only non-defaults
@@ -255,10 +300,14 @@ day 2026-10-16 …
 cp 1 2026-10-16T08:30 label=step-1 … lambda=-0.30
 ideal a=0.25 b=0.10
 eq step = act(clip01(e + 0.25*(h - e) + 0.10*s(e)))   # readable; ignored on import
+pick shame=0.80 calm=0.45 connection=0.45 hope=0.45     # the picked feelings (Pick feelings only)
+extra blame putdown                                     # the extra chips
+mix calm=0.80 connection=0.80 hope=0.80                 # the freeing mix from the last Update
+free Now: ashamed strongly, … → Freeing mix: …         # readable; rebuilt on save, ignored on import
 ```
 
 * Numbers and labels only, never your words.
-* mf 2 round-trips exactly.
+* mf 3 round-trips exactly. mf 2 is mf 3 without the pick, extra, mix and free lines, and still imports exactly.
 * mf 1 codes import on a best-effort basis through the mapping above. Old variables and frameworks are dropped, with a note.
 
 ## Structure
@@ -266,9 +315,9 @@ eq step = act(clip01(e + 0.25*(h - e) + 0.10*s(e)))   # readable; ignored on imp
 Code is grouped by feature. Every file starts with a header comment; every function has a JSDoc. Files share one namespace, `MF` (`window.MF` in the browser, `global.MF` in Node tests).
 
 ```
-index.html            the one page: scene, input, Update, card tiles, six friends, six panels
+index.html            the one page: scene, Write / Pick feelings, input, Update, card tiles, six friends, six panels
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v17)
+sw.js                 offline cache (v18)
 tools.html            redirects old shortcuts to the one page
 img/                  fox, owl, raccoon, tortoise, otter, dove (original SVGs)
 js/
@@ -276,10 +325,10 @@ js/
   core/               the model; no page code
     signals.js        word patterns (thinking traps, needs)
     grounding.js      crisis wording and pattern reading
-    movers.js         MF.Movers: the nine movers, W, variables, lexicon, fromText
-    reality.js        MF.Reality: grandiosity g, hidden conflicts, positive emotions
+    movers.js         MF.Movers: the nine movers, W, variables, lexicon, fromText, the picker levels and fromPick
+    reality.js        MF.Reality: grandiosity g, false humility u, hidden conflicts, positive emotions
     peace.js          MF.Peace: inner peace P, the lever, the gradient, the bands
-    master.js         MF.Master: the master function, recovery, baseline
+    master.js         MF.Master: the master function (text, state-vector and picker entries), recovery, baseline
     words.js          MF.Words: the composer (every card sentence built from the numbers)
   features/
     writer/           Fern the Fox
@@ -289,15 +338,17 @@ js/
       comfort.js      MF.Comfort: the optional public-AI prompt and links
     historian.js      Hazel the Owl: days, checkpoints, restore, history
     analyzer.js       Remy the Raccoon: the nine movers in words
-    scribe.js         Toby the Tortoise: mf 2 / mf 1 export and import
+    scribe.js         Toby the Tortoise: mf 3 / mf 2 / mf 1 export and import
     scientist.js      Ada the Otter: the math, sliders and variables
     relationship.js   the Four Horsemen pattern helper
     forgiveness.js    Grace the Dove: forgiveness cues, master pass, card words, guided paths
     practices.js      MF.Practices: patience & mindfulness library, the step pick, the breathing circle
+    freeing.js        MF.Freeing: the freeing mix (master pass, card words, the export line, Copy freeing mix)
+    picker.js         MF.Picker: the Write / Pick feelings toggle and the feelings chips
 tests/                node tests (tests/mf.js loads every module)
 ```
 
-Load order in `index.html`: core (signals, grounding, movers, reality, peace, master, words), then features (relationship, forgiveness, practices, stories, games, historian, writer, comfort, analyzer, scribe, scientist), then `app.js`.
+Load order in `index.html`: core (signals, grounding, movers, reality, peace, master, words), then features (relationship, forgiveness, practices, freeing, picker, stories, games, historian, writer, comfort, analyzer, scribe, scientist), then `app.js`.
 
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
 
@@ -328,6 +379,8 @@ MindFrame is a model built from design assumptions and informed by the research 
 * Desbordes, G., Gard, T., Hoge, E. A., Hölzel, B. K., Kerr, C., Lazar, S. W., Olendzki, A., & Vago, D. R. (2015). Moving beyond mindfulness: Defining equanimity as an outcome measure in meditation and contemplative research. *Mindfulness, 6*(2), 356–372. doi:10.1007/s12671-013-0269-8
 * Emmons, R. A., & McCullough, M. E. (2003). Counting blessings versus burdens: An experimental investigation of gratitude and subjective well-being in daily life. *Journal of Personality and Social Psychology, 84*(2), 377–389.
 * Enright, R. D., & Fitzgibbons, R. P. (2015). *Forgiveness therapy: An empirical guide for resolving anger and restoring hope.* Washington, DC: APA. doi:10.1037/14526-000
+* Gilbert, P. (2009). Introducing compassion-focused therapy. *Advances in Psychiatric Treatment, 15*(3), 199–208. doi:10.1192/apt.bp.107.005264
+* Gilbert, P., & Procter, S. (2006). Compassionate mind training for people with high shame and self-criticism: Overview and pilot study of a group therapy approach. *Clinical Psychology & Psychotherapy, 13*(6), 353–379. doi:10.1002/cpp.507
 * Gillanders, D. T., et al. (2014). The development and initial validation of the Cognitive Fusion Questionnaire. *Behavior Therapy, 45*(1), 83–101.
 * Holt-Lunstad, J., Smith, T. B., & Layton, J. B. (2010). Social relationships and mortality risk: A meta-analytic review. *PLoS Medicine, 7*(7), e1000316.
 * Kabat-Zinn, J. (1990). *Full catastrophe living.* New York: Delacorte.
@@ -348,6 +401,8 @@ MindFrame is a model built from design assumptions and informed by the research 
 * Gottman, J. M., & Levenson, R. W. (2000). The timing of divorce: Predicting when a couple will divorce over a 14-year period. *Journal of Marriage and Family, 62*(3), 737–745.
 * Heyman, R. E., & Slep, A. M. S. (2001). The hazards of predicting divorce without crossvalidation. *Journal of Marriage and Family, 63*(2), 473–479. doi:10.1111/j.1741-3737.2001.00473.x
 * Stahl, B., & Goldstein, E. (2010). *A mindfulness-based stress reduction workbook.* Oakland, CA: New Harbinger.
+* Tangney, J. P. (2000). Humility: Theoretical perspectives, empirical findings and directions for future research. *Journal of Social and Clinical Psychology, 19*(1), 70–82. doi:10.1521/jscp.2000.19.1.70
+* Teresa of Ávila. *The interior castle* (VI.10.7). In K. Kavanaugh & O. Rodriguez (Trans.), *The collected works of St. Teresa of Avila* (Vol. 2). Washington, DC: ICS Publications, 1980. ("To be humble is to walk in truth.")
 * Wade, N. G., Hoyt, W. T., Kidwell, J. E. M., & Worthington, E. L., Jr. (2014). Efficacy of psychotherapeutic interventions to promote forgiveness: A meta-analysis. *Journal of Consulting and Clinical Psychology, 82*(1), 154–170. doi:10.1037/a0035268
 * Worthington, E. L., Jr. (2006). *Forgiveness and reconciliation: Theory and application.* New York: Routledge.
 * Zaccaro, A., et al. (2018). How breath-control can change your life: A systematic review on psycho-physiological correlates of slow breathing. *Frontiers in Human Neuroscience, 12*, 353. doi:10.3389/fnhum.2018.00353

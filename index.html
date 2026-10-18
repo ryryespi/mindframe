@@ -30,6 +30,7 @@
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
     <symbol id="i-sprout" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-4-3-6-7-6 0 4 3 6 7 6z"/><path d="M12 14c0-4 3-6 7-6 0 4-3 6-7 6z"/></symbol>
     <symbol id="i-pull" viewBox="0 0 24 24"><path d="M4 12h6M14 12h6"/><path d="M7 9l-3 3 3 3M17 9l3 3-3 3"/></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8.5 11V7.5a3.5 3.5 0 0 1 6.8-1.2"/><path d="M12 15v2"/></symbol>
     <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
   </svg>
 
@@ -57,9 +58,22 @@
     </header>
 
     <main>
-      <!-- 1. Write, then tap Update. Nothing is read until you do. -->
-      <label class="visually-hidden" for="input">What's on your mind?</label>
-      <textarea id="input" rows="4" placeholder="What's on your mind?"></textarea>
+      <!-- 1. Write (or pick feelings), then tap Update. Nothing is read until you do. -->
+      <div class="mode" role="group" aria-label="How to begin">
+        <button type="button" id="mode-write" aria-pressed="true">Write</button>
+        <button type="button" id="mode-pick" aria-pressed="false">Pick feelings</button>
+      </div>
+      <div id="write-box">
+        <label class="visually-hidden" for="input">What's on your mind?</label>
+        <textarea id="input" rows="4" placeholder="What's on your mind?"></textarea>
+      </div>
+      <div id="picker" class="picker hidden" role="group" aria-labelledby="picker-title">
+        <p id="picker-title" class="small quiet">Tap a feeling to go through off, a little, quite and strongly.</p>
+        <div id="pick-chips" class="feel-chips"></div>
+        <p class="small quiet picker-also">Also true right now:</p>
+        <div id="pick-extras" class="feel-chips extras"></div>
+        <button type="button" id="pick-reset" class="text small">Clear the chips</button>
+      </div>
       <button type="button" id="update" class="primary">Update</button>
       <p class="quiet small">Your words stay on this device and are never saved unless you keep them in the journal. Ctrl or Cmd + Enter also works.</p>
 
@@ -76,6 +90,8 @@
           <div class="tile tile-soft hidden" id="t-conflict"><svg class="ico" aria-hidden="true"><use href="#i-pull"/></svg><div id="conflict" class="soft-box"></div></div>
           <div class="tile tile-soft hidden" id="t-reality"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg><div id="reality" class="soft-box"></div></div>
           <div class="tile tile-forgive hidden" id="t-forgive"><svg class="ico" aria-hidden="true"><use href="#i-dove"/></svg><div id="forgive"></div><button type="button" id="forgive-open" class="secondary">Open Grace's guide</button></div>
+          <div class="tile tile-free hidden" id="t-free"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><div id="free" class="soft-box"></div><p id="free-step" class="free-step"></p>
+            <div class="row"><button type="button" id="free-try" class="secondary">Try the self-compassion break</button><button type="button" id="free-grace" class="secondary hidden">Forgive myself with Grace</button></div></div>
           <div class="tile tile-soft hidden" id="t-pattern"><div id="pattern"></div></div>
           <div class="tile" id="t-affirm"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg>Affirmations</span><ul id="affirm" class="affirm"></ul></div>
           <div class="tile tile-step" id="t-step"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-sprout"/></svg>One step</span><p id="step"></p><button type="button" id="step-try" class="secondary hidden">Try it with Grace</button></div>
@@ -180,13 +196,18 @@
         <section id="p-scribe" class="panel card hidden" aria-label="Scribe">
           <div class="panel-head"><img src="img/tortoise.svg" alt="" width="40" height="40" /><h2>Toby the Tortoise, Scribe</h2><button type="button" class="text panel-close" aria-label="Close the Scribe">Close</button></div>
           <p class="quiet small">Your session as plain .mf code: numbers and labels only, never your words.</p>
+          <div class="mix-box">
+            <span class="label">Your freeing mix</span>
+            <p id="mix-line" class="mix-line"></p>
+            <button type="button" id="copy-mix" class="secondary">Copy freeing mix</button><span class="quiet small" id="mix-copied"></span>
+          </div>
           <pre id="code" class="code"></pre>
           <div class="row">
             <button type="button" id="copy-code" class="secondary">Copy code</button>
             <button type="button" id="download" class="secondary">Download .mf.txt</button>
           </div>
           <label class="visually-hidden" for="import-text">Paste .mf code</label>
-          <textarea id="import-text" class="short" rows="5" placeholder="Paste code that starts with mf 2 (mf 1 also works)"></textarea>
+          <textarea id="import-text" class="short" rows="5" placeholder="Paste code that starts with mf 3 (mf 2 and mf 1 also work)"></textarea>
           <label class="small" for="import-file">Or choose a file</label>
           <input type="file" id="import-file" accept=".txt,.mf,text/plain" />
           <ul id="import-errors" class="errors"></ul>
@@ -276,6 +297,8 @@
   <script src="js/features/relationship.js"></script>
   <script src="js/features/forgiveness.js"></script>
   <script src="js/features/practices.js"></script>
+  <script src="js/features/freeing.js"></script>
+  <script src="js/features/picker.js"></script>
   <script src="js/features/writer/stories.js"></script>
   <script src="js/features/writer/games.js"></script>
   <script src="js/features/historian.js"></script>

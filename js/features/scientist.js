@@ -71,6 +71,15 @@ if (typeof module !== "undefined") {
       L.push(`F_self = e_shame\u00B7(0.4 + 0.6\u00B7c_self) = ${f2(m.e[idx.shame])}\u00B7(0.4 + 0.6\u00B7${f2(f.cSelf)}) = ${f2(f.Fself)};  F_other = e_anger\u00B7(0.4 + 0.6\u00B7c_other) = ${f2(m.e[idx.anger])}\u00B7(0.4 + 0.6\u00B7${f2(f.cOther)}) = ${f2(f.Fother)}`);
       L.push(`forgiveness path (\u03B8_F = 0.35): ${f.path || "none"};  \u0394P_F self ${f.dP.self >= 0 ? "+" : ""}${f.dP.self.toFixed(3)}, other ${f.dP.other >= 0 ? "+" : ""}${f.dP.other.toFixed(3)};  Grace recommended: ${f.grace ? "yes (lever in the path's movers)" : "no"}`);
     }
+    // True size, the small side (core/reality.js) and the freeing mix (features/freeing.js).
+    if (m.small) L.push(`u = 1 \u2212 e^(\u22120.7k) (putting yourself down, k = ${m.small.k}${m.small.chip ? ", the chip" : ""}) = ${f2(m.small.u)}; true size max(g, u) = ${f2(m.tsize || 0)} in P_g = 1 \u2212 \u03B4\u00B7max(g, u); adds shame +0.20, hope \u22120.20`);
+    const fr = m.freeing;
+    if (fr) {
+      L.push(`freeing mix: max J = P \u2212 \u03BC\u00B7N, \u03BC = ${f2(fr.mu)}, N = e_shame + c_self\u00B7e_rumination + u\u00B7max(0, h_hope \u2212 e_hope) (c_self = ${f2(fr.cSelf)}, u = ${f2(fr.u)})`);
+      L.push(`  moves: \u2264 ${fr.K} movers per step, one band each toward h (ladder 0, 0.15, 0.45, 0.80), master's step direction; keep P' \u2265 P and shame' \u2264 shame; \u2264 ${fr.T} steps, exhaustive over the subsets`);
+      fr.steps.forEach((st, k) => L.push(`  step ${k + 1}: ${st.moves.map(x => `${label(x.name)} ${f2(x.from)}\u2192${f2(x.to)}`).join(", ")}; P = ${f2(st.P)}, J = ${f2(st.J)}`));
+      L.push(`  P ${f2(fr.P0)} \u2192 ${f2(fr.P1)}, N ${f2(fr.N0)} \u2192 ${f2(fr.N1)}, J ${f2(fr.J0)} \u2192 ${f2(fr.J1)}${fr.steps.length ? "" : " (no feasible move raises J)"}`);
+    }
     if ("wait" in m) L.push(`practice = pick(lever, e, d, c_wait = ${f2(m.wait || 0)}) \u2192 ${m.practice ? `${m.practice.id} for ${label(m.practice.mover)}` : "none (the mover's own step)"}`);
     return L;
   }

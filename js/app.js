@@ -1,8 +1,10 @@
-// app.js — the app shell: one text box, an Update button, the words-first
+// app.js — the app shell: one text box (or the feelings picker), an Update button, the words-first
 // card (soft tiles with small icons), the sky-and-meadow scene, and six animal
 // helpers that each open one panel.
 //
 //   Update (or Ctrl/Cmd+Enter) → master(text, state) → the card, every line
+//   (in "Pick feelings" mode: masterPick(pick, state), the same master path on
+//   the picked vector; features/picker.js),
 //   composed from master's numbers by core/words.js (room for positive
 //   emotions first, then inner peace and the path to it, then feelings, links, a hidden pull, a reality check,
 //   affirmations, one step, progress). Nothing is
@@ -20,6 +22,7 @@
 //   Analyzer (Remy the Raccoon) the nine movers in words
 //   Scribe (Toby the Tortoise)  export / import .mf code
 //   Scientist (Ada the Otter)   the math + adjust numbers and variables
+//   The freeing mix (freeing.js) is a card tile and a line in Toby's panel.
 //   Peacemaker (Grace the Dove) forgive myself, forgive someone, and the
 //                               patience & mindfulness practices with the
 //                               breathing circle (forgiveness.js, practices.js)
@@ -32,7 +35,7 @@
 (function () {
   "use strict";
   const { defaultState } = MF.Movers;
-  const { master, refreshIdeal } = MF.Master;
+  const { master, masterPick, refreshIdeal } = MF.Master;
   const KEY = "mindframe-workspace";
   const FAITH_KEY = "mindframe-faith";
   const $ = id => document.getElementById(id);
@@ -113,11 +116,17 @@
    * @returns {boolean} false when the text reads as a crisis
    */
   function update() {
-    const out = master($("input").value, { ...state, e: base });
+    const picking = app.picker && app.picker.mode() === "pick";
+    // Safety first: crisis wording still in the text box shows the 988/911 box even in pick mode.
+    if (picking && Grounding.isCrisis($("input").value)) { crisis(true); return false; }
+    const pick = picking ? app.picker.pick() : null;
+    const out = picking ? masterPick(pick, { ...state, e: base }) : master($("input").value, { ...state, e: base });
     if (out.crisis) { crisis(true); return false; }
     if (inCrisis) crisis(false);
     reading = out;
-    state = { ...state, e: out.e.slice() };
+    // The session keeps the reading's e, the picked levels (pick mode only) and the freeing mix (mf 3).
+    state = { ...state, e: out.e.slice(), pick: picking ? { e: out.pick.base.slice(), extras: out.pick.extras.slice() } : null, mix: out.freeing ? out.freeing.target.slice() : null };
+    if (picking) base = out.e.slice();
     note("");
     renderCard();
     renderAll();
@@ -139,6 +148,12 @@
     soft("forgive", c.forgive);
     // A tile is shown only when it has something to say.
     [["t-conflict", c.conflict], ["t-reality", c.reality], ["t-forgive", c.forgive]].forEach(([id, l]) => $(id).classList.toggle("hidden", !l.length));
+    // The freeing mix tile (features/freeing.js): ease/grow, the peace band, true humility, One step.
+    soft("free", c.freeing ? c.freeing.lines : []);
+    $("t-free").classList.toggle("hidden", !c.freeing);
+    $("free-step").textContent = c.freeing ? c.freeing.step : "";
+    $("free-grace").classList.toggle("hidden", !(c.freeing && c.freeing.grace));
+    $("free-try").classList.toggle("hidden", !(c.freeing && c.freeing.tryIt));
     $("step-try").classList.toggle("hidden", !c.practice);
     $("step-try").dataset.practice = c.practice ? c.practice.id : "";
     $("step-try").textContent = c.practice ? `Try it with Grace: ${c.practice.name}` : "";
@@ -172,7 +187,7 @@
   }
 
   // ---------- Panels ----------
-  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices].map(f => f.mount(app));
+  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker].map(f => f.mount(app));
   /** Re-render every panel (cheap; panels only display). */
   function renderAll() { renders.forEach(r => r()); }
 
