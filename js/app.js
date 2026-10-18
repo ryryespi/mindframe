@@ -103,6 +103,9 @@
       delete document.body.dataset.peace;
       crises.forEach(fn => fn());
       $("out").classList.add("hidden");
+    $("card-tools").classList.add("hidden");
+      $("card-tools").classList.add("hidden");
+      closeSheet(false);
       $("crisis").innerHTML = `<p><strong>You don't have to carry this alone.</strong> What you're feeling matters, and help is available right now.</p>
         <p>Call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline, US, free, 24/7). If you're in immediate danger, call <strong>911</strong>.</p>
         <p>Please also reach out to someone you trust.</p>`;
@@ -139,6 +142,7 @@
     const c = MF.Words.card(state, reading, { faith: app.faith(), seed: 1 });
     // The scene follows the inner-peace band (colors only; words stay on the card).
     if (reading.peace) document.body.dataset.peace = MF.Peace.band(reading.peace.P).replace(" ", "-");
+    $("headline").textContent = c.headline;
     $("room").textContent = c.room;
     $("feel").textContent = c.feeling;
     const soft = (id, list) => { const el = $(id); el.innerHTML = ""; list.forEach(t => { const p = document.createElement("p"); p.textContent = t; el.appendChild(p); }); el.classList.toggle("hidden", !list.length); };
@@ -161,6 +165,7 @@
     const fill = (id, list) => { const ul = $(id); ul.innerHTML = ""; list.forEach(t => ul.appendChild(li(t))); };
     fill("connect", c.connect);
     fill("affirm", c.affirmations);
+    fill("affirm-top", c.affirmTop);
     $("step").textContent = c.step;
     $("progress").textContent = c.progress;
     const rel = MF.Relationship.section(reading.found);
@@ -178,39 +183,98 @@
       box.append(h, a, ex);
     });
     $("t-pattern").classList.toggle("hidden", !rel.length);
+    placeInsight(c.insight ? c.insight.id : null);
     const out = $("out");
     out.classList.remove("hidden");
+    $("card-tools").classList.remove("hidden");
     // A soft, staggered fade-in for the visible tiles (none with reduced motion; see style.css).
     let i = 0;
     out.querySelectorAll(".tile").forEach(t => { if (!t.classList.contains("hidden")) t.style.setProperty("--i", i++); });
     out.classList.remove("fresh"); void out.offsetWidth; out.classList.add("fresh");
   }
 
+  // ---------- Short card + See more ----------
+  // The insight tiles live in #more in a fixed order; the one the numbers pick
+  // (Words.insight) moves into #insight-slot, shown short (.compact) until See more.
+  const INSIGHT_TILE = { free: "t-free", forgive: "t-forgive", reality: "t-reality", pattern: "t-pattern", conflict: "t-conflict" };
+  const MORE_ORDER = ["t-peace", "t-connect", "t-conflict", "t-reality", "t-forgive", "t-free", "t-pattern", "t-affirm"];
+  /** Put the chosen insight tile in the slot and every other tile back in #more, in order. */
+  function placeInsight(id) {
+    const more = $("more"), slot = $("insight-slot"), pick = id ? INSIGHT_TILE[id] : null;
+    MORE_ORDER.forEach(t => { $(t).classList.remove("compact"); more.insertBefore($(t), $("progress")); });
+    if (pick) { const t = $(pick); t.classList.add("compact"); slot.appendChild(t); t.classList.toggle("compact", !expanded()); }
+    setMore(false);
+  }
+  /** True when See more is open. */
+  const expanded = () => $("more-toggle").getAttribute("aria-expanded") === "true";
+  /** Open or close the See more part of the card. */
+  function setMore(open) {
+    $("more").classList.toggle("hidden", !open);
+    $("more-toggle").setAttribute("aria-expanded", String(open));
+    $("more-toggle").textContent = open ? "See less" : "See more";
+    $("insight-slot").querySelectorAll(".tile").forEach(t => t.classList.toggle("compact", !open));
+  }
+  $("more-toggle").addEventListener("click", () => setMore(!expanded()));
+
   // ---------- Panels ----------
   const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker].map(f => f.mount(app));
   /** Re-render every panel (cheap; panels only display). */
   function renderAll() { renders.forEach(r => r()); }
 
-  // The animal row: each friend opens one panel; tapping again closes it.
-  const calmMotion = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // The animal row: each friend opens one panel as a bottom sheet over the page
+  // (a modal dialog: focus moves in and stays in; Close, Esc or the shade closes it,
+  // and focus goes back to the friend who opened it). Tapping the friend again closes it.
+  let opener = null;
+  /** The open sheet, or null. */
+  const openSheet = () => document.querySelector(".panel:not(.hidden)");
+  /** Close the open sheet; with restore, give focus back to the friend button. */
+  function closeSheet(restore = true) {
+    const was = openSheet();
+    document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+    document.querySelectorAll(".friend").forEach(b => b.setAttribute("aria-expanded", "false"));
+    $("sheet-backdrop").classList.add("hidden");
+    document.body.classList.remove("sheet-open");
+    closes.forEach(fn => fn());
+    if (was && restore && opener && document.contains(opener)) opener.focus();
+    if (was) opener = null;
+  }
   /** Open (or, with force false, toggle) the panel a friend button controls; one panel at a time. */
   function openPanel(btn, force) {
     const panel = $(btn.getAttribute("aria-controls")), open = force || panel.classList.contains("hidden");
-    document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
-    document.querySelectorAll(".friend").forEach(b => b.setAttribute("aria-expanded", "false"));
-    closes.forEach(fn => fn());
-    if (open) {
-      panel.classList.remove("hidden");
-      btn.setAttribute("aria-expanded", "true");
-      panel.scrollIntoView({ block: "start", behavior: calmMotion() ? "auto" : "smooth" });
-    }
+    const keep = opener;
+    closeSheet(false);
+    if (!open) { btn.focus(); return; }
+    // Focus goes back to whatever opened the sheet (a friend, or a card button such as Try it).
+    const active = document.activeElement;
+    opener = !force ? btn : (active && active !== document.body && !active.closest(".panel") ? active : keep || btn);
+    panel.classList.remove("hidden");
+    btn.setAttribute("aria-expanded", "true");
+    $("sheet-backdrop").classList.remove("hidden");
+    document.body.classList.add("sheet-open");
+    panel.scrollTop = 0;
+    panel.querySelector("h2").focus({ preventScroll: true });
   }
+  /** The focusable things inside a sheet, in tab order. */
+  const focusables = el => [...el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+    .filter(x => !x.disabled && x.getClientRects().length && !x.closest(".hidden"));
+  // Esc closes; Tab and Shift+Tab wrap inside the sheet (the focus trap).
+  document.addEventListener("keydown", e => {
+    const panel = openSheet();
+    if (!panel) return;
+    if (e.key === "Escape") { e.preventDefault(); closeSheet(true); return; }
+    if (e.key !== "Tab") return;
+    const f = focusables(panel);
+    if (!f.length) { e.preventDefault(); return; }
+    const first = f[0], last = f[f.length - 1], at = document.activeElement;
+    if (!panel.contains(at)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && (at === first || at === panel.querySelector("h2"))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && at === last) { e.preventDefault(); first.focus(); }
+  });
+  // Focus that wanders out (a click on the page behind) is brought back in.
+  document.addEventListener("focusin", e => { const panel = openSheet(); if (panel && !panel.contains(e.target)) panel.querySelector("h2").focus({ preventScroll: true }); });
+  $("sheet-backdrop").addEventListener("click", () => closeSheet(true));
   document.querySelectorAll(".friend").forEach(btn => btn.addEventListener("click", () => openPanel(btn, false)));
-  document.querySelectorAll(".panel-close").forEach(b => b.addEventListener("click", () => {
-    b.closest(".panel").classList.add("hidden");
-    document.querySelectorAll(".friend").forEach(x => x.setAttribute("aria-expanded", "false"));
-    closes.forEach(fn => fn());
-  }));
+  document.querySelectorAll(".panel-close").forEach(b => b.addEventListener("click", () => closeSheet(true)));
   // From the card into Grace's panel: the One step's practice, or the suggested forgiveness path.
   $("step-try").addEventListener("click", () => { app.open("grace"); app.grace.show("practice"); app.practices.select($("step-try").dataset.practice); });
   $("forgive-open").addEventListener("click", () => { app.open("grace"); app.grace.show($("forgive-open").dataset.path || "self"); });
@@ -258,6 +322,7 @@
     app.resetBase("");
     delete document.body.dataset.peace;
     $("out").classList.add("hidden");
+    $("card-tools").classList.add("hidden");
     renderAll();
     note("");
   }

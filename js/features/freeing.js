@@ -167,13 +167,13 @@ if (typeof module !== "undefined") {
     const parts = [];
     if (f.ease.length) parts.push(`ease ${listJoin(f.ease.map(n => EASE_NOUN[n]))}`);
     if (f.grow.length) parts.push(`grow ${listJoin(f.grow.map(n => GROW_NOUN[n]))}`);
-    const lines = [`Your freeing mix: ${parts.join("; ")}.`];
+    // Order matters for the short card: the mix and the true-humility line come first.
+    const lines = [`Your freeing mix: ${parts.join("; ")}.`, TRUE_HUMILITY];
     const b0 = PEACE.band(f.P0), b1 = PEACE.band(f.P1), n = f.steps.length;
     const how = `${cap(NUMBER[n])} gentle step${n === 1 ? "" : "s"}, one band at a time`;
     lines.push(b0 === b1
       ? `${how}: inner peace rises within ${BAND_WORD[b0]}, and shame only goes down.`
       : `${how}: inner peace could go from ${BAND_WORD[b0]} to ${BAND_WORD[b1]}, and shame only goes down.`);
-    lines.push(TRUE_HUMILITY);
     if (opts.faith) lines.push(FAITH);
     // Grace's route in words only when the forgiveness tile isn't already saying it (the button shows either way).
     if (f.selfBlame && !(m.forgive && m.forgive.path === "self")) lines.push(GRACE);

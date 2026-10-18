@@ -106,7 +106,9 @@ if (typeof module !== "undefined") {
       app.note("Checkpoint saved (numbers only).");
     });
     return function render() {
-      const s = app.state;
+      const s = app.state, m = app.m();
+      // Hazel shows the card's progress line (it is no longer on the short card).
+      $("hazel-progress").textContent = m ? MF.Words.progressLine(m) : "";
       const wk = $("week");
       wk.innerHTML = "";
       const lines = weekLines(s);

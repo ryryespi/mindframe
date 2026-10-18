@@ -189,7 +189,7 @@ In Fern the Fox's panel, **Comfort story from a public AI** builds a prompt from
 
 ## Six friends
 
-Below the card, six friendly animals sit in a little meadow. Each opens one panel; only one is open at a time. Pictures are original SVGs in `img/`, cached for offline use. Six is the cap: the patience and mindfulness practices live with Grace rather than in a seventh helper.
+Below the card, six friendly animals sit in a little meadow. Each opens one panel as a bottom sheet; only one is open at a time. Pictures are original SVGs in `img/`, cached for offline use. Six is the cap: the patience and mindfulness practices live with Grace rather than in a seventh helper.
 
 | Friend | Role | Personality | Panel |
 |---|---|---|---|
@@ -267,6 +267,23 @@ The card reads "<practice>: <instruction with dose words>, so <mover> can <ease>
 
 **The breathing circle** is optional: in for four seconds, out for six (a longer exhale, six breaths a minute). The number of breaths follows the dose (three, four or five). It makes no sound. With reduced motion, the circle stays still and only the words and a soft color change.
 
+## A short card, details in the helpers
+
+The card is kept short so it fits a phone screen. By default it shows at most four tiles:
+
+1. **The headline**: the inner-peace band and "Room for …" in one line.
+2. **What you may be feeling**: one or two sentences.
+3. **One insight**: the strongest one, picked by the numbers (`MF.Words.insight`). The candidates are the freeing mix (max of e_shame, self-blame c_self and put-down u), forgiveness (max of F_self and F_other), the reality check (max of g and u), a relationship pattern (0.7 when found), and the hidden pull (C_max). Ties go in that order. The tile shows its first two lines and its button.
+4. **One step**, with its "Try it" button and two affirmations.
+
+A single **See more** button reveals the rest: the path to peace, "How they connect", the other insights, every affirmation, and the progress line. Every output is also in a helper's panel. Remy has all the insights and the connections. Grace shows the forgiveness lines. Hazel shows the progress line. Include faith and Copy sit in a slim row under the card. Copy still copies the full card.
+
+**Input.** Write / Pick feelings is a segmented control. The picker is one grid of eleven compact chips, three per row: the nine movers, then the two extra chips. Each chip shows its level as dots (none, one, two or three); the word stays for screen readers. Clear is a small text link. Update is one big button.
+
+**Helpers as bottom sheets.** The six helpers are small icon tiles with names (two rows of three). Each panel opens as a bottom sheet over the page and starts with the helper's role and personality. It is a modal dialog (`role="dialog"`, `aria-modal`). Focus moves to its title and stays inside (Tab wraps). Close, Esc or tapping the shade closes it, and focus goes back to the button that opened it. A crisis closes any open sheet. The slide-up is off with `prefers-reduced-motion`.
+
+**Chrome.** The sky header is shorter, and the privacy line is shown once in small text. The 988 banner is slimmer but still sticky at the top, above any sheet. The layout has no sideways scroll at 360 to 412 px, in light and dark (tested in the browser).
+
 ## The look: sky, meadow and tiles
 
 The header is a small illustrated sky over a meadow (inline SVG, no external assets). After Update, its colors follow the inner-peace band (`body[data-peace]`): overcast lavender for "a little", dawn peach for "growing", morning blue for "close", and a clear sky for "steady". In dark mode (`prefers-color-scheme`) it is a night sky with a moon and stars. Card sections are soft tiles with small line icons. They fade in gently after Update, with no motion when `prefers-reduced-motion` is set. Text keeps WCAG AA contrast in both themes (this is tested), and buttons are at least 44 px tall.
@@ -315,13 +332,13 @@ free Now: ashamed strongly, … → Freeing mix: …         # readable; rebuilt
 Code is grouped by feature. Every file starts with a header comment; every function has a JSDoc. Files share one namespace, `MF` (`window.MF` in the browser, `global.MF` in Node tests).
 
 ```
-index.html            the one page: scene, Write / Pick feelings, input, Update, card tiles, six friends, six panels
+index.html            the one page: scene, Write / Pick feelings, input, Update, the short card (+ See more), six friends, six sheet panels
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v18)
+sw.js                 offline cache (v19)
 tools.html            redirects old shortcuts to the one page
 img/                  fox, owl, raccoon, tortoise, otter, dove (original SVGs)
 js/
-  app.js              page shell: state, Update, the card, opening panels
+  app.js              page shell: state, Update, the card (insight slot, See more), helper sheets (focus trap, Esc)
   core/               the model; no page code
     signals.js        word patterns (thinking traps, needs)
     grounding.js      crisis wording and pattern reading

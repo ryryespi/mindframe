@@ -258,6 +258,12 @@ if (typeof module !== "undefined") {
       else if (m.forgive.path === "self") hint.textContent = "From your reading: forgiving yourself may help most right now.";
       else if (m.forgive.path === "other") hint.textContent = "From your reading: forgiving someone may help most right now, at your own pace.";
       else hint.textContent = "From your reading: no forgiveness path stands out. Both are here if you want them.";
+      // The card's forgiveness lines, shown here in full (the short card may not show them).
+      const box = $("grace-reading");
+      box.innerHTML = "";
+      const lines = m ? MF.Words.card(app.state, m, { faith: app.faith(), seed: 1 }).forgive : [];
+      lines.forEach(t => { const p = document.createElement("p"); p.textContent = t; box.appendChild(p); });
+      box.classList.toggle("hidden", !lines.length);
       draw();
     };
   }

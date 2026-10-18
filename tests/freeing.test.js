@@ -281,16 +281,16 @@ test("deterministic: the same pick gives the same reading and the same freeing m
   const st = M.defaultState();
   assert.equal(nums(M.masterPick(SPEC, st, { now: NOW })), nums(M.masterPick(SPEC, st, { now: NOW })));
 });
-test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy freeing mix, sw v18, README", () => {
+test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy freeing mix, sw v19, README", () => {
   const index = read("index.html"), sw = read("sw.js"), r = read("README.md"), css = read("style.css");
   assert.match(index, /<button type="button" id="mode-write" aria-pressed="true">Write<\/button>/);
   assert.match(index, /<button type="button" id="mode-pick" aria-pressed="false">Pick feelings<\/button>/);
   assert.match(index, /id="picker" class="picker hidden"/);
   assert.match(index, /id="t-free"/);
   assert.match(index, /id="copy-mix" class="secondary">Copy freeing mix</);
-  assert.match(css, /\.feel-chip \{[^}]*min-height: 3\.4rem/);
+  assert.match(css, /\.feel-chip \{[^}]*min-height: 2\.9rem/);
   assert.match(css, /\.mode button \{[^}]*min-height: 2\.75rem/);
-  assert.match(sw, /mindframe-shell-v18/);
+  assert.match(sw, /mindframe-shell-v19/);
   ["./js/features/freeing.js", "./js/features/picker.js"].forEach(f => assert.ok(sw.includes(f), f));
   ["## Pick feelings", "## The freeing mix", "J(e) = P(e) \u2212 \u03BC\u00B7N(e)", "mf 3", "Tangney, J. P. (2000)", "Gilbert, P., & Procter, S. (2006)", "Gilbert, P. (2009)", "Burns, D. D. (1980)", "Interior Castle", "Romans 12:3", "1 John 4:19"].forEach(x => assert.ok(r.includes(x), x));
 });

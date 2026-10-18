@@ -426,9 +426,42 @@ if (typeof module !== "undefined") {
    * The default card, words only, every line composed from the master output.
    * @returns {{room:string, peace:string[], peaceFaith:string|null, feeling:string, connect:string[], conflict:string[], reality:string[], forgive:string[], affirmations:string[], step:string, practice:{id:string,name:string}|null, progress:string}}
    */
+  // ---------- The short card (push19): headline + feeling + one insight + One step ----------
+  /**
+   * The one most relevant insight, chosen by the numbers (strongest first):
+   *   free     max(e_shame, c_self, u) when the freeing tile shows
+   *   forgive  max(F_self, F_other) when a forgiveness path is suggested
+   *   reality  max(g, u) when the reality check shows
+   *   pattern  0.7 when a relationship pattern is found (explicit and actionable)
+   *   conflict C_max, the strongest hidden pull
+   * Ties go to the earlier one in that order. null when nothing applies.
+   * @param {object} m master output
+   * @param {object} c the composed card (needs conflict, reality, forgive, freeing)
+   * @returns {{id:string, score:number}|null}
+   */
+  function insight(m, c) {
+    const fr = m.freeing, f = m.forgive;
+    const cand = [
+      ["free", c.freeing ? Math.max(m.e[MF.Movers.idx.shame], fr ? fr.cSelf : 0, fr ? fr.u : 0) : 0],
+      ["forgive", c.forgive && c.forgive.length && f ? Math.max(f.Fself, f.Fother) : 0],
+      ["reality", c.reality && c.reality.length ? Math.max(m.grand ? m.grand.g : 0, m.small ? m.small.u : 0) : 0],
+      ["pattern", (m.found || []).length ? 0.7 : 0],
+      ["conflict", c.conflict && c.conflict.length ? (m.conflicts || []).reduce((x, q) => Math.max(x, q.c), 0) : 0],
+    ];
+    let best = null;
+    cand.forEach(([id, score]) => { if (score > 0 && (!best || score > best.score + 1e-9)) best = { id, score: MF.Movers.r2(score) }; });
+    return best;
+  }
+  /** The headline: the peace band line, then "Room for …" (one short tile). */
+  function headline(m, seed = 1) {
+    const room = roomLine(m).replace(/^Room for: /, "Room for ");
+    const p = m.peace ? peaceLines(m, seed)[0] : "";
+    return p ? `${p} ${room}` : room;
+  }
+
   function card(state, m, opts = {}) {
     const seed = Number.isFinite(opts.seed) ? opts.seed : 1;
-    return {
+    const c = {
       room: roomLine(m),
       // Grace's line joins the peace lines when the lever is one of a forgiveness path's movers.
       peace: peaceLines(m, seed).concat(MF.Forgive && MF.Forgive.peaceLine(m) ? [MF.Forgive.peaceLine(m)] : []),
@@ -444,6 +477,10 @@ if (typeof module !== "undefined") {
       practice: MF.Practices && m.practice ? { id: m.practice.id, name: MF.Practices.LIBRARY[m.practice.id].name } : null,
       progress: progressLine(m),
     };
+    c.headline = headline(m, seed);
+    c.insight = insight(m, c);
+    c.affirmTop = c.affirmations.slice(0, 2);
+    return c;
   }
   /** The card as plain text lines (Copy, tests). */
   function lines(state, m, opts = {}) {
@@ -463,7 +500,7 @@ if (typeof module !== "undefined") {
 
   MF.Words = {
     hash, choose, band, DEGREE, ADV, SIZE, FEEL, FEEL_HIGH, NOUN, LOW_NOUN, SOFTENER, LINK_VERB, strength, EASE, ACT, subj,
-    felt, feelingLine, roomLine, peaceLines, countWord, PEACE_FAITH, connectLines, pulls, conflictLines, realityLines, affirmations, stepLine, progressLine, card, lines,
+    felt, feelingLine, roomLine, headline, insight, peaceLines, countWord, PEACE_FAITH, connectLines, pulls, conflictLines, realityLines, affirmations, stepLine, progressLine, card, lines,
   };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Words;

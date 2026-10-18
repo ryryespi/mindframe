@@ -98,12 +98,27 @@ if (typeof module !== "undefined") require("../core/words.js");
    * @param {object} app the app shell (see js/app.js)
    * @returns {function} render
    */
+  /**
+   * Every insight line from the card, in one list for Remy's panel: hidden pulls,
+   * reality check, forgiveness, the freeing mix and any relationship pattern.
+   * @returns {string[]}
+   */
+  function insightLines(state, m, faith) {
+    const c = MF.Words.card(state, m, { faith, seed: 1 });
+    const rel = MF.Relationship.section(m.found).map(r => `${r.title}: ${r.antidote}`);
+    return [].concat(c.conflict, c.reality, c.forgive, c.freeing ? c.freeing.lines : [], rel);
+  }
+
   function mount(app) {
     const { $ } = app;
     return function render() {
       const ul = $("breakdown"), m = app.m();
       ul.innerHTML = "";
+      ["remy-insights", "remy-connect"].forEach(id => { $(id).innerHTML = ""; });
       if (!m) { ul.appendChild(app.li("Tap Update to see each mover.")); $("remy-extra").innerHTML = ""; return; }
+      // Remy keeps the full card detail the short card leaves out: every insight and the connections.
+      insightLines(app.state, m, app.faith()).forEach(t => $("remy-insights").appendChild(app.li(t)));
+      MF.Words.card(app.state, m, { faith: app.faith(), seed: 1 }).connect.forEach(t => $("remy-connect").appendChild(app.li(t)));
       const ex = $("remy-extra");
       ex.innerHTML = "";
       details(m).forEach(t => ex.appendChild(app.li(t)));
@@ -120,6 +135,6 @@ if (typeof module !== "undefined") require("../core/words.js");
     };
   }
 
-  MF.Analyzer = { level, breakdown, details, mount };
+  MF.Analyzer = { insightLines, level, breakdown, details, mount };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Analyzer;

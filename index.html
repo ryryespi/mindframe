@@ -35,21 +35,21 @@
   </svg>
 
   <!-- Always visible. Crisis support lives here even when the rest of the page changes. -->
-  <p class="safety-banner">In crisis, call or text <strong>988</strong> (US). MindFrame is practice, not therapy.</p>
+  <p class="safety-banner">In crisis, call or text <strong>988</strong> (US) &middot; practice, not therapy</p>
 
   <div class="app">
     <!-- The scene: a sky and meadow whose colors follow the inner-peace band after Update
          (body[data-peace]); a night sky in dark mode. Decorative only. -->
     <header class="top scene">
-      <svg class="scene-art" viewBox="0 0 400 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+      <svg class="scene-art" viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
         <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sky1"/><stop offset="1" class="sky2"/></linearGradient></defs>
-        <rect width="400" height="150" fill="url(#sky)"/>
-        <g class="stars"><circle cx="40" cy="22" r="1.2"/><circle cx="96" cy="40" r="0.9"/><circle cx="150" cy="16" r="1.1"/><circle cx="220" cy="34" r="0.8"/><circle cx="262" cy="14" r="1.2"/><circle cx="372" cy="30" r="1"/></g>
-        <circle class="sun" cx="322" cy="50" r="19"/>
-        <g class="clouds"><ellipse cx="96" cy="58" rx="34" ry="9"/><ellipse cx="118" cy="52" rx="20" ry="9"/><ellipse cx="246" cy="76" rx="26" ry="7"/></g>
-        <path class="birds" d="M252 30q4-4 8 0q4-4 8 0M276 44q3-3 6 0q3-3 6 0"/>
-        <path class="hill2" d="M0 112C60 92 120 96 180 108S300 92 400 100V150H0Z"/>
-        <path class="hill1" d="M0 128C70 112 150 116 220 126S340 116 400 122V150H0Z"/>
+        <rect width="400" height="100" fill="url(#sky)"/>
+        <g class="stars"><circle cx="40" cy="14" r="1.2"/><circle cx="96" cy="26" r="0.9"/><circle cx="150" cy="10" r="1.1"/><circle cx="220" cy="22" r="0.8"/><circle cx="262" cy="9" r="1.2"/><circle cx="372" cy="20" r="1"/></g>
+        <circle class="sun" cx="330" cy="34" r="14"/>
+        <g class="clouds"><ellipse cx="236" cy="40" rx="26" ry="6"/><ellipse cx="252" cy="36" rx="15" ry="6"/></g>
+        <path class="birds" d="M276 18q3-3 6 0q3-3 6 0M292 27q2.5-2.5 5 0q2.5-2.5 5 0"/>
+        <path class="hill2" d="M0 74C60 60 120 62 180 70S300 60 400 66V100H0Z"/>
+        <path class="hill1" d="M0 86C70 76 150 79 220 85S340 79 400 82V100H0Z"/>
       </svg>
       <div class="scene-text">
         <h1>MindFrame</h1>
@@ -59,7 +59,7 @@
 
     <main>
       <!-- 1. Write (or pick feelings), then tap Update. Nothing is read until you do. -->
-      <div class="mode" role="group" aria-label="How to begin">
+      <div class="mode seg" role="group" aria-label="How to begin">
         <button type="button" id="mode-write" aria-pressed="true">Write</button>
         <button type="button" id="mode-pick" aria-pressed="false">Pick feelings</button>
       </div>
@@ -68,14 +68,11 @@
         <textarea id="input" rows="4" placeholder="What's on your mind?"></textarea>
       </div>
       <div id="picker" class="picker hidden" role="group" aria-labelledby="picker-title">
-        <p id="picker-title" class="small quiet">Tap a feeling to go through off, a little, quite and strongly.</p>
+        <div class="picker-top"><p id="picker-title" class="small quiet">Tap to set how strong: off, a little, quite, strongly.</p><button type="button" id="pick-reset" class="text small">Clear</button></div>
         <div id="pick-chips" class="feel-chips"></div>
-        <p class="small quiet picker-also">Also true right now:</p>
-        <div id="pick-extras" class="feel-chips extras"></div>
-        <button type="button" id="pick-reset" class="text small">Clear the chips</button>
       </div>
       <button type="button" id="update" class="primary">Update</button>
-      <p class="quiet small">Your words stay on this device and are never saved unless you keep them in the journal. Ctrl or Cmd + Enter also works.</p>
+      <p class="quiet small privacy">Private: your words stay on this device unless you save them to the journal.</p>
 
       <div id="crisis-wrap" class="hidden"><div id="crisis" class="crisis" tabindex="-1"></div></div>
 
@@ -83,24 +80,31 @@
         <!-- 2. The reading, in words. Hidden until Update. -->
         <!-- Each section is a soft tile with a small icon, in this fixed order. -->
         <section id="out" class="card reading hidden" aria-live="polite">
-          <div class="tile tile-room" id="t-room"><svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg><p id="room" class="room"></p></div>
-          <div class="tile tile-peace" id="t-peace"><svg class="ico" aria-hidden="true"><use href="#i-leaf"/></svg><div id="peace" class="peace-box"></div></div>
+          <!-- By default at most four short tiles: the headline (inner peace + room for),
+               the feeling, the one insight the numbers pick (moved into #insight-slot),
+               and One step with two affirmations. Everything else is under See more. -->
+          <div class="tile tile-head" id="t-head"><svg class="ico" aria-hidden="true"><use href="#i-leaf"/></svg><p id="headline" class="room"></p></div>
           <div class="tile" id="t-feel"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg>What you may be feeling</span><p id="feel"></p></div>
-          <div class="tile" id="t-connect"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>How they connect</span><ul id="connect" class="plain"></ul></div>
-          <div class="tile tile-soft hidden" id="t-conflict"><svg class="ico" aria-hidden="true"><use href="#i-pull"/></svg><div id="conflict" class="soft-box"></div></div>
-          <div class="tile tile-soft hidden" id="t-reality"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg><div id="reality" class="soft-box"></div></div>
-          <div class="tile tile-forgive hidden" id="t-forgive"><svg class="ico" aria-hidden="true"><use href="#i-dove"/></svg><div id="forgive"></div><button type="button" id="forgive-open" class="secondary">Open Grace's guide</button></div>
-          <div class="tile tile-free hidden" id="t-free"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><div id="free" class="soft-box"></div><p id="free-step" class="free-step"></p>
-            <div class="row"><button type="button" id="free-try" class="secondary">Try the self-compassion break</button><button type="button" id="free-grace" class="secondary hidden">Forgive myself with Grace</button></div></div>
-          <div class="tile tile-soft hidden" id="t-pattern"><div id="pattern"></div></div>
-          <div class="tile" id="t-affirm"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg>Affirmations</span><ul id="affirm" class="affirm"></ul></div>
-          <div class="tile tile-step" id="t-step"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-sprout"/></svg>One step</span><p id="step"></p><button type="button" id="step-try" class="secondary hidden">Try it with Grace</button></div>
-          <p id="progress" class="quiet"></p>
-          <div class="row">
-            <label class="check small"><input type="checkbox" id="faith" /> Include faith</label>
-            <button type="button" class="text" id="copy">Copy</button><span class="quiet small" id="copied"></span>
+          <div id="insight-slot" class="insight-slot"></div>
+          <div class="tile tile-step" id="t-step"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-sprout"/></svg>One step</span><p id="step"></p><button type="button" id="step-try" class="secondary hidden">Try it with Grace</button><ul id="affirm-top" class="affirm-slim" aria-label="Affirmations"></ul></div>
+          <button type="button" id="more-toggle" class="more-toggle" aria-expanded="false" aria-controls="more">See more</button>
+          <div id="more" class="more hidden">
+            <div class="tile tile-peace" id="t-peace"><svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg><p id="room" class="small"></p><div id="peace" class="peace-box"></div></div>
+            <div class="tile" id="t-connect"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>How they connect</span><ul id="connect" class="plain"></ul></div>
+            <div class="tile tile-soft hidden" id="t-conflict"><svg class="ico" aria-hidden="true"><use href="#i-pull"/></svg><div id="conflict" class="soft-box"></div></div>
+            <div class="tile tile-soft hidden" id="t-reality"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg><div id="reality" class="soft-box"></div></div>
+            <div class="tile tile-forgive hidden" id="t-forgive"><svg class="ico" aria-hidden="true"><use href="#i-dove"/></svg><div id="forgive" class="soft-box"></div><button type="button" id="forgive-open" class="secondary">Open Grace's guide</button></div>
+            <div class="tile tile-free hidden" id="t-free"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><div id="free" class="soft-box"></div><p id="free-step" class="free-step"></p>
+              <div class="row"><button type="button" id="free-try" class="secondary">Try the self-compassion break</button><button type="button" id="free-grace" class="secondary hidden">Forgive myself with Grace</button></div></div>
+            <div class="tile tile-soft hidden" id="t-pattern"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg><div id="pattern" class="soft-box"></div></div>
+            <div class="tile" id="t-affirm"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg>Affirmations</span><ul id="affirm" class="affirm"></ul></div>
+            <p id="progress" class="quiet small"></p>
           </div>
         </section>
+        <div id="card-tools" class="card-tools hidden">
+          <label class="check small"><input type="checkbox" id="faith" /> Include faith</label>
+          <button type="button" class="text small" id="copy">Copy</button><span class="quiet small" id="copied"></span>
+        </div>
         <p id="note" class="quiet small" aria-live="polite"></p>
 
         <!-- 3. Six friends sitting in the meadow; each opens one panel. -->
@@ -108,29 +112,33 @@
         <p class="meadow-title">Your helpers</p>
         <nav class="friends" aria-label="Helpers">
           <button type="button" class="friend" aria-controls="p-writer" aria-expanded="false" aria-label="Fern the Fox, Writer: journal and stories">
-            <img src="img/fox.svg" alt="" width="64" height="64" /><strong>Fern</strong><span class="role">Writer</span><span class="who">Keeps your journal and spins gentle stories.</span>
+            <img src="img/fox.svg" alt="" width="44" height="44" /><strong>Fern</strong>
           </button>
           <button type="button" class="friend" aria-controls="p-historian" aria-expanded="false" aria-label="Hazel the Owl, Historian: history and checkpoints">
-            <img src="img/owl.svg" alt="" width="64" height="64" /><strong>Hazel</strong><span class="role">Historian</span><span class="who">Remembers your days and how far you've come.</span>
+            <img src="img/owl.svg" alt="" width="44" height="44" /><strong>Hazel</strong>
           </button>
           <button type="button" class="friend" aria-controls="p-analyzer" aria-expanded="false" aria-label="Remy the Raccoon, Analyzer: the nine movers in words">
-            <img src="img/raccoon.svg" alt="" width="64" height="64" /><strong>Remy</strong><span class="role">Analyzer</span><span class="who">Turns over each feeling to see how it fits.</span>
+            <img src="img/raccoon.svg" alt="" width="44" height="44" /><strong>Remy</strong>
           </button>
           <button type="button" class="friend" aria-controls="p-scribe" aria-expanded="false" aria-label="Toby the Tortoise, Scribe: export and import">
-            <img src="img/tortoise.svg" alt="" width="64" height="64" /><strong>Toby</strong><span class="role">Scribe</span><span class="who">Slow and careful; copies your numbers safely.</span>
+            <img src="img/tortoise.svg" alt="" width="44" height="44" /><strong>Toby</strong>
           </button>
           <button type="button" class="friend" aria-controls="p-scientist" aria-expanded="false" aria-label="Ada the Otter, Scientist: the math and adjust numbers">
-            <img src="img/otter.svg" alt="" width="64" height="64" /><strong>Ada</strong><span class="role">Scientist</span><span class="who">Loves equations and lets you tinker.</span>
+            <img src="img/otter.svg" alt="" width="44" height="44" /><strong>Ada</strong>
           </button>
           <button type="button" class="friend" aria-controls="p-grace" aria-expanded="false" aria-label="Grace the Dove, Peacemaker: forgiveness, patience and mindfulness">
-            <img src="img/dove.svg" alt="" width="64" height="64" /><strong>Grace</strong><span class="role">Peacemaker</span><span class="who">Lets go gently, of my own mistakes and others'.</span>
+            <img src="img/dove.svg" alt="" width="44" height="44" /><strong>Grace</strong>
           </button>
         </nav>
         </div>
 
+        <!-- Each helper's panel opens as a bottom sheet over the page (role=dialog,
+             focus kept inside, Close / Esc / tapping the shade closes it). -->
+        <div id="sheet-backdrop" class="backdrop hidden"></div>
+
         <!-- Writer: journal + stories + path game -->
-        <section id="p-writer" class="panel card hidden" aria-label="Writer">
-          <div class="panel-head"><img src="img/fox.svg" alt="" width="40" height="40" /><h2>Fern the Fox, Writer</h2><button type="button" class="text panel-close" aria-label="Close the Writer">Close</button></div>
+        <section id="p-writer" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-writer-title">
+          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/fox.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-writer-title" tabindex="-1">Fern the Fox</h2><p class="persona">Writer &middot; Keeps your journal and spins gentle stories.</p></div><button type="button" class="text panel-close" aria-label="Close the Writer">Close</button></div>
           <div class="row">
             <button type="button" id="story-go" class="secondary">Write a story</button>
             <button type="button" id="journal-save" class="secondary">Save to journal</button>
@@ -174,8 +182,9 @@
         </section>
 
         <!-- Historian: history + checkpoints -->
-        <section id="p-historian" class="panel card hidden" aria-label="Historian">
-          <div class="panel-head"><img src="img/owl.svg" alt="" width="40" height="40" /><h2>Hazel the Owl, Historian</h2><button type="button" class="text panel-close" aria-label="Close the Historian">Close</button></div>
+        <section id="p-historian" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-historian-title">
+          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/owl.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-historian-title" tabindex="-1">Hazel the Owl</h2><p class="persona">Historian &middot; Remembers your days and how far you've come.</p></div><button type="button" class="text panel-close" aria-label="Close the Historian">Close</button></div>
+          <p id="hazel-progress" class="small"></p>
           <ul id="week" class="plain"></ul>
           <button type="button" id="save" class="secondary">Save checkpoint</button>
           <h3>Checkpoints</h3>
@@ -184,8 +193,12 @@
         </section>
 
         <!-- Analyzer: the nine movers in words -->
-        <section id="p-analyzer" class="panel card hidden" aria-label="Analyzer">
-          <div class="panel-head"><img src="img/raccoon.svg" alt="" width="40" height="40" /><h2>Remy the Raccoon, Analyzer</h2><button type="button" class="text panel-close" aria-label="Close the Analyzer">Close</button></div>
+        <section id="p-analyzer" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-analyzer-title">
+          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/raccoon.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-analyzer-title" tabindex="-1">Remy the Raccoon</h2><p class="persona">Analyzer &middot; Turns over each feeling to see how it fits.</p></div><button type="button" class="text panel-close" aria-label="Close the Analyzer">Close</button></div>
+          <h3>All insights from your reading</h3>
+          <ul id="remy-insights" class="plain"></ul>
+          <h3>How they connect</h3>
+          <ul id="remy-connect" class="plain"></ul>
           <h3>Hidden pulls, reality check and forgiveness cues</h3>
           <ul id="remy-extra" class="plain"></ul>
           <h3>The nine movers</h3>
@@ -193,8 +206,8 @@
         </section>
 
         <!-- Scribe: export / import -->
-        <section id="p-scribe" class="panel card hidden" aria-label="Scribe">
-          <div class="panel-head"><img src="img/tortoise.svg" alt="" width="40" height="40" /><h2>Toby the Tortoise, Scribe</h2><button type="button" class="text panel-close" aria-label="Close the Scribe">Close</button></div>
+        <section id="p-scribe" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-scribe-title">
+          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/tortoise.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-scribe-title" tabindex="-1">Toby the Tortoise</h2><p class="persona">Scribe &middot; Slow and careful; copies your numbers safely.</p></div><button type="button" class="text panel-close" aria-label="Close the Scribe">Close</button></div>
           <p class="quiet small">Your session as plain .mf code: numbers and labels only, never your words.</p>
           <div class="mix-box">
             <span class="label">Your freeing mix</span>
@@ -216,8 +229,8 @@
         </section>
 
         <!-- Scientist: the math + adjust numbers and variables -->
-        <section id="p-scientist" class="panel card hidden" aria-label="Scientist">
-          <div class="panel-head"><img src="img/otter.svg" alt="" width="40" height="40" /><h2>Ada the Otter, Scientist</h2><button type="button" class="text panel-close" aria-label="Close the Scientist">Close</button></div>
+        <section id="p-scientist" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-scientist-title">
+          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/otter.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-scientist-title" tabindex="-1">Ada the Otter</h2><p class="persona">Scientist &middot; Loves equations and lets you tinker.</p></div><button type="button" class="text panel-close" aria-label="Close the Scientist">Close</button></div>
           <p class="quiet small">Every result comes from one function: step = act(clip01(e + a(e)(h &minus; e) + b&middot;s(e))). Model numbers, not measurements of you.</p>
           <ul id="movers" class="movers"></ul>
           <ul id="math-lines" class="lines"></ul>
@@ -232,9 +245,10 @@
         </section>
 
         <!-- Grace: forgive myself, forgive someone, and the patience & mindfulness practices -->
-        <section id="p-grace" class="panel card hidden" aria-label="Peacemaker">
-          <div class="panel-head"><img src="img/dove.svg" alt="" width="40" height="40" /><h2>Grace the Dove, Peacemaker</h2><button type="button" class="text panel-close" aria-label="Close the Peacemaker">Close</button></div>
+        <section id="p-grace" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="p-grace-title">
+          <div class="panel-head"><span class="grab" aria-hidden="true"></span><img src="img/dove.svg" alt="" width="40" height="40" /><div class="panel-title"><h2 id="p-grace-title" tabindex="-1">Grace the Dove</h2><p class="persona">Peacemaker &middot; Lets go gently, of my own mistakes and others'.</p></div><button type="button" class="text panel-close" aria-label="Close the Peacemaker">Close</button></div>
           <p id="grace-hint" class="quiet small"></p>
+          <div id="grace-reading" class="soft-box small"></div>
           <div id="grace-tabs" class="tabs" role="tablist" aria-label="Grace's paths">
             <button type="button" role="tab" id="tab-self" data-tab="self" aria-controls="grace-self" aria-selected="true">Forgive myself</button>
             <button type="button" role="tab" id="tab-other" data-tab="other" aria-controls="grace-other" aria-selected="false" tabindex="-1">Forgive someone</button>

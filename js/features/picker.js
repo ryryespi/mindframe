@@ -40,7 +40,8 @@ if (typeof module !== "undefined") {
     };
     load();
 
-    const grid = $("pick-chips"), extraBox = $("pick-extras");
+    // One grid: the nine movers, then the two extra chips (3 per row; see style.css).
+    const grid = $("pick-chips"), extraBox = grid;
     PICK_ORDER.forEach(n => {
       const b = document.createElement("button");
       b.type = "button";
@@ -60,18 +61,21 @@ if (typeof module !== "undefined") {
       b.addEventListener("click", () => { extras = extras.includes(id) ? extras.filter(x => x !== id) : extras.concat(id); paint(); changed(); });
       extraBox.appendChild(b);
     });
-    /** Show each chip's level in words (and as its data-level for the color). */
+    /** Show each chip's level as small dots (the word stays for screen readers) and as its data-level for the color. */
     function paint() {
-      grid.querySelectorAll(".feel-chip").forEach(b => {
+      grid.querySelectorAll(".feel-chip:not(.extra)").forEach(b => {
         const n = b.dataset.mover, l = levels[n];
         b.dataset.level = l.replace(" ", "-");
         b.innerHTML = "";
         const w = document.createElement("span"); w.className = "feel-word"; w.textContent = PICK_WORD[n];
-        const lv = document.createElement("span"); lv.className = "feel-level"; lv.textContent = l;
-        b.append(w, lv);
+        const dots = document.createElement("span"); dots.className = "dots"; dots.setAttribute("aria-hidden", "true");
+        const on = Object.keys(LEVELS).indexOf(l);
+        for (let k = 1; k <= 3; k++) { const d = document.createElement("i"); if (k <= on) d.className = "on"; dots.appendChild(d); }
+        const lv = document.createElement("span"); lv.className = "feel-level visually-hidden"; lv.textContent = l;
+        b.append(w, dots, lv);
         b.setAttribute("aria-label", `${PICK_WORD[n]}: ${l}. Tap to change.`);
       });
-      extraBox.querySelectorAll(".feel-chip").forEach(b => b.setAttribute("aria-pressed", extras.includes(b.dataset.extra) ? "true" : "false"));
+      extraBox.querySelectorAll(".feel-chip.extra").forEach(b => b.setAttribute("aria-pressed", extras.includes(b.dataset.extra) ? "true" : "false"));
     }
     /** A chip changed: the card is out of date until Update. */
     const changed = () => { if (app.m()) app.note("Tap Update to read the feelings you picked."); };
