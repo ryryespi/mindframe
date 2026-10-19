@@ -29,10 +29,15 @@ if (typeof module !== "undefined") {
       .filter(x => (x.group === "grounding" ? Math.abs(x.v - 0.5) >= 0.1 : x.v >= ACTIVE));
   }
   /** The math behind the card: e, the master equation with its values, λ, loops, baseline and recovery. */
-  function mathLines(state, m) {
+  function mathLines(state, m, opts = {}) {
     const V = state.vars, L = [];
     const mv = shown(m.e);
+    // The whole model on one page (core/master.js header; README).
+    MF.Master.ONE_PAGE.forEach(x => L.push(x));
+    if (opts.faith) L.push(`h (home), with faith on: ${MF.Master.FAITH_HOME} Wording only; the numbers are the same.`);
     L.push(`e: ${mv.length ? mv.map(x => `${x.label} ${f2(x.v)}`).join(", ") : "at rest"}`);
+    // The Kai shield (core/kai.js): the X(1 \u2212 S)\u00B7w term of line (1).
+    if (MF.Kai) MF.Kai.mathLines(m).forEach(x => L.push(x));
     L.push("step = act(clip01(e + a(e)\u00B7(h \u2212 e) + b\u00B7s(e)))");
     const raw = V.aBase + V.k * m.d;
     L.push(`a(e) = min(a_max, a0 + k\u2016e \u2212 h\u2016) = min(${f2(V.aMax)}, ${f2(V.aBase)} + ${f2(V.k)}\u00B7${f2(m.d)}) = ${f2(Math.min(V.aMax, raw))}${m.unstable ? `, capped at a_cap = ${f2(FIXED.aCap)} (\u03BB > 0) \u2192 ${f2(m.a)}` : ""}`);
@@ -64,6 +69,7 @@ if (typeof module !== "undefined") {
       }
       L.push("convergence: grounding next \u2212 h = (1 \u2212 a)(e \u2212 h); hard/process 0 \u2264 next \u2264 (1 \u2212 a)e (s \u2264 0, clip at 0 = h)");
       L.push(`  \u21D2 \u2016next \u2212 h\u2016 \u2264 (1 \u2212 a)\u2016e \u2212 h\u2016 with a \u2265 min(a0, a_max, a_cap) = ${f2(Math.min(V2.aBase, V2.aMax, FIXED.aCap))} > 0: a contraction to e* = h, where P = 1 (rounding to 0.01 stops within 0.005/a)`);
+      L.push("  the Kai term X(1 \u2212 S)\u00B7w only enters the reading (line 1), pushes hard movers up and is bounded by X\u00B7w; the step map is unchanged, so the proof holds");
     }
     // Forgiveness (features/forgiveness.js) and the practice pick (features/practices.js).
     const f = m.forgive;
@@ -211,7 +217,7 @@ if (typeof module !== "undefined") {
           el.append(name, bar, v);
           ul.appendChild(el);
         });
-        mathLines(app.state, m).concat(MF.Historian.weekMath(app.state)).forEach(t => ml.appendChild(app.li(t)));
+        mathLines(app.state, m, { faith: app.faith() }).concat(MF.Historian.weekMath(app.state)).forEach(t => ml.appendChild(app.li(t)));
       }
       renderInputs();
     };

@@ -6,6 +6,7 @@ const parts = [
   require("../js/core/movers.js"),
   require("../js/core/reality.js"),
   require("../js/core/peace.js"),
+  require("../js/core/kai.js"),
   require("../js/core/master.js"),
   require("../js/core/words.js"),
   require("../js/features/relationship.js"),

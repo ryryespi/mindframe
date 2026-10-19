@@ -39,6 +39,55 @@ Only emotions and processes with strong evidence behind them as drivers of distr
 | presets, frameworks, Compare, Optimize | removed (one Variables panel instead) |
 | Check-in form, Coach bots, Spot, Rebuild games | removed ("adjust numbers" sliders; the path game stays) |
 
+## The whole model on one page
+
+Everything built so far (the nine movers, the step map, the baseline, hidden conflicts C, grandiosity and true size G, inner peace P, the freeing mix, forgiveness F_self / F_other, the Kai shield S, the practices, and the companion's growth) is one step of four lines:
+
+```
+(1) e  = clip01(e₋ ⊕ n(text) + X·(1 − S)·w)                         the reading
+(2) e' = clip01(e + a(e)·(h − e) + b·s(e))                           the step
+(3) P  = P_d(e)·(1 − γ·C)·(1 − δ·G);  lever = argmax_i ΔP_i;  step = practice(lever)
+(4) words = compose(e, e', P, lever, passes)
+```
+
+* **e₋** is where you were (the session's e, or the vector picked with the chips). **n(text)** is what the words add: the lexicon, the signals and the word hooks (relationship patterns, forgiveness cues, true size, patience, tension), each saturating as 1 − e^(−raw). **⊕** is the saturating add: hard and process movers 1 − (1 − e)(1 − n); grounding movers e + n⁺(1 − e) − n⁻e.
+* **X(1 − S)·w** is the Kai term (below): outside hurt X, less the shield S, pushes anger, shame and fear (w = 0.8, 0.6, 0.4). For almost every text X = 0, and line (1) is just e₋ ⊕ n(text).
+* **a(e), b, s(e)** are the step sizes and the grounding pressure from [the master function](#the-master-function); h is home.
+* **P_d = 1/(1 + (d/d0)²)** with d = ‖e − h‖; **C** is the strongest hidden conflict; **G = max(g, u)** is the true-size signal (too big or too small).
+* **ΔP_i** is the gain in P when e_i moves 0.05 toward h_i. The lever is the biggest gain, and **practice()** is the rule table in the practices section. Strictly, the step is the practice for the lever that maximizes ΔP; it is not a search over every practice.
+* **passes** run in the same call and never move e: forgiveness (F_self, F_other and the path), the freeing mix (max J = P − μN), the Kai lines, and the companion, which grows only from caring actions (an Update, a step tried, a journal save, a practice finished), never from e.
+* Values are rounded to 0.01 after (1) and after (2), as the code does. The baseline (B_t = 0.8·B_{t−1} + 0.2·e_t) and the recovery count (repeat (2) until d < 0.3) use the same map.
+* **Checked against the code.** `tests/onepage.test.js` recomputes (1), (2) and (3) from these lines alone and checks that `master()` gives exactly the same e, e', P, lever and practice. The refactor changed nothing else: every earlier test still passes.
+* **Faith.** With Include faith on, h is described as rest and peace in Christ ("Come to me, all you who labor and are heavily burdened, and I will give you rest", Matthew 11:28–30; "the peace of God, which surpasses all understanding", Philippians 4:7), and the virtues as fruits of the Spirit (Galatians 5:22–23): patience = forbearance, kindness = empathy, gentleness = the respect guard, self-control = no impulsive reaction. **Only the wording changes, not the math**; the numbers are identical with faith on or off (tested).
+
+## Kai: steadiness under outside pressure
+
+From Ryan's story: Kai faces a storm of criticism in the village square, anchors in self-awareness, applies forbearance and empathy, and his respect guard blocks the barbs without harming anyone, so impulsive reaction flickers and fails. In `js/core/kai.js`, merged into the master function, with no new movers:
+
+```
+X  = 1 − e^(−0.7k)              outside hurt received (k cues of criticism or judgment AT you)
+A  = (1 − G)·[1 − (1 − c_A)(1 − ½σ_A)]                 self-awareness (feelings named, worth affirmed, true size low)
+F  = 1 − (1 − c_F)(1 − ½σ_F)(1 − p_F)                  forbearance (holding back, a slow breath, the pause)
+E  = 1 − (1 − c_E)(1 − ½σ_E)                           empathy (perspective taking: "they must be stressed")
+R  = (1 − c_attack)·[1 − (1 − c_R)(1 − ½σ_R)]          respect guard (a boundary without attack)
+S  = 1 − (1 − A)(1 − F)(1 − E)(1 − R)                  the shield, capped at 0.99
+push: e_j ← clip01(e_j + X(1 − S)·w_j),  w = {anger 0.8, shame 0.6, fear 0.4}
+I  = X(1 − S)·u,  u = max(e_anger, c_urge)             impulsive reaction; "flickers and fails" below 0.15
+```
+
+* **To you, not by you.** X counts hurt received: "they criticized me", "everyone judged me", "he called me …", "told me I'm useless", "rolled her eyes at me", "gave me the silent treatment", and "in front of everyone" as an extra weight. It is negation-aware ("nobody judged me" is 0). The Four Horsemen in your own words ("you always …", contempt) are by you: they never raise X, and they lower the respect guard through c_attack.
+* **Cues and bounds.** Each c is 1 − e^(−0.7k) for k matching phrases (negation-aware). σ is 1 when a matching practice was finished this session: the pause, breathing and body practices count for F; labeling, STOP, the brain dump and the self-compassion break count for A; walking past REACH's Empathize step counts for E. Sessions are kept in memory only, never saved, and cleared by Start over. p_F = ½ comes from the picker chip "holding back from reacting"; the chip "criticized or judged" sets X = 0.75. Each virtue is capped at 0.95.
+* **Card, words only, only when X > 0.** For example: "Your steadiness: self-awareness just starting, forbearance growing, empathy growing, respect guard just starting." Then the impulse line, and the weakest virtue as the lever with one step:
+  * self-awareness: name it to yourself, "I feel hurt, and I am still worth respect."
+  * forbearance: before you answer, breathe out slowly three times.
+  * empathy: ask yourself once, "What might they be carrying today?"
+  * respect guard: say, "I hear you. I see it differently, and I'm going to step away now."
+
+  The bands are strong (0.6 and up), growing (0.3 to 0.6) and just starting. When X > 0 the steadiness tile is the card's insight.
+* **Kai-style story.** In Write a story, when X > 0, a traveler (Kai) with your companion as his friend stands calm in a storm of words. Each virtue line follows your own level, and the weakest is shown growing. With faith on, it adds that Jesus, before his accusers, answered nothing, like a sheep that is silent before its shearers (Matthew 27:12–14; Isaiah 53:7); when he was cursed, he didn't curse back (1 Peter 2:23); and he prayed, "Father, forgive them" (Luke 23:34). Verse wording follows the World English Bible (public domain).
+* **Ada's panel** shows X, A, F, E, R, S, the push, I and the lever.
+* **Sources.** Self-awareness: affect labeling (Lieberman et al., 2007) and self-affirmation (Cohen & Sherman, 2014). Forbearance: patience (Schnitker, 2012). Empathy: perspective taking (Davis, 1983, the Interpersonal Reactivity Index). Respect guard: DEAR MAN (Linehan, 2015) and assertiveness training (Speed, Goldstein & Goldfried, 2018). **This is a model, not a validated measure.** The weights, the ½ terms and the product form of S are design choices.
+
 ## The master function
 
 Every feature calls one function, `MF.Master.master(text, state)` in `js/core/master.js`. It has a state-vector entry with the same path, `masterState(e, state, opts, words)`, and the feelings picker's entry `masterPick(pick, state)`. Text → score → `reading(e, …)` and picked → vector → `reading(e, …)` share one internal path, so `master(text, state)` equals `masterState(combine(state.e, fromText(text).w), state, {}, fromText(text))` exactly (tested). That covers the live card, the story, the path game, checkpoints, accepting a step, recovery, the baseline, import and restore. Nothing else steps e.
@@ -392,7 +441,7 @@ Code is grouped by feature. Every file starts with a header comment; every funct
 ```
 index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with Watch something and six views
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v22); other sites (the film APIs) are never cached
+sw.js                 offline cache (v23); other sites (the film APIs) are never cached
 tools.html            redirects old shortcuts to the one page
 js/
   app.js              page shell: state, Update, the card (insight slot, See more), the companion sheet (views, Back, focus trap, Esc)
@@ -402,7 +451,8 @@ js/
     movers.js         MF.Movers: the nine movers, W, variables, lexicon, fromText, the picker levels and fromPick
     reality.js        MF.Reality: grandiosity g, false humility u, hidden conflicts, positive emotions
     peace.js          MF.Peace: inner peace P, the lever, the gradient, the bands
-    master.js         MF.Master: the master function (text, state-vector and picker entries), recovery, baseline
+    kai.js            MF.Kai: the Kai shield (outside hurt X, virtues A F E R, shield S, impulse I, card lines, story)
+    master.js         MF.Master: the master function (text, state-vector and picker entries), the one-page form, recovery, baseline
     words.js          MF.Words: the composer (every card sentence built from the numbers)
   features/
     writer/           Write a story
@@ -429,6 +479,8 @@ Load order in `index.html`: core (signals, grounding, movers, reality, peace, ma
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
 
 ## Papers
+
+[MindFrame: The Whole Model as One Equation](paper/MindFrame-One-Equation.pdf) puts the one-page model, the Kai equation, the faith reading, and what is proven versus modeled in five short pages. The source is `paper/MindFrame-One-Equation.tex`.
 
 [MindFrame: A Master-Function Model for Grounded Reflection, Inner Peace, and Forgiveness](paper/MindFrame-Grace-Peace-Paper.pdf) is the research paper on the master-function model, inner peace, and forgiveness. The source is `paper/MindFrame-Grace-Peace-Paper.tex`; figures are in `paper/grace-peace-fig/`.
 
@@ -490,6 +542,10 @@ MindFrame is a model built from design assumptions and informed by the research 
 * McCallie, M. S., Blum, C. M., & Hood, C. J. (2006). Progressive muscle relaxation. *Journal of Human Behavior in the Social Environment, 13*(3), 51–66. doi:10.1300/J137v13n03_04
 * Pennebaker, J. W., & Beall, S. K. (1986). Confronting a traumatic event: Toward an understanding of inhibition and disease. *Journal of Abnormal Psychology, 95*(3), 274–281. doi:10.1037/0021-843X.95.3.274
 * Rebar, A. L., Stanton, R., Geard, D., Short, C., Duncan, M. J., & Vandelanotte, C. (2015). A meta-meta-analysis of the effect of physical activity on depression and anxiety in non-clinical adult populations. *Health Psychology Review, 9*(3), 366–378. doi:10.1080/17437199.2015.1022901
+* Cohen, G. L., & Sherman, D. K. (2014). The psychology of change: Self-affirmation and social psychological intervention. *Annual Review of Psychology, 65*, 333–371. doi:10.1146/annurev-psych-010213-115137
+* Davis, M. H. (1983). Measuring individual differences in empathy: Evidence for a multidimensional approach. *Journal of Personality and Social Psychology, 44*(1), 113–126. doi:10.1037/0022-3514.44.1.113
+* Speed, B. C., Goldstein, B. L., & Goldfried, M. R. (2018). Assertiveness training: A forgotten evidence-based treatment. *Clinical Psychology: Science and Practice, 25*(1), e12216. doi:10.1111/cpsp.12216
+* *World English Bible* (public domain), ebible.org: Isaiah 53:7; Matthew 11:28–30; Matthew 27:12–14; Luke 23:34; Galatians 5:22–23; Philippians 4:7; 1 Peter 2:23.
 
 ## Privacy
 

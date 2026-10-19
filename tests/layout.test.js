@@ -29,7 +29,7 @@ test("card: at most four default tiles (headline, feeling, the insight slot, One
   assert.equal(slots, 1);
   assert.ok(tiles.length + slots <= 4);
   const rest = [...outHtml.slice(moreAt).matchAll(/<div class="tile[^"]*" id="(t-[a-z]+)"/g)].map(x => x[1]);
-  assert.deepEqual(rest, ["t-peace", "t-connect", "t-conflict", "t-reality", "t-forgive", "t-free", "t-pattern", "t-affirm"]);
+  assert.deepEqual(rest, ["t-peace", "t-connect", "t-kai", "t-conflict", "t-reality", "t-forgive", "t-free", "t-pattern", "t-affirm"]);
   assert.ok(outHtml.slice(moreAt).includes('id="progress"'), "progress lives under See more");
   assert.match(outHtml, /<button type="button" id="more-toggle" class="more-toggle" aria-expanded="false" aria-controls="more">See more<\/button>/);
   assert.match(outHtml, /<div id="more" class="more hidden">/);

@@ -1,6 +1,32 @@
 // core/master.js — THE MASTER FUNCTION. Every feature calls master(); nothing
 // else steps the numbers.
 //
+// ===================== THE WHOLE MODEL ON ONE PAGE (push23) =====================
+//   (1) e  = clip01( e₋ ⊕ n(text) + X·(1 − S)·w )                       the reading
+//   (2) e' = clip01( e + a(e)·(h − e) + b·s(e) )                          the step
+//   (3) P  = P_d(e)·(1 − γ·C)·(1 − δ·G);  lever = argmax_i ΔP_i;  step = practice(lever)
+//   (4) words = compose(e, e', P, lever, passes)
+// where
+//   e₋        where you were (the session's e, or the picked vector from the chips)
+//   n(text)   the words: lexicon + signals + word hooks (relationship patterns,
+//             forgiveness, true size g/u, patience, tension …), each 1 − e^(−raw)
+//   ⊕         the saturating add: hard/process 1 − (1 − e)(1 − n); grounding e + n⁺(1 − e) − n⁻e
+//   X, S, w   the Kai shield (core/kai.js): outside hurt X, S = 1 − (1−A)(1−F)(1−E)(1−R),
+//             w = {anger .8, shame .6, fear .4}; X = 0 for almost every text, so (1) is then e₋ ⊕ n
+//   a, b, s   a(e) = min(a_max, a0 + k‖e − h‖) (a_cap and b_U when λ > 0); s ≤ 0 is grounding
+//             pressing on hard/process movers above home (below); the 9 movers and h as before
+//   P_d       1/(1 + (d/d0)²), d = ‖e − h‖;  C = the strongest hidden conflict;  G = max(g, u) true size
+//   ΔP_i      the gain in P for e_i moved 0.05 toward h_i;  practice(): features/practices.js rules
+//   passes    in the same call, never moving e: forgiveness F_self, F_other and the path; the freeing
+//             mix (max J = P − μN); the Kai lines; the companion grows from caring actions only
+//             (Update, a step tried, a journal save, a practice finished), never from e
+//   Every value is rounded to 0.01 after (1) and after (2), as the code does.
+//   The baseline B_t = 0.8·B_{t−1} + 0.2·e_t and recovery (repeat (2) until d < 0.3) read the same map.
+// With faith on, h is described as rest and peace in Christ (Matthew 11:28–30; Philippians 4:7)
+// and the virtues as fruits of the Spirit (Galatians 5:22–23); the wording changes, not the math.
+// tests/onepage.test.js recomputes (1)–(3) from these lines and checks them against master().
+// ===============================================================================
+//
 //   e        = score(text)                       (words added to where you are)
 //              or a picked vector                 (masterState / masterPick: the feelings picker)
 //              — both then run the one shared path reading(e, …) below
@@ -41,11 +67,12 @@ if (typeof module !== "undefined") {
   require("./movers.js");
   require("./reality.js");
   require("./peace.js");
+  require("./kai.js");
 }
 
 (function (MF) {
   "use strict";
-  const R = MF.Reality, PEACE = MF.Peace;
+  const R = MF.Reality, PEACE = MF.Peace, KAI = MF.Kai;
   const { NAMES, GROUND, REST, FIXED, ACTIVE, MAX_SIM, N, idx, isGround, r2, clamp01, norm, distance, stamp, dayOf, weights, fromText, fromPick, combine } = MF.Movers;
   // ---------- Vectors, dynamics, λ ----------
 
@@ -227,9 +254,18 @@ if (typeof module !== "undefined") {
   }
 
   /** The one shared path: everything after the vector e is known. */
-  function reading(e, words, state, opts) {
+  function reading(e0, words, state, opts) {
     calls.master += 1;
     const h = state.home, W = weights(state.w), V = state.vars;
+    const data = words.data || {};
+    // The true-size principle, both sides: too big (g) and too small (u, false humility).
+    const grand = data.grand || R.grandiosity("");
+    const small = data.small || R.smallness("");
+    const tsize = Math.max(grand.g, small.u);
+    // The Kai term (line 1 of the one-page form): outside hurt X, less the shield S,
+    // pushes anger, shame and fear: e ← clip01(e + X(1 − S)·w). X = 0 leaves e as it is.
+    const kai = KAI.shield(e0, data, state.session || {}, tsize);
+    const e = KAI.apply(e0, kai);
     const lam = lambda(e, W, V.d);
     const unstable = lam !== null && lam > 0;
     const d = distance(e, h);
@@ -254,11 +290,6 @@ if (typeof module !== "undefined") {
     const Bprev = baselineOf(state.days.filter(x => x.day < today));
     const B = ema(Bprev, e).map(r2);
     // Same pass: grandiosity (already folded into e by the word hook), hidden conflicts, positive emotions.
-    const data = words.data || {};
-    const grand = data.grand || R.grandiosity("");
-    // The true-size principle, both sides: too big (g) and too small (u, false humility).
-    const small = data.small || R.smallness("");
-    const tsize = Math.max(grand.g, small.u);
     const out = {
       crisis: false, notes: words.notes || [], read: words.read || null, found: words.found || [],
       grand, small, tsize, conflicts: R.conflicts(e, data.clashes || []), positives: R.positives(e, next, h),
@@ -267,6 +298,7 @@ if (typeof module !== "undefined") {
       top: top ? top.n : null, stabilizer, mover, action,
       loops: loops(e, W, V.d), hidden: hidden(e, W, V),
       B, baseline: { dPrev: Bprev ? r2(distance(Bprev, h)) : null, dB: r2(distance(B, h)), days: state.days.length },
+      kai: kai.X > 0 || data.kai || data.kaiPickF ? kai : null,
     };
     // Inner peace, same pass: P for this reading, then (outside the inner
     // simulation) the lever, the gradient, and the solve for e* and n*.
@@ -346,8 +378,17 @@ if (typeof module !== "undefined") {
     return { ...state, ideal: { a: r2(m.a), b: r2(m.b) } };
   }
 
+  /** The one-page form, as shown in Ada's panel. */
+  const ONE_PAGE = [
+    "(1) e = clip01(e\u208B \u2295 n(text) + X\u00B7(1 \u2212 S)\u00B7w)   the reading",
+    "(2) e' = clip01(e + a(e)\u00B7(h \u2212 e) + b\u00B7s(e))   the step",
+    "(3) P = P_d(e)\u00B7(1 \u2212 \u03B3C)\u00B7(1 \u2212 \u03B4G);  lever = argmax \u0394P_i;  step = practice(lever)",
+    "(4) words = compose(e, e', P, lever, passes)",
+  ];
+  /** How h is described with faith on (wording only). */
+  const FAITH_HOME = "rest and peace in Christ (Matthew 11:28\u201330; Philippians 4:7).";
   MF.Master = {
-    SKILL, REFRAME, master, masterState, masterPick, addPass, calls, recovery, solvePeace, recText, refreshIdeal, focus, baselineSeries, baselineOf,
+    ONE_PAGE, FAITH_HOME, SKILL, REFRAME, master, masterState, masterPick, addPass, calls, recovery, solvePeace, recText, refreshIdeal, focus, baselineSeries, baselineOf,
     // Building blocks master uses (exported for tests only; features call master).
     _parts: { step, lambda, hidden, loops, sVec, act, ema, simulate },
   };

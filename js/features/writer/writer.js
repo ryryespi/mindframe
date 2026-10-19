@@ -29,9 +29,19 @@ if (typeof module !== "undefined") {
   const STEP_FOR = { calm: SKILL.calm.split(": ")[1].replace(/\.$/, "").toLowerCase(), connection: "send one short message to someone who is kind", hope: "pick one small thing for tomorrow and write it down" };
   /** Which mover the story is about: the strongest one, else the biggest grounding gap. */
   function storyFocus(state, m) { return focus({ e: m.e, home: state.home }).name || m.top || "calm"; }
-  /** A creature story driven by the master step, in feeling words, ending with an affirmation and a question. */
+  /**
+   * A creature story driven by the master step, in feeling words, ending with an affirmation and a question.
+   * When outside hurt is present (m.kai.X > 0) it is a Kai-style story instead (core/kai.js):
+   * a traveler (Kai, or opts.traveler) with your companion (opts.friend) as his friend,
+   * the virtue lines from your shield, the weakest shown growing; faith adds a Christ-centered line.
+   */
   function story(state, m, opts = {}) {
-    if (!m || m.crisis || m.d < 0.005) return null;
+    if (!m || m.crisis) return null;
+    if (MF.Kai && m.kai && m.kai.X > 0) {
+      const k = MF.Kai.story(m, { traveler: opts.traveler, friend: opts.friend, faith: !!opts.faith });
+      return { kind: "kai", guide: k.traveler, tag: `${k.traveler}, a traveler who stands calm in a storm of words`, focus: m.top || "anger", arc: "kai", lever: k.lever, from: null, to: null, affirmation: null, text: k.text, sentences: k.sentences, next: m.next };
+    }
+    if (m.d < 0.005) return null;
     const top = storyFocus(state, m);
     const i = idx[top];
     const arc = HARD.concat(PROCESS).includes(top) ? ARC_FOR[top] : "none";
@@ -99,7 +109,7 @@ if (typeof module !== "undefined") {
     app.onReset(hide);
     function tell() {
       if (!app.update()) return;
-      current = story(app.state, app.m(), { seed, faith: app.faith() });
+      current = story(app.state, app.m(), { seed, faith: app.faith(), friend: app.companion ? app.companion.get().name : "" });
       if (!current) { hide(); app.note("You're close to steady; there's no story to tell right now."); return; }
       $("story-tag").textContent = "Guide: " + current.tag;
       $("story-text").textContent = current.text;

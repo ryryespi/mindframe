@@ -244,6 +244,8 @@ if (typeof module !== "undefined") {
       root.querySelector(".path-next").addEventListener("click", () => {
         // Walking a path to its last step is a practice finished (a caring action for the companion).
         if (at[p] === PATHS[p].steps.length - 1) app.care("practice");
+        // Walking past REACH's "Empathize" step counts as empathy practised (the Kai shield).
+        if (PATHS[p].steps[at[p]].k === "Empathize" && app.practised) app.practised("E");
         at[p] = at[p] === PATHS[p].steps.length - 1 ? 0 : at[p] + 1; draw(); root.querySelector(".path-k").focus();
       });
       root.querySelector(".path-save").addEventListener("click", () => {

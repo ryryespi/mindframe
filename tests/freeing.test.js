@@ -37,7 +37,7 @@ test("picker: four levels at the band midpoints, plain words, grounding chips st
   assert.deepEqual(M.vectorLevels(v), { fear: "a little", sadness: "off", anger: "strongly", shame: "off", calm: "off", connection: "quite", hope: "quite", rumination: "off", avoidance: "off" });
 });
 test("picker extras: 'blaming myself' and 'putting myself down' are nudges onto existing movers (no new movers)", () => {
-  assert.deepEqual(M.EXTRAS.map(c => c.id).sort(), ["blame", "putdown"]);
+  assert.deepEqual(M.EXTRAS.map(c => c.id).sort(), ["blame", "holdback", "judged", "putdown"]);
   const p = M.fromPick(SPEC);
   assert.equal(p.e.length, 9);
   assert.deepEqual(p.extras, ["blame", "putdown"]);
@@ -281,7 +281,7 @@ test("deterministic: the same pick gives the same reading and the same freeing m
   const st = M.defaultState();
   assert.equal(nums(M.masterPick(SPEC, st, { now: NOW })), nums(M.masterPick(SPEC, st, { now: NOW })));
 });
-test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy freeing mix, sw v22, README", () => {
+test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy freeing mix, sw v23, README", () => {
   const index = read("index.html"), sw = read("sw.js"), r = read("README.md"), css = read("style.css");
   assert.match(index, /<button type="button" id="mode-write" aria-pressed="true">Write<\/button>/);
   assert.match(index, /<button type="button" id="mode-pick" aria-pressed="false">Pick feelings<\/button>/);
@@ -290,7 +290,7 @@ test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy f
   assert.match(index, /id="copy-mix" class="secondary">Copy freeing mix</);
   assert.match(css, /\.feel-chip \{[^}]*min-height: 2\.9rem/);
   assert.match(css, /\.mode button \{[^}]*min-height: 2\.75rem/);
-  assert.match(sw, /mindframe-shell-v22/);
+  assert.match(sw, /mindframe-shell-v23/);
   ["./js/features/freeing.js", "./js/features/picker.js"].forEach(f => assert.ok(sw.includes(f), f));
   ["## Pick feelings", "## The freeing mix", "J(e) = P(e) \u2212 \u03BC\u00B7N(e)", "mf 3", "Tangney, J. P. (2000)", "Gilbert, P., & Procter, S. (2006)", "Gilbert, P. (2009)", "Burns, D. D. (1980)", "Interior Castle", "Romans 12:3", "1 John 4:19"].forEach(x => assert.ok(r.includes(x), x));
 });

@@ -330,7 +330,7 @@ if (typeof module !== "undefined") {
       let k = 0;
       $("breath-go").textContent = "Stop";
       const tick = () => {
-        if (k >= plan.length) { stop("Done. Notice how you feel now."); app.care("practice"); return; }
+        if (k >= plan.length) { stop("Done. Notice how you feel now."); app.care("practice"); if (app.practised && MF.Kai) app.practised(MF.Kai.PRACTICE_VIRTUE[chosen]); return; }
         const s = plan[k], c = $("breath-circle");
         c.style.setProperty("--dur", `${s.ms}ms`);
         c.className = `breath-circle ${s.phase}`;
@@ -370,7 +370,7 @@ if (typeof module !== "undefined") {
       $("dump-time").textContent = mmss(DUMP_MS);
       dumpTimer = setInterval(() => {
         const left = dumpEnd - Date.now();
-        if (left <= 0) { dumpStop("Time. Keep what helps, or let it go."); app.care("practice"); return; }
+        if (left <= 0) { dumpStop("Time. Keep what helps, or let it go."); app.care("practice"); if (app.practised) app.practised("A"); return; }
         $("dump-time").textContent = mmss(left);
       }, 1000);
       $("dump-text").focus();

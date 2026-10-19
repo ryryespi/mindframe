@@ -1,0 +1,134 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,tabularx,array}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage[round,authoryear]{natbib}
+\setlist{itemsep=2pt,topsep=4pt}
+\newtheorem{proposition}{Proposition}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\newcommand{\clip}{\operatorname{clip}_{[0,1]}}
+\newcommand{\norm}[1]{\lVert #1\rVert}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\begin{document}
+
+%% ---------------- Title page ----------------
+\begin{titlepage}
+\centering
+\vspace*{1.8in}
+{\LARGE\bfseries MindFrame: The Whole Model as One Equation\par}
+\vspace{0.25in}
+{\large The master function, the Kai shield, and a faith reading\par}
+\vspace{0.5in}
+{\Large Ryan Espinosa\par}
+\vspace{0.2in}
+{\large October 2026\par}
+\vfill
+{\small MindFrame is a model built from design assumptions and informed by research. It is not validated science, not a diagnosis, and not therapy. In a crisis in the US, call or text 988, or call 911.\par}
+\end{titlepage}
+
+%% ---------------- Dedication ----------------
+\thispagestyle{empty}
+\vspace*{3in}
+\begin{center}
+\Large\itshape All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.
+\end{center}
+\clearpage
+\setcounter{page}{1}
+
+%% ---------------- 1. One page ----------------
+\section{The whole model on one page}
+
+MindFrame reads one thought into a vector $e\in[0,1]^9$ of nine movers (fear, sadness, anger, shame, calm, connection, hope, rumination, avoidance) and takes one gentle step toward a home state $h$. Every feature built so far fits in four lines:
+\begin{align}
+e &= \clip\!\big(e_{-} \oplus n(\text{text}) + X\,(1-S)\,w\big) && \text{the reading}\label{eq:read}\\
+e' &= \clip\!\big(e + a(e)\,(h-e) + b\,s(e)\big) && \text{the step}\label{eq:step}\\
+P &= P_d(e)\,(1-\gamma C)\,(1-\delta G);\ \ \ell=\arg\max_i \Delta P_i;\ \ \text{step}=\text{practice}(\ell) && \text{peace}\label{eq:peace}\\
+\text{words} &= \text{compose}(e, e', P, \ell, \text{passes}). && \label{eq:words}
+\end{align}
+\begin{itemize}
+\item $e_{-}$ is where the person was: the session's $e$, or the vector picked with the feeling chips. $n(\text{text})$ is what the words add: a lexicon, thinking-trap signals, and word hooks (relationship patterns, forgiveness cues, true size, patience, body tension), each saturating as $1-e^{-\text{raw}}$. The saturating sum $\oplus$ is $1-(1-e_j)(1-n_j)$ for hard and process movers and $e_j+n_j^{+}(1-e_j)-n_j^{-}e_j$ for the grounding movers (calm, connection, hope).
+\item $X(1-S)w$ is the Kai term (Section~\ref{sec:kai}). For almost every text $X=0$, and line~(\ref{eq:read}) is just $e_{-}\oplus n$.
+\item $a(e)=\min(a_{\max}, a_0+k\norm{e-h})$, lowered to $a_{\mathrm{cap}}=0.12$ (with $b=b_U$) when the active hard movers feed each other ($\lambda>0$). The term $s_j(e)=e_j\sum_{g}\min(0,W_{gj})\,h_g\le 0$ is grounding pressing on a hard or process mover that sits above home.
+\item $P_d=1/(1+(d/d_0)^2)$ with $d=\norm{e-h}$. $C$ is the strongest hidden conflict $\sqrt{x_iy_j}$. $G=\max(g,u)$ is the true-size signal (too big, $g$; too small, $u$).
+\item $\Delta P_i$ is the gain in $P$ when $e_i$ moves $0.05$ toward $h_i$. The lever $\ell$ is the largest gain. $\text{practice}(\ell)$ is a fixed, deterministic rule table: for example, the cold-water reset only for very high fear or anger with low peace, and the brain dump for very high rumination. Strictly, the step is the practice for the lever that maximizes $\Delta P$; the model does not search every practice.
+\item The \emph{passes} run in the same call and never move $e$. They are forgiveness ($F_{\text{self}}=e_{\text{shame}}(0.4+0.6c_{\text{self}})$ and $F_{\text{other}}=e_{\text{anger}}(0.4+0.6c_{\text{other}})$), the freeing mix ($\max J=P-\mu N$ over small band moves), the Kai lines, and the companion. The companion grows only from caring actions (an Update, a step tried, a journal save, a practice finished), never from $e$.
+\item Values are rounded to $0.01$ after~(\ref{eq:read}) and after~(\ref{eq:step}), as the code does. The baseline $B_t=0.8B_{t-1}+0.2e_t$ and the recovery count (repeat~(\ref{eq:step}) until $d<0.3$) reuse the same map.
+\end{itemize}
+\textbf{Code and formula agree.} A unit test recomputes (\ref{eq:read})--(\ref{eq:peace}) from these lines alone and checks that \texttt{master()} returns exactly the same $e$, $e'$, $P$, lever and practice. The refactor changed no other behavior: all earlier tests still pass.
+
+%% ---------------- 2. Kai ----------------
+\section{The Kai equation: steadiness under outside pressure}\label{sec:kai}
+In Ryan's story, Kai faces a storm of criticism. He anchors in self-awareness, applies forbearance and empathy, and his respect guard blocks the barbs without harming anyone, so impulsive reaction ``flickers and fails.'' The model adds no movers:
+\begin{align*}
+X &= 1-e^{-0.7k_X} && \text{hurt received (aimed \emph{at} you)}\\
+A &= (1-G)\,[1-(1-c_A)(1-\tfrac12\sigma_A)] && \text{self-awareness}\\
+F &= 1-(1-c_F)(1-\tfrac12\sigma_F)(1-p_F) && \text{forbearance}\\
+E &= 1-(1-c_E)(1-\tfrac12\sigma_E) && \text{empathy}\\
+R &= (1-c_{\text{attack}})\,[1-(1-c_R)(1-\tfrac12\sigma_R)] && \text{respect guard}\\
+S &= \min\!\big(0.99,\ 1-(1-A)(1-F)(1-E)(1-R)\big) && \text{the shield}\\
+e_j &\leftarrow \clip\!\big(e_j + X(1-S)\,w_j\big),\ \ w=(0.8,\,0.6,\,0.4)\text{ for anger, shame, fear} && \text{the push}\\
+I &= X(1-S)\,u,\quad u=\max(e_{\text{anger}}, c_{\text{urge}}) && \text{impulsive reaction}
+\end{align*}
+Here each $c=1-e^{-0.7k}$ counts $k$ matching phrases, with negation handled (``nobody judged me'' gives $X=0$). $\sigma=1$ when a matching practice was finished this session: the pause or breathing practices for $F$, labeling for $A$, and the REACH ``Empathize'' step for $E$. Sessions are kept in memory only. $p_F=\tfrac12$ comes from a picker chip. Each virtue is capped at $0.95$. The Four Horsemen \citep{gottman1992} in the person's \emph{own} words never raise $X$; contempt or criticism aimed outward lowers $R$ through $c_{\text{attack}}$.
+
+\textbf{On the card} (words only, and only when $X>0$), for the reading ``My coworkers criticized me in front of everyone, I want to snap back but I know they're stressed'': $X=0.75$, $A=0$, $F=0.5$, $E=0.5$, $R=0$, $S=0.75$, $I=0.14$. The card says: ``Your steadiness: self-awareness just starting, forbearance growing, empathy growing, respect guard just starting. The urge to react flickers and fails.'' The weakest virtue is the lever, and it comes with one step. For the respect guard, that step is DEAR MAN-style \citep{linehan2015}: ``I hear you. I see it differently, and I'm going to step away now.''
+
+\textbf{Sources, honestly.} Naming feelings dampens amygdala response \citep{lieberman2007}; affirming core values buffers threat to the self \citep{cohen2014}. Patience relates to well-being and can be trained \citep{schnitker2012}. Perspective taking is a distinct facet of empathy \citep{davis1983}. Assertiveness training has a substantial, if older, evidence base \citep{speed2018}. None of these studies tested this equation. The product form of $S$, the weights $w$, and the $\tfrac12$ terms are modeling choices.
+
+%% ---------------- 3. Faith ----------------
+\section{The faith reading}
+With \emph{Include faith} on, the home $h$ is described as rest and peace in Christ: ``Come to me, all you who labor and are heavily burdened, and I will give you rest'' (Matthew 11:28--30), and ``the peace of God, which surpasses all understanding, will guard your hearts and your thoughts in Christ Jesus'' (Philippians 4:7). The virtues are read as fruits of the Spirit: ``love, joy, peace, patience, kindness, goodness, faith, gentleness, and self-control'' (Galatians 5:22--23). Verse wording follows the World English Bible (public domain).
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}lLL@{}}
+\toprule
+Model & Fruit of the Spirit & Picture in the Gospel\\
+\midrule
+Forbearance $F$ & patience & He ``answered nothing'' before his accusers (Matthew 27:12--14); ``as a sheep that before its shearers is silent'' (Isaiah 53:7)\\
+Empathy $E$ & kindness & ``Father, forgive them, for they don't know what they are doing'' (Luke 23:34)\\
+Respect guard $R$ & gentleness & ``When he was cursed, he didn't curse back'' (1 Peter 2:23)\\
+Low impulsive reaction $I$ & self-control & the same verse: ``When he suffered, he didn't threaten''\\
+Home $h$ & peace & Philippians 4:7; Matthew 11:28--30\\
+\bottomrule
+\end{tabularx}
+\end{center}
+\textbf{Only the words change, not the math.} With faith on, every number ($e$, $e'$, $X$, $S$, $I$, $P$) is identical; this is tested. The faith reading is offered as a way of speaking about the same quantities, not as a claim that the model measures anything spiritual.
+
+%% ---------------- 4. Proven vs modeled ----------------
+\section{What is proven, what is tested, what is modeled}
+\begin{proposition}[Contraction still holds]\label{prop:contract}
+Let $T$ be the step map~(\ref{eq:step}) with hard and process homes at $0$. Then for every $e\in[0,1]^9$, $\norm{T(e)-h}\le(1-a_{\mathrm{lo}})\norm{e-h}$ with $a_{\mathrm{lo}}=\min(a_0,a_{\max},a_{\mathrm{cap}})>0$. The Kai term does not change $T$, so the iteration converges to $e^\ast=h$, where $P=1$.
+\end{proposition}
+\begin{proof}
+For a grounding mover, $T(e)_j-h_j=(1-a)(e_j-h_j)$. For a hard or process mover, $T(e)_j=\clip(e_j(1-a-b\kappa_j))$ with $\kappa_j=-\sum_g\min(0,W_{gj})h_g\ge0$, so $0\le T(e)_j\le(1-a)e_j$. Summing squares gives the bound. The Kai term enters only line~(\ref{eq:read}): it takes a point of $[0,1]^9$ to another point of $[0,1]^9$ (clipped), raising only anger, shame and fear by at most $X w_j$. The proof needs nothing else from the starting point, and the solve and recovery iterate $T$ with empty text, where $X=0$.
+\end{proof}
+\begin{remark}[If the pressure were applied at every step]
+Suppose the map were instead $T_X(e)=\clip(T(e)+p)$ with a constant $p=X(1-S)w\ge0$ on the hard movers. Then $|T_X(e)_j-h_j|\le(1-a)|e_j-h_j|+p_j$, so $d_{t+1}\le(1-a_{\mathrm{lo}})d_t+\norm{p}$ and $\limsup d_t\le\norm{p}/a_{\mathrm{lo}}$. That is bounded, but it does \emph{not} converge to $h$. This bound is loose (with the defaults $a_{\mathrm{lo}}=0.12$). The app does not do this: outside hurt is applied once per reading.
+\end{remark}
+\begin{proposition}[The shield behaves as the story says]
+$S\in[0,0.99]$ and $\partial S/\partial V=\prod_{U\neq V}(1-U)\ge0$ for each virtue $V$. With $X$ fixed, $X(1-S)$ and the pushed anger fall as $S$ rises, so $u$ and $I=X(1-S)u$ are non-increasing in $S$; $I$ is strictly decreasing when $X>0$ and $u>0$ (before rounding). With $X=0$ nothing changes: no push, $I=0$, and no card tile.
+\end{proposition}
+\noindent\textbf{Tested, not proven:} the code matches (\ref{eq:read})--(\ref{eq:peace}) to the cent. The rounded iteration stops within $0.005/a$ of $h$. The detection separates hurt received from hurt given on the listed examples. Crisis wording returns only the 988/911 box. Everything is deterministic. The unit suite has 299 checks. \textbf{Modeled, not validated:} the movers' links, every weight and threshold, the cue lists, the virtue formulas, and the practice rules. No study with people has been run.
+
+%% ---------------- References ----------------
+\begingroup\small
+\begin{thebibliography}{9}\setlength{\itemsep}{1pt}
+\bibitem[Cohen and Sherman(2014)]{cohen2014} Cohen, G.~L., \& Sherman, D.~K. (2014). The psychology of change: Self-affirmation and social psychological intervention. \emph{Annual Review of Psychology, 65}, 333--371. doi:10.1146/annurev-psych-010213-115137
+\bibitem[Davis(1983)]{davis1983} Davis, M.~H. (1983). Measuring individual differences in empathy: Evidence for a multidimensional approach. \emph{Journal of Personality and Social Psychology, 44}(1), 113--126. doi:10.1037/0022-3514.44.1.113
+\bibitem[Gottman and Levenson(1992)]{gottman1992} Gottman, J.~M., \& Levenson, R.~W. (1992). Marital processes predictive of later dissolution: Behavior, physiology, and health. \emph{Journal of Personality and Social Psychology, 63}(2), 221--233. doi:10.1037/0022-3514.63.2.221
+\bibitem[Lieberman et~al.(2007)]{lieberman2007} Lieberman, M.~D., Eisenberger, N.~I., Crockett, M.~J., Tom, S.~M., Pfeifer, J.~H., \& Way, B.~M. (2007). Putting feelings into words: Affect labeling disrupts amygdala activity in response to affective stimuli. \emph{Psychological Science, 18}(5), 421--428.
+\bibitem[Linehan(2015)]{linehan2015} Linehan, M.~M. (2015). \emph{DBT skills training manual} (2nd ed.). New York: Guilford Press.
+\bibitem[Schnitker(2012)]{schnitker2012} Schnitker, S.~A. (2012). An examination of patience and well-being. \emph{The Journal of Positive Psychology, 7}(4), 263--280. doi:10.1080/17439760.2012.697185
+\bibitem[Speed et~al.(2018)]{speed2018} Speed, B.~C., Goldstein, B.~L., \& Goldfried, M.~R. (2018). Assertiveness training: A forgotten evidence-based treatment. \emph{Clinical Psychology: Science and Practice, 25}(1), e12216. doi:10.1111/cpsp.12216
+\bibitem[World English Bible(n.d.)]{web} \emph{World English Bible} (public domain), ebible.org: Isaiah 53:7; Matthew 11:28--30; 27:12--14; Luke 23:34; Galatians 5:22--23; Philippians 4:7; 1 Peter 2:23.
+\end{thebibliography}
+\endgroup
+\end{document}

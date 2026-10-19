@@ -5,8 +5,9 @@
 //   • Pick feelings: the nine movers as plain-word chips (afraid, sad, angry,
 //     ashamed, calm, connected, hopeful, replaying thoughts, avoiding). Each tap
 //     goes off → a little → quite → strongly → off (0, 0.15, 0.45, 0.80, the
-//     band midpoints; see MF.Movers.LEVELS). Two extra chips, "blaming myself"
-//     and "putting myself down", turn on nudges onto existing movers.
+//     band midpoints; see MF.Movers.LEVELS). Four extra chips: "blaming myself"
+//     and "putting myself down" turn on nudges onto existing movers; "criticized
+//     or judged" and "holding back from reacting" feed the Kai shield (core/kai.js).
 //   • Update reads the picked state with MF.Master.masterPick(), the same master
 //     path the text uses (no text, so no crisis path; the 988 line stays visible).
 //   • The picked levels are kept with the session (state.pick, mf 3 code), so
@@ -20,7 +21,7 @@ if (typeof module !== "undefined") {
   "use strict";
   const { PICK_WORD, PICK_ORDER, LEVELS, pickDefault, nextLevel, levelOf } = MF.Movers;
   /** The extra chips, in screen order. */
-  const EXTRA_ORDER = ["blame", "putdown"];
+  const EXTRA_ORDER = ["blame", "putdown", "judged", "holdback"];
 
   /**
    * Mount the toggle and the chips.

@@ -106,7 +106,7 @@ if (typeof module !== "undefined") require("../core/words.js");
   function insightLines(state, m, faith) {
     const c = MF.Words.card(state, m, { faith, seed: 1 });
     const rel = MF.Relationship.section(m.found).map(r => `${r.title}: ${r.antidote}`);
-    return [].concat(c.conflict, c.reality, c.forgive, c.freeing ? c.freeing.lines : [], rel);
+    return [].concat(c.kai || [], c.conflict, c.reality, c.forgive, c.freeing ? c.freeing.lines : [], rel);
   }
 
   function mount(app) {

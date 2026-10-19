@@ -67,6 +67,7 @@ if (typeof module !== "undefined") {
       ...(m.small && m.small.u > 0 ? [`Putting yourself down (false humility) signal: ${f2(m.small.u)}${m.small.kinds.length ? ` (${m.small.kinds.join(", ")})` : " (chosen in the feelings picker)"}`] : []),
       ...(m.freeing && MF.Freeing ? [`Freeing mix (inner peace ${f2(m.freeing.P0)} -> ${f2(m.freeing.P1)}, shame only goes down): ${MF.Freeing.line(m.e, m.freeing.target, m.pick ? m.pick.extras : [])}`] : []),
       ...(m.practice && MF.Practices ? [`Practice for the one step: ${MF.Practices.LIBRARY[m.practice.id].name}`] : []),
+      ...(m.kai && m.kai.X > 0 && MF.Kai ? [`Steadiness under outside criticism (Kai shield): pressure X=${f2(m.kai.X)}, shield S=${f2(m.kai.S)} (self-awareness ${f2(m.kai.A)}, forbearance ${f2(m.kai.F)}, empathy ${f2(m.kai.E)}, respect guard ${f2(m.kai.R)}); impulsive reaction I=${f2(m.kai.I)}; weakest: ${MF.Kai.NAME[m.kai.lever]}`] : []),
     ];
   }
 

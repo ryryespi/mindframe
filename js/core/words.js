@@ -429,6 +429,7 @@ if (typeof module !== "undefined") {
   // ---------- The short card (push19): headline + feeling + one insight + One step ----------
   /**
    * The one most relevant insight, chosen by the numbers (strongest first):
+   *   kai      X, the outside hurt, when the Kai shield tile shows (push23)
    *   free     max(e_shame, c_self, u) when the freeing tile shows
    *   forgive  max(F_self, F_other) when a forgiveness path is suggested
    *   reality  max(g, u) when the reality check shows
@@ -442,6 +443,7 @@ if (typeof module !== "undefined") {
   function insight(m, c) {
     const fr = m.freeing, f = m.forgive;
     const cand = [
+      ["kai", c.kai && c.kai.length ? m.kai.X : 0],
       ["free", c.freeing ? Math.max(m.e[MF.Movers.idx.shame], fr ? fr.cSelf : 0, fr ? fr.u : 0) : 0],
       ["forgive", c.forgive && c.forgive.length && f ? Math.max(f.Fself, f.Fother) : 0],
       ["reality", c.reality && c.reality.length ? Math.max(m.grand ? m.grand.g : 0, m.small ? m.small.u : 0) : 0],
@@ -470,6 +472,7 @@ if (typeof module !== "undefined") {
       connect: connectLines(state, m, seed),
       conflict: conflictLines(m, seed),
       reality: realityLines(m),
+      kai: MF.Kai ? MF.Kai.cardLines(m, opts) : [],
       forgive: MF.Forgive ? MF.Forgive.cardLines(m, opts) : [],
       freeing: MF.Freeing ? MF.Freeing.cardLines(m, opts) : null,
       affirmations: affirmations(m, opts),
@@ -490,7 +493,7 @@ if (typeof module !== "undefined") {
       ...c.peace, ...(c.peaceFaith ? [c.peaceFaith] : []),
       `What you may be feeling: ${c.feeling.replace(/^You may be feeling /, "")}`,
       `How they connect: ${c.connect.join(" ")}`,
-      ...c.conflict, ...c.reality, ...c.forgive,
+      ...c.kai, ...c.conflict, ...c.reality, ...c.forgive,
       ...(c.freeing ? [...c.freeing.lines, c.freeing.step] : []),
       "Affirmations:", ...c.affirmations.map(x => `  ${x}`),
       `One step: ${c.step}`,

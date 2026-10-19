@@ -45,6 +45,8 @@
   let base = state.e.slice();   // where you were before the words in the box
   let reading = null;           // the last master output (null until Update)
   let inCrisis = false;
+  // Virtues practised this session (the Kai shield, core/kai.js): {A, F, E, R}. In memory only, never saved.
+  let session = {};
   const resets = [], crises = [], closes = [];
 
   // ---------- The app shell the feature panels use ----------
@@ -76,6 +78,10 @@
     open: who => openPanel(who),
     /** A caring action for the companion's growth (set by features/companion.js). */
     care: () => 0,
+    /** A virtue was practised this session (A, F, E or R): it counts toward the Kai shield from the next Update. */
+    practised(v) { if (["A", "F", "E", "R"].includes(v)) session = { ...session, [v]: 1 }; },
+    /** The virtues practised this session (a copy). */
+    session: () => ({ ...session }),
     startOver,
   };
 
@@ -128,7 +134,7 @@
     // Safety first: crisis wording still in the text box shows the 988/911 box even in pick mode.
     if (picking && Grounding.isCrisis($("input").value)) { crisis(true); return false; }
     const pick = picking ? app.picker.pick() : null;
-    const out = picking ? masterPick(pick, { ...state, e: base }) : master($("input").value, { ...state, e: base });
+    const out = picking ? masterPick(pick, { ...state, e: base, session }) : master($("input").value, { ...state, e: base, session });
     if (out.crisis) { crisis(true); return false; }
     if (inCrisis) crisis(false);
     reading = out;
@@ -192,6 +198,9 @@
       box.append(h, a, ex);
     });
     $("t-pattern").classList.toggle("hidden", !rel.length);
+    // The Kai shield tile (core/kai.js): only when outside hurt is present.
+    soft("kai", c.kai);
+    $("t-kai").classList.toggle("hidden", !c.kai.length);
     placeInsight(c.insight ? c.insight.id : null);
     const out = $("out");
     out.classList.remove("hidden");
@@ -205,8 +214,8 @@
   // ---------- Short card + See more ----------
   // The insight tiles live in #more in a fixed order; the one the numbers pick
   // (Words.insight) moves into #insight-slot, shown short (.compact) until See more.
-  const INSIGHT_TILE = { free: "t-free", forgive: "t-forgive", reality: "t-reality", pattern: "t-pattern", conflict: "t-conflict" };
-  const MORE_ORDER = ["t-peace", "t-connect", "t-conflict", "t-reality", "t-forgive", "t-free", "t-pattern", "t-affirm"];
+  const INSIGHT_TILE = { kai: "t-kai", free: "t-free", forgive: "t-forgive", reality: "t-reality", pattern: "t-pattern", conflict: "t-conflict" };
+  const MORE_ORDER = ["t-peace", "t-connect", "t-kai", "t-conflict", "t-reality", "t-forgive", "t-free", "t-pattern", "t-affirm"];
   /** Put the chosen insight tile in the slot and every other tile back in #more, in order. */
   function placeInsight(id) {
     const more = $("more"), slot = $("insight-slot"), pick = id ? INSIGHT_TILE[id] : null;
@@ -356,6 +365,7 @@
   function startOver() {
     localStorage.removeItem(KEY);
     state = defaultState();
+    session = {};
     app.resetBase("");
     delete document.body.dataset.peace;
     $("out").classList.add("hidden");
