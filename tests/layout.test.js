@@ -140,7 +140,7 @@ test("chrome: shorter sky, one small privacy line, slim but sticky readable 988 
   assert.match(css, /\.scene \{ position: relative; height: 5\.6rem;/);
   assert.match(index, /viewBox="0 0 400 100"/);
   assert.equal((index.match(/stay on this device/g) || []).length, 1);
-  assert.match(index, /<p class="quiet small privacy">Private: your words stay on this device unless you save them to the journal\.<\/p>/);
+  assert.match(index, /<p class="quiet small privacy">Private: your words stay on this device unless you save them to the journal\. Nothing goes online unless you tap Find more online, which sends only film genres\.<\/p>/);
   assert.match(index, /<p class="safety-banner">In crisis, call or text <strong>988<\/strong> \(US\)/);
   assert.match(css, /\.safety-banner \{ position: sticky; top: 0; z-index: 30;[^}]*color: var\(--ink\)/);
   assert.match(css, /\.backdrop \{[^}]*z-index: 20/);

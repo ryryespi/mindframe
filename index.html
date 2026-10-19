@@ -23,6 +23,7 @@
   <!-- Small line icons for the card tiles (inline, so the app works offline). -->
   <svg class="sprite" aria-hidden="true" focusable="false">
     <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M3.5 9h17M8 5l-1.5 4M13 5l-1.5 4M18 5l-1.5 4"/><path d="M10.5 12.3v4l3.5-2z"/></symbol>
     <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 15-14-1 10-6 15-14 15"/><path d="M5 19c3-4 6-7 10-9"/></symbol>
     <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></symbol>
     <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
@@ -74,7 +75,7 @@
         <div id="pick-chips" class="feel-chips"></div>
       </div>
       <button type="button" id="update" class="primary">Update</button>
-      <p class="quiet small privacy">Private: your words stay on this device unless you save them to the journal.</p>
+      <p class="quiet small privacy">Private: your words stay on this device unless you save them to the journal. Nothing goes online unless you tap Find more online, which sends only film genres.</p>
 
       <!-- First use: name your companion (or skip and keep the default). Stored on this device only. -->
       <div id="name-box" class="name-box hidden">
@@ -113,6 +114,7 @@
               <div class="row"><button type="button" id="free-try" class="secondary">Try the self-compassion break</button><button type="button" id="free-grace" class="secondary hidden">Forgive myself</button></div></div>
             <div class="tile tile-soft hidden" id="t-pattern"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg><div id="pattern" class="soft-box"></div></div>
             <div class="tile" id="t-affirm"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg>Affirmations</span><ul id="affirm" class="affirm"></ul></div>
+            <p id="movie-line" class="quiet small movie-line hidden"></p>
             <p id="progress" class="quiet small"></p>
           </div>
         </section>
@@ -140,6 +142,7 @@
               <div id="pet-growth" class="bar" role="progressbar" aria-label="Growth" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="fill"></span></div>
               <p class="quiet small">I grow when you check in, try a step, save to your journal, finish a practice, or come back another day. Hard days never make me smaller. <span id="pet-days"></span></p>
             </div>
+            <button type="button" id="pet-watch" class="act act-watch" data-view="movies" aria-controls="p-movies"><svg class="ico" aria-hidden="true"><use href="#i-film"/></svg><span class="act-text"><strong>Watch something</strong><small>Want to watch something gentle together?</small></span><span class="act-go" aria-hidden="true">&rsaquo;</span></button>
             <div id="pet-actions" class="acts"></div>
             <div class="row pet-tools"><button type="button" id="pet-rename" class="text small">Rename</button><button type="button" id="pet-reset" class="text small">Reset growth</button></div>
           </div>
@@ -301,6 +304,31 @@
             </div>
           </div>
           </div>
+
+        <!-- Watch something: film suggestions from the reading (features/movies.js).
+             Works offline from a small curated list; "Find more online" is the
+             app's only network call, shows what it sends first, and sends only film genres. -->
+          <div id="p-movies" class="view hidden" role="group" aria-labelledby="v-movies-title">
+            <h3 class="view-title" id="v-movies-title" tabindex="-1">Watch something</h3>
+            <p id="mv-intro" class="pet-say mv-intro"></p>
+            <p id="mv-mood" class="small mv-mood"></p>
+            <ol id="mv-list" class="mv-list" aria-label="Film suggestions"></ol>
+            <div class="row"><button type="button" id="mv-more" class="secondary">More</button><button type="button" id="mv-online" class="secondary">Find more online</button></div>
+            <div id="mv-confirm" class="soft-box mv-confirm hidden" role="group" aria-label="Before anything is sent">
+              <p id="mv-send-what" class="small"></p>
+              <div class="row"><button type="button" id="mv-send" class="secondary">Send and look</button><button type="button" id="mv-cancel" class="text small">Cancel</button></div>
+            </div>
+            <p id="mv-status" class="quiet small" aria-live="polite"></p>
+            <p class="quiet small">A model, not a prescription: people often choose films to ease a hard mood or keep a good one (mood management theory, Zillmann, 1988). The films here are a small list kept in the app, so they work offline. Film facts from Wikidata (CC0).</p>
+            <details class="mv-key">
+              <summary class="small">Use my own TMDB key (optional, off)</summary>
+              <p id="mv-key-state" class="quiet small"></p>
+              <label class="small" for="mv-key">TMDB v3 API key</label>
+              <input id="mv-key" type="password" autocomplete="off" spellcheck="false" inputmode="text" placeholder="32 letters and numbers" />
+              <div class="row"><button type="button" id="mv-key-save" class="secondary">Save key</button><button type="button" id="mv-key-clear" class="text small">Remove key</button></div>
+              <p class="quiet small">Stored only in this browser and never in your code. Sent only to api.themoviedb.org, and only when you tap Find more online, for posters and ratings. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+            </details>
+          </div>
         </section>
 
         <p class="quiet small foot">A model built from design assumptions and informed by research, not validated science and not a diagnosis.</p>
@@ -331,6 +359,7 @@
   <script src="js/features/scribe.js"></script>
   <script src="js/features/scientist.js"></script>
   <script src="js/features/companion.js"></script>
+  <script src="js/features/movies.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

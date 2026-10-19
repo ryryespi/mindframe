@@ -4,7 +4,7 @@
 // http://localhost:8000/. On GitHub Pages it is /mindframe/.
 // A leading slash would skip that folder and break one of those two.
 
-const CACHE = "mindframe-shell-v20";
+const CACHE = "mindframe-shell-v21";
 
 const FILES = [
   "./",
@@ -33,6 +33,7 @@ const FILES = [
   "./js/features/scribe.js",
   "./js/features/scientist.js",
   "./js/features/companion.js",
+  "./js/features/movies.js",
   "./js/app.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -59,6 +60,9 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
+  // Other sites (only "Find more online": Wikidata, or TMDB with your own key)
+  // go straight to the network and are never cached here.
+  if (new URL(request.url).origin !== self.location.origin) return;
   event.respondWith(
     // Old links may carry ?view= or ?chip=, so match pages without the query.
     caches.match(request, { ignoreSearch: request.mode === "navigate" }).then(cached => {

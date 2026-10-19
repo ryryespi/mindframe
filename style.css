@@ -304,3 +304,20 @@ body.sheet-open { overflow: hidden; }
 @keyframes pet-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.03); } }
 @keyframes pet-drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(6px, 4px); } }
 @media (prefers-reduced-motion: reduce) { .pet-breath, .pet-leaf { animation: none !important; } .bar .fill { transition: none; } }
+
+/* ---- push21: Watch something (features/movies.js) ---- */
+.act-watch { margin-top: 0.6rem; background: var(--tile-step); }
+.mv-intro { margin: 0.2rem 0 0.4rem; }
+.mv-mood { color: var(--muted); margin: 0 0 0.4rem; }
+.mv-list { list-style: none; margin: 0 0 0.6rem; padding: 0; display: flex; flex-direction: column; gap: 0.45rem; }
+.mv-list li { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.55rem 0.75rem; border: 1px solid var(--line); border-radius: 0.9rem; background: var(--tile); }
+.mv-list li > div { min-width: 0; flex: 1; }
+.mv-list a { font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+.mv-list p { margin: 0.15rem 0 0; color: var(--muted); }
+.mv-list img { flex: none; width: 46px; height: auto; border-radius: 0.3rem; }
+.mv-confirm { margin: 0.5rem 0; padding: 0.6rem 0.75rem; border-radius: 0.9rem; background: var(--tile-soft); }
+.mv-confirm p { overflow-wrap: anywhere; }
+.mv-key { margin-top: 0.6rem; }
+.mv-key summary { cursor: pointer; min-height: 2.75rem; display: flex; align-items: center; }
+.mv-key input { width: 100%; box-sizing: border-box; min-height: 2.75rem; margin: 0.25rem 0; padding: 0.4rem 0.6rem; border: 1px solid var(--line); border-radius: 0.6rem; background: var(--card); color: var(--ink); font: inherit; }
+.movie-line { margin: 0.4rem 0; }

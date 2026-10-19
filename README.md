@@ -1,6 +1,6 @@
 # MindFrame
 
-A calm, local-only practice tool for looking at a thought. One page, one input box (or **Pick feelings** chips), and an **Update** button: nothing is read or shown until you tap Update (or press Ctrl/Cmd + Enter). No account and no API key. **The app composes its own replies from the equation and makes no network calls**; a public AI is optional, through one button that shows you the exact prompt first.
+A calm, local-only practice tool for looking at a thought. One page, one input box (or **Pick feelings** chips), and an **Update** button: nothing is read or shown until you tap Update (or press Ctrl/Cmd + Enter). No account and no API key. **The app composes its own replies from the equation and works offline.** It makes one kind of network call, and only when you tap **Find more online** under Watch something: it sends film genre ids to Wikidata (never your words, feelings or names) and shows you what it will send first. A public AI is optional, through one button that shows you the exact prompt first.
 
 **Not therapy, not a diagnosis.** In crisis, call or text **988** (US) or call **911**. Crisis wording shows only that support box; nothing is computed or saved.
 
@@ -189,7 +189,7 @@ In **Write a story**, **Comfort story from a public AI** builds a prompt from th
 
 ## Your companion
 
-One gentle animal stands for you: **a little fawn**, an original inline SVG drawn by `js/features/companion.js` (no image files). On first use a small box offers to name it; the default is **Willow**, and you can skip. The name is stored on this device only (and in the mf 4 code if you export it). The fawn sits in the header sky (small but always visible), and after Update it appears beside the card with one short line. Tapping it opens **one bottom sheet**: its name, its stage, a growth bar, and six actions. It replaced the six helpers of earlier versions (see DELETE.txt).
+One gentle animal stands for you: **a little fawn**, an original inline SVG drawn by `js/features/companion.js` (no image files). On first use a small box offers to name it; the default is **Willow**, and you can skip. The name is stored on this device only (and in the mf 4 code if you export it). The fawn sits in the header sky (small but always visible), and after Update it appears beside the card with one short line. Tapping it opens **one bottom sheet**: its name, its stage, a growth bar, and six actions. It replaced the six helpers of earlier versions (push20 removed their six SVG files).
 
 **Growth comes only from caring actions, never from how the feelings read.** Points only go up, and only through:
 
@@ -219,6 +219,33 @@ Five stages: **Newborn** (0, curled asleep in a leaf nest), **Little** (8, sitti
 The sheet is a modal dialog (`role="dialog"`, `aria-modal`): focus moves to its title and stays inside (Tab wraps), Close, Esc or tapping the shade closes it, and focus goes back to what opened it.
 
 Changing a number in a panel does not redraw the card; it says "Tap Update to see the new reading." Buttons that are themselves an action (Write a story, Accept step, Save checkpoint, Restore) run Update for you.
+
+## Watch something
+
+Willow's sheet has one more row above the six actions: **Watch something**, with Willow asking, for example, "Want to watch something gentle together?" It opens a view with three film suggestions at a time (title, year, one short reason in words, and a link to the film's English Wikipedia page), a **More** button, and **Find more online**. Under See more, the card can show one line: "Watch something: something gentle, like Paddington. Willow has more ideas." Watching is not a caring action: it never adds growth. In a crisis there are no films, only the 988/911 box.
+
+**The film mood is picked from the reading** (`MF.Movies.pick`, a model):
+
+| Reading (from the master function) | Film mood | Why it might help |
+|---|---|---|
+| sadness is the strongest hard mover | gentle and uplifting | a warm, gentle story can lift the mood a little |
+| sadness with low connection (under 0.25), or connection is the lever to grow | friendship and family | films about friendship and family can feel like company |
+| fear or avoiding | cozy and safe | a familiar, funny film with a safe ending helps you settle |
+| anger | calming, with some perspective | slow nature films and quiet stories lower arousal and widen the view |
+| shame, or self-blame (the Forgive myself path or the freeing mix) | second chances and self-worth | stories of second chances remind you that people grow and are worth kindness |
+| replaying (rumination) | absorbing, a light adventure | an absorbing story gives the mind a rest from replaying |
+| no hard mover at 0.3 or more, and calm or hope at 0.6 or more, or peace close or steady | inspiring | an inspiring story can build on a good mood |
+| anything else | gentle and uplifting | |
+
+The idea comes from **mood management theory** (Zillmann, 1988): people tend to choose media that ease a bad mood or keep a good one; calm, low-excitement content lowers arousal, and absorbing content interrupts rumination. This is a model and a suggestion, not a treatment, and the mapping itself has not been tested.
+
+**Offline first.** The suggestions come from a small curated list in `js/features/movies.js`: 59 well-known films, mostly rated G or PG, each tagged with the moods it suits (14 gentle, 13 cozy, 7 calm, 20 second chances, 18 friendship, 13 absorbing, 13 inspiring; 7 marked faith-friendly). Every title, year (first release), Wikidata id and English Wikipedia link was checked against Wikidata and Wikipedia in October 2026. With **Include faith** on, faith-friendly picks (for example The Prince of Egypt, The Chronicles of Narnia: The Lion, the Witch and the Wardrobe, Chariots of Fire, The Nativity Story) come first.
+
+**Find more online (optional).** This is the app's only network call. Tapping it first shows exactly what will be sent, for example: "Only this goes to query.wikidata.org: film genres (family film, animated film, comedy drama) and fixed filters (well known (25+ Wikipedia languages); rated G or PG, or a family, children's or nature film; not PG-13 or R; has an English Wikipedia page). Nothing you typed, no feelings and no names." Only **Send and look** fetches. The request is one fixed SPARQL query to the public Wikidata Query Service (`https://query.wikidata.org/sparql`), where only the genre ids change per mood (plus the religious-film and Christian-film genres with faith on). It is free, needs no key, allows browser requests from any site (CORS `Access-Control-Allow-Origin: *`), and its data is CC0. It sends no cookies and no referrer, with an `Api-User-Agent` naming the app as Wikimedia asks. Results stay in memory for the session only, and the service worker never caches other sites. Online results also leave out horror, thriller, war, crime, action and Western films (and, for cozy and calm, science fiction, post-apocalyptic and fantasy films), and the device drops a short list of well-known family-rated films built around a death, a suicide or heavy violence (for example Dead Poets Society, Bambi, Old Yeller, Bridge to Terabithia, Grave of the Fireflies). Online picks are less curated than the local list: each one says "A well-known … (from Wikidata)" instead of a hand-written reason. Offline, busy (HTTP 429 or 5xx, or a 20-second timeout) or any error shows a gentle line, and the local films keep working. Wikimedia warns the query service is not built for instant answers, so a lookup can take a few seconds.
+
+Why Wikidata: TMDB and OMDb both need an API key. A key shipped in a static GitHub Pages site is public to anyone, and TMDB asks that keys be kept server-side and that apps credit TMDB. Wikidata needs no key and no backend.
+
+**Your own TMDB key (optional, off by default).** Under "Use my own TMDB key", you can paste a TMDB v3 API key (32 letters and numbers) to get posters and ratings. It is stored only in this browser (localStorage `mindframe-tmdb-key`), is never in the mf code, the journal or the comfort prompt, and is sent only to `api.themoviedb.org` when you tap Find more online (shown masked in the preview). The request is TMDB's Discover with genre ids and fixed filters (US certification up to PG, 1000+ votes, no adult titles); posters load from `image.tmdb.org`. This product uses the TMDB API but is not endorsed or certified by TMDB. Remove key turns it off again.
 
 ## Forgive & breathe: forgiveness, patience and mindfulness
 
@@ -351,11 +378,10 @@ pet points=31 days=6 name=Willow                        # your companion (the na
 Code is grouped by feature. Every file starts with a header comment; every function has a JSDoc. Files share one namespace, `MF` (`window.MF` in the browser, `global.MF` in Node tests).
 
 ```
-index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with six views
+index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with Watch something and six views
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v20)
+sw.js                 offline cache (v21); other sites (the film APIs) are never cached
 tools.html            redirects old shortcuts to the one page
-DELETE.txt            files removed in push20 (the six helper SVGs)
 js/
   app.js              page shell: state, Update, the card (insight slot, See more), the companion sheet (views, Back, focus trap, Esc)
   core/               the model; no page code
@@ -377,6 +403,7 @@ js/
     scribe.js         Save & share code: mf 4 / mf 3 / mf 2 / mf 1 export and import
     scientist.js      Show the math: the math, sliders and variables
     companion.js      MF.Companion: your fawn (growth rules, stages, mood, its line, the SVG, the sheet home)
+    movies.js         MF.Movies: Watch something (the film mood from the reading, the curated list, the optional Wikidata / TMDB lookup)
     relationship.js   the Four Horsemen pattern helper
     forgiveness.js    Forgive & breathe: forgiveness cues, master pass, card words, guided paths
     practices.js      MF.Practices: patience & mindfulness library, the step pick, the breathing circle
@@ -385,7 +412,7 @@ js/
 tests/                node tests (tests/mf.js loads every module)
 ```
 
-Load order in `index.html`: core (signals, grounding, movers, reality, peace, master, words), then features (relationship, forgiveness, practices, freeing, picker, stories, games, historian, writer, comfort, analyzer, scribe, scientist), then `app.js`.
+Load order in `index.html`: core (signals, grounding, movers, reality, peace, master, words), then features (relationship, forgiveness, practices, freeing, picker, stories, games, historian, writer, comfort, analyzer, scribe, scientist, companion, movies), then `app.js`.
 
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
 
@@ -442,9 +469,12 @@ MindFrame is a model built from design assumptions and informed by the research 
 * Teresa of Ávila. *The interior castle* (VI.10.7). In K. Kavanaugh & O. Rodriguez (Trans.), *The collected works of St. Teresa of Avila* (Vol. 2). Washington, DC: ICS Publications, 1980. ("To be humble is to walk in truth.")
 * Wade, N. G., Hoyt, W. T., Kidwell, J. E. M., & Worthington, E. L., Jr. (2014). Efficacy of psychotherapeutic interventions to promote forgiveness: A meta-analysis. *Journal of Consulting and Clinical Psychology, 82*(1), 154–170. doi:10.1037/a0035268
 * Worthington, E. L., Jr. (2006). *Forgiveness and reconciliation: Theory and application.* New York: Routledge.
+* Zillmann, D. (1988). Mood management through communication choices. *American Behavioral Scientist, 31*(3), 327–340. doi:10.1177/000276488031003005
 * Zaccaro, A., et al. (2018). How breath-control can change your life: A systematic review on psycho-physiological correlates of slow breathing. *Frontiers in Human Neuroscience, 12*, 353. doi:10.3389/fnhum.2018.00353
 
 ## Privacy
 
 * Everything stays in this browser's localStorage: the .mf numbers, the faith toggle, your companion (name and growth points), and the journal (explicit saves only). The forgiveness note boxes are never stored unless you tap "Save these notes to the journal".
+* Network: none, except **Find more online** under Watch something, after you see what it sends: film genre ids and fixed filters to query.wikidata.org (or, only if you saved your own TMDB key, to api.themoviedb.org with that key). Never your words, feelings, names or the mf code. Replies are kept in memory for the session only.
+* An optional TMDB key stays in this browser only (Remove key deletes it).
 * Start over clears the numbers. Clear journal clears the journal.

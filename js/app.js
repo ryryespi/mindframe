@@ -223,7 +223,7 @@
   $("more-toggle").addEventListener("click", () => setMore(!expanded()));
 
   // ---------- Panels ----------
-  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker, MF.Companion].map(f => f.mount(app));
+  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker, MF.Companion, MF.Movies].map(f => f.mount(app));
   /** Re-render every panel (cheap; panels only display). */
   function renderAll() { renders.forEach(r => r()); }
 
@@ -232,7 +232,7 @@
   // Close, Esc or the shade closes it, and focus goes back to what opened it).
   // It opens on the companion's home (name, stage, growth, six actions); each
   // action shows one view (the old helpers' panels) in the same sheet, with Back.
-  const VIEWS = ["writer", "historian", "analyzer", "scribe", "scientist", "grace"];
+  const VIEWS = ["writer", "historian", "analyzer", "scribe", "scientist", "grace", "movies"];
   let opener = null, view = null;
   /** The sheet element. */
   const sheetEl = () => $("p-companion");
@@ -290,9 +290,12 @@
     const f = focusables(panel);
     if (!f.length) { e.preventDefault(); return; }
     const first = f[0], last = f[f.length - 1], at = document.activeElement;
+    // Wrap when nothing focusable is left in that direction (from a control or a view title).
+    const ahead = f.some(x => at.compareDocumentPosition(x) & Node.DOCUMENT_POSITION_FOLLOWING);
+    const behind = f.some(x => at.compareDocumentPosition(x) & Node.DOCUMENT_POSITION_PRECEDING);
     if (!panel.contains(at)) { e.preventDefault(); first.focus(); }
-    else if (e.shiftKey && (at === first || at === panel.querySelector("h2"))) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && at === last) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && (!behind || at === panel.querySelector("h2"))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && !ahead) { e.preventDefault(); first.focus(); }
   });
   // Focus that wanders out (a click on the page behind) is brought back in.
   document.addEventListener("focusin", e => { const panel = openSheet(); if (panel && !panel.contains(e.target)) panel.querySelector("h2").focus({ preventScroll: true }); });
