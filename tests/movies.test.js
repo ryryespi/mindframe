@@ -167,7 +167,7 @@ test("offline first and gentle fallbacks: offline, busy, errors and timeouts nev
   Object.keys(V.MOODS).forEach(id => assert.equal(V.suggest(id).length, 3, id));
   // The service worker never caches other sites (the film APIs go straight to the network).
   assert.match(read("sw.js"), /if \(new URL\(request\.url\)\.origin !== self\.location\.origin\) return;/);
-  assert.match(read("sw.js"), /mindframe-shell-v24/);
+  assert.match(read("sw.js"), /mindframe-shell-v25/);
   assert.ok(read("sw.js").includes('"./js/features/movies.js"'));
 });
 
@@ -209,14 +209,14 @@ test("page and docs: one Watch something row, its view, the card line, honest pr
   assert.match(index, /<summary class="small">Use my own TMDB key \(optional, off\)<\/summary>/);
   assert.match(index, /This product uses the TMDB API but is not endorsed or certified by TMDB\./);
   assert.match(index, /mood management theory, Zillmann, 1988/);
-  assert.match(app, /"grace", "movies"\]/);
-  assert.match(app, /MF\.Companion, MF\.Movies, MF\.Scripture\]\.map/);
+  assert.match(app, /"grace", "movies", "credits"\]/);
+  assert.match(app, /MF\.Companion, MF\.Movies, MF\.Scripture, MF\.Credits\]\.map/);
   assert.ok(!/care\(/.test(src), "watching is not a caring action");
   assert.ok(index.indexOf("js/features/movies.js") > index.indexOf("js/features/companion.js"));
   assert.match(readme, /## Watch something/);
   assert.match(readme, /query\.wikidata\.org/);
   assert.match(readme, /Zillmann, D\. \(1988\)\. Mood management through communication choices\. \*American Behavioral Scientist, 31\*\(3\), 327–340/);
-  assert.match(readme, /offline cache \(v24\)/);
+  assert.match(readme, /offline cache \(v25\)/);
 });
 
 Promise.all(pending).then(() => console.log(`\n${passed} passed`));

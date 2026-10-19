@@ -160,7 +160,7 @@ test("page: Forgive & breathe (was Grace) is one of the companion's six actions,
 test("README: Forgive & breathe, the equations, the practices, the safety line, and verified citations", () => {
   const r = read("README.md");
   [/## Forgive & breathe: forgiveness, patience and mindfulness/, /F_self  = e_shame · \(0\.4 \+ 0\.6·c_self\)/, /θ_F = 0\.35/, /Forgiving is not excusing what happened, making up, or staying anywhere unsafe\./,
-    /Cornish, M\. A\., & Wade, N\. G\. \(2015\)/, /Worthington, E\. L\., Jr\. \(2006\)/, /Enright, R\. D\., & Fitzgibbons/, /Neff, K\. D\. \(2003\)/, /McCullough, M\. E\., Bono/, /Lieberman, M\. D\./, /Bowen, S\., & Marlatt/, /Schnitker, S\. A\. \(2012\)/, /Segal, Z\. V\./, /offline cache \(v24\)/, /## Your companion/, /prefers-reduced-motion/].forEach(re => assert.match(r, re));
+    /Cornish, M\. A\., & Wade, N\. G\. \(2015\)/, /Worthington, E\. L\., Jr\. \(2006\)/, /Enright, R\. D\., & Fitzgibbons/, /Neff, K\. D\. \(2003\)/, /McCullough, M\. E\., Bono/, /Lieberman, M\. D\./, /Bowen, S\., & Marlatt/, /Schnitker, S\. A\. \(2012\)/, /Segal, Z\. V\./, /offline cache \(v25\)/, /## Your companion/, /prefers-reduced-motion/].forEach(re => assert.match(r, re));
 });
 
 console.log(`\n${passed} passed`);

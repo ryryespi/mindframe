@@ -235,7 +235,7 @@
   $("more-toggle").addEventListener("click", () => setMore(!expanded()));
 
   // ---------- Panels ----------
-  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker, MF.Companion, MF.Movies, MF.Scripture].map(f => f.mount(app));
+  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker, MF.Companion, MF.Movies, MF.Scripture, MF.Credits].map(f => f.mount(app));
   /** Re-render every panel (cheap; panels only display). */
   function renderAll() { renders.forEach(r => r()); }
 
@@ -244,7 +244,7 @@
   // Close, Esc or the shade closes it, and focus goes back to what opened it).
   // It opens on the companion's home (name, stage, growth, six actions); each
   // action shows one view (the old helpers' panels) in the same sheet, with Back.
-  const VIEWS = ["writer", "historian", "analyzer", "scribe", "scientist", "grace", "movies"];
+  const VIEWS = ["writer", "historian", "analyzer", "scribe", "scientist", "grace", "movies", "credits"];
   let opener = null, view = null;
   /** The sheet element. */
   const sheetEl = () => $("p-companion");

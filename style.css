@@ -346,3 +346,10 @@ body.sheet-open { overflow: hidden; }
 @keyframes cs-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @keyframes cs-glow { 0% { filter: drop-shadow(0 0 0 transparent); transform: translateY(-6px); } 40% { filter: drop-shadow(0 0 5px var(--sun)); } 100% { filter: drop-shadow(0 0 0 transparent); transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .cs-seed, .cs-scene.composing .cs-seed { animation: none !important; } }
+
+/* Credits view (features/credits.js). */
+.cr-cat { margin: 1rem 0 .3rem; font-size: .9rem; color: var(--ink); }
+.cr-items { margin: 0; padding-left: 1.1rem; }
+.cr-items li { font-size: .8rem; line-height: 1.45; margin: .25rem 0; color: var(--ink); overflow-wrap: anywhere; }
+.cr-items a { color: var(--accent); }
+.cr-flag { color: var(--warm); font-style: italic; }

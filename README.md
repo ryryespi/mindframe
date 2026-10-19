@@ -475,7 +475,7 @@ Code is grouped by feature. Every file starts with a header comment; every funct
 ```
 index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with Watch something and six views
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v24); other sites (the film APIs) are never cached
+sw.js                 offline cache (v25); other sites (the film APIs) are never cached
 tools.html            redirects old shortcuts to the one page
 js/
   app.js              page shell: state, Update, the card (insight slot, See more), the companion sheet (views, Back, focus trap, Esc)
@@ -531,6 +531,27 @@ Also in `paper/`:
 
 MindFrame is a model built from design assumptions and informed by the research cited here. It is not validated science, not a measurement of you, and not a diagnosis. The thresholds (0.3, 0.6, 0.25, the peace threshold 0.8, the forgiveness threshold θ_F = 0.35, c_wait ≥ 0.3) and weights (including d0, γ, δ, the hook nudges and the release vectors) are design choices.
 
+## Credits
+
+With gratitude to every researcher, clinician, translator and writer whose careful work MindFrame stands on. All credit and glory to God.
+
+Every source below was checked in October 2026. Journal articles were checked against Crossref (title, authors, year, volume, pages and DOI). Books were checked against Open Library or publisher and library catalogs. Reports, preprints, archives and web articles were checked at their own sites. **99 sources are verified and 2 are flagged.** The full citations, with DOIs, are in **References** below, in the app (open your companion, then **Credits**), and in the "Credits and References" section of both papers.
+
+* **Emotion, cognition and CBT:** Beck, Rush, Shaw, Emery, Steer, Kovacs, Garrison, Burns, Gross, Aldao, Nolen-Hoeksema, Schweizer, Barlow, Allen, Choate, Wisco, Lyubomirsky, Al-Mosaiwi, Johnstone, Kim, Thibodeau, Jorgensen, Hofmann, Asnaani, Vonk, Sawyer, Fang, Lieberman, Eisenberger, Crockett, Tom, Pfeifer, Way, Snyder, Wolpe, Rachman, de Silva, Holmes, Mathews, Wegner, Schneider, Carter, White, Borkovec, Wilkinson, Folensbee, Lerman, McGowan, Behar, King, Peters, Flink, Boersma, Linton, Hershfield, Oettingen, American Psychiatric Association, Kroenke, Strine, Spitzer, Williams, Berry, Mokdad, Shiffman, Stone, Hufford, Dawes, Kravitz, Duan, the DEcIDE N-of-1 Guidance Panel, Fitzpatrick, Darcy, Vierhile, Cohen, Sherman.
+* **DBT, ACT, mindfulness and compassion:** Linehan, Neacsiu, Rizvi, Vitaliano, Lynch, Hayes, Luoma, Bond, Masuda, Lillis, Strosahl, Wilson, Sackett, Twohig, Gillanders and colleagues, Kabat-Zinn, Segal, Williams, Teasdale, Stahl, Goldstein, Desbordes, Gard, Hoge, Hölzel, Kerr, Lazar, Olendzki, Vago, Neff, Gilbert, Procter, Hofmann, Grossman, Hinton, Bowen, Marlatt, Miller, Rollnick, Zaccaro and colleagues.
+* **Forgiveness, virtue, gratitude and peace:** Cornish, Wade, Worthington, Hoyt, Kidwell, Enright, Fitzgibbons, McCullough, Bono, Root, Emmons, Schnitker, Tangney, Lee, Lin, Huang, Fredrickson, Davis, Speed, Goldstein, Goldfried.
+* **Relationships and belonging:** Gottman, Levenson, Heyman, Slep, Holt-Lunstad, Smith, Layton, Baumeister, Leary, Meng, Chen, Wang, Yuan, Yu.
+* **Body, writing and activity:** Jacobson, McCallie, Blum, Hood, Pennebaker, Beall, Frattaroli, Ekkekakis, Hall, VanLanduyt, Petruzzello, Rebar, Stanton, Geard, Short, Duncan, Vandelanotte.
+* **Inner speech, language and design:** Alderson-Day, Fernyhough, Kross and colleagues, Vygotsky, Whorf, Boroditsky, Cowan, Miller, Sweller, Nielsen, Weizenbaum, Bommasani and colleagues.
+* **Media:** Zillmann.
+* **Mathematics:** Langlands, Gelbart, Wiles, Frenkel.
+* **Philosophy and spiritual writers:** Frankl, Robertson, Epictetus, Marcus Aurelius, Teresa of Ávila.
+* **Scripture and data:** World English Bible (eBible.org), Wikidata, TMDB.
+
+**Flagged (kept, not fully verifiable):** Epictetus, *Enchiridion*, and Marcus Aurelius, *Meditations*, are cited as classical works with "various translations". The works are certain, but no specific edition or translator is named, so no full citation can be confirmed.
+
+**Films and songs** are credited to their studios and filmmakers, and to their artists and songwriters. MindFrame only names them (film facts from Wikidata, CC0; the optional TMDB lookup follows TMDB's attribution terms) and quotes no lyrics.
+
 ## References
 
 * Borkovec, T. D., Wilkinson, L., Folensbee, R., & Lerman, C. (1983). Stimulus control applications to the treatment of worry. *Behaviour Research and Therapy, 21*(3), 247–251. doi:10.1016/0005-7967(83)90206-1
@@ -560,7 +581,7 @@ MindFrame is a model built from design assumptions and informed by the research 
 * Gillanders, D. T., et al. (2014). The development and initial validation of the Cognitive Fusion Questionnaire. *Behavior Therapy, 45*(1), 83–101.
 * Holt-Lunstad, J., Smith, T. B., & Layton, J. B. (2010). Social relationships and mortality risk: A meta-analytic review. *PLoS Medicine, 7*(7), e1000316.
 * Kabat-Zinn, J. (1990). *Full catastrophe living.* New York: Delacorte.
-* Kabat-Zinn, J. (2003). Mindfulness-based interventions in context: Past, present, and future. *Clinical Psychology: Science and Practice, 10*(2), 144–156. doi:10.1093/clipsy/bpg016
+* Kabat-Zinn, J. (2003). Mindfulness-based interventions in context: Past, present, and future. *Clinical Psychology: Science and Practice, 10*(2), 144–156. doi:10.1093/clipsy.bpg016
 * Kim, S., Thibodeau, R., & Jorgensen, R. S. (2011). Shame, guilt, and depressive symptoms: A meta-analytic review. *Psychological Bulletin, 137*(1), 68–96. doi:10.1037/a0021466
 * Lieberman, M. D., Eisenberger, N. I., Crockett, M. J., Tom, S. M., Pfeifer, J. H., & Way, B. M. (2007). Putting feelings into words: Affect labeling disrupts amygdala activity in response to affective stimuli. *Psychological Science, 18*(5), 421–428.
 * McCullough, M. E., Bono, G., & Root, L. M. (2007). Rumination, emotion, and forgiveness: Three longitudinal studies. *Journal of Personality and Social Psychology, 92*(3), 490–505. doi:10.1037/0022-3514.92.3.490
