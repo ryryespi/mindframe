@@ -120,7 +120,7 @@ test("UI: scene follows the peace band, dark mode, reduced motion, offline, labe
   assert.match(css, /\.chip \{[^}]*min-height: 2\.75rem/);
   assert.match(css, /\.tabs \[role="tab"\] \{[^}]*min-height: 2\.9rem/);
   const order = [...index.matchAll(/<div class="tile[^"]*" id="(t-[a-z]+)"/g)].map(x => x[1]);
-  assert.deepEqual(order, ["t-head", "t-feel", "t-step", "t-peace", "t-connect", "t-kai", "t-conflict", "t-reality", "t-forgive", "t-free", "t-pattern", "t-affirm"]);
+  assert.deepEqual(order, ["t-head", "t-feel", "t-step", "t-peace", "t-connect", "t-kai", "t-scripture", "t-conflict", "t-reality", "t-forgive", "t-free", "t-pattern", "t-affirm"]);
   assert.ok(!/sound|Audio\(|AudioContext/.test(read("js/features/practices.js").replace(/No sound[^\n]*/g, "")), "no sound");
 });
 test("contrast: muted text stays readable on cards in both themes (WCAG AA 4.5:1)", () => {

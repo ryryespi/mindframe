@@ -147,7 +147,7 @@ test("page: one companion replaces the six helpers; its sheet has six actions th
 });
 test("code: every js file has a header comment, and every function a JSDoc or a one-line comment", () => {
   const files = ["js/app.js", ...["core", "features", "features/writer"].flatMap(d => fs.readdirSync(path.join(__dirname, "../js", d)).filter(f => f.endsWith(".js")).map(f => `js/${d}/${f}`))];
-  assert.equal(files.length, 24);
+  assert.equal(files.length, 28);
   files.forEach(f => {
     const src = read(f);
     assert.match(src.split("\n")[0], /^\/\/ js\/|^\/\/ /, `${f} header`);

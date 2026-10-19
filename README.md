@@ -88,6 +88,40 @@ I  = X(1 − S)·u,  u = max(e_anger, c_urge)             impulsive reaction; "f
 * **Ada's panel** shows X, A, F, E, R, S, the push, I and the lever.
 * **Sources.** Self-awareness: affect labeling (Lieberman et al., 2007) and self-affirmation (Cohen & Sherman, 2014). Forbearance: patience (Schnitker, 2012). Empathy: perspective taking (Davis, 1983, the Interpersonal Reactivity Index). Respect guard: DEAR MAN (Linehan, 2015) and assertiveness training (Speed, Goldstein & Goldfried, 2018). **This is a model, not a validated measure.** The weights, the ½ terms and the product form of S are design choices.
 
+## For this moment: grip, past to future, Scripture, a parable, and more
+
+After Update, See more holds one tile, "For this moment", in stage order. Nothing shows before Update or in a crisis, and nothing goes online.
+
+1. **Loosen the grip** (`js/features/grip.js`). This stage detects three pulls: fear (e_fear), a looping mind (e_rumination, plus repetition across your saved days and loop wording like "over and over"), and gentle vice cues (desire, envy, resentment and pride). The vice cues use negation-aware words and the existing signals: grandiosity → pride, and the forgiveness path "other" → resentment. It is not suppression, because pushing thoughts away tends to bring them back (Wegner et al., 1987). The tool depends on the strongest pull:
+   * a vice → urge surfing (Bowen & Marlatt, 2009);
+   * a repeating loop → a scheduled worry window (Borkovec et al., 1983; McGowan & Behar, 2013);
+   * otherwise → notice, name, defuse (Masuda et al., 2004).
+
+   A small value step (the lever's practice) always follows. In the model, the pulls ease as x' = x(1 − L), with L = 1 − (1 − L_tool)(1 − 0.15) and L_tool .25 / .30 / .20. The card shows this in words only ("may loosen from a lot toward some"), and it never says a thought will be removed. Faith on adds 2 Corinthians 10:5 and Philippians 4:8.
+2. **Past to future** (`js/features/past.js`). The past focus is clamp(max(shame, rumination) + 0.3·cue(past wording)). The technique is picked by the highest score:
+   * shame → self-compassion (Neff, 2003) with the four Rs of self-forgiveness (Cornish & Wade, 2015);
+   * hurt by another → loving-kindness, moving from self to a loved one, a neutral person, a difficult person and all people (Hofmann et al., 2011);
+   * replaying → ACT acceptance and defusion (Hayes et al., 2006).
+
+   A future step always follows: Best Possible Self writing when hope is low (King, 2001; Peters et al., 2010), otherwise a note to your future self (Hershfield, 2011). In the model, shame and rumination ease by Lp (.20 / .15 / .20) and hope grows as h + (1 − h)·Lh (.20 / .15). Faith on adds Philippians 3:13–14, Isaiah 43:18–19, Lamentations 3:22–23 and Colossians 3:13.
+3. **Scripture for this moment** (`js/features/scripture.js`, faith on only). 90 verses from the World English Bible (public domain), each copied exactly from ebible.org's `eng-web_vpl.txt`. The source lines are kept in `tests/fixtures/scripture-web.txt`, and the tests check every verse against them.
+   * Themes: fear, sadness, anger, shame and forgiveness, calm and peace, connection and love, hope, renewing the mind, courage, patience, gentleness, self-control, and the past and a new beginning.
+   * The theme comes from the Kai shield first (a strong urge → self-control; otherwise the weakest virtue), then the inner-peace lever, then the dominant hard mover.
+   * The verse is FNV-1a(rounded e, e', P, S) mod the theme's list, so the same numbers give the same verse. **Another verse** moves the seed by one, and a new Update starts again.
+   * Your companion keeps the verse in the sheet.
+4. **Verses together** (faith on). Two or three verses: the dominant mover's theme, the lever's theme, and hope or calm (the past and a new beginning when Past to future shows). The synthesis is composed from the theme tags and the numbers: it names and validates the feeling, says the thread the verses share, gives a gentle reframe, says how the step moves P toward steady (over days, no instant fix), and offers one small daily habit. Verse text is shown exactly and separately, with references.
+5. **A parable of peace** (`js/features/parable.js`). Five to eight sentences built from the feeling, the grip, past to future, the step and your companion. With faith on, it adds the verse themes and references. It moves from the past to the future and ends at rest; with faith off, it has no scripture.
+6. **Continue your story.** Two films from the films list (same mood pick) and two or three songs from a built-in list of 45 (worship songs only with faith on). The picks use the same seed, and each has a one-line prompt. No lyrics are quoted.
+
+7. **Cornerstone.** Every pick uses the seed mix(CORNERSTONE, numbers, text, counter), computed with FNV-1a 32-bit.
+   * CORNERSTONE = FNV-1a("Ephesians 2:20") is a documented constant, mixed in first.
+   * numbers is the hash of the rounded e, e', P and S. text is the hash of the words, kept in memory only. counter is the number of **Another verse** taps since Update; if a tap would land on the same verse, it moves on by one.
+   * Randomness: the cornerstone is a constant, so it adds no entropy (H(seed) = H(numbers, text, counter)). What it does is anchor reproducibility: the same reading gives the same picks on every device and in every version that keeps it. The tests check that it neither adds nor removes distinct outcomes, and that index spread passes a chi-square check.
+   * The tile opens with a small CSS and inline-SVG scene: seeds resting in water above a counter (the ledge shows the seed counter) on a cornerstone. The seeds glow, then settle, on a new reading. The scene is still with reduced motion and follows dark mode through the theme colors.
+   * The parable opens with the same image. With faith on, it names Christ the chief cornerstone (1 Peter 2:6) and the tree planted by streams of water (Psalm 1:3), and their exact WEB text is shown under the parable.
+
+The weights in stages 1 and 2 are modeling choices, not measured effects.
+
 ## The master function
 
 Every feature calls one function, `MF.Master.master(text, state)` in `js/core/master.js`. It has a state-vector entry with the same path, `masterState(e, state, opts, words)`, and the feelings picker's entry `masterPick(pick, state)`. Text → score → `reading(e, …)` and picked → vector → `reading(e, …)` share one internal path, so `master(text, state)` equals `masterState(combine(state.e, fromText(text).w), state, {}, fromText(text))` exactly (tested). That covers the live card, the story, the path game, checkpoints, accepting a step, recovery, the baseline, import and restore. Nothing else steps e.
@@ -441,7 +475,7 @@ Code is grouped by feature. Every file starts with a header comment; every funct
 ```
 index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with Watch something and six views
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v23); other sites (the film APIs) are never cached
+sw.js                 offline cache (v24); other sites (the film APIs) are never cached
 tools.html            redirects old shortcuts to the one page
 js/
   app.js              page shell: state, Update, the card (insight slot, See more), the companion sheet (views, Back, focus trap, Esc)
@@ -466,6 +500,10 @@ js/
     scientist.js      Show the math: the math, sliders and variables
     companion.js      MF.Companion: your fawn (growth rules, stages, mood, its line, the SVG, the sheet home)
     movies.js         MF.Movies: Watch something (the film mood from the reading, the curated list, the optional Wikidata / TMDB lookup)
+    scripture.js      MF.Scripture: 90 exact WEB verses, theme, seed, Another verse, Verses together
+    grip.js           MF.Grip: Loosen the grip (fear, looping thoughts, gentle vice cues; never suppression)
+    past.js           MF.Past: Past to future (self-compassion, four Rs, loving-kindness, acceptance, best possible self)
+    parable.js        MF.Parable: the parable of peace, and Continue your story (films + 45 songs)
     relationship.js   the Four Horsemen pattern helper
     forgiveness.js    Forgive & breathe: forgiveness cues, master pass, card words, guided paths
     practices.js      MF.Practices: patience, mindfulness & body library, the step pick, the breathing circle, the never-saved brain dump
@@ -495,6 +533,16 @@ MindFrame is a model built from design assumptions and informed by the research 
 
 ## References
 
+* Borkovec, T. D., Wilkinson, L., Folensbee, R., & Lerman, C. (1983). Stimulus control applications to the treatment of worry. *Behaviour Research and Therapy, 21*(3), 247–251. doi:10.1016/0005-7967(83)90206-1
+* Hayes, S. C., Luoma, J. B., Bond, F. W., Masuda, A., & Lillis, J. (2006). Acceptance and commitment therapy: Model, processes and outcomes. *Behaviour Research and Therapy, 44*(1), 1–25. doi:10.1016/j.brat.2005.06.006
+* Hershfield, H. E. (2011). Future self-continuity: How conceptions of the future self transform intertemporal choice. *Annals of the New York Academy of Sciences, 1235*, 30–43. doi:10.1111/j.1749-6632.2011.06201.x
+* Hofmann, S. G., Grossman, P., & Hinton, D. E. (2011). Loving-kindness and compassion meditation: Potential for psychological interventions. *Clinical Psychology Review, 31*(7), 1126–1132. doi:10.1016/j.cpr.2011.07.003
+* King, L. A. (2001). The health benefits of writing about life goals. *Personality and Social Psychology Bulletin, 27*(7), 798–807. doi:10.1177/0146167201277003
+* Masuda, A., Hayes, S. C., Sackett, C. F., & Twohig, M. P. (2004). Cognitive defusion and self-relevant negative thoughts: Examining the impact of a ninety year old technique. *Behaviour Research and Therapy, 42*(4), 477–485. doi:10.1016/j.brat.2003.10.008
+* McGowan, S. K., & Behar, E. (2013). A preliminary investigation of stimulus control training for worry: Effects on anxiety and insomnia. *Behavior Modification, 37*(1), 90–112. doi:10.1177/0145445512455661
+* Peters, M. L., Flink, I. K., Boersma, K., & Linton, S. J. (2010). Manipulating optimism: Can imagining a best possible self be used to increase positive future expectancies? *The Journal of Positive Psychology, 5*(3), 204–211. doi:10.1080/17439761003790963
+* Wegner, D. M., Schneider, D. J., Carter, S. R., & White, T. L. (1987). Paradoxical effects of thought suppression. *Journal of Personality and Social Psychology, 53*(1), 5–13. doi:10.1037/0022-3514.53.1.5
+* *World English Bible* (public domain), ebible.org `eng-web_vpl.txt` (sha256 52b92dc6…cd8c4): the 90 verses in `js/features/scripture.js`, plus Ephesians 2:20, 1 Peter 2:6 and Psalm 1:3 for the cornerstone.
 * Al-Mosaiwi, M., & Johnstone, T. (2018). In an absolute state: Elevated use of absolutist words is a marker specific to anxiety, depression, and suicidal ideation. *Clinical Psychological Science, 6*(4), 529–542. doi:10.1177/2167702617747074
 * Aldao, A., Nolen-Hoeksema, S., & Schweizer, S. (2010). Emotion-regulation strategies across psychopathology: A meta-analytic review. *Clinical Psychology Review, 30*(2), 217–237.
 * Barlow, D. H., Allen, L. B., & Choate, M. L. (2004). Toward a unified treatment for emotional disorders. *Behavior Therapy, 35*(2), 205–230. doi:10.1016/S0005-7894(04)80036-4

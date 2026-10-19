@@ -20,4 +20,7 @@ const parts = [
   require("../js/features/scribe.js"),
   require("../js/features/scientist.js"),
 ];
+// The stage modules (films, scripture, grip, past, parable) register on MF but
+// are not merged here, since names like pick / lines / seed would clash.
+["movies", "scripture", "grip", "past", "parable"].forEach(f => require(`../js/features/${f}.js`));
 module.exports = Object.assign({}, ...parts.map(p => { const c = Object.assign({}, p); delete c.mount; return c; }));

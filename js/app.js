@@ -215,7 +215,7 @@
   // The insight tiles live in #more in a fixed order; the one the numbers pick
   // (Words.insight) moves into #insight-slot, shown short (.compact) until See more.
   const INSIGHT_TILE = { kai: "t-kai", free: "t-free", forgive: "t-forgive", reality: "t-reality", pattern: "t-pattern", conflict: "t-conflict" };
-  const MORE_ORDER = ["t-peace", "t-connect", "t-kai", "t-conflict", "t-reality", "t-forgive", "t-free", "t-pattern", "t-affirm"];
+  const MORE_ORDER = ["t-peace", "t-connect", "t-kai", "t-scripture", "t-conflict", "t-reality", "t-forgive", "t-free", "t-pattern", "t-affirm"];
   /** Put the chosen insight tile in the slot and every other tile back in #more, in order. */
   function placeInsight(id) {
     const more = $("more"), slot = $("insight-slot"), pick = id ? INSIGHT_TILE[id] : null;
@@ -235,7 +235,7 @@
   $("more-toggle").addEventListener("click", () => setMore(!expanded()));
 
   // ---------- Panels ----------
-  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker, MF.Companion, MF.Movies].map(f => f.mount(app));
+  const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker, MF.Companion, MF.Movies, MF.Scripture].map(f => f.mount(app));
   /** Re-render every panel (cheap; panels only display). */
   function renderAll() { renders.forEach(r => r()); }
 
