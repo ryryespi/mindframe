@@ -222,11 +222,11 @@ test("Continue your story: two films and two or three songs, seeded, a prompt ea
   assert.ok(!/lyrics:/i.test(read("js/features/parable.js")));
 });
 
-test("page and docs: the tile, Another verse, the companion's verse, scripts, sw v25, README", () => {
+test("page and docs: the tile, Another verse, the companion's verse, scripts, sw v26, README", () => {
   const html = read("index.html"), sw = read("sw.js"), r = read("README.md");
   assert.match(html, /id="t-scripture"/); assert.match(html, /id="scripture-next"[^>]*>Another verse</); assert.match(html, /id="pet-verse"/);
   ["scripture", "grip", "past", "parable"].forEach(f => { assert.match(html, new RegExp(`js/features/${f}\\.js`)); assert.ok(sw.includes(`./js/features/${f}.js`)); });
-  assert.match(sw, /mindframe-shell-v25/);
+  assert.match(sw, /mindframe-shell-v26/);
   assert.match(r, /## For this moment: grip, past to future, Scripture, a parable, and more/);
   [/Wegner, D\. M\./, /Masuda, A\./, /McGowan, S\. K\./, /Borkovec, T\. D\./, /Hayes, S\. C\./, /King, L\. A\. \(2001\)/, /Peters, M\. L\./, /Hofmann, S\. G\./, /Hershfield, H\. E\./].forEach(re => assert.match(r, re));
 });

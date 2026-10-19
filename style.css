@@ -353,3 +353,6 @@ body.sheet-open { overflow: hidden; }
 .cr-items li { font-size: .8rem; line-height: 1.45; margin: .25rem 0; color: var(--ink); overflow-wrap: anywhere; }
 .cr-items a { color: var(--accent); }
 .cr-flag { color: var(--warm); font-style: italic; }
+.wi-src { color: var(--accent); }
+.wi-eq { font-family: ui-monospace, monospace; font-size: .75rem; overflow-wrap: anywhere; color: var(--ink); }
+#wi-title { margin-top: .4rem; }

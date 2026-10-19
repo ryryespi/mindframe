@@ -124,6 +124,104 @@
   /** A plain-text line for one entry (the DOI as a doi.org link when there is one). */
   const line = e => `${e.cite}${e.doi ? ` https://doi.org/${e.doi}` : ""}${e.status === "flagged" ? " [flagged: " + e.how + "]" : ""}`;
 
+
+  // ---------- Where ideas come from (push26): the attribution equation ----------
+  // MindFrame's one-page model (core/master.js) split into 18 terms. Each term is
+  // tagged only with credited sources that the code comments, the README mover
+  // table or the papers name for it ("where"; tests check that each source's
+  // surname appears in one of those files). A term may have no source: it is a
+  // design assumption, and it says so.
+  //   M = Σ_k τ_k,   Src(τ_k) ⊆ the 101 credited sources
+  //   share(s) = |{k : s ∈ Src(τ_k)}| / 18
+  // share is a STRUCTURAL MAP (how many model terms a source informs), not an
+  // effect size, not a validated weight, and not a ranking of importance.
+  const T = (id, tex, plain, name, words, where, src) => ({ id, tex, plain, name, words, where, src });
+  const TERMS = [
+    T("t1", "e", "e", "The nine movers", "Which feelings and habits of mind are tracked: fear, sadness, anger, shame, calm, connection, hope, replaying and avoiding.", ["README.md"],
+      ["Barlow, D. H.", "Beck, A. T., Steer", "Kim, S.", "Zaccaro", "Holt-Lunstad", "Snyder", "Aldao", "Nolen-Hoeksema", "Bond, F. W.", "Gillanders"]),
+    T("t2", "n(\\text{text})", "n(text)", "Reading your words", "How words become the reading: thinking traps, absolute words and relationship patterns.", ["js/core/signals.js", "js/core/reality.js", "js/features/relationship.js"],
+      ["Beck, A. T. (1976)", "Burns", "Al-Mosaiwi", "Gottman, J. M. (1994)", "Gottman, J. M., & Levenson, R. W. (1992)", "Gottman, J. M., & Levenson, R. W. (2000)", "Heyman"]),
+    T("t3", "X", "X", "Outside hurt", "Criticism aimed at you, kept apart from harsh words you use yourself.", ["js/core/kai.js", "paper/MindFrame-One-Equation.tex"],
+      ["Gottman, J. M., & Levenson, R. W. (1992)"]),
+    T("t4", "S", "S", "The Kai shield", "Steadiness under pressure: self-awareness, patience, empathy and a respectful guard.", ["js/core/kai.js"],
+      ["Lieberman", "Cohen", "Schnitker", "Davis", "Linehan, M. M. (2015)", "Speed"]),
+    T("t5", "a(e)(h-e)", "a(e)(h−e)", "One gentle step home", "Each update moves a little toward home, more when far away. A design choice; no single source.", ["js/core/master.js"], []),
+    T("t6", "b\\,s(e)", "b·s(e)", "Feelings feeding each other", "The small table of which feelings amplify or calm each other. Design assumptions; no single source.", ["js/core/movers.js"], []),
+    T("t7", "P_d", "P_d", "Peace near home", "Peace as being close to home with nothing pulling hard, an even mind.", ["js/core/peace.js"],
+      ["Desbordes", "Kabat-Zinn, J. (2003)"]),
+    T("t8", "C", "C", "Hidden conflicts", "Two pulls at once, like wanting and fearing; mixed feelings are a normal part of change.", ["js/core/peace.js", "js/core/reality.js"],
+      ["Lee, Y.-C.", "Miller, W. R."]),
+    T("t9", "G", "G", "True size", "Thinking that is neither too big nor too small: true humility.", ["js/core/reality.js", "js/core/peace.js"],
+      ["Beck, A. T. (1976)", "Burns", "Al-Mosaiwi", "Tangney", "Neff", "Gilbert, P., & Procter", "Gilbert, P. (2009)", "Gross"]),
+    T("t10", "\\ell", "ℓ", "The lever", "The one place where a small step helps most.", ["js/core/peace.js"], ["Gross"]),
+    T("t11", "\\mathrm{practice}(\\ell)", "practice(ℓ)", "The practice", "The step you are offered: breathing, labeling, kindness to yourself, a walk, writing and more.", ["js/features/practices.js"],
+      ["Stahl", "Segal", "Kabat-Zinn, J. (1990)", "Lieberman", "Neff", "Zaccaro", "Gross", "Schnitker", "Bowen", "Emmons", "Linehan, M. M. (2015)", "Jacobson", "McCallie", "Pennebaker", "Frattaroli", "Rebar", "Ekkekakis"]),
+    T("t12", "F", "F", "Forgiveness", "Forgiving yourself and forgiving someone else, step by step.", ["js/features/forgiveness.js"],
+      ["Cornish", "Neff", "Worthington", "Wade, N. G., Hoyt", "Enright", "McCullough, M. E., Bono"]),
+    T("t13", "J", "J", "The freeing mix", "The gentlest mix of feelings to aim for, in true size.", ["js/features/freeing.js"],
+      ["Tangney", "Burns", "Neff", "Gilbert, P., & Procter", "Gilbert, P. (2009)", "Teresa of Ávila"]),
+    T("t14", "x(1-L)", "x(1−L)", "Loosen the grip", "Loosening a thought's hold without pushing it away.", ["js/features/grip.js"],
+      ["Wegner", "Bowen", "Borkovec", "McGowan", "Masuda"]),
+    T("t15", "\\Pi", "Π", "Past to future", "From what happened toward what can grow.", ["js/features/past.js"],
+      ["Neff", "Cornish", "Hofmann, S. G., Grossman", "Hayes, S. C., Luoma", "King, L. A.", "Peters, M. L.", "Hershfield"]),
+    T("t16", "\\sigma", "σ", "Scripture seed", "With faith on, the verses chosen for this moment.", ["js/features/scripture.js"], ["World English Bible"]),
+    T("t17", "\\mathrm{story}", "story", "Continue your story", "Films and songs that continue the parable (credited to their studios and artists).", ["js/features/movies.js"],
+      ["Zillmann", "Wikidata", "The Movie Database"]),
+    T("t18", "\\mathrm{words}", "words", "The words you read", "Short, plain words first, with the numbers behind Show the math.", ["js/core/words.js", "paper/MindFrame-Grace-Peace-Paper.tex"],
+      ["Burns", "Miller, W. R.", "Alderson-Day", "Fernyhough, C. (2016)", "Vygotsky", "Kross", "Cowan", "Miller, G. A.", "Sweller", "Nielsen"]),
+  ];
+  const SHARE_LABEL = "structural map, not effect size or validated weight";
+  const MERGED_TEX = "\\mathcal{M}=\\mathrm{words}_{\\tau_{18}}\\Big(e'=\\mathrm{clip}\\big(e+\\underbrace{a(e)(h-e)}_{\\tau_5}+\\underbrace{b\\,s(e)}_{\\tau_6}\\big),\\ e=\\mathrm{clip}\\big(\\underbrace{e_-}_{\\tau_1}\\oplus\\underbrace{n(\\text{text})}_{\\tau_2}+\\underbrace{X}_{\\tau_3}(1-\\underbrace{S}_{\\tau_4})w\\big),\\ P=\\underbrace{P_d}_{\\tau_7}(1-\\gamma\\underbrace{C}_{\\tau_8})(1-\\delta\\underbrace{G}_{\\tau_9}),\\ \\underbrace{\\ell}_{\\tau_{10}}\\mapsto\\underbrace{\\mathrm{practice}(\\ell)}_{\\tau_{11}},\\ \\underbrace{F}_{\\tau_{12}},\\underbrace{J}_{\\tau_{13}},\\underbrace{x(1-L)}_{\\tau_{14}},\\underbrace{\\Pi}_{\\tau_{15}},\\underbrace{\\sigma}_{\\tau_{16}},\\underbrace{\\mathrm{story}}_{\\tau_{17}}\\Big),\\quad \\tau_k\\leftarrow\\sum_{s\\in\\mathrm{Src}(\\tau_k)} s,\\quad \\mathrm{share}(s)=\\frac{|\\{k: s\\in\\mathrm{Src}(\\tau_k)\\}|}{18}";
+  const MERGED_PLAIN = "M = words_τ18( e' = clip(e + a(e)(h−e)_τ5 + b·s(e)_τ6),  e = clip(e₋_τ1 ⊕ n(text)_τ2 + X_τ3·(1 − S_τ4)·w),  P = P_d_τ7·(1 − γ·C_τ8)·(1 − δ·G_τ9),  ℓ_τ10 → practice(ℓ)_τ11,  F_τ12, J_τ13, x(1−L)_τ14, Π_τ15, σ_τ16, story_τ17 );  τ_k ← Σ sources of τ_k;  share(s) = (terms s informs) / 18";
+
+  /** The entry a source key (a unique cite prefix) names; throws if it is missing or ambiguous. */
+  function entry(key) {
+    const m = ENTRIES.filter(e => e.cite.startsWith(key));
+    if (m.length !== 1) throw new Error(`source key "${key}" matches ${m.length} entries`);
+    return m[0];
+  }
+  /** A short author-year label, e.g. "Neff 2003", "Cornish & Wade 2015", "Hofmann et al. 2011". */
+  function label(e) {
+    const SPECIAL = { "World English Bible": "World English Bible", "Wikidata": "Wikidata", "The Movie Database": "TMDB", "Teresa of Ávila": "Teresa of Ávila" };
+    for (const k in SPECIAL) if (e.cite.startsWith(k)) return SPECIAL[k];
+    const y = (e.cite.match(/\((\d{4})\)/) || [])[1];
+    const head = e.cite.split(/\s\(\d{4}\)/)[0];
+    const names = head.replace(/,? et al\.?/, "").split(/,\s*(?:&\s*)?|\s&\s/).map(x => x.trim()).filter(x => x && !/^([A-Z]\.\s?-?)+([A-Z]\.)?$|^Jr\.?$|^the /.test(x) && !/^[A-Z]\.( [A-Z]\.)*$/.test(x));
+    const many = names.length > 2 || /et al/.test(head);
+    return `${names[0]}${many ? " et al." : names.length === 2 ? " & " + names[1] : ""} ${y}`;
+  }
+  /** Per source: the terms it informs and its structural share. Sorted by share, then label. */
+  function contributions() {
+    const by = new Map();
+    TERMS.forEach(t => t.src.forEach(k => { const e = entry(k); if (!by.has(e)) by.set(e, []); by.get(e).push(t.id); }));
+    return [...by].map(([e, terms]) => ({ label: label(e), cite: e.cite, terms, share: Math.round(terms.length / TERMS.length * 1000) / 1000 }))
+      .sort((a, b) => b.share - a.share || a.label.localeCompare(b.label));
+  }
+  /** Credited sources that inform no model term (context, measurement plans, mathematics, philosophy). */
+  const context = () => { const used = new Set(TERMS.flatMap(t => t.src.map(entry))); return ENTRIES.filter(e => !used.has(e)); };
+
+  /** Browser: fill the Where ideas come from section. */
+  function mountSources() {
+    const $ = id => document.getElementById(id);
+    const list = $("wi-list");
+    TERMS.forEach(t => {
+      const li = document.createElement("li");
+      const b = document.createElement("strong"); b.textContent = t.name; li.appendChild(b);
+      li.append(`: ${t.words} `);
+      const s = document.createElement("span"); s.className = "wi-src";
+      s.textContent = t.src.length ? `Ideas from ${t.src.map(k => label(entry(k))).join(", ")}.` : "A design choice of this app.";
+      li.appendChild(s); list.appendChild(li);
+    });
+    const c = contributions(), ctx = context();
+    $("wi-sum").textContent = `${c.length} of the ${ENTRIES.length} credited sources inform a part of the model; the other ${ctx.length} give context, ways to test it, or wider reading.`;
+    $("wi-eq").textContent = MERGED_PLAIN;
+    $("wi-label").textContent = `Share = terms a source informs ÷ ${TERMS.length}. A ${SHARE_LABEL}.`;
+    const ol = $("wi-shares");
+    c.forEach(x => { const li = document.createElement("li"); li.textContent = `${x.label}: ${x.terms.map(id => "τ" + id.slice(1)).join(", ")} (${x.terms.length}/${TERMS.length} = ${x.share.toFixed(2)})`; ol.appendChild(li); });
+    const btn = $("wi-math"), box = $("wi-math-box");
+    btn.addEventListener("click", () => { const open = box.classList.toggle("hidden") === false; btn.setAttribute("aria-expanded", String(open)); btn.textContent = open ? "Hide the math" : "Show the math"; });
+  }
+
   /** Browser: the Credits view in the sheet (opened from the companion's home). */
   function mount(app) {
     const $ = id => document.getElementById(id);
@@ -143,10 +241,11 @@
       });
       box.appendChild(ul);
     });
+    mountSources();
     $("pet-credits").addEventListener("click", () => app.open("credits"));
     return () => {};
   }
 
-  MF.Credits = { GRATITUDE, MEDIA, CATEGORIES, ENTRIES, counts, line, mount };
+  MF.Credits = { GRATITUDE, MEDIA, CATEGORIES, ENTRIES, counts, line, TERMS, SHARE_LABEL, MERGED_TEX, MERGED_PLAIN, entry, label, contributions, context, mount };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Credits;

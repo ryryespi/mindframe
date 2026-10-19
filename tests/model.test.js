@@ -470,7 +470,7 @@ test("crisis: a crisis label inside code is refused", () => {
 });
 
 // ---------- one page ----------
-test("single page: index has no tools links; tools.html only redirects; the service worker is v25", () => {
+test("single page: index has no tools links; tools.html only redirects; the service worker is v26", () => {
   const root = path.join(__dirname, "..");
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const tools = fs.readFileSync(path.join(root, "tools.html"), "utf8");
@@ -479,7 +479,7 @@ test("single page: index has no tools links; tools.html only redirects; the serv
   assert.ok(/history\.replaceState/.test(index), "old ?view/?chip links are stripped");
   assert.ok(/location\.replace\("\.\/"\)/.test(tools) && /http-equiv="refresh"/.test(tools));
   assert.ok(!/<textarea|<script src/.test(tools), "tools.html is only a redirect");
-  assert.match(sw, /mindframe-shell-v25/);
+  assert.match(sw, /mindframe-shell-v26/);
   const scripts = [...index.matchAll(/<script src="([^"]+)"/g)].map(x => x[1]);
   assert.deepEqual(scripts, ["js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/reality.js", "js/core/peace.js", "js/core/kai.js", "js/core/master.js", "js/core/words.js",
     "js/features/relationship.js", "js/features/forgiveness.js", "js/features/practices.js", "js/features/freeing.js", "js/features/picker.js", "js/features/writer/stories.js", "js/features/writer/games.js", "js/features/historian.js",

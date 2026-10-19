@@ -51,7 +51,7 @@ test("app: the Credits view in the sheet, offline, cached, no network", () => {
   assert.match(app, /"movies", "credits"\]/);
   assert.match(app, /MF\.Credits\]\.map/);
   assert.ok(sw.includes("./js/features/credits.js"));
-  assert.match(sw, /mindframe-shell-v25/);
+  assert.match(sw, /mindframe-shell-v26/);
   assert.ok(!/fetch\(|XMLHttpRequest/.test(src));
 });
 
@@ -73,6 +73,42 @@ test("README Credits and both papers: gratitude, counts, flagged, media note, de
     assert.ok(ded > 0 && ded < t.indexOf("\\section"), "the dedication comes before every section");
     assert.ok(fs.existsSync(path.join(__dirname, "..", f.replace(".tex", ".pdf"))));
   });
+});
+
+test("push26 attribution: 18 terms, every tag backed by its evidence file, shares are terms/18, labeled structural", () => {
+  assert.equal(C.TERMS.length, 18);
+  assert.deepEqual(C.TERMS.filter(t => !t.src.length).map(t => t.id), ["t5", "t6"], "the two design choices stay untagged");
+  C.TERMS.forEach(t => {
+    t.where.forEach(f => assert.ok(fs.existsSync(path.join(__dirname, "..", f)), f));
+    const txt = t.where.map(read).join("\n");
+    assert.equal(new Set(t.src.map(C.entry)).size, t.src.length, `no duplicate in ${t.id}`);
+    t.src.forEach(k => { const e = C.entry(k); const sur = C.label(e).split(/[ &]/)[0]; assert.ok(txt.includes(sur), `${t.id}: ${sur} in ${t.where}`); assert.equal(e.status, "verified", "only verified sources are tagged"); });
+  });
+  const c = C.contributions();
+  assert.equal(c.length, 70); assert.equal(C.context().length, 31); assert.equal(c.length + C.context().length, C.ENTRIES.length);
+  c.forEach(x => assert.equal(x.share, Math.round(x.terms.length / 18 * 1000) / 1000));
+  assert.deepEqual(c.slice(0, 3).map(x => [x.label, x.terms.length]), [["Neff 2003", 5], ["Burns 1980", 4], ["Gross 1998", 3]]);
+  assert.deepEqual(c[0].terms, ["t9", "t11", "t12", "t13", "t15"]);
+  assert.ok(C.context().some(e => e.cite.startsWith("Wolpe")), "Wolpe (SUDS) informs no model term in the code");
+  assert.equal(C.SHARE_LABEL, "structural map, not effect size or validated weight");
+  assert.ok(!/\br\s*=|\bd\s*=\s*\.|effect size of/.test(C.MERGED_PLAIN + C.TERMS.map(t => t.words).join(" ")), "no effect sizes");
+});
+
+test("push26 docs: the view, README section and the One Equation paper section (dedication still first)", () => {
+  const html = read("index.html");
+  ["wi", "wi-list", "wi-sum", "wi-math-box", "wi-eq", "wi-label", "wi-shares"].forEach(id => assert.match(html, new RegExp(`id="${id}"`)));
+  assert.match(html, /id="wi-math"[^>]*aria-expanded="false"[^>]*>Show the math</);
+  assert.match(html, /id="wi-math-box" class="hidden"/);
+  const r = read("README.md");
+  assert.match(r, /## Where ideas come from: the attribution equation/);
+  assert.ok(r.includes(C.MERGED_PLAIN));
+  assert.match(r, /structural map, not effect size or validated weight/);
+  assert.match(r, /Neff 2003 5\/18/);
+  const t = read("paper/MindFrame-One-Equation.tex");
+  assert.match(t, /\\section\{Where ideas come from: one attribution equation\}/);
+  assert.match(t, /structural map, not effect size or validated weight/);
+  assert.match(t, /\\mathrm\{share\}\(s\)=\\frac/);
+  assert.ok(t.indexOf("All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.") < t.indexOf("\\section"));
 });
 
 console.log(`\n${passed} passed`);

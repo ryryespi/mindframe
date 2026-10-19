@@ -475,7 +475,7 @@ Code is grouped by feature. Every file starts with a header comment; every funct
 ```
 index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with Watch something and six views
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v25); other sites (the film APIs) are never cached
+sw.js                 offline cache (v26); other sites (the film APIs) are never cached
 tools.html            redirects old shortcuts to the one page
 js/
   app.js              page shell: state, Update, the card (insight slot, See more), the companion sheet (views, Back, focus trap, Esc)
@@ -530,6 +530,41 @@ Also in `paper/`:
 ## Model, not validated science
 
 MindFrame is a model built from design assumptions and informed by the research cited here. It is not validated science, not a measurement of you, and not a diagnosis. The thresholds (0.3, 0.6, 0.25, the peace threshold 0.8, the forgiveness threshold θ_F = 0.35, c_wait ≥ 0.3) and weights (including d0, γ, δ, the hook nudges and the release vectors) are design choices.
+
+## Where ideas come from: the attribution equation
+
+This splits the one-page model into 18 terms and tags each one with the credited sources that ground it. A source is tagged only where the code comments, the mover table above or the papers name it for that term; `tests/credits.test.js` checks that each tagged surname appears in the file given as evidence. Two terms (the gentle step home, and feelings feeding each other) are design choices with no single source, and they are labeled that way. In the app, open the companion → **Credits** → **Where ideas come from**. The words come first, and the numbers sit behind **Show the math**.
+
+```
+M = words_τ18( e' = clip(e + a(e)(h−e)_τ5 + b·s(e)_τ6),  e = clip(e₋_τ1 ⊕ n(text)_τ2 + X_τ3·(1 − S_τ4)·w),  P = P_d_τ7·(1 − γ·C_τ8)·(1 − δ·G_τ9),  ℓ_τ10 → practice(ℓ)_τ11,  F_τ12, J_τ13, x(1−L)_τ14, Π_τ15, σ_τ16, story_τ17 );  τ_k ← Σ sources of τ_k;  share(s) = (terms s informs) / 18
+```
+
+| Term | What it is | Sources (evidence) |
+|---|---|---|
+| τ1 `e` | The nine movers | Barlow et al. 2004; Beck et al. 1985; Kim et al. 2011; Zaccaro et al. 2018; Holt-Lunstad et al. 2010; Snyder 2002; Aldao et al. 2010; Nolen-Hoeksema et al. 2008; Bond et al. 2011; Gillanders et al. 2014 (`README.md`) |
+| τ2 `n(text)` | Reading your words | Beck 1976; Burns 1980; Al-Mosaiwi & Johnstone 2018; Gottman 1994; Gottman & Levenson 1992; Gottman & Levenson 2000; Heyman & Slep 2001 (`core/signals.js`, `core/reality.js`, `features/relationship.js`) |
+| τ3 `X` | Outside hurt | Gottman & Levenson 1992 (`core/kai.js`, `paper/MindFrame-One-Equation.tex`) |
+| τ4 `S` | The Kai shield | Lieberman et al. 2007; Cohen & Sherman 2014; Schnitker 2012; Davis 1983; Linehan 2015; Speed et al. 2018 (`core/kai.js`) |
+| τ5 `a(e)(h−e)` | One gentle step home | design choice, no single source (`core/master.js`) |
+| τ6 `b·s(e)` | Feelings feeding each other | design choice, no single source (`core/movers.js`) |
+| τ7 `P_d` | Peace near home | Desbordes et al. 2015; Kabat-Zinn 2003 (`core/peace.js`) |
+| τ8 `C` | Hidden conflicts | Lee et al. 2013; Miller & Rollnick 2013 (`core/peace.js`, `core/reality.js`) |
+| τ9 `G` | True size | Beck 1976; Burns 1980; Al-Mosaiwi & Johnstone 2018; Tangney 2000; Neff 2003; Gilbert & Procter 2006; Gilbert 2009; Gross 1998 (`core/reality.js`, `core/peace.js`) |
+| τ10 `ℓ` | The lever | Gross 1998 (`core/peace.js`) |
+| τ11 `practice(ℓ)` | The practice | Stahl & Goldstein 2010; Segal et al. 2013; Kabat-Zinn 1990; Lieberman et al. 2007; Neff 2003; Zaccaro et al. 2018; Gross 1998; Schnitker 2012; Bowen & Marlatt 2009; Emmons & McCullough 2003; Linehan 2015; Jacobson 1938; McCallie et al. 2006; Pennebaker & Beall 1986; Frattaroli 2006; Rebar et al. 2015; Ekkekakis et al. 2000 (`features/practices.js`) |
+| τ12 `F` | Forgiveness | Cornish & Wade 2015; Neff 2003; Worthington 2006; Wade et al. 2014; Enright & Fitzgibbons 2015; McCullough et al. 2007 (`features/forgiveness.js`) |
+| τ13 `J` | The freeing mix | Tangney 2000; Burns 1980; Neff 2003; Gilbert & Procter 2006; Gilbert 2009; Teresa of Ávila (`features/freeing.js`) |
+| τ14 `x(1−L)` | Loosen the grip | Wegner et al. 1987; Bowen & Marlatt 2009; Borkovec et al. 1983; McGowan & Behar 2013; Masuda et al. 2004 (`features/grip.js`) |
+| τ15 `Π` | Past to future | Neff 2003; Cornish & Wade 2015; Hofmann et al. 2011; Hayes et al. 2006; King 2001; Peters et al. 2010; Hershfield 2011 (`features/past.js`) |
+| τ16 `σ` | Scripture seed | World English Bible (`features/scripture.js`) |
+| τ17 `story` | Continue your story | Zillmann 1988; Wikidata; TMDB (`features/movies.js`) |
+| τ18 `words` | The words you read | Burns 1980; Miller & Rollnick 2013; Alderson-Day & Fernyhough 2015; Fernyhough 2016; Vygotsky 1986; Kross et al. 2014; Cowan 2001; Miller 1956; Sweller 1988; Nielsen 2006 (`core/words.js`, `paper/MindFrame-Grace-Peace-Paper.tex`) |
+
+**Contribution map.** share(s) = terms s informs ÷ 18. This is a **structural map, not effect size or validated weight**. It counts where an idea appears in the model's structure. It does not say how much any idea changes a reading or how well it works. 70 of the 101 credited sources inform at least one term:
+
+Neff 2003 5/18 (τ9, τ11, τ12, τ13, τ15) · Burns 1980 4/18 (τ2, τ9, τ13, τ18) · Gross 1998 3/18 (τ9, τ10, τ11) · Al-Mosaiwi & Johnstone 2018 2/18 (τ2, τ9) · Beck 1976 2/18 (τ2, τ9) · Bowen & Marlatt 2009 2/18 (τ11, τ14) · Cornish & Wade 2015 2/18 (τ12, τ15) · Gilbert & Procter 2006 2/18 (τ9, τ13) · Gilbert 2009 2/18 (τ9, τ13) · Gottman & Levenson 1992 2/18 (τ2, τ3) · Lieberman et al. 2007 2/18 (τ4, τ11) · Linehan 2015 2/18 (τ4, τ11) · Miller & Rollnick 2013 2/18 (τ8, τ18) · Schnitker 2012 2/18 (τ4, τ11) · Tangney 2000 2/18 (τ9, τ13) · Zaccaro et al. 2018 2/18 (τ1, τ11) · Aldao et al. 2010 1/18 (τ1) · Alderson-Day & Fernyhough 2015 1/18 (τ18) · Barlow et al. 2004 1/18 (τ1) · Beck et al. 1985 1/18 (τ1) · Bond et al. 2011 1/18 (τ1) · Borkovec et al. 1983 1/18 (τ14) · Cohen & Sherman 2014 1/18 (τ4) · Cowan 2001 1/18 (τ18) · Davis 1983 1/18 (τ4) · Desbordes et al. 2015 1/18 (τ7) · Ekkekakis et al. 2000 1/18 (τ11) · Emmons & McCullough 2003 1/18 (τ11) · Enright & Fitzgibbons 2015 1/18 (τ12) · Fernyhough 2016 1/18 (τ18) · Frattaroli 2006 1/18 (τ11) · Gillanders et al. 2014 1/18 (τ1) · Gottman & Levenson 2000 1/18 (τ2) · Gottman 1994 1/18 (τ2) · Hayes et al. 2006 1/18 (τ15) · Hershfield 2011 1/18 (τ15) · Heyman & Slep 2001 1/18 (τ2) · Hofmann et al. 2011 1/18 (τ15) · Holt-Lunstad et al. 2010 1/18 (τ1) · Jacobson 1938 1/18 (τ11) · Kabat-Zinn 1990 1/18 (τ11) · Kabat-Zinn 2003 1/18 (τ7) · Kim et al. 2011 1/18 (τ1) · King 2001 1/18 (τ15) · Kross et al. 2014 1/18 (τ18) · Lee et al. 2013 1/18 (τ8) · Masuda et al. 2004 1/18 (τ14) · McCallie et al. 2006 1/18 (τ11) · McCullough et al. 2007 1/18 (τ12) · McGowan & Behar 2013 1/18 (τ14) · Miller 1956 1/18 (τ18) · Nielsen 2006 1/18 (τ18) · Nolen-Hoeksema et al. 2008 1/18 (τ1) · Pennebaker & Beall 1986 1/18 (τ11) · Peters et al. 2010 1/18 (τ15) · Rebar et al. 2015 1/18 (τ11) · Segal et al. 2013 1/18 (τ11) · Snyder 2002 1/18 (τ1) · Speed et al. 2018 1/18 (τ4) · Stahl & Goldstein 2010 1/18 (τ11) · Sweller 1988 1/18 (τ18) · Teresa of Ávila 1/18 (τ13) · TMDB 1/18 (τ17) · Vygotsky 1986 1/18 (τ18) · Wade et al. 2014 1/18 (τ12) · Wegner et al. 1987 1/18 (τ14) · Wikidata 1/18 (τ17) · World English Bible 1/18 (τ16) · Worthington 2006 1/18 (τ12) · Zillmann 1988 1/18 (τ17)
+
+The other 31 sources give context, ways to test the model, or wider reading, and inform no term: Beck et al. 1979; Beck 2011; Hofmann et al. 2012; Wolpe 1969; Rachman & de Silva 1978; Holmes & Mathews 2010; Oettingen 2014; American Psychiatric Association. 2013; Kroenke et al. 2009; Shiffman et al. 2008; Dawes 1979; Kravitz & Duan 2014; Fitzpatrick et al. 2017; Linehan 1993; Neacsiu et al. 2010; Neacsiu et al. 2010; Hayes et al. 2012; Baumeister & Leary 1995; Meng et al. 2024; Whorf 1956; Boroditsky 2001; Weizenbaum 1966; Bommasani et al. 2021; Langlands 1967; Gelbart 1984; Wiles 1995; Frenkel 2013; Frankl 2006; Robertson 2010; Epictetus. (c. 125 CE). Enchiridion (Handbook). Various translations. undefined; Marcus Aurelius. (c. 170–180 CE). Meditations. Various translations. undefined.
 
 ## Credits
 

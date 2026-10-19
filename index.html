@@ -345,6 +345,17 @@
           <!-- Credits (features/credits.js): offline, every source checked; flagged ones say why. -->
           <div id="p-credits" class="view hidden" role="group" aria-labelledby="v-credits-title">
             <h3 class="view-title" id="v-credits-title" tabindex="-1">Credits</h3>
+            <section id="wi" aria-labelledby="wi-title">
+              <h4 id="wi-title" class="cr-cat">Where ideas come from</h4>
+              <p id="wi-sum" class="small"></p>
+              <ul id="wi-list" class="cr-items"></ul>
+              <button type="button" id="wi-math" class="text small" aria-expanded="false" aria-controls="wi-math-box">Show the math</button>
+              <div id="wi-math-box" class="hidden">
+                <p id="wi-eq" class="wi-eq"></p>
+                <p id="wi-label" class="small"></p>
+                <ol id="wi-shares" class="cr-items"></ol>
+              </div>
+            </section>
             <p id="cr-thanks" class="pet-say"></p>
             <p id="cr-count" class="quiet small"></p>
             <div id="cr-list" class="cr-list"></div>
