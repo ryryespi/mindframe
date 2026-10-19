@@ -167,6 +167,9 @@
     $("step-try").classList.toggle("hidden", !c.practice);
     $("step-try").dataset.practice = c.practice ? c.practice.id : "";
     $("step-try").textContent = c.practice ? `Try it together: ${c.practice.name}` : "";
+    // A practice's caution (the cold-water reset always has one) shows with the step.
+    $("step-caution").textContent = c.practice && c.practice.caution ? `Caution: ${c.practice.caution}` : "";
+    $("step-caution").classList.toggle("hidden", !(c.practice && c.practice.caution));
     $("forgive-open").dataset.path = reading.forgive && reading.forgive.path ? reading.forgive.path : "";
     const fill = (id, list) => { const ul = $(id); ul.innerHTML = ""; list.forEach(t => ul.appendChild(li(t))); };
     fill("connect", c.connect);

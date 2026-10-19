@@ -321,3 +321,11 @@ body.sheet-open { overflow: hidden; }
 .mv-key summary { cursor: pointer; min-height: 2.75rem; display: flex; align-items: center; }
 .mv-key input { width: 100%; box-sizing: border-box; min-height: 2.75rem; margin: 0.25rem 0; padding: 0.4rem 0.6rem; border: 1px solid var(--line); border-radius: 0.6rem; background: var(--card); color: var(--ink); font: inherit; }
 .movie-line { margin: 0.4rem 0; }
+
+/* ---- push22: new practices (cautions, the brain dump) ---- */
+.caution { margin: 0.35rem 0 0; padding: 0.4rem 0.6rem; border-left: 3px solid var(--warm); background: var(--tile-soft); border-radius: 0.4rem; color: var(--ink); }
+.dump { margin-top: 0.6rem; }
+.dump-time { font-variant-numeric: tabular-nums; color: var(--muted); align-self: center; }
+.dump-text { width: 100%; box-sizing: border-box; min-height: 9rem; margin: 0.3rem 0; padding: 0.6rem 0.7rem; border: 1px solid var(--line); border-radius: 0.8rem; background: var(--card); color: var(--ink); font: inherit; transition: opacity 0.6s ease; }
+.dump-text.fading { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .dump-text { transition: none; } }

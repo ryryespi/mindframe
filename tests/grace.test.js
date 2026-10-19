@@ -135,7 +135,7 @@ test("comfort prompt: forgiveness scores, path, practice and the safety note; ne
   const st = M.defaultState(), m = M.master(OTHER, st);
   const p = C.buildPrompt(st, m, { raw: OTHER });
   assert.match(p, /Forgiveness: self F=0\.\d\d, others F=0\.\d\d \(threshold 0\.35\); suggested path: forgiving someone/);
-  assert.match(p, /Practice for the one step: Pause and breathe \(slow breathing: Zaccaro et al\., 2018\)/);
+  assert.match(p, /Practice for the one step: Pause and breathe$/m);
   assert.match(p, /- Forgiving someone: /);
   assert.match(p, /forgiving is not excusing what happened, reconciling, or staying anywhere unsafe/);
   assert.ok(!/betrayed me|resent him/.test(p));
@@ -160,7 +160,7 @@ test("page: Forgive & breathe (was Grace) is one of the companion's six actions,
 test("README: Forgive & breathe, the equations, the practices, the safety line, and verified citations", () => {
   const r = read("README.md");
   [/## Forgive & breathe: forgiveness, patience and mindfulness/, /F_self  = e_shame · \(0\.4 \+ 0\.6·c_self\)/, /θ_F = 0\.35/, /Forgiving is not excusing what happened, making up, or staying anywhere unsafe\./,
-    /Cornish, M\. A\., & Wade, N\. G\. \(2015\)/, /Worthington, E\. L\., Jr\. \(2006\)/, /Enright, R\. D\., & Fitzgibbons/, /Neff, K\. D\. \(2003\)/, /McCullough, M\. E\., Bono/, /Lieberman, M\. D\./, /Bowen, S\., & Marlatt/, /Schnitker, S\. A\. \(2012\)/, /Segal, Z\. V\./, /offline cache \(v21\)/, /## Your companion/, /prefers-reduced-motion/].forEach(re => assert.match(r, re));
+    /Cornish, M\. A\., & Wade, N\. G\. \(2015\)/, /Worthington, E\. L\., Jr\. \(2006\)/, /Enright, R\. D\., & Fitzgibbons/, /Neff, K\. D\. \(2003\)/, /McCullough, M\. E\., Bono/, /Lieberman, M\. D\./, /Bowen, S\., & Marlatt/, /Schnitker, S\. A\. \(2012\)/, /Segal, Z\. V\./, /offline cache \(v22\)/, /## Your companion/, /prefers-reduced-motion/].forEach(re => assert.match(r, re));
 });
 
 console.log(`\n${passed} passed`);

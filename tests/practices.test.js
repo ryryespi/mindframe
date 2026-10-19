@@ -18,10 +18,11 @@ const DIGIT = /[0-9]/;
 const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
 const DOSES = [{ min: "two", times: "three" }, { min: "five", times: "four" }, { min: "ten", times: "five" }];
 
-test("library: ten practices, five mindfulness + one self-compassion, four patience, each with steps and a source", () => {
-  assert.equal(PR.ORDER.length, 10);
-  assert.deepEqual(PR.ORDER.filter(id => PR.LIBRARY[id].kind === "mindfulness"), ["stop", "space", "senses", "body", "label", "kindness"]);
+test("library: fourteen practices, seven mindfulness (with self-compassion and the brain dump), four patience, three body, each with steps and a source", () => {
+  assert.equal(PR.ORDER.length, 14);
+  assert.deepEqual(PR.ORDER.filter(id => PR.LIBRARY[id].kind === "mindfulness"), ["stop", "space", "senses", "body", "label", "kindness", "dump"]);
   assert.deepEqual(PR.ORDER.filter(id => PR.LIBRARY[id].kind === "patience"), ["pause", "waiting", "surf", "gratitude"]);
+  assert.deepEqual(PR.ORDER.filter(id => PR.LIBRARY[id].kind === "body"), ["cold", "pmr", "walk"]);
   PR.ORDER.forEach(id => {
     const p = PR.LIBRARY[id];
     assert.ok(p.name && p.source && p.steps.length >= 3, id);
@@ -43,6 +44,7 @@ test("pick rule: the numbers choose the practice", () => {
   const id = x => (PR.pick(x) || { id: null }).id;
   assert.equal(id(m("rumination", { rumination: 0.7, fear: 0.5 })), "label");
   assert.equal(id(m("rumination", { rumination: 0.7 })), "stop");
+  // push22: mild and plain-strong states keep their old picks (see practices22.test.js for the new ones).
   assert.equal(id(m("anger", { anger: 0.7 })), "pause");
   assert.equal(id(m("anger", { anger: 0.7 }, 0.4, 0.5)), "waiting");
   assert.equal(id(m("fear", { fear: 0.7 })), "space");
@@ -67,12 +69,13 @@ test("one step: the practice, sized by d, and why, words only", () => {
     assert.ok(c.step.startsWith(PR.LIBRARY[m.practice.id].say({ min: "two", times: "three" }).split(":")[0]), c.step);
     assert.ok(c.step.includes(`can ${M.EASE[lever][0]}`), c.step);
     assert.ok(!DIGIT.test(c.step));
-    assert.deepEqual(c.practice, { id: m.practice.id, name: PR.LIBRARY[m.practice.id].name });
+    assert.deepEqual(c.practice, { id: m.practice.id, name: PR.LIBRARY[m.practice.id].name, caution: PR.LIBRARY[m.practice.id].caution || null });
   });
   const st = M.defaultState();
   assert.match(M.card(st, M.master("I keep putting off my taxes, I just avoid it", st)).step, /^Urge surfing: /);
   assert.match(M.card(st, M.master("I keep replaying what I said and I feel sick with worry", st)).step, /^Name it to tame it: /);
-  assert.match(M.card(st, M.master("I'm so angry", st)).step, /^Pause: step away for/);
+  assert.match(M.card(st, M.master("I'm angry", st)).step, /^Pause: step away for/);
+  assert.match(M.card(st, M.master("I'm so angry", st)).step, /^Cold-water reset: /, "very high anger with low peace: the fast reset");
 });
 test("patience hook: waiting/impatience cues nudge anger and calm only; c_wait reaches master", () => {
   assert.equal(PR.waitCues("Why is this taking forever, I'm so impatient"), 3);

@@ -102,7 +102,7 @@
           <div class="tile tile-head" id="t-head"><svg class="ico" aria-hidden="true"><use href="#i-leaf"/></svg><p id="headline" class="room"></p></div>
           <div class="tile" id="t-feel"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg>What you may be feeling</span><p id="feel"></p></div>
           <div id="insight-slot" class="insight-slot"></div>
-          <div class="tile tile-step" id="t-step"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-sprout"/></svg>One step</span><p id="step"></p><button type="button" id="step-try" class="secondary hidden">Try it together</button><ul id="affirm-top" class="affirm-slim" aria-label="Affirmations"></ul></div>
+          <div class="tile tile-step" id="t-step"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-sprout"/></svg>One step</span><p id="step"></p><p id="step-caution" class="caution small hidden" role="note"></p><button type="button" id="step-try" class="secondary hidden">Try it together</button><ul id="affirm-top" class="affirm-slim" aria-label="Affirmations"></ul></div>
           <button type="button" id="more-toggle" class="more-toggle" aria-expanded="false" aria-controls="more">See more</button>
           <div id="more" class="more hidden">
             <div class="tile tile-peace" id="t-peace"><svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg><p id="room" class="small"></p><div id="peace" class="peace-box"></div></div>
@@ -289,11 +289,21 @@
             <p id="practice-suggest" class="small"></p>
             <span class="label">Mindfulness</span><div id="practice-mind" class="chips"></div>
             <span class="label">Patience</span><div id="practice-patience" class="chips"></div>
+            <span class="label">Body</span><div id="practice-body" class="chips"></div>
             <div id="practice-detail" class="practice-detail">
               <h3 id="practice-name"></h3>
               <ol id="practice-steps" class="steps"></ol>
+              <p id="practice-caution" class="caution small hidden" role="note"></p>
               <p id="practice-faith" class="small hidden"></p>
               <p id="practice-source" class="quiet small"></p>
+            </div>
+            <!-- Brain dump: a scratch box that is never saved (clears on Close, Update, Start over and Let it go). -->
+            <div id="dump" class="dump hidden">
+              <div class="row"><button type="button" id="dump-go" class="secondary">Start the 10-minute timer</button><span id="dump-time" class="dump-time" aria-live="polite">10:00</span></div>
+              <label class="small" for="dump-text">Scratch box (never saved unless you tap Save to journal)</label>
+              <textarea id="dump-text" class="dump-text" rows="8" autocomplete="off" spellcheck="false" placeholder="Write whatever is going round. Nothing here is kept."></textarea>
+              <div class="row"><button type="button" id="dump-letgo" class="secondary">Let it go</button><button type="button" id="dump-save" class="text small">Save to journal</button></div>
+              <p class="quiet small">It clears when you close this, tap Update, or tap Let it go.</p>
             </div>
             <div class="breath" id="breath">
               <div class="breath-stage"><div id="breath-circle" class="breath-circle" aria-hidden="true"></div></div>

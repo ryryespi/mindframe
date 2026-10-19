@@ -474,7 +474,7 @@ if (typeof module !== "undefined") {
       freeing: MF.Freeing ? MF.Freeing.cardLines(m, opts) : null,
       affirmations: affirmations(m, opts),
       step: stepLine(m),
-      practice: MF.Practices && m.practice ? { id: m.practice.id, name: MF.Practices.LIBRARY[m.practice.id].name } : null,
+      practice: MF.Practices && m.practice ? { id: m.practice.id, name: MF.Practices.LIBRARY[m.practice.id].name, caution: MF.Practices.LIBRARY[m.practice.id].caution || null } : null,
       progress: progressLine(m),
     };
     c.headline = headline(m, seed);
@@ -494,6 +494,7 @@ if (typeof module !== "undefined") {
       ...(c.freeing ? [...c.freeing.lines, c.freeing.step] : []),
       "Affirmations:", ...c.affirmations.map(x => `  ${x}`),
       `One step: ${c.step}`,
+      ...(c.practice && c.practice.caution ? [`Caution: ${c.practice.caution}`] : []),
       c.progress,
     ];
   }

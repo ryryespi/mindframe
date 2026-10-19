@@ -80,7 +80,13 @@ if (typeof module !== "undefined") {
       fr.steps.forEach((st, k) => L.push(`  step ${k + 1}: ${st.moves.map(x => `${label(x.name)} ${f2(x.from)}\u2192${f2(x.to)}`).join(", ")}; P = ${f2(st.P)}, J = ${f2(st.J)}`));
       L.push(`  P ${f2(fr.P0)} \u2192 ${f2(fr.P1)}, N ${f2(fr.N0)} \u2192 ${f2(fr.N1)}, J ${f2(fr.J0)} \u2192 ${f2(fr.J1)}${fr.steps.length ? "" : " (no feasible move raises J)"}`);
     }
-    if ("wait" in m) L.push(`practice = pick(lever, e, d, c_wait = ${f2(m.wait || 0)}) \u2192 ${m.practice ? `${m.practice.id} for ${label(m.practice.mover)}` : "none (the mover's own step)"}`);
+    if ("wait" in m) {
+      const band = m.peace && MF.Peace ? MF.Peace.band(m.peace.P) : "none";
+      L.push(`practice = pick(lever, e, d, c_wait = ${f2(m.wait || 0)}, c_tense = ${f2(m.tense || 0)}, c_tired = ${f2(m.tired || 0)}, peace band = ${band}) \u2192 ${m.practice ? `${m.practice.id} for ${label(m.practice.mover)}` : "none (the mover's own step)"}`);
+      L.push("  cold-water reset: lever fear or anger, that mover \u2265 0.75 (very high) and peace band a little (P < 0.40); always with its caution");
+      L.push("  brain dump: lever rumination \u2265 0.75;  progressive muscle relaxation: lever fear, avoidance or calm with c_tense \u2265 0.30");
+      L.push("  short brisk walk: lever sadness or avoidance with sadness \u2265 0.30, avoidance \u2265 0.30 and c_tired \u2265 0.30; or lever anger > 0.60 with peace not low");
+    }
     return L;
   }
 

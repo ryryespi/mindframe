@@ -214,7 +214,7 @@ Five stages: **Newborn** (0, curled asleep in a leaf nest), **Little** (8, sitti
 | **Look closer** | Remy the Raccoon | Every insight and how they connect, every hidden pull and any grand wording with its true-sized version, then all nine movers in words. |
 | **Save & share code** | Toby the Tortoise | The freeing mix as one readable line with Copy freeing mix, export / import `.mf` code (mf 4), download, Start over. |
 | **Show the math** | Ada the Otter | The math (vector, equation, λ, baseline, recovery, g, conflict strengths c, positive-emotion scores, inner peace P with ∂P/∂e, the lever, n*, e* and the convergence proof sketch, the forgiveness scores F_self and F_other with the path, ΔP_F and the forgiveness recommendation, the practice pick, the false-humility signal u, and the freeing-mix optimization), adjust each mover, and the variables, with Reset. |
-| **Forgive & breathe** | Grace the Dove | Three tabs: **Forgive myself** (the four Rs), **Forgive someone** (REACH), and **Breathe & be patient** (ten practices and the breathing circle). Optional note boxes stay on the page unless you save them to the journal. |
+| **Forgive & breathe** | Grace the Dove | Three tabs: **Forgive myself** (the four Rs), **Forgive someone** (REACH), and **Breathe & be patient** (fourteen practices, the breathing circle and the brain-dump box). Optional note boxes stay on the page unless you save them to the journal. |
 
 The sheet is a modal dialog (`role="dialog"`, `aria-modal`): focus moves to its title and stays inside (Tab wraps), Close, Esc or tapping the shade closes it, and focus goes back to what opened it.
 
@@ -279,7 +279,7 @@ Without a cue, a path needs e_shame (or e_anger) ≥ 0.875. Rumination is in bot
 * **Forgive myself:** the four Rs of self-forgiveness: Responsibility, Remorse, Restoration, Renewal (Cornish & Wade, 2015). Renewal uses Neff's self-compassion: mindfulness, common humanity, self-kindness (Neff, 2003). The request named "Worthington's four Rs"; the published four-R model is Cornish & Wade's, so it is credited to them.
 * **Forgive someone:** REACH (Recall, Empathize, Altruistic gift, Commit, Hold on; Worthington, 2006). Forgiveness interventions are supported by a meta-analysis (Wade, Hoyt, Kidwell & Worthington, 2014). The intro follows Enright's process model (uncovering, decision, work, deepening; Enright & Fitzgibbons, 2015). It says plainly that forgiving is not excusing, reconciling, or staying unsafe, and to reach out for help first if you are not safe.
 
-**Patience and mindfulness practices** (the "Breathe & be patient" tab):
+**Patience, mindfulness and body practices** (the "Breathe & be patient" tab):
 
 | Practice | Kind | Source |
 |---|---|---|
@@ -293,18 +293,30 @@ Without a cue, a path needs e_shame (or e_anger) ≥ 0.875. Rumination is in bot
 | Reframe the wait (reappraisal) | patience | Gross, 1998; Schnitker, 2012 |
 | Urge surfing | patience | Bowen & Marlatt, 2009 |
 | Gratitude for what's here | patience | Emmons & McCullough, 2003 |
+| Brain dump (10 minutes of free writing, then keep or let go) | mindfulness | expressive writing: Pennebaker & Beall, 1986; Frattaroli, 2006 (small average effects) |
+| Cold-water reset (cool or cold water on the face, or something cold to hold, 15–30 s, slow exhale) | body | DBT TIP skills, Temperature: Linehan, 2015 |
+| Progressive muscle relaxation (3 minutes: tense ~5 s, release ~10 s; hands, shoulders, jaw, feet) | body | Jacobson, 1938; review: McCallie, Blum & Hood, 2006 |
+| Short brisk walk (5–10 minutes) | body | Rebar et al., 2015; Ekkekakis et al., 2000 |
+
+**Cautions are always shown with the practice** (on the card, in Copy, and in Grace's panel). The cold-water reset always says: "Skip this if you have a heart condition, low blood pressure, fainting, or an eating disorder; check with your doctor first." Progressive muscle relaxation says to tense gently, never to pain, and to skip injured areas; the walk says only where it's safe. Shaking it out is not included: we found no evidence base for it as a stand-alone practice.
+
+**The brain dump box is never saved.** It is a plain text box with a 10-minute timer. It is not stored anywhere, not in the `.mf` export, and not in the comfort-story prompt (which names the practice only). It clears when you tap **Let it go** (with a gentle fade, or instantly with reduced motion), close the sheet, tap **Update**, tap Start over, or a crisis is shown. Crisis wording typed into it clears it at once and shows 988 / 911. Only **Save to journal** keeps it, in this browser's journal, if you choose.
+
+Two word hooks feed the pick but never move a feeling: body tension ("tense", "tight shoulders", "clenched jaw", "can't relax", "wound up") gives c_tense, and low energy ("exhausted", "drained", "worn out", "no energy", "can't get out of bed") gives c_tired, each 1 − e^(−0.7k) and negation-aware.
 
 Patience is treated as a trainable strength linked to well-being (Schnitker, 2012). A waiting/impatience hook ("taking forever", "can't wait", "impatient", "stuck in traffic") gives c_wait = 1 − e^(−0.7k) and nudges anger +0.2 and calm −0.2.
 
 **Which practice becomes the One step.** Let n be the inner-peace lever, or master's mover if there is no lever:
 
-* rumination → labeling if another hard mover is ≥ 0.3, else STOP;
-* anger → reframe the wait if c_wait ≥ 0.3, else pause and longer exhale;
-* fear → reframe the wait if c_wait ≥ 0.3, else the breathing space;
-* avoidance → urge surfing;
+"Very high" means n ≥ 0.75, the upper part of the card's "strongly" band (> 0.6): one plain feeling word reads about 0.63, so it takes an intensifier ("so angry"), several cues, or "strongly" in the picker. "Low peace" is the "a little" band (P < 0.4). The first matching rule wins:
+
+* rumination → brain dump if rumination is very high, else labeling if another hard mover is ≥ 0.1, else STOP;
+* anger → cold-water reset if anger is very high and peace is low, else reframe the wait if c_wait ≥ 0.3, else a short brisk walk if anger is strongly but peace is not low (a modeling choice: the walk sources cover mood and anxiety, not anger directly), else pause and longer exhale;
+* fear → cold-water reset if fear is very high and peace is low, else reframe the wait if c_wait ≥ 0.3, else progressive muscle relaxation if c_tense ≥ 0.3, else the breathing space;
+* avoidance → a short brisk walk if sadness ≥ 0.3 and c_tired ≥ 0.3, else progressive muscle relaxation if c_tense ≥ 0.3, else urge surfing;
 * shame → self-compassion break;
-* sadness → gratitude if hope is ≥ 0.3, else the earlier small-action step;
-* calm → reframe the wait if c_wait ≥ 0.3, else five senses if d ≥ 0.5, else the body scan;
+* sadness → a short brisk walk if avoidance ≥ 0.3 and c_tired ≥ 0.3, else gratitude if hope is ≥ 0.3, else the earlier small-action step;
+* calm → reframe the wait if c_wait ≥ 0.3, else progressive muscle relaxation if c_tense ≥ 0.3, else five senses if d ≥ 0.5, else the body scan;
 * hope → gratitude;
 * connection → the earlier message step.
 
@@ -380,7 +392,7 @@ Code is grouped by feature. Every file starts with a header comment; every funct
 ```
 index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with Watch something and six views
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v21); other sites (the film APIs) are never cached
+sw.js                 offline cache (v22); other sites (the film APIs) are never cached
 tools.html            redirects old shortcuts to the one page
 js/
   app.js              page shell: state, Update, the card (insight slot, See more), the companion sheet (views, Back, focus trap, Esc)
@@ -406,7 +418,7 @@ js/
     movies.js         MF.Movies: Watch something (the film mood from the reading, the curated list, the optional Wikidata / TMDB lookup)
     relationship.js   the Four Horsemen pattern helper
     forgiveness.js    Forgive & breathe: forgiveness cues, master pass, card words, guided paths
-    practices.js      MF.Practices: patience & mindfulness library, the step pick, the breathing circle
+    practices.js      MF.Practices: patience, mindfulness & body library, the step pick, the breathing circle, the never-saved brain dump
     freeing.js        MF.Freeing: the freeing mix (master pass, card words, the export line, Copy freeing mix)
     picker.js         MF.Picker: the Write / Pick feelings toggle and the feelings chips
 tests/                node tests (tests/mf.js loads every module)
@@ -471,6 +483,13 @@ MindFrame is a model built from design assumptions and informed by the research 
 * Worthington, E. L., Jr. (2006). *Forgiveness and reconciliation: Theory and application.* New York: Routledge.
 * Zillmann, D. (1988). Mood management through communication choices. *American Behavioral Scientist, 31*(3), 327–340. doi:10.1177/000276488031003005
 * Zaccaro, A., et al. (2018). How breath-control can change your life: A systematic review on psycho-physiological correlates of slow breathing. *Frontiers in Human Neuroscience, 12*, 353. doi:10.3389/fnhum.2018.00353
+* Ekkekakis, P., Hall, E. E., VanLanduyt, L. M., & Petruzzello, S. J. (2000). Walking in (affective) circles: Can short walks enhance affect? *Journal of Behavioral Medicine, 23*(3), 245–275. doi:10.1023/A:1005558025163
+* Frattaroli, J. (2006). Experimental disclosure and its moderators: A meta-analysis. *Psychological Bulletin, 132*(6), 823–865. doi:10.1037/0033-2909.132.6.823 (146 studies; a small average effect, r ≈ .08)
+* Jacobson, E. (1938). *Progressive relaxation* (2nd ed.). Chicago: University of Chicago Press.
+* Linehan, M. M. (2015). *DBT skills training manual* (2nd ed.). New York: Guilford Press. (TIP skills: Temperature)
+* McCallie, M. S., Blum, C. M., & Hood, C. J. (2006). Progressive muscle relaxation. *Journal of Human Behavior in the Social Environment, 13*(3), 51–66. doi:10.1300/J137v13n03_04
+* Pennebaker, J. W., & Beall, S. K. (1986). Confronting a traumatic event: Toward an understanding of inhibition and disease. *Journal of Abnormal Psychology, 95*(3), 274–281. doi:10.1037/0021-843X.95.3.274
+* Rebar, A. L., Stanton, R., Geard, D., Short, C., Duncan, M. J., & Vandelanotte, C. (2015). A meta-meta-analysis of the effect of physical activity on depression and anxiety in non-clinical adult populations. *Health Psychology Review, 9*(3), 366–378. doi:10.1080/17437199.2015.1022901
 
 ## Privacy
 
