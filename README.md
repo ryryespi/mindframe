@@ -522,6 +522,8 @@ Tests: `for f in tests/*.test.js; do node "$f"; done`.
 
 [MindFrame: A Master-Function Model for Grounded Reflection, Inner Peace, and Forgiveness](paper/MindFrame-Grace-Peace-Paper.pdf) is the research paper on the master-function model, inner peace, and forgiveness. The source is `paper/MindFrame-Grace-Peace-Paper.tex`; figures are in `paper/grace-peace-fig/`.
 
+[Validation plan and next app (Trellis)](paper/MindFrame-Validation-and-Next.pdf)
+
 Also in `paper/`:
 
 * [MindFrame: An Inner Language for Self-Talk, an Integrated Low-Overload Framework, and the Ψ Daily Reflection Index](paper/MindFrame_Combined_Paper.pdf) combines MindFrame with the Psi daily reflection index.
