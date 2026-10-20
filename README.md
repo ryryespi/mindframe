@@ -475,7 +475,7 @@ Code is grouped by feature. Every file starts with a header comment; every funct
 ```
 index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with Watch something and six views
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v26); other sites (the film APIs) are never cached
+sw.js                 offline cache (v27); other sites (the film APIs) are never cached
 tools.html            redirects old shortcuts to the one page
 js/
   app.js              page shell: state, Update, the card (insight slot, See more), the companion sheet (views, Back, focus trap, Esc)
@@ -566,11 +566,59 @@ Neff 2003 5/18 (τ9, τ11, τ12, τ13, τ15) · Burns 1980 4/18 (τ2, τ9, τ13,
 
 The other 31 sources give context, ways to test the model, or wider reading, and inform no term: Beck et al. 1979; Beck 2011; Hofmann et al. 2012; Wolpe 1969; Rachman & de Silva 1978; Holmes & Mathews 2010; Oettingen 2014; American Psychiatric Association. 2013; Kroenke et al. 2009; Shiffman et al. 2008; Dawes 1979; Kravitz & Duan 2014; Fitzpatrick et al. 2017; Linehan 1993; Neacsiu et al. 2010; Neacsiu et al. 2010; Hayes et al. 2012; Baumeister & Leary 1995; Meng et al. 2024; Whorf 1956; Boroditsky 2001; Weizenbaum 1966; Bommasani et al. 2021; Langlands 1967; Gelbart 1984; Wiles 1995; Frenkel 2013; Frankl 2006; Robertson 2010; Epictetus. (c. 125 CE). Enchiridion (Handbook). Various translations. undefined; Marcus Aurelius. (c. 170–180 CE). Meditations. Various translations. undefined.
 
+## The anchor: a layered topology
+
+All 102 variables in MindFrame's equations sit on six layers (`js/core/topology.js`):
+
+| Layer | What it holds | Variables |
+|---|---|---|
+| L1 | Feelings and the step | 25 |
+| L2 | Steadiness (virtues and the Kai shield) | 14 |
+| L3 | Peace, conflict and true size | 12 |
+| L4 | Grip, time and resistance | 19 |
+| L5 | Past to future, hope and the moving anchor | 23 |
+| L6 | Faith and meaning (wording only) | 9 |
+
+The upper layers are projections of L1, the feelings cube [0,1]^9. The master step `T` pulls every state toward the anchor h with ‖T(e)−h‖ ≤ 0.88‖e−h‖, so:
+
+- h is the one fixed point;
+- every starting point reaches it (the basin is the whole cube);
+- ‖e−h‖ is a Lyapunov function.
+
+This is honestly not a strict Banach contraction: two nearby states can jump apart where the hard feelings feed each other. With faith on, the anchor is described as rest in Christ (Hebrews 6:19, WEB). Only the words change.
+
+**Anchor sheet.** Open it from the petal button. It shows words first: how near you are to your anchor, which layer pulls most, a patience line, and a wide time range (never a promise). It also shows your anchor path, which moves as you settle, with hysteresis. "Collapse" here is a picture, not physics. Show the math reveals the numbers.
+
+**Time.** Each feeling has its own time constant, from emotion-duration research (Verduyn & Lavrijsen 2015; Verduyn et al. 2009):
+
+| Feeling | Time constant |
+|---|---|
+| fear | 0.25–3 h |
+| shame | 0.25–2 h |
+| anger | 0.5–48 h |
+| sadness | 24–120 h |
+
+Grounding feelings and rumination use design choices. The popular "90-second rule" is not used.
+
+**Resistance.** Avoidance, suppression, rumination, inertia and sustain talk slow things down and weaken the pull: τ/(1−ρ) and a(1−ρ). Willingness lowers resistance.
+
+**Expression governor** (`js/core/governor.js`). A leaky PI controller with anti-windup. It suggests write, pause, ground or step away, and never blocks. If racing or short-sleep cues appear on 3 or more days, it shows a gentle line to consider talking with a doctor. This is not a diagnosis. Crisis words still show only 988/911.
+
+**Scenes and About me.** Thirteen original SVG scenes follow the parable's beats with the same traveler and fawn. A grounding picture carries one kind action. Optional About me (hobbies and field) stays on this device and is saved in your .mf code. It personalizes activation steps, metaphors and extras, and never changes a number.
+
+**Creative additions.**
+
+- Scenes as the story's visual spine.
+- An evening review as a parable page.
+- "Save this story as a picture" (a local SVG).
+- The anchor path with a Clear button.
+- Reminders were left out to keep things simple.
+
 ## Credits
 
 With gratitude to every researcher, clinician, translator and writer whose careful work MindFrame stands on. All credit and glory to God.
 
-Every source below was checked in October 2026. Journal articles were checked against Crossref (title, authors, year, volume, pages and DOI). Books were checked against Open Library or publisher and library catalogs. Reports, preprints, archives and web articles were checked at their own sites. **99 sources are verified and 2 are flagged.** The full citations, with DOIs, are in **References** below, in the app (open your companion, then **Credits**), and in the "Credits and References" section of both papers.
+Every source below was checked in October 2026. Journal articles were checked against Crossref (title, authors, year, volume, pages and DOI). Books were checked against Open Library or publisher and library catalogs. Reports, preprints, archives and web articles were checked at their own sites. **111 sources are verified and 2 are flagged.** The full citations, with DOIs, are in **References** below, in the app (open your companion, then **Credits**), and in the "Credits and References" section of both papers.
 
 * **Emotion, cognition and CBT:** Beck, Rush, Shaw, Emery, Steer, Kovacs, Garrison, Burns, Gross, Aldao, Nolen-Hoeksema, Schweizer, Barlow, Allen, Choate, Wisco, Lyubomirsky, Al-Mosaiwi, Johnstone, Kim, Thibodeau, Jorgensen, Hofmann, Asnaani, Vonk, Sawyer, Fang, Lieberman, Eisenberger, Crockett, Tom, Pfeifer, Way, Snyder, Wolpe, Rachman, de Silva, Holmes, Mathews, Wegner, Schneider, Carter, White, Borkovec, Wilkinson, Folensbee, Lerman, McGowan, Behar, King, Peters, Flink, Boersma, Linton, Hershfield, Oettingen, American Psychiatric Association, Kroenke, Strine, Spitzer, Williams, Berry, Mokdad, Shiffman, Stone, Hufford, Dawes, Kravitz, Duan, the DEcIDE N-of-1 Guidance Panel, Fitzpatrick, Darcy, Vierhile, Cohen, Sherman.
 * **DBT, ACT, mindfulness and compassion:** Linehan, Neacsiu, Rizvi, Vitaliano, Lynch, Hayes, Luoma, Bond, Masuda, Lillis, Strosahl, Wilson, Sackett, Twohig, Gillanders and colleagues, Kabat-Zinn, Segal, Williams, Teasdale, Stahl, Goldstein, Desbordes, Gard, Hoge, Hölzel, Kerr, Lazar, Olendzki, Vago, Neff, Gilbert, Procter, Hofmann, Grossman, Hinton, Bowen, Marlatt, Miller, Rollnick, Zaccaro and colleagues.
@@ -581,6 +629,7 @@ Every source below was checked in October 2026. Journal articles were checked ag
 * **Media:** Zillmann.
 * **Mathematics:** Langlands, Gelbart, Wiles, Frenkel.
 * **Philosophy and spiritual writers:** Frankl, Robertson, Epictetus, Marcus Aurelius, Teresa of Ávila.
+* **Time, dynamics, control and imagery:** Verduyn, Lavrijsen, Delvaux, Van Coillie, Tuerlinckx, Van Mechelen, Kuppens, Allen, Sheeber, Banach, Lyapunov (trans. Fuller), Åström, Murray, Kaplan, Berman, Jonides, Curry, Rowland, Van Lissa, Zlotowitz, McAlaney, Whitehouse, Lewinsohn, Martell, Addis, Jacobson, Csikszentmihalyi.
 * **Scripture and data:** World English Bible (eBible.org), Wikidata, TMDB.
 
 **Flagged (kept, not fully verifiable):** Epictetus, *Enchiridion*, and Marcus Aurelius, *Meditations*, are cited as classical works with "various translations". The works are certain, but no specific edition or translator is named, so no full citation can be confirmed.
@@ -588,6 +637,19 @@ Every source below was checked in October 2026. Journal articles were checked ag
 **Films and songs** are credited to their studios and filmmakers, and to their artists and songwriters. MindFrame only names them (film facts from Wikidata, CC0; the optional TMDB lookup follows TMDB's attribution terms) and quotes no lyrics.
 
 ## References
+
+* Lewinsohn, P. M. (1974). A behavioral approach to depression. In R. J. Friedman & M. M. Katz (Eds.), The psychology of depression: Contemporary theory and research (pp. 157–178). Washington, DC: V. H. Winston & Sons / Wiley.
+* Martell, C. R., Addis, M. E., & Jacobson, N. S. (2001). Depression in context: Strategies for guided action. New York: W. W. Norton.
+* Csikszentmihalyi, M. (1990). Flow: The psychology of optimal experience. New York: Harper & Row.
+* Verduyn, P., & Lavrijsen, S. (2015). Which emotions last longest and why: The role of event importance and rumination. Motivation and Emotion, 39(1), 119–127. https://doi.org/10.1007/s11031-014-9445-y
+* Verduyn, P., Delvaux, E., Van Coillie, H., Tuerlinckx, F., & Van Mechelen, I. (2009). Predicting the duration of emotional experience: Two experience sampling studies. Emotion, 9(1), 83–91. https://doi.org/10.1037/a0014610
+* Kuppens, P., Allen, N. B., & Sheeber, L. B. (2010). Emotional inertia and psychological maladjustment. Psychological Science, 21(7), 984–991. https://doi.org/10.1177/0956797610372634
+* Banach, S. (1922). Sur les opérations dans les ensembles abstraits et leur application aux équations intégrales. Fundamenta Mathematicae, 3, 133–181. https://doi.org/10.4064/fm-3-1-133-181
+* Lyapunov, A. M. (1992). The general problem of the stability of motion (A. T. Fuller, Trans.). International Journal of Control, 55(3), 531–773. (Original work published 1892). https://doi.org/10.1080/00207179208934253
+* Åström, K. J., & Murray, R. M. (2008). Feedback Systems: An Introduction for Scientists and Engineers. Princeton, NJ: Princeton University Press. https://doi.org/10.1515/9781400828739
+* Kaplan, S. (1995). The restorative benefits of nature: Toward an integrative framework. Journal of Environmental Psychology, 15(3), 169–182. https://doi.org/10.1016/0272-4944(95)90001-2
+* Berman, M. G., Jonides, J., & Kaplan, S. (2008). The cognitive benefits of interacting with nature. Psychological Science, 19(12), 1207–1212. https://doi.org/10.1111/j.1467-9280.2008.02225.x
+* Curry, O. S., Rowland, L. A., Van Lissa, C. J., Zlotowitz, S., McAlaney, J., & Whitehouse, H. (2018). Happy to help? A systematic review and meta-analysis of the effects of performing acts of kindness on the well-being of the actor. Journal of Experimental Social Psychology, 76, 320–329. https://doi.org/10.1016/j.jesp.2018.02.014
 
 * Borkovec, T. D., Wilkinson, L., Folensbee, R., & Lerman, C. (1983). Stimulus control applications to the treatment of worry. *Behaviour Research and Therapy, 21*(3), 247–251. doi:10.1016/0005-7967(83)90206-1
 * Hayes, S. C., Luoma, J. B., Bond, F. W., Masuda, A., & Lillis, J. (2006). Acceptance and commitment therapy: Model, processes and outcomes. *Behaviour Research and Therapy, 44*(1), 1–25. doi:10.1016/j.brat.2005.06.006

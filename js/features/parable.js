@@ -78,8 +78,13 @@
   const PAST = { self: "the traveler looked back at a mistake, spoke to it as kindly as to a friend, and set down the stone of self-blame", other: "the traveler thought of the one who had caused the hurt and, slowly, wished them well, without pretending the hurt was small", loop: "the traveler let the old memory walk behind, no longer turning around to replay it" };
   const AHEAD = { bps: "then she pictured the road ahead going as well as it reasonably could, and one small thing to start today", future: "then she wrote a short note to the self who would arrive a year from now" };
 
-  /** The parable sentences (5–8). ctx: {faith, grip, past, together, friend, animal} */
-  function parable(m, ctx = {}) {
+  /**
+   * The parable as beats [{id, text}] (5–8): open, grip?, crossroads?, bend, verses|remember,
+   * peace, share?, evening. Each beat has a matching scene (features/scenes.js), so text and
+   * picture come from the same list. ctx.gov (core/governor.js) adds the shared-table beat
+   * when activation or true-size drift is high, and dropping "peace" keeps it at 8.
+   */
+  function beats(m, ctx = {}) {
     if (!m || m.crisis || !m.e) return [];
     const dom = S().dominant(m), friend = ctx.friend || "Willow", animal = ctx.animal || "fawn";
     const out = [];
@@ -87,18 +92,25 @@
     const open = ctx.faith
       ? "Seeds rested in still water above a stone counter set on the cornerstone, the way Christ is called the chief cornerstone (1 Peter 2:6), and a tree planted by streams of water bears fruit in its season (Psalm 1:3)"
       : "Seeds rested in still water above a stone counter set on a strong cornerstone, waiting for their season";
-    out.push(`${open}. Once, a traveler carried ${dom ? FEEL[dom] : "a quiet heart"} past that water along a winding road, and ${friend} the ${animal} walked beside her.`);
-    if (ctx.grip && ctx.grip.show) out.push(`${GRIP[ctx.grip.top][0].toUpperCase() + GRIP[ctx.grip.top].slice(1)} tugged at her; she didn't fight it or run, she named it and let it walk alongside, and its hold loosened a little.`);
-    if (ctx.past && ctx.past.show) out.push(`At a crossroads, ${PAST[ctx.past.tech]}; ${AHEAD[ctx.past.future]}.`);
+    out.push({ id: "open", text: `${open}. Once, a traveler carried ${dom ? FEEL[dom] : "a quiet heart"} past that water along a winding road, and ${friend} the ${animal} walked beside her.` });
+    if (ctx.grip && ctx.grip.show) out.push({ id: "grip", text: `${GRIP[ctx.grip.top][0].toUpperCase() + GRIP[ctx.grip.top].slice(1)} tugged at her; she didn't fight it or run, she named it and let it walk alongside, and its hold loosened a little.` });
+    if (ctx.past && ctx.past.show) out.push({ id: "crossroads", text: `At a crossroads, ${PAST[ctx.past.tech]}; ${AHEAD[ctx.past.future]}.` });
     const pr = m.practice && MF.Practices && MF.Practices.LIBRARY[m.practice.id];
-    out.push(`At a quiet bend, ${friend} showed her one small practice${pr ? `, ${pr.name.replace(/:.*$/, "").toLowerCase().replace(/^(\d)/, "the $1")}` : ""}, and she tried it, one breath at a time.`);
+    out.push({ id: "bend", text: `At a quiet bend, ${friend} showed her one small practice${pr ? `, ${pr.name.replace(/:.*$/, "").toLowerCase().replace(/^(\d)/, "the $1")}` : ""}, and she tried it, one breath at a time${ctx.about && MF.About && MF.About.metaphor(ctx.about) ? `, ${MF.About.metaphor(ctx.about)}` : ""}.` });
     const tog = ctx.faith && ctx.together;
-    if (tog) out.push(`She remembered words about ${tog.themes.map(t => S().THEMES[t].label).join(" and ").replace(/ and (.*) and /, ", $1 and ")} (${tog.verses.map(v => v.ref).join("; ")}), and that ${S().THREAD[tog.thread].replace("you are", "she was")}.`);
-    else out.push(`She remembered that ${S().THREAD[ctxThread(m, ctx)].replace("you are", "she was")}.`);
+    if (tog) out.push({ id: "verses", text: `She remembered words about ${tog.themes.map(t => S().THEMES[t].label).join(" and ").replace(/ and (.*) and /, ", $1 and ")} (${tog.verses.map(v => v.ref).join("; ")}), and that ${S().THREAD[tog.thread].replace("you are", "she was")}.` });
+    else out.push({ id: "remember", text: `She remembered that ${S().THREAD[ctxThread(m, ctx)].replace("you are", "she was")}.` });
     const band = m.peace && MF.Peace ? MF.Peace.band(m.peace.P) : "growing";
-    out.push(`Nothing changed all at once; her peace, ${band} at first, grew a little with each step she took.`);
-    out.push(tog ? "By evening she sat by still water, and rest came, not because the road was gone, but because she was not walking it alone." : "By evening she sat by still water and rested, carrying the road more lightly than before.");
+    out.push({ id: "peace", text: `Nothing changed all at once; her peace, ${band} at first, grew a little with each step she took.` });
+    const g = ctx.gov;
+    if (g && (g.s.Mn >= 0.4 || (g.s.G || 0) >= 0.4)) out.push({ id: "share", text: "Before evening she stopped at a long table and shared bread with her neighbors, and the ordinary day felt steady and good." });
+    out.push({ id: "evening", text: tog ? "By evening she sat by still water, and rest came, not because the road was gone, but because she was not walking it alone." : "By evening she sat by still water and rested, carrying the road more lightly than before." });
+    if (out.length > 8) out.splice(out.findIndex(b => b.id === "peace"), 1);
     return out.slice(0, 8);
+  }
+  /** The parable sentences (5–8): the text of beats(). */
+  function parable(m, ctx = {}) {
+    return beats(m, ctx).map(b => b.text);
   }
   /** Faith off: a thread from the themes alone. */
   function ctxThread(m, ctx) {
@@ -120,12 +132,15 @@
       const fit = SONGS.filter(s => s.themes.includes(t) && (ctx.faith || !s.worship) && !songs.includes(s));
       if (fit.length && songs.length < 3) songs.push(fit[(seed + i * 5) % fit.length]);
     });
+    const ex = MF.About && ctx.about ? MF.About.extras(ctx.about) : { songs: 0, films: 0 };
+    // About me: music adds one more song, films one more film (still seeded).
+    if (ex.songs) { const fit = SONGS.filter(s => (ctx.faith || !s.worship) && !songs.includes(s)); if (fit.length) songs.push(fit[(seed + 7) % fit.length]); }
     while (songs.length < 2) songs.push(SONGS.filter(s => !s.worship && !songs.includes(s))[seed % 10]);
     let films = [];
     if (MF.Movies) {
       const p = MF.Movies.pick(m), id = p ? p.id : "inspire";
       const pool = MF.Movies.pool(id, { faith: ctx.faith });
-      films = pool.length ? [pool[seed % pool.length], pool[(seed + 1) % pool.length]].filter((f, i, a) => a.indexOf(f) === i) : [];
+      films = pool.length ? [pool[seed % pool.length], pool[(seed + 1) % pool.length]].concat(ex.films ? [pool[(seed + 2) % pool.length]] : []).filter((f, i, a) => a.indexOf(f) === i) : [];
     }
     const tag = s => s.themes.find(t => uniq.includes(t)) || s.themes[0];
     return {
@@ -134,6 +149,6 @@
     };
   }
 
-  MF.Parable = { SONGS, FEEL, SONG_LINE, parable, more };
+  MF.Parable = { SONGS, FEEL, SONG_LINE, beats, parable, more };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));
 if (typeof module !== "undefined") module.exports = global.MF.Parable;

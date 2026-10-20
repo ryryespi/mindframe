@@ -7,6 +7,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs,tabularx,array}
 \usepackage{enumitem}
+\usepackage{graphicx}
 \usepackage[dvipsnames]{xcolor}
 \definecolor{mfblue}{RGB}{31,94,166}\definecolor{mfred}{RGB}{176,58,46}\definecolor{mfgreen}{RGB}{30,120,70}\definecolor{mfpurple}{RGB}{112,64,160}\definecolor{mforange}{RGB}{190,105,20}\definecolor{mfgray}{RGB}{110,110,110}
 \usepackage[hidelinks]{hyperref}
@@ -187,6 +188,55 @@ Hayes et al. 2006 & 15 & 1/18 & Zillmann 1988 & 17 & 1/18\\
 \end{center}}
 The other 31 credited sources give context, ways to test the model, mathematics, or philosophy, and inform no term: Beck et al. 1979; Beck 2011; Hofmann et al. 2012; Wolpe 1969; Rachman \& de Silva 1978; Holmes \& Mathews 2010; Oettingen 2014; American Psychiatric Association. 2013; Kroenke et al. 2009; Shiffman et al. 2008; Dawes 1979; Kravitz \& Duan 2014; Fitzpatrick et al. 2017; Linehan 1993; Neacsiu et al. 2010; Neacsiu et al. 2010; Hayes et al. 2012; Baumeister \& Leary 1995; Meng et al. 2024; Whorf 1956; Boroditsky 2001; Weizenbaum 1966; Bommasani et al. 2021; Langlands 1967; Gelbart 1984; Wiles 1995; Frenkel 2013; Frankl 2006; Robertson 2010; Epictetus. (c. 125 CE). Enchiridion (Handbook). Various translations. undefined; Marcus Aurelius. (c. 170--180 CE). Meditations. Various translations. undefined.
 
+%% ---------------- push27: topology, time, the anchor, the governor ----------------
+\section{A layered topology and the anchor}\label{sec:topology}
+\paragraph{Layers.} Every variable in the MindFrame equations (102 in all, listed in \texttt{js/core/topology.js}) sits on one of six layers: L1 feelings and the step (25), L2 virtues and the Kai shield (14), L3 peace, conflict and true size (12), L4 grip, time and resistance (19), L5 past to future, hope, forgiveness, the freeing mix and the moving anchor (23), L6 faith and meaning (9, \emph{wording only}: the seed and the verse choice are not measured quantities). The state space is the product $E=L_1\times\cdots\times L_6$ over the base $L_1=[0,1]^9$. The upper layers are read from $L_1$ and the words by projection maps $\pi_2(e)=X(1-S)$, $\pi_3(e)=(P,C,G)$, $\pi_4(e)=(\text{fear},\text{loop},\text{vice},\rho)$, $\pi_5(e)=(\text{past},\text{hope})$, so a point over $e$ is the section $\sigma(e)=(e,\pi_2(e),\dots,\pi_6)$. We call this ``fiber-bundle style'' only in that loose sense. The companion's growth sits in L6 because it never depends on $e$. There is no daily score $\Psi$ in the current code, so none is listed.
+
+\begin{center}\includegraphics[width=\linewidth]{mf-anchor-layers.png}\end{center}
+
+\begin{proposition}[The anchor]\label{prop:anchor}
+Let $T(e)=\mathrm{clip}(e+a(e)(h-e)+b\,s(e))$ be master's step and $a_{\mathrm{lo}}=\min(a_0,a_{\max},a_{\mathrm{cap}})>0$. Then $\|T(e)-h\|\le q\|e-h\|$ with $q=1-a_{\mathrm{lo}}$ ($q=0.88$ with the defaults). Hence $h$ is the unique fixed point of $T$, every orbit from every point of $[0,1]^9$ converges to it (the basin is the whole cube), and $V(e)=\|e-h\|$ is a Lyapunov function, $V(T(e))\le qV(e)$ in the sense of \citet{lyapunov1992}.
+\end{proposition}
+\noindent\emph{Proof.} The inequality is Proposition~\ref{prop:contract}. If $T(e^\ast)=e^\ast$ then $\|e^\ast-h\|\le q\|e^\ast-h\|$ with $q<1$, so $e^\ast=h$. Iterating gives $\|T^t(e)-h\|\le q^t\|e-h\|\to0$. \qed
+
+\noindent\textbf{Honest limit.} $T$ is \emph{not} a Banach contraction in the strict pairwise sense, $\|T(x)-T(y)\|\le q\|x-y\|$ for all $x,y$ \citep{banach1922}. The step size jumps to $a_{\mathrm{cap}}$ when the hard movers feed each other ($\lambda>0$), so $T$ is discontinuous there. Sampling 4000 pairs gives a pairwise ratio of up to 12.4, while the ratio toward $h$ never exceeds 0.871. The toward-a-point form above is what uniqueness and convergence need. Numerically, the app's rounded iteration from 500 random starts lands within 0.057 of $h$ in at most 21 steps. At the anchor, the layer coordinates are $L_1=h=(0,0,0,0,0.8,0.8,0.8,0,0)$, $\pi_2=0$, $\pi_3=(P,C,G)=(1,0,0)$, $\pi_4=(0,0,0,0)$ and $\pi_5=(0,0.8)$. With faith on, the anchor is described as rest in Christ: ``This hope we have as an anchor of the soul, a hope both sure and steadfast'' (Hebrews 6:19, WEB). The words change, not the math.
+
+\paragraph{Time.} Each mover gets a time constant $\tau_i$ (hours; Table~\ref{tab:tau}). In continuous time, $\dot e_i=-(e_i-A_i)/\tau^{\mathrm{eff}}_i+\text{inputs}$, so over a gap $dt$, $e_i\mapsto A_i+(e_i-A_i)e^{-dt/\tau^{\mathrm{eff}}_i}$ with $\tau^{\mathrm{eff}}_i=\tau_i(1+e_{\mathrm{rum}})/(1-\rho)$. Rumination lengthens every $\tau$, as rumination goes with longer emotions \citep{verduyn2015}. The map contracts per gap with $k(dt)=\max_i e^{-dt/\tau^{\mathrm{eff}}_i}<1$ for every $dt>0$ and $\rho<1$. The app shows the time to come within 0.1 per mover, $t=\max_i\tau^{\mathrm{eff}}_i\ln(|e_i-A_i|/0.1)$, only as a wide range in words, never as a promise. The popular ``90-second'' rule for an emotion's chemical wave is not peer-reviewed and is not used.
+
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}llp{0.62\linewidth}@{}}\toprule
+Mover & $\tau$ range (h) & Source\\\midrule
+fear & 0.25--3 & among the shortest emotions, shorter than anxiety \citep{verduyn2015}\\
+shame & 0.25--2 & the shortest on average, about half an hour; guilt lasts longer \citep{verduyn2015}\\
+anger & 0.5--48 & irritation is short; longer forms such as hatred last days \citep{verduyn2015}\\
+sadness & 24--120 & the longest emotion, about 120 h on average to a lasting return \citep{verduyn2015}\\
+calm, connection, hope & 1--24 & design choice (no duration data for the grounding movers)\\
+rumination, avoidance & 2--48 & design choice; rumination and re-occurrence prolong emotions \citep{verduyn2009,verduyn2015}\\\bottomrule
+\end{tabular}\caption{Time constants. The typical value is the geometric mean of the range.}\label{tab:tau}\end{table}
+
+\paragraph{Resistance.} Resistance $\rho\in[0,0.9]$ is built as $\rho=\min\!\big(0.9,\ [1-(1-0.4e_{\mathrm{avoid}})(1-0.5c_{\mathrm{sup}})(1-0.3e_{\mathrm{rum}})(1-0.3\,\iota)(1-0.3c_{\mathrm{sustain}})](1-0.5c_{\mathrm{will}})\big)$. Its parts:
+\begin{itemize}[itemsep=0pt]
+\item experiential avoidance \citep{hayes2006,bond2011};
+\item suppression or fighting words, which tend to bring a thought back \citep{wegner1987};
+\item rumination;
+\item emotional inertia $\iota$, the lag-1 autocorrelation of the saved days \citep{kuppens2010};
+\item sustain talk \citep{millerrollnick2013};
+\item willingness and acceptance words, which lower $\rho$.
+\end{itemize}
+Resistance slows time ($\tau^{\mathrm{eff}}=\tau/(1-\rho)$) and weakens the pull ($a_{\mathrm{eff}}=a(1-\rho)$). The anchor step still contracts, with $q_\rho=1-a_{\mathrm{lo}}(1-\rho)\le0.995<1$. The signs are as intended: $\partial\rho/\partial c_{\mathrm{sup}}>0$, so pushing harder raises resistance, and $\partial\rho/\partial c_{\mathrm{will}}<0$, so willingness lowers it. The weights are modeling choices.
+
+\paragraph{The moving anchor.} The anchor is a moving focus point, not one fixed point. It is updated as $A_k=\mathrm{clip}\big(\lambda A_{k-1}+(1-\lambda)(\beta e+(1-\beta)d)\big)$, with $\lambda=0.6$ and $\beta=0.25+0.25\rho$. Here $d$ is the desired feelings (the freeing mix, else $h$), and $A_{-1}=h$. Within an epoch $A_k$ is fixed, and $e\mapsto\mathrm{clip}(e+a_{\mathrm{eff}}(A_k-e))$ contracts toward it with $q_\rho$, so $A_k$ is that epoch's unique fixed point. A transition to $A_{k+1}$ (called ``collapse'' only as a picture; nothing quantum) happens when $\|e-A_k\|\le\varepsilon_{\mathrm{in}}=0.15$ has held for a dwell time $\tau_{\mathrm{dwell}}$. The dwell breaks only when $\|e-A_k\|>\varepsilon_{\mathrm{out}}=0.25$; this hysteresis prevents flip-flopping. With $d$ fixed, $\|A_{k+1}-d\|\le q_A\|A_k-d\|+(1-\lambda)\beta\varepsilon_{\mathrm{out}}$, with $q_A=\lambda+(1-\lambda)\beta\le0.79$. So the chain stays in the cube and approaches a ball of radius $\beta\varepsilon_{\mathrm{out}}/(1-\beta)\le0.23$ around $d$ geometrically. A stone is added only when $A$ moves by at least 0.02. A sample chain (sad, replaying, $\rho=0.40$, $d=(\dots,0.9,0.6,0.7,\dots)$ then $(\dots,0.7,0.9,0.8,\dots)$) runs calm/connection/hope $0.78/0.71/0.73\to0.81/0.68/0.72\to\cdots\to0.86/0.64/0.71$ by 71 h, then turns toward the new desire, reaching $0.72/0.87/0.79$ by 205 h. The path is kept on the device only.
+
+\paragraph{Expression governor.} The goal is full expression up to a safe limit; the governor offers a gentle pause, never a block. It uses three signals:
+\begin{itemize}[itemsep=0pt]
+\item unawareness $U$: numb or detached words, flat repetition and low self-awareness;
+\item irritability $Y$: anger rising per hour, and irritation words;
+\item mania-like activation $M_n$: racing words, pressured long entries, true size $G$, short-sleep words, and bursts of entries.
+\end{itemize}
+From these it forms the activation $\alpha=1-(1-Y)(1-M_n)(1-\tfrac12U)$ and a limit $\ell(C)=0.45(1-0.5C)$, which tightens as conflict rises. A PI controller with leak and anti-windup \citep{astrom2008} runs on the error $E=\alpha-\ell(C)$: $I_k=\mathrm{clip}_{[-1,1]}(0.8I_{k-1}+E_k)$, frozen while $u$ is saturated, and $u_k=\mathrm{clip}_{[0,1]}(1.2E_k+0.4I_k)$. The output is graded: keep writing; a slow-down pause; breathe and ground (STOP; \citealp{linehan2015}; an early pause in the sense of \citealp{gross1998}); step away. \emph{Stability (honest scope):} $u$ and $I$ are bounded by the clips. The leak makes the controller state a contraction, $|I_k-I'_k|\le0.8|I_{k-1}-I'_{k-1}|$, so old error fades geometrically. The governor never feeds back into $e$, so $q$, $q_A$ and $q_\rho$ are untouched. The loop through the person is not modeled. If racing words or short sleep appear on three or more days, a gentle line suggests talking with a doctor. This is not a diagnosis; DSM-5 \citep{apa2013} is context only. Crisis wording still shows only the 988/911 box.
+
+\paragraph{Scenes and About me.} Thirteen small original SVG scenes follow the parable's beats with the same traveler and fawn. The text and the pictures come from one list of beats, so they stay in sync. A grounding picture is chosen from the governor (activation or true-size drift: a shared table or a garden; irritability: open water or a horizon; unawareness: hands or a lamp) and is paired with one kind, concrete action. This draws on positive imagery \citep{holmes2010}, nature and attention restoration \citep{kaplan1995,berman2008} and kindness and well-being, a small average effect \citep{curry2018}. The optional, local-only \emph{About me} (hobbies, field) does four things: it adds a behavioral-activation step \citep{lewinsohn1974,martell2001}, a field motif and metaphor, one more song or film, and a word of room for flow \citep{csikszentmihalyi1990}. It never changes a number.
+
 \section{What is proven, what is tested, what is modeled}
 \begin{proposition}[Contraction still holds]\label{prop:contract}
 Let $T$ be the step map~(\ref{eq:step}) with hard and process homes at $0$. Then for every $e\in[0,1]^9$, $\norm{T(e)-h}\le(1-a_{\mathrm{lo}})\norm{e-h}$ with $a_{\mathrm{lo}}=\min(a_0,a_{\max},a_{\mathrm{cap}})>0$. The Kai term does not change $T$, so the iteration converges to $e^\ast=h$, where $P=1$.
@@ -207,7 +257,7 @@ $S\in[0,0.99]$ and $\partial S/\partial V=\prod_{U\neq V}(1-U)\ge0$ for each vir
 \addcontentsline{toc}{section}{Credits and References}
 \noindent\emph{With gratitude to every researcher, clinician, translator and writer listed here, whose careful work MindFrame stands on. All credit and glory to God.}
 
-\noindent\small Every source used across MindFrame (the app, its README and its papers) was checked in October 2026. Journal articles were checked against Crossref (title, authors, year, volume, pages, DOI); books against Open Library or publisher and library catalogs; reports, preprints, archives and web articles at their source. 99 are verified; 2 are flagged and marked below. Films are credited to their studios and filmmakers and songs to their artists and songwriters; MindFrame only names them and quotes no lyrics. The works cited in this paper follow under \emph{Works cited}.
+\noindent\small Every source used across MindFrame (the app, its README and its papers) was checked in October 2026. Journal articles were checked against Crossref (title, authors, year, volume, pages, DOI); books against Open Library or publisher and library catalogs; reports, preprints, archives and web articles at their source. 111 are verified; 2 are flagged and marked below. Films are credited to their studios and filmmakers and songs to their artists and songwriters; MindFrame only names them and quotes no lyrics. The works cited in this paper follow under \emph{Works cited}.
 
 \footnotesize
 \paragraph{Emotion, cognition and CBT}
@@ -335,6 +385,21 @@ $S\in[0,0.99]$ and $\partial S/\partial V=\prod_{U\neq V}(1-U)\ge0$ for each vir
 \item Marcus Aurelius. (c. 170--180 CE). Meditations. Various translations. \textit{[Flagged: Classical work (Meditations); existence is certain, but the paper names no edition or translator, so no full citation can be verified.]}
 \item Teresa of Ávila. The interior castle (VI.10.7). In K. Kavanaugh \& O. Rodriguez (Trans.), The collected works of St. Teresa of Avila (Vol. 2). Washington, DC: ICS Publications, 1980. ("To be humble is to walk in truth.").
 \end{itemize}
+\paragraph{Time, dynamics, control and imagery}
+\begin{itemize}[leftmargin=1em,itemsep=0pt,topsep=1pt,parsep=0pt]
+\item Verduyn, P., \& Lavrijsen, S. (2015). Which emotions last longest and why: The role of event importance and rumination. Motivation and Emotion, 39(1), 119--127. \url{https://doi.org/10.1007/s11031-014-9445-y}
+\item Verduyn, P., Delvaux, E., Van Coillie, H., Tuerlinckx, F., \& Van Mechelen, I. (2009). Predicting the duration of emotional experience: Two experience sampling studies. Emotion, 9(1), 83--91. \url{https://doi.org/10.1037/a0014610}
+\item Kuppens, P., Allen, N. B., \& Sheeber, L. B. (2010). Emotional inertia and psychological maladjustment. Psychological Science, 21(7), 984--991. \url{https://doi.org/10.1177/0956797610372634}
+\item Banach, S. (1922). Sur les opérations dans les ensembles abstraits et leur application aux équations intégrales. Fundamenta Mathematicae, 3, 133--181. \url{https://doi.org/10.4064/fm-3-1-133-181}
+\item Lyapunov, A. M. (1992). The general problem of the stability of motion (A. T. Fuller, Trans.). International Journal of Control, 55(3), 531--773. (Original work published 1892). \url{https://doi.org/10.1080/00207179208934253}
+\item Åström, K. J., \& Murray, R. M. (2008). Feedback Systems: An Introduction for Scientists and Engineers. Princeton, NJ: Princeton University Press. \url{https://doi.org/10.1515/9781400828739}
+\item Kaplan, S. (1995). The restorative benefits of nature: Toward an integrative framework. Journal of Environmental Psychology, 15(3), 169--182. \url{https://doi.org/10.1016/0272-4944(95)90001-2}
+\item Berman, M. G., Jonides, J., \& Kaplan, S. (2008). The cognitive benefits of interacting with nature. Psychological Science, 19(12), 1207--1212. \url{https://doi.org/10.1111/j.1467-9280.2008.02225.x}
+\item Curry, O. S., Rowland, L. A., Van Lissa, C. J., Zlotowitz, S., McAlaney, J., \& Whitehouse, H. (2018). Happy to help? A systematic review and meta-analysis of the effects of performing acts of kindness on the well-being of the actor. Journal of Experimental Social Psychology, 76, 320--329. \url{https://doi.org/10.1016/j.jesp.2018.02.014}
+\item Lewinsohn, P. M. (1974). A behavioral approach to depression. In R. J. Friedman \& M. M. Katz (Eds.), The psychology of depression: Contemporary theory and research (pp. 157--178). Washington, DC: V. H. Winston \& Sons / Wiley.
+\item Martell, C. R., Addis, M. E., \& Jacobson, N. S. (2001). Depression in context: Strategies for guided action. New York: W. W. Norton.
+\item Csikszentmihalyi, M. (1990). Flow: The psychology of optimal experience. New York: Harper \& Row.
+\end{itemize}
 \paragraph{Scripture and data}
 \begin{itemize}[leftmargin=1em,itemsep=0pt,topsep=1pt,parsep=0pt]
 \item World English Bible (public domain). eBible.org, eng-web\_vpl.txt (sha256 52b92dc6\ldots{}cd8c4).
@@ -354,6 +419,25 @@ $S\in[0,0.99]$ and $\partial S/\partial V=\prod_{U\neq V}(1-U)\ge0$ for each vir
 \bibitem[Schnitker(2012)]{schnitker2012} Schnitker, S.~A. (2012). An examination of patience and well-being. \emph{The Journal of Positive Psychology, 7}(4), 263--280. doi:10.1080/17439760.2012.697185
 \bibitem[Speed et~al.(2018)]{speed2018} Speed, B.~C., Goldstein, B.~L., \& Goldfried, M.~R. (2018). Assertiveness training: A forgotten evidence-based treatment. \emph{Clinical Psychology: Science and Practice, 25}(1), e12216. doi:10.1111/cpsp.12216
 \bibitem[World English Bible(n.d.)]{web} \emph{World English Bible} (public domain), ebible.org: Isaiah 53:7; Matthew 11:28--30; 27:12--14; Luke 23:34; Galatians 5:22--23; Philippians 4:7; 1 Peter 2:23.
+\bibitem[Banach(1922)]{banach1922} Banach, S. (1922). Sur les op\'erations dans les ensembles abstraits et leur application aux \'equations int\'egrales. Fundamenta Mathematicae, 3, 133--181. \url{https://doi.org/10.4064/fm-3-1-133-181}
+\bibitem[Verduyn and Lavrijsen(2015)]{verduyn2015} Verduyn, P., \& Lavrijsen, S. (2015). Which emotions last longest and why: The role of event importance and rumination. Motivation and Emotion, 39(1), 119--127. \url{https://doi.org/10.1007/s11031-014-9445-y}
+\bibitem[Verduyn et~al.(2009)]{verduyn2009} Verduyn, P., Delvaux, E., Van Coillie, H., Tuerlinckx, F., \& Van Mechelen, I. (2009). Predicting the duration of emotional experience: Two experience sampling studies. Emotion, 9(1), 83--91. \url{https://doi.org/10.1037/a0014610}
+\bibitem[Kuppens et~al.(2010)]{kuppens2010} Kuppens, P., Allen, N. B., \& Sheeber, L. B. (2010). Emotional inertia and psychological maladjustment. Psychological Science, 21(7), 984--991. \url{https://doi.org/10.1177/0956797610372634}
+\bibitem[Hayes et~al.(2006)]{hayes2006} Hayes, S. C., Luoma, J. B., Bond, F. W., Masuda, A., \& Lillis, J. (2006). Acceptance and commitment therapy: Model, processes and outcomes. Behaviour Research and Therapy, 44(1), 1--25. \url{https://doi.org/10.1016/j.brat.2005.06.006}
+\bibitem[Bond et~al.(2011)]{bond2011} Bond, F. W., et al. (2011). Preliminary psychometric properties of the Acceptance and Action Questionnaire--II. Behavior Therapy, 42(4), 676--688. \url{https://doi.org/10.1016/j.beth.2011.03.007}
+\bibitem[Wegner et~al.(1987)]{wegner1987} Wegner, D. M., Schneider, D. J., Carter, S. R., \& White, T. L. (1987). Paradoxical effects of thought suppression. Journal of Personality and Social Psychology, 53(1), 5--13. \url{https://doi.org/10.1037/0022-3514.53.1.5}
+\bibitem[Miller and Rollnick(2013)]{millerrollnick2013} Miller, W. R., \& Rollnick, S. (2013). Motivational interviewing: Helping people change (3rd ed.). New York: Guilford Press.
+\bibitem[\AA{}ström and Murray(2008)]{astrom2008} \AA{}ström, K. J., \& Murray, R. M. (2008). Feedback Systems: An Introduction for Scientists and Engineers. Princeton, NJ: Princeton University Press. \url{https://doi.org/10.1515/9781400828739}
+\bibitem[Gross(1998)]{gross1998} Gross, J. J. (1998). The emerging field of emotion regulation: An integrative review. Review of General Psychology, 2(3), 271--299. \url{https://doi.org/10.1037/1089-2680.2.3.271}
+\bibitem[American Psychiatric Association(2013)]{apa2013} American Psychiatric Association. (2013). Diagnostic and Statistical Manual of Mental Disorders (5th ed.). Arlington, VA: APA. \url{https://doi.org/10.1176/appi.books.9780890425596}
+\bibitem[Holmes and Mathews(2010)]{holmes2010} Holmes, E. A., \& Mathews, A. (2010). Mental imagery in emotion and emotional disorders. Clinical Psychology Review, 30(3), 349--362. \url{https://doi.org/10.1016/j.cpr.2010.01.001}
+\bibitem[Kaplan(1995)]{kaplan1995} Kaplan, S. (1995). The restorative benefits of nature: Toward an integrative framework. Journal of Environmental Psychology, 15(3), 169--182. \url{https://doi.org/10.1016/0272-4944(95)90001-2}
+\bibitem[Berman et~al.(2008)]{berman2008} Berman, M. G., Jonides, J., \& Kaplan, S. (2008). The cognitive benefits of interacting with nature. Psychological Science, 19(12), 1207--1212. \url{https://doi.org/10.1111/j.1467-9280.2008.02225.x}
+\bibitem[Curry et~al.(2018)]{curry2018} Curry, O. S., Rowland, L. A., Van Lissa, C. J., Zlotowitz, S., McAlaney, J., \& Whitehouse, H. (2018). Happy to help? A systematic review and meta-analysis of the effects of performing acts of kindness on the well-being of the actor. Journal of Experimental Social Psychology, 76, 320--329. \url{https://doi.org/10.1016/j.jesp.2018.02.014}
+\bibitem[Lewinsohn(1974)]{lewinsohn1974} Lewinsohn, P. M. (1974). A behavioral approach to depression. In R. J. Friedman \& M. M. Katz (Eds.), The psychology of depression: Contemporary theory and research (pp. 157--178). Washington, DC: V. H. Winston \& Sons / Wiley.
+\bibitem[Martell et~al.(2001)]{martell2001} Martell, C. R., Addis, M. E., \& Jacobson, N. S. (2001). Depression in context: Strategies for guided action. New York: W. W. Norton.
+\bibitem[Csikszentmihalyi(1990)]{csikszentmihalyi1990} Csikszentmihalyi, M. (1990). Flow: The psychology of optimal experience. New York: Harper \& Row.
+\bibitem[Lyapunov(1992)]{lyapunov1992} Lyapunov, A. M. (1992). The general problem of the stability of motion (A. T. Fuller, Trans.). International Journal of Control, 55(3), 531--773. (Original work published 1892). \url{https://doi.org/10.1080/00207179208934253}
 \end{thebibliography}
 \endgroup
 \end{document}

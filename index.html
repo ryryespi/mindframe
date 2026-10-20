@@ -146,6 +146,8 @@
             </div>
             <button type="button" id="pet-watch" class="act act-watch" data-view="movies" aria-controls="p-movies"><svg class="ico" aria-hidden="true"><use href="#i-film"/></svg><span class="act-text"><strong>Watch something</strong><small>Want to watch something gentle together?</small></span><span class="act-go" aria-hidden="true">&rsaquo;</span></button>
             <div id="pet-actions" class="acts"></div>
+            <button type="button" id="pet-anchor" class="act act-anchor" data-view="anchor" aria-controls="p-anchor"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span class="act-text"><strong>Anchor</strong><small>How far you are from your anchor, and your path</small></span><span class="act-go" aria-hidden="true">&rsaquo;</span></button>
+            <button type="button" id="pet-about" class="act act-about" data-view="about" aria-controls="p-about"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span class="act-text"><strong>About me</strong><small>Optional: hobbies and work, kept on this device</small></span><span class="act-go" aria-hidden="true">&rsaquo;</span></button>
             <button type="button" id="pet-credits" class="act act-credits" data-view="credits" aria-controls="p-credits"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span class="act-text"><strong>Credits</strong><small>The researchers and sources MindFrame stands on</small></span><span class="act-go" aria-hidden="true">&rsaquo;</span></button>
             <div class="row pet-tools"><button type="button" id="pet-rename" class="text small">Rename</button><button type="button" id="pet-reset" class="text small">Reset growth</button></div>
           </div>
@@ -342,6 +344,47 @@
               <p class="quiet small">Stored only in this browser and never in your code. Sent only to api.themoviedb.org, and only when you tap Find more online, for posters and ratings. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
             </details>
           </div>
+          <!-- About me (features/about.js): optional, kept in the local .mf code, never sent. -->
+          <div id="p-about" class="view hidden" role="group" aria-labelledby="v-about-title">
+            <h3 class="view-title" id="v-about-title" tabindex="-1">About me</h3>
+            <p class="small">Optional. It shapes the steps, story pictures and suggestions in your own way. It is kept on this device and never sent.</p>
+            <fieldset><legend>Hobbies</legend><div id="ab-hobbies" class="ab-chips"></div></fieldset>
+            <label for="ab-tags">Other interests (comma separated)</label>
+            <input id="ab-tags" type="text" maxlength="200" autocomplete="off">
+            <label for="ab-field">Field of study or work</label>
+            <select id="ab-field"><option value="">Not set</option></select>
+            <label for="ab-fieldtext">In your own words (optional)</label>
+            <input id="ab-fieldtext" type="text" maxlength="40" autocomplete="off">
+            <div class="row"><button type="button" id="ab-save" class="secondary">Save</button><button type="button" id="ab-clear" class="text small">Clear</button></div>
+            <p id="ab-note" class="small" role="status"></p>
+          </div>
+          <!-- Anchor (core/topology.js): words first; the numbers behind Show the math. The path stays on this device. -->
+          <div id="p-anchor" class="view hidden" role="group" aria-labelledby="v-anchor-title">
+            <h3 class="view-title" id="v-anchor-title" tabindex="-1">Your anchor</h3>
+            <p id="an-intro" class="small"></p>
+            <div id="an-words"></div>
+            <div id="an-svg" class="an-svg"></div>
+            <section id="gv" class="hidden" aria-labelledby="gv-title">
+              <h4 id="gv-title" class="cr-cat">Room to express</h4>
+              <div id="gv-words"></div>
+              <button type="button" id="gv-math" class="text small" aria-expanded="false" aria-controls="gv-math-box">Show the math</button>
+              <div id="gv-math-box" class="hidden"><div id="gv-math-lines" class="wi-eq"></div></div>
+            </section>
+            <section id="an-review" aria-labelledby="an-review-title">
+              <h4 id="an-review-title" class="cr-cat">Evening review: your path as a story</h4>
+              <div id="an-story"></div>
+              <button type="button" id="an-save" class="text small">Save this story as a picture</button>
+            </section>
+            <h4 class="cr-cat">Your anchor path</h4>
+            <ol id="an-path" class="cr-items"></ol>
+            <p class="small">The anchor moves with you: it gathers the feelings you hope for with where you are. When you stay near it for a while, it steps to a new stone. “Collapse” is only a picture for that step, nothing quantum. The path is kept on this device and never sent.</p>
+            <div class="row"><button type="button" id="an-math" class="text small" aria-expanded="false" aria-controls="an-math-box">Show the math</button><button type="button" id="an-clear" class="text small">Clear path</button></div>
+            <div id="an-math-box" class="hidden">
+              <div id="an-math-lines" class="wi-eq"></div>
+              <h4 class="cr-cat">Time constants (hours)</h4>
+              <ul id="an-tau" class="cr-items"></ul>
+            </div>
+          </div>
           <!-- Credits (features/credits.js): offline, every source checked; flagged ones say why. -->
           <div id="p-credits" class="view hidden" role="group" aria-labelledby="v-credits-title">
             <h3 class="view-title" id="v-credits-title" tabindex="-1">Credits</h3>
@@ -376,6 +419,8 @@
   <script src="js/core/peace.js"></script>
   <script src="js/core/kai.js"></script>
   <script src="js/core/master.js"></script>
+  <script src="js/core/topology.js"></script>
+  <script src="js/core/governor.js"></script>
   <script src="js/core/words.js"></script>
   <!-- features -->
   <script src="js/features/relationship.js"></script>
@@ -397,6 +442,8 @@
   <script src="js/features/grip.js"></script>
   <script src="js/features/past.js"></script>
   <script src="js/features/parable.js"></script>
+  <script src="js/features/scenes.js"></script>
+  <script src="js/features/about.js"></script>
   <script src="js/features/credits.js"></script>
   <script src="js/app.js"></script>
 </body>

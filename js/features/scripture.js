@@ -348,8 +348,30 @@
       }
       if (MF.Parable) {
         const friend = app.companion ? app.companion.get().name : "Willow";
-        const ctx = { ...o, together: tog, friend };
-        p("A parable of peace", "label"); p(MF.Parable.parable(m, ctx).join(" "));
+        const about = state.about || null;
+        const ctx = { ...o, together: tog, friend, about };
+        // The story and its scenes come from the same beats (features/scenes.js), so they stay in sync.
+        const gov = app.gov ? app.gov() : null;
+        const calm = !!(gov && gov.c.grade.id !== "write");
+        const stage = app.companion && MF.Companion ? MF.Companion.stageOf(app.companion.get().points || 0).i : 0;
+        const img = MF.Scenes ? MF.Scenes.grounding(gov, m, about) : null;
+        const motif = MF.About ? MF.About.motif(about) : null;
+        if (img) {
+          p("A picture to steady you", "label");
+          const fig = document.createElement("figure"); fig.className = "sc-fig sc-ground"; fig.dataset.scene = img.id;
+          fig.innerHTML = MF.Scenes.svg(img.id, { stage, calm: img.calm, motif });
+          const cap = document.createElement("figcaption"); cap.textContent = img.prompt; fig.appendChild(cap); box.appendChild(fig);
+        }
+        p("A parable of peace", "label");
+        const story = document.createElement("div"); story.className = "sc-story"; story.id = "pb-story";
+        MF.Parable.beats(m, { ...ctx, gov }).forEach(b => {
+          const fig = document.createElement("figure"); fig.className = "sc-fig"; fig.dataset.beat = b.id;
+          if (MF.Scenes) fig.innerHTML = MF.Scenes.svg(MF.Scenes.BEAT_SCENE[b.id], { stage, calm, motif });
+          const cap = document.createElement("figcaption"); cap.textContent = b.text; fig.appendChild(cap); story.appendChild(fig);
+        });
+        box.appendChild(story);
+        const own = MF.About ? MF.About.step(about) : null;
+        if (own) p(own);
         if (faith) CORNER_VERSES.filter(v => v.code !== "EPH 2:20").forEach(quote);
         const more = MF.Parable.more(m, ctx);
         p("Continue your story", "label"); more.films.concat(more.songs).forEach(x => p(x.line));

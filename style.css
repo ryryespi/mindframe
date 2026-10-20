@@ -356,3 +356,19 @@ body.sheet-open { overflow: hidden; }
 .wi-src { color: var(--accent); }
 .wi-eq { font-family: ui-monospace, monospace; font-size: .75rem; overflow-wrap: anywhere; color: var(--ink); }
 #wi-title { margin-top: .4rem; }
+.an-svg { margin: .6rem 0; }
+#an-words p { margin: .35rem 0; }
+.sc-fig { margin: .6rem 0; }
+.sc-fig svg { display: block; border-radius: 12px; }
+.sc-fig figcaption { font-size: .9rem; line-height: 1.5; margin-top: .35rem; color: var(--ink); }
+.sc-ground figcaption { font-weight: 600; }
+.sc-ripple { animation: sc-drift 6s ease-in-out infinite alternate; }
+.sc-breath { animation: sc-breathe 10s ease-in-out infinite; transform-origin: 150px 70px; }
+@keyframes sc-drift { from { transform: translateX(0); } to { transform: translateX(8px); } }
+@keyframes sc-breathe { 0%, 100% { transform: scale(.85); } 40% { transform: scale(1.1); } }
+@media (prefers-reduced-motion: reduce) { .sc-ripple, .sc-breath { animation: none; } }
+@media (prefers-color-scheme: dark) { .sc-fig svg, .an-svg svg { filter: brightness(.82) saturate(.9); } }
+.ab-chips { display: flex; flex-wrap: wrap; gap: .35rem .8rem; }
+.ab-chip { font-size: .9rem; }
+#p-about label { display: block; margin-top: .6rem; font-size: .9rem; }
+#p-about input[type=text], #p-about select { width: 100%; }

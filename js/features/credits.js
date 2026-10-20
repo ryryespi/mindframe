@@ -13,7 +13,7 @@
 
   const GRATITUDE = "With gratitude to every researcher, clinician, translator and writer listed here, whose careful work this small app stands on. All credit and glory to God.";
   const MEDIA = "Films are credited to their studios and filmmakers, and songs to their artists and songwriters. MindFrame names them only, links to public pages, and quotes no lyrics.";
-  const CATEGORIES = ["Emotion, cognition and CBT", "DBT, ACT, mindfulness and compassion", "Forgiveness, virtue, gratitude and peace", "Relationships and belonging", "Body, writing and activity", "Inner speech, language and design", "Media", "Mathematics", "Philosophy and spiritual writers", "Scripture and data"];
+  const CATEGORIES = ["Emotion, cognition and CBT", "DBT, ACT, mindfulness and compassion", "Forgiveness, virtue, gratitude and peace", "Relationships and belonging", "Body, writing and activity", "Inner speech, language and design", "Media", "Mathematics", "Philosophy and spiritual writers", "Time, dynamics, control and imagery", "Scripture and data"];
   /** {cat, cite, doi, status: "verified" | "flagged", how} */
   const ENTRIES = [
     {"cat": "Emotion, cognition and CBT", "cite": "Beck, A. T. (1976). Cognitive therapy and the emotional disorders. New York: International Universities Press.", "doi": null, "status": "verified", "how": "Open Library (International Universities Press, 1976)"},
@@ -114,6 +114,18 @@
     {"cat": "Philosophy and spiritual writers", "cite": "Epictetus. (c. 125 CE). Enchiridion (Handbook). Various translations.", "doi": null, "status": "flagged", "how": "Classical work (Enchiridion); existence is certain, but the paper names no edition or translator, so no full citation can be verified."},
     {"cat": "Philosophy and spiritual writers", "cite": "Marcus Aurelius. (c. 170–180 CE). Meditations. Various translations.", "doi": null, "status": "flagged", "how": "Classical work (Meditations); existence is certain, but the paper names no edition or translator, so no full citation can be verified."},
     {"cat": "Philosophy and spiritual writers", "cite": "Teresa of Ávila. The interior castle (VI.10.7). In K. Kavanaugh & O. Rodriguez (Trans.), The collected works of St. Teresa of Avila (Vol. 2). Washington, DC: ICS Publications, 1980. (\"To be humble is to walk in truth.\").", "doi": null, "status": "verified", "how": "Open Library (ICS Publications, Collected Works vol. 2, 1980); Interior Castle VI.10.7"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Verduyn, P., & Lavrijsen, S. (2015). Which emotions last longest and why: The role of event importance and rumination. Motivation and Emotion, 39(1), 119–127.", "doi": "10.1007/s11031-014-9445-y", "status": "verified", "how": "Crossref, doi:10.1007/s11031-014-9445-y"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Verduyn, P., Delvaux, E., Van Coillie, H., Tuerlinckx, F., & Van Mechelen, I. (2009). Predicting the duration of emotional experience: Two experience sampling studies. Emotion, 9(1), 83–91.", "doi": "10.1037/a0014610", "status": "verified", "how": "Crossref, doi:10.1037/a0014610"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Kuppens, P., Allen, N. B., & Sheeber, L. B. (2010). Emotional inertia and psychological maladjustment. Psychological Science, 21(7), 984–991.", "doi": "10.1177/0956797610372634", "status": "verified", "how": "Crossref, doi:10.1177/0956797610372634"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Banach, S. (1922). Sur les opérations dans les ensembles abstraits et leur application aux équations intégrales. Fundamenta Mathematicae, 3, 133–181.", "doi": "10.4064/fm-3-1-133-181", "status": "verified", "how": "Crossref, doi:10.4064/fm-3-1-133-181"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Lyapunov, A. M. (1992). The general problem of the stability of motion (A. T. Fuller, Trans.). International Journal of Control, 55(3), 531–773. (Original work published 1892).", "doi": "10.1080/00207179208934253", "status": "verified", "how": "Crossref, doi:10.1080/00207179208934253"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Åström, K. J., & Murray, R. M. (2008). Feedback Systems: An Introduction for Scientists and Engineers. Princeton, NJ: Princeton University Press.", "doi": "10.1515/9781400828739", "status": "verified", "how": "Crossref, doi:10.1515/9781400828739"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Kaplan, S. (1995). The restorative benefits of nature: Toward an integrative framework. Journal of Environmental Psychology, 15(3), 169–182.", "doi": "10.1016/0272-4944(95)90001-2", "status": "verified", "how": "Crossref, doi:10.1016/0272-4944(95)90001-2"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Berman, M. G., Jonides, J., & Kaplan, S. (2008). The cognitive benefits of interacting with nature. Psychological Science, 19(12), 1207–1212.", "doi": "10.1111/j.1467-9280.2008.02225.x", "status": "verified", "how": "Crossref, doi:10.1111/j.1467-9280.2008.02225.x"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Curry, O. S., Rowland, L. A., Van Lissa, C. J., Zlotowitz, S., McAlaney, J., & Whitehouse, H. (2018). Happy to help? A systematic review and meta-analysis of the effects of performing acts of kindness on the well-being of the actor. Journal of Experimental Social Psychology, 76, 320–329.", "doi": "10.1016/j.jesp.2018.02.014", "status": "verified", "how": "Crossref, doi:10.1016/j.jesp.2018.02.014"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Lewinsohn, P. M. (1974). A behavioral approach to depression. In R. J. Friedman & M. M. Katz (Eds.), The psychology of depression: Contemporary theory and research (pp. 157–178). Washington, DC: V. H. Winston & Sons / Wiley.", "doi": null, "status": "verified", "how": "Open Library (Friedman & Katz, 1974) and published reference lists (pages also given as 157\u2013185)"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Martell, C. R., Addis, M. E., & Jacobson, N. S. (2001). Depression in context: Strategies for guided action. New York: W. W. Norton.", "doi": null, "status": "verified", "how": "Open Library (Martell, Addis & Jacobson, 2001)"},
+    {"cat": "Time, dynamics, control and imagery", "cite": "Csikszentmihalyi, M. (1990). Flow: The psychology of optimal experience. New York: Harper & Row.", "doi": null, "status": "verified", "how": "Open Library (Csikszentmihalyi, 1990)"},
     {"cat": "Scripture and data", "cite": "World English Bible (public domain). eBible.org, eng-web_vpl.txt (sha256 52b92dc6…cd8c4).", "doi": null, "status": "verified", "how": "Downloaded from ebible.org; every verse is checked against it in the tests"},
     {"cat": "Scripture and data", "cite": "Wikidata (CC0), Wikimedia Foundation. Film titles, years and ids in the films list.", "doi": null, "status": "verified", "how": "wikidata.org; each film id checked when the list was made"},
     {"cat": "Scripture and data", "cite": "The Movie Database (TMDB) API, optional and off by default. This product uses the TMDB API but is not endorsed or certified by TMDB.", "doi": null, "status": "verified", "how": "themoviedb.org attribution terms"},
@@ -131,7 +143,8 @@
   // table or the papers name for it ("where"; tests check that each source's
   // surname appears in one of those files). A term may have no source: it is a
   // design assumption, and it says so.
-  //   M = Σ_k τ_k,   Src(τ_k) ⊆ the 101 credited sources
+  //   M = Σ_k τ_k,   Src(τ_k) ⊆ the 101 sources credited in push25 (ATTR; the push27
+  //   time, control and imagery sources are credited too but are not in this map)
   //   share(s) = |{k : s ∈ Src(τ_k)}| / 18
   // share is a STRUCTURAL MAP (how many model terms a source informs), not an
   // effect size, not a validated weight, and not a ranking of importance.
@@ -198,7 +211,8 @@
       .sort((a, b) => b.share - a.share || a.label.localeCompare(b.label));
   }
   /** Credited sources that inform no model term (context, measurement plans, mathematics, philosophy). */
-  const context = () => { const used = new Set(TERMS.flatMap(t => t.src.map(entry))); return ENTRIES.filter(e => !used.has(e)); };
+  const ATTR_N = 101, PUSH27 = "Time, dynamics, control and imagery";
+  const context = () => { const used = new Set(TERMS.flatMap(t => t.src.map(entry))); return ENTRIES.filter(e => e.cat !== PUSH27 && !used.has(e)); };
 
   /** Browser: fill the Where ideas come from section. */
   function mountSources() {
@@ -213,7 +227,7 @@
       li.appendChild(s); list.appendChild(li);
     });
     const c = contributions(), ctx = context();
-    $("wi-sum").textContent = `${c.length} of the ${ENTRIES.length} credited sources inform a part of the model; the other ${ctx.length} give context, ways to test it, or wider reading.`;
+    $("wi-sum").textContent = `${c.length} of the ${ATTR_N} sources in this map inform a part of the model; the other ${ctx.length} give context, ways to test it, or wider reading.`;
     $("wi-eq").textContent = MERGED_PLAIN;
     $("wi-label").textContent = `Share = terms a source informs ÷ ${TERMS.length}. A ${SHARE_LABEL}.`;
     const ol = $("wi-shares");

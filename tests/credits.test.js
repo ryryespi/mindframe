@@ -15,8 +15,8 @@ function test(name, fn) {
 }
 const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
 
-test("entries: 101 sources, 99 verified, 2 flagged (the classical works), each with how it was checked", () => {
-  assert.deepEqual(C.counts(), { verified: 99, flagged: 2, total: 101 });
+test("entries: 113 sources, 111 verified, 2 flagged (the classical works), each with how it was checked", () => {
+  assert.deepEqual(C.counts(), { verified: 111, flagged: 2, total: 113 });
   C.ENTRIES.forEach(e => {
     assert.ok(C.CATEGORIES.includes(e.cat), e.cite);
     assert.ok(e.cite.length > 30 && /\.$/.test(e.cite), e.cite);
@@ -48,17 +48,17 @@ test("app: the Credits view in the sheet, offline, cached, no network", () => {
   assert.match(html, /id="p-credits" class="view hidden"/);
   ["cr-thanks", "cr-count", "cr-list", "cr-media"].forEach(id => assert.match(html, new RegExp(`id="${id}"`)));
   assert.match(html, /js\/features\/credits\.js/);
-  assert.match(app, /"movies", "credits"\]/);
-  assert.match(app, /MF\.Credits\]\.map/);
+  assert.match(app, /"movies", "credits", "anchor", "about"\]/);
+  assert.match(app, /MF\.Credits, MF\.Topology, MF\.About\]\.map/);
   assert.ok(sw.includes("./js/features/credits.js"));
-  assert.match(sw, /mindframe-shell-v26/);
+  assert.match(sw, /mindframe-shell-v27/);
   assert.ok(!/fetch\(|XMLHttpRequest/.test(src));
 });
 
 test("README Credits and both papers: gratitude, counts, flagged, media note, dedication first", () => {
   const r = read("README.md");
   assert.match(r, /## Credits\n\nWith gratitude to every researcher/);
-  assert.match(r, /\*\*99 sources are verified and 2 are flagged\.\*\*/);
+  assert.match(r, /\*\*111 sources are verified and 2 are flagged\.\*\*/);
   assert.match(r, /Flagged \(kept, not fully verifiable\)/);
   assert.ok(r.indexOf("## Credits") < r.indexOf("## References"));
   assert.ok(!r.includes("clipsy/bpg016"));
@@ -66,7 +66,7 @@ test("README Credits and both papers: gratitude, counts, flagged, media note, de
     const t = read(f);
     assert.match(t, /\\section\*\{Credits and References\}/);
     assert.match(t, /With gratitude to every researcher/);
-    assert.match(t, /99 are verified; 2 are flagged/);
+    assert.match(t, /111 are verified; 2 are flagged/);
     assert.match(t, /\[Flagged: Classical work \(Enchiridion\)/);
     assert.match(t, /\\renewcommand\{\\refname\}\{Works cited\}/);
     const ded = t.indexOf("All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.");
@@ -85,7 +85,7 @@ test("push26 attribution: 18 terms, every tag backed by its evidence file, share
     t.src.forEach(k => { const e = C.entry(k); const sur = C.label(e).split(/[ &]/)[0]; assert.ok(txt.includes(sur), `${t.id}: ${sur} in ${t.where}`); assert.equal(e.status, "verified", "only verified sources are tagged"); });
   });
   const c = C.contributions();
-  assert.equal(c.length, 70); assert.equal(C.context().length, 31); assert.equal(c.length + C.context().length, C.ENTRIES.length);
+  assert.equal(c.length, 70); assert.equal(C.context().length, 31); assert.equal(c.length + C.context().length, 101);
   c.forEach(x => assert.equal(x.share, Math.round(x.terms.length / 18 * 1000) / 1000));
   assert.deepEqual(c.slice(0, 3).map(x => [x.label, x.terms.length]), [["Neff 2003", 5], ["Burns 1980", 4], ["Gross 1998", 3]]);
   assert.deepEqual(c[0].terms, ["t9", "t11", "t12", "t13", "t15"]);

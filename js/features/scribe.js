@@ -70,6 +70,7 @@ if (typeof module !== "undefined") {
       out.push(join(["mix", vecCode(state.mix)]));
       if (MF.Freeing) out.push(`free ${MF.Freeing.line(state.e, state.mix, state.pick ? state.pick.extras : [])}`);
     }
+    if (state.about && MF.About) { const al = MF.About.line(state.about); if (al) out.push(al); }
     if (state.pet) out.push(`pet points=${Math.max(0, Math.floor(state.pet.points || 0))} days=${Math.max(0, Math.floor(state.pet.days || 0))} name=${encodeURIComponent(petName(state.pet.name))}`);
     return out.join("\n") + "\n";
   }
@@ -269,8 +270,16 @@ if (typeof module !== "undefined") {
           state.pet = pet;
           break;
         }
+        case "about": {
+          // push27: About me (hobbies, field), local only.
+          if (!MF.About) break;
+          const r = MF.About.read(rest);
+          r.errors.forEach(x => err(n, x));
+          state.about = r.about;
+          break;
+        }
         case "mf": err(n, "the header appears twice."); break;
-        default: err(n, `\u201C${kw}\u201D isn't a keyword (mf, home, e, vars, w, day, cp, ideal, eq, pick, extra, mix, free, pet).`);
+        default: err(n, `\u201C${kw}\u201D isn't a keyword (mf, home, e, vars, w, day, cp, ideal, eq, pick, extra, mix, free, pet, about).`);
       }
     });
     if (crisis) return { ok: false, crisis: true, errors: [] };
