@@ -32,15 +32,17 @@
 //     point is the reality check (P_g).
 
 if (typeof module !== "undefined") {
+  require("./equations.js");
   require("./movers.js");
   require("./reality.js");
 }
 
 (function (MF) {
   "use strict";
+  const P = MF.Params, EQ = MF.Equations;   // every number: data/params.js; every equation: core/equations.js
   const { NAMES, isGround, r2, distance } = MF.Movers;
   const R = MF.Reality;
-  const P_STAR = 0.8, EPS = 0.05, H = 0.01;
+  const { P_STAR, EPS, H } = P.peace;
 
   /**
    * The peace score for a vector. conflicts are master's conflicts[] (or
@@ -50,8 +52,7 @@ if (typeof module !== "undefined") {
   function score(e, h, vars, conflicts, g = 0) {
     const d = distance(e, h);
     const Cmax = (conflicts || []).reduce((m, c) => Math.max(m, c.c), 0);
-    const Pd = 1 / (1 + (d / vars.d0) ** 2), Pc = 1 - vars.gamma * Cmax, Pg = 1 - vars.delta * g;
-    const raw = Pd * Pc * Pg;
+    const { Pd, Pc, Pg, raw } = EQ.peace(d, Cmax, g, vars);   // OE eq.(3)
     return { P: r2(raw), raw, Pd: r2(Pd), Pc: r2(Pc), Pg: r2(Pg), d: r2(d), Cmax, g };
   }
   /** Unrounded P for e (conflicts recomputed from e plus the text clashes). */
@@ -90,7 +91,7 @@ if (typeof module !== "undefined") {
   }
 
   /** The peace band: < 0.4 a little, 0.4–0.6 growing, 0.6–0.8 close, ≥ 0.8 steady. */
-  const band = P => (P >= P_STAR ? "steady" : P >= 0.6 ? "close" : P >= 0.4 ? "growing" : "a little");
+  const band = EQ.peaceBand;
 
   MF.Peace = { P_STAR, EPS, score, lever, gradient, band };
 })(typeof window !== "undefined" ? (window.MF = window.MF || {}) : (global.MF = global.MF || {}));

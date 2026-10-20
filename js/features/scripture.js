@@ -32,8 +32,11 @@
 //    separately, exactly, with references.
 // The pure parts are tested in node; mount() is browser only.
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params;   // every number: data/params.js
 
   const TRANSLATION = "WEB";
   /** [theme, source code, reference, exact WEB text] */
@@ -141,62 +144,62 @@
     fear: { label: "fear", tags: ["presence", "courage"] },
     sadness: { label: "sadness", tags: ["comfort", "presence"] },
     anger: { label: "anger", tags: ["slow", "peace"] },
-    shame: { label: "shame and forgiveness", tags: ["mercy", "new"] },
-    calm: { label: "calm and peace", tags: ["peace", "rest"] },
-    connection: { label: "connection and love", tags: ["love", "presence"] },
+    shame: { label: Str.t("scripture.THEMES.shame.label"), tags: ["mercy", "new"] },
+    calm: { label: Str.t("scripture.THEMES.calm.label"), tags: ["peace", "rest"] },
+    connection: { label: Str.t("scripture.THEMES.connection.label"), tags: ["love", "presence"] },
     hope: { label: "hope", tags: ["hope", "new"] },
-    rumination: { label: "renewing the mind", tags: ["mind", "rest"] },
+    rumination: { label: Str.t("scripture.THEMES.rumination.label"), tags: ["mind", "rest"] },
     avoidance: { label: "courage", tags: ["courage", "presence"] },
     patience: { label: "patience", tags: ["slow", "peace"] },
     gentleness: { label: "gentleness", tags: ["gentle", "peace"] },
     selfcontrol: { label: "self-control", tags: ["slow", "gentle"] },
-    renewal: { label: "the past and a new beginning", tags: ["new", "mercy"] },
+    renewal: { label: Str.t("scripture.THEMES.renewal.label"), tags: ["new", "mercy"] },
   };
   /** What a shared tag says (the thread through the verses). */
   const THREAD = {
-    presence: "you are not facing this alone",
-    courage: "courage can stand next to fear",
-    comfort: "sorrow is met with comfort, not hurry",
-    slow: "slowness is a strength here",
-    peace: "peace is offered, not demanded",
-    mercy: "mercy is bigger than the mistake",
-    new: "something new can begin",
-    rest: "rest is allowed",
-    love: "love holds people together",
-    hope: "hope looks ahead",
-    mind: "a weary mind can be renewed",
-    gentle: "gentleness is strong",
+    presence: Str.t("scripture.THREAD.presence"),
+    courage: Str.t("scripture.THREAD.courage"),
+    comfort: Str.t("scripture.THREAD.comfort"),
+    slow: Str.t("scripture.THREAD.slow"),
+    peace: Str.t("scripture.THREAD.peace"),
+    mercy: Str.t("scripture.THREAD.mercy"),
+    new: Str.t("scripture.THREAD.new"),
+    rest: Str.t("scripture.THREAD.rest"),
+    love: Str.t("scripture.THREAD.love"),
+    hope: Str.t("scripture.THREAD.hope"),
+    mind: Str.t("scripture.THREAD.mind"),
+    gentle: Str.t("scripture.THREAD.gentle"),
   };
   /** Naming and validating the feeling, by mover. */
   const VALID = {
-    fear: "fear is how a mind tries to keep you safe",
-    sadness: "sadness is what caring feels like when something hurts",
-    anger: "anger often means something mattered to you",
-    shame: "shame hurts, and it is not the last word about you",
-    rumination: "a mind that keeps replaying is trying to solve something",
-    avoidance: "wanting to step back is a human way to protect yourself",
+    fear: Str.t("scripture.VALID.fear"),
+    sadness: Str.t("scripture.VALID.sadness"),
+    anger: Str.t("scripture.VALID.anger"),
+    shame: Str.t("scripture.VALID.shame"),
+    rumination: Str.t("scripture.VALID.rumination"),
+    avoidance: Str.t("scripture.VALID.avoidance"),
   };
   /** A gentle reframe through the verses, by theme. */
   const REFRAME = {
-    fear: "the verses don't ask you to stop feeling afraid; they place someone beside you in it",
-    sadness: "the verses don't hurry grief; they promise comfort along the way",
-    anger: "the verses don't call anger wrong; they invite you to be slow with it",
-    shame: "the verses speak of mercy, so what you did can be named without becoming who you are",
-    calm: "the verses offer peace as a gift you can receive a little at a time",
-    connection: "the verses remind you that you were made for love, given and received",
-    hope: "the verses lift your eyes a little further than today",
-    rumination: "the verses invite your mind to rest on what is true and good",
-    avoidance: "the verses offer courage for one small step, not the whole road",
-    patience: "the verses treat patience as fruit that grows, not a test you pass",
-    gentleness: "the verses show that a gentle answer is strength under control",
-    selfcontrol: "the verses show that holding back is a quiet kind of strength",
-    renewal: "the verses don't erase the past; they point to mercy that is new and a way that opens ahead",
+    fear: Str.t("scripture.REFRAME.fear"),
+    sadness: Str.t("scripture.REFRAME.sadness"),
+    anger: Str.t("scripture.REFRAME.anger"),
+    shame: Str.t("scripture.REFRAME.shame"),
+    calm: Str.t("scripture.REFRAME.calm"),
+    connection: Str.t("scripture.REFRAME.connection"),
+    hope: Str.t("scripture.REFRAME.hope"),
+    rumination: Str.t("scripture.REFRAME.rumination"),
+    avoidance: Str.t("scripture.REFRAME.avoidance"),
+    patience: Str.t("scripture.REFRAME.patience"),
+    gentleness: Str.t("scripture.REFRAME.gentleness"),
+    selfcontrol: Str.t("scripture.REFRAME.selfcontrol"),
+    renewal: Str.t("scripture.REFRAME.renewal"),
   };
   /** Small daily habits (the reference, never a paraphrase in quotes). */
   const HABITS = [
-    v => `Each morning, read ${v.ref} slowly once, at the same moment (with your first drink, or at the door).`,
-    v => `Try a breath prayer each evening: breathe in slowly, then read ${v.ref} on a long breath out.`,
-    v => `Write ${v.ref} on a card and read it at one set moment a day, like lunch.`,
+    v => Str.t("scripture.each_morning_read_slowly_once", { ref: v.ref }),
+    v => Str.t("scripture.try_a_breath_prayer_each", { ref: v.ref }),
+    v => Str.t("scripture.write_on_a_card_and", { ref: v.ref }),
   ];
   const KAI_THEME = { F: "patience", R: "gentleness", E: "connection", A: "shame" };
   const HARD = ["fear", "sadness", "anger", "shame", "rumination", "avoidance"];
@@ -275,7 +278,7 @@
   /** The peace band word, or a plain fallback. */
   const band = P => (MF.Peace ? MF.Peace.band(P) : "growing");
   /** "a lot of fear" style naming, from the level. */
-  const amount = x => (x >= 0.7 ? "a lot of" : x >= 0.4 ? "some" : "a little");
+  const amount = x => (x >= 0.7 ? Str.t("topology.lvl.a_lot_of") : x >= 0.4 ? "some" : "a little");
 
   /**
    * Verses together: two or three verses and a synthesis composed from the
@@ -298,15 +301,15 @@
     const feel = dom || (m.e[idx("calm")] >= 0.5 ? null : "rumination");
     const lines = [];
     lines.push(feel
-      ? `You are carrying ${amount(m.e[idx(feel)])} ${feel === "rumination" ? "replaying" : feel === "avoidance" ? "wanting to pull back" : feel} right now, and that makes sense: ${VALID[feel]}.`
-      : "Things feel fairly settled right now, and that is worth noticing.");
-    lines.push(`These verses, on ${themes.map(t => THEMES[t].label).join(", ").replace(/, ([^,]*)$/, " and $1")}, share one thread: ${THREAD[thread]}.`);
+      ? Str.t("scripture.together.you_are_carrying_right_now", { v0: amount(m.e[idx(feel)]), feel_s: feel === "rumination" ? "replaying" : feel === "avoidance" ? Str.t("scripture.together.wanting_to_pull_back") : feel, v2: VALID[feel] })
+      : Str.t("scripture.together.things_feel_fairly_settled_right"));
+    lines.push(Str.t("scripture.together.these_verses_on_share_one", { v0: themes.map(t => THEMES[t].label).join(", ").replace(/, ([^,]*)$/, " and $1"), v1: THREAD[thread] }));
     lines.push(`Gently, ${REFRAME[themes[0]]}.`);
     const pr = m.practice && MF.Practices && MF.Practices.LIBRARY[m.practice.id];
     const lvl = m.peace && m.peace.lever;
-    const toward = steady ? "keeps it near steady" : lvl && lvl.dP > 0 ? `${lvl.kind === "grow" ? "grows" : "eases"} ${lvl.name}, which moves it a little toward steady` : "may move it a little toward steady";
-    lines.push(`Your inner peace is ${band(P)} now. ${pr ? `One gentle step, ${pr.name.replace(/:.*$/, "")}, ` : "One gentle step "}${toward}; peace grows over days of small practice, not all at once.`);
-    lines.push(`A small daily habit: ${HABITS[s % HABITS.length](verses[verses.length - 1])}`);
+    const toward = steady ? Str.t("scripture.together.toward.keeps_it_near_steady") : lvl && lvl.dP > 0 ? Str.t("scripture.together.toward.which_moves_it_a_little", { v0: lvl.kind === "grow" ? "grows" : "eases", name: lvl.name }) : Str.t("scripture.together.toward.may_move_it_a_little");
+    lines.push(Str.t("scripture.together.your_inner_peace_is_now", { v0: band(P), v1: pr ? Str.t("scripture.together.one_gentle_step", { v0: pr.name.replace(/:.*$/, "") }) : Str.t("scripture.together.one_gentle_step_2"), toward: toward }));
+    lines.push(Str.t("scripture.together.a_small_daily_habit", { v0: HABITS[s % HABITS.length](verses[verses.length - 1]) }));
     return { themes, verses, thread, lines };
   }
 
@@ -331,19 +334,19 @@
       $("scripture-next").classList.add("hidden");
       if (!m) return;
       const p = (t, c) => { const e = document.createElement("p"); if (c) e.className = c; e.textContent = t; box.appendChild(e); };
-      const quote = v => show(v).forEach((t, i) => p(t, i ? "quiet small" : "verse"));
+      const quote = v => show(v).forEach((t, i) => p(t, i ? Str.t("analyzer.quiet_small") : "verse"));
       const grip = MF.Grip ? MF.Grip.detect(m, text, state) : null;
       const past = MF.Past ? MF.Past.detect(m, text) : null;
       const o = { faith, crisis: app.inCrisis(), offset, grip, past, text };
-      if (grip && grip.show) { p("Loosen the grip", "label"); MF.Grip.lines(grip, m, o).forEach(t => p(t)); if (faith) MF.Grip.faithVerses().forEach(quote); }
-      if (past && past.show) { p("Past to future", "label"); MF.Past.lines(past, o).forEach(t => p(t)); if (faith) MF.Past.faithPassages().forEach(quote); }
+      if (grip && grip.show) { p(Str.t("credits.TERMS.loosen_the_grip"), "label"); MF.Grip.lines(grip, m, o).forEach(t => p(t)); if (faith) MF.Grip.faithVerses().forEach(quote); }
+      if (past && past.show) { p(Str.t("credits.TERMS.past_to_future"), "label"); MF.Past.lines(past, o).forEach(t => p(t)); if (faith) MF.Past.faithPassages().forEach(quote); }
       const one = pick(m, o), tog = together(m, o);
       if (one) {
-        p(`Scripture for this moment: ${one.label}`, "label"); quote(one.verse);
+        p(Str.t("scripture.render.scripture_for_this_moment", { label: one.label }), "label"); quote(one.verse);
         $("scripture-next").classList.remove("hidden");
-        p("Verses together", "label"); tog.verses.forEach(quote); tog.lines.forEach(t => p(t));
-        const name = app.companion ? app.companion.get().name : "Your companion";
-        $("pet-verse").textContent = `${name} keeps a verse with you: \u201C${one.verse.text}\u201D ${one.verse.ref} (${TRANSLATION})`;
+        p(Str.t("scripture.render.verses_together"), "label"); tog.verses.forEach(quote); tog.lines.forEach(t => p(t));
+        const name = app.companion ? app.companion.get().name : Str.t("movies.cardLine.your_companion");
+        $("pet-verse").textContent = Str.t("scripture.render.keeps_a_verse_with_you", { name: name, text: one.verse.text, ref: one.verse.ref, TRANSLATION: TRANSLATION });
         $("pet-verse").classList.remove("hidden");
       }
       if (MF.Parable) {
@@ -357,12 +360,12 @@
         const img = MF.Scenes ? MF.Scenes.grounding(gov, m, about) : null;
         const motif = MF.About ? MF.About.motif(about) : null;
         if (img) {
-          p("A picture to steady you", "label");
+          p(Str.t("scripture.render.a_picture_to_steady_you"), "label");
           const fig = document.createElement("figure"); fig.className = "sc-fig sc-ground"; fig.dataset.scene = img.id;
           fig.innerHTML = MF.Scenes.svg(img.id, { stage, calm: img.calm, motif });
           const cap = document.createElement("figcaption"); cap.textContent = img.prompt; fig.appendChild(cap); box.appendChild(fig);
         }
-        p("A parable of peace", "label");
+        p(Str.t("scripture.render.a_parable_of_peace"), "label");
         const story = document.createElement("div"); story.className = "sc-story"; story.id = "pb-story";
         MF.Parable.beats(m, { ...ctx, gov }).forEach(b => {
           const fig = document.createElement("figure"); fig.className = "sc-fig"; fig.dataset.beat = b.id;
@@ -374,15 +377,15 @@
         if (own) p(own);
         if (faith) CORNER_VERSES.filter(v => v.code !== "EPH 2:20").forEach(quote);
         const more = MF.Parable.more(m, ctx);
-        p("Continue your story", "label"); more.films.concat(more.songs).forEach(x => p(x.line));
+        p(Str.t("credits.TERMS.continue_your_story"), "label"); more.films.concat(more.songs).forEach(x => p(x.line));
       }
     }
     /** The cornerstone scene: the counter shows the seed counter; seeds glow, then settle, on a new reading. */
     let shown = null;
     function scene(m) {
       $("cs-count").textContent = String(offset);
-      $("cs-scene").setAttribute("aria-label", `Seeds resting in water above a counter on a cornerstone; seed counter ${offset}`);
-      if (m && m !== shown) { shown = m; const el = $("cs-scene"); el.classList.remove("composing"); void el.getBoundingClientRect(); el.classList.add("composing"); }
+      $("cs-scene").setAttribute("aria-label", Str.t("scripture.scene.seeds_resting_in_water_above", { offset: offset }));
+      if (m && m !== shown) { shown = m; app.replay($("cs-scene"), "composing"); }
     }
     $("scripture-next").addEventListener("click", () => { offset++; render(); });
     app.onCrisis(render);

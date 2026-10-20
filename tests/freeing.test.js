@@ -20,7 +20,7 @@ function test(name, fn) {
 const I = n => M.NAMES.indexOf(n);
 const DIGIT = /[0-9]/;
 const NOW = Date.parse("2026-10-18T12:00:00");
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 /** The numeric parts of a reading that must match between two paths. */
 const nums = m => JSON.stringify({ e: m.e, next: m.next, a: m.a, b: m.b, s: m.s, d: m.d, lambda: m.lambda, mover: m.mover, conflicts: m.conflicts, positives: m.positives, peace: m.peace, recovery: m.recovery, forgive: m.forgive, freeing: m.freeing, small: m.small, grand: m.grand, practice: m.practice });
 const SPEC = { levels: { shame: "strongly" }, extras: ["blame", "putdown"] };
@@ -281,7 +281,7 @@ test("deterministic: the same pick gives the same reading and the same freeing m
   const st = M.defaultState();
   assert.equal(nums(M.masterPick(SPEC, st, { now: NOW })), nums(M.masterPick(SPEC, st, { now: NOW })));
 });
-test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy freeing mix, sw v27, README", () => {
+test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy freeing mix, sw v28, README", () => {
   const index = read("index.html"), sw = read("sw.js"), r = read("README.md"), css = read("style.css");
   assert.match(index, /<button type="button" id="mode-write" aria-pressed="true">Write<\/button>/);
   assert.match(index, /<button type="button" id="mode-pick" aria-pressed="false">Pick feelings<\/button>/);
@@ -290,7 +290,7 @@ test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy f
   assert.match(index, /id="copy-mix" class="secondary">Copy freeing mix</);
   assert.match(css, /\.feel-chip \{[^}]*min-height: 2\.9rem/);
   assert.match(css, /\.mode button \{[^}]*min-height: 2\.75rem/);
-  assert.match(sw, /mindframe-shell-v27/);
+  assert.match(sw, /mindframe-shell-v28/);
   ["./js/features/freeing.js", "./js/features/picker.js"].forEach(f => assert.ok(sw.includes(f), f));
   ["## Pick feelings", "## The freeing mix", "J(e) = P(e) \u2212 \u03BC\u00B7N(e)", "mf 3", "Tangney, J. P. (2000)", "Gilbert, P., & Procter, S. (2006)", "Gilbert, P. (2009)", "Burns, D. D. (1980)", "Interior Castle", "Romans 12:3", "1 John 4:19"].forEach(x => assert.ok(r.includes(x), x));
 });

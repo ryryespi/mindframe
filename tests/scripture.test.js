@@ -16,7 +16,7 @@ function test(name, fn) {
   try { fn(); passed += 1; console.log("ok  -", name); }
   catch (err) { console.error("FAIL -", name); console.error(err); process.exitCode = 1; }
 }
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 const I = n => M.NAMES.indexOf(n);
 const KAI = "My coworkers criticized me in front of everyone, I want to snap back but I know they're stressed";
 const LOOP = "I keep replaying what I did over and over, I should have been kinder, I feel so ashamed";
@@ -95,7 +95,7 @@ test("cornerstone scene: counter shows the seed counter, seeds glow and settle, 
   assert.equal((html.match(/class="cs-seed /g) || []).length, 5);
   assert.match(html, /seed counter <span id="cs-count">0<\/span>/);
   assert.match(sc, /\$\("cs-count"\)\.textContent = String\(offset\)/);
-  assert.match(sc, /classList\.add\("composing"\)/);
+  assert.match(sc, /app\.replay\(\$\("cs-scene"\), "composing"\)/);
   assert.match(css, /\.cs-scene\.composing \.cs-seed \{ animation: cs-glow/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{ \.cs-seed, \.cs-scene\.composing \.cs-seed \{ animation: none !important; \} \}/);
   assert.ok(/\.cs-water \{ fill: var\(--sky1\)/.test(css) && /\.cs-seed \{ fill: var\(--warm\)/.test(css), "colors from the theme variables, so dark mode follows");
@@ -222,11 +222,11 @@ test("Continue your story: two films and two or three songs, seeded, a prompt ea
   assert.ok(!/lyrics:/i.test(read("js/features/parable.js")));
 });
 
-test("page and docs: the tile, Another verse, the companion's verse, scripts, sw v27, README", () => {
+test("page and docs: the tile, Another verse, the companion's verse, scripts, sw v28, README", () => {
   const html = read("index.html"), sw = read("sw.js"), r = read("README.md");
   assert.match(html, /id="t-scripture"/); assert.match(html, /id="scripture-next"[^>]*>Another verse</); assert.match(html, /id="pet-verse"/);
   ["scripture", "grip", "past", "parable"].forEach(f => { assert.match(html, new RegExp(`js/features/${f}\\.js`)); assert.ok(sw.includes(`./js/features/${f}.js`)); });
-  assert.match(sw, /mindframe-shell-v27/);
+  assert.match(sw, /mindframe-shell-v28/);
   assert.match(r, /## For this moment: grip, past to future, Scripture, a parable, and more/);
   [/Wegner, D\. M\./, /Masuda, A\./, /McGowan, S\. K\./, /Borkovec, T\. D\./, /Hayes, S\. C\./, /King, L\. A\. \(2001\)/, /Peters, M\. L\./, /Hofmann, S\. G\./, /Hershfield, H\. E\./].forEach(re => assert.match(r, re));
 });

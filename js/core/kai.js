@@ -35,21 +35,23 @@
 
 if (typeof module !== "undefined") require("./movers.js");
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("./equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params, EQ = MF.Equations;   // every number: data/params.js; every equation: core/equations.js
   const { NAMES, idx, r2, clamp01 } = MF.Movers;
 
-  const S_MAX = 0.99, V_MAX = 0.95, FLICKER = 0.15, SESSION = 0.5, PICK_F = 0.5, PICK_X = 0.75;
-  const W = { anger: 0.8, shame: 0.6, fear: 0.4 };
+  const { S_MAX, V_MAX, FLICKER, SESSION, PICK_F, PICK_X, W } = P.kai;
   const ORDER = ["A", "F", "E", "R"];
-  const NAME = { A: "self-awareness", F: "forbearance", E: "empathy", R: "respect guard" };
+  const NAME = { A: "self-awareness", F: "forbearance", E: "empathy", R: Str.t("kai.NAME.R") };
   /** With faith on: the fruits of the Spirit (Galatians 5:22–23). Words only; the numbers are the same. */
-  const FRUIT = { A: "self-awareness", F: "patience (forbearance)", E: "kindness (empathy)", R: "gentleness (the respect guard)" };
+  const FRUIT = { A: "self-awareness", F: Str.t("kai.FRUIT.F"), E: Str.t("kai.FRUIT.E"), R: Str.t("kai.FRUIT.R") };
   /** Practices that count as a virtue practised this session. */
   const PRACTICE_VIRTUE = { pause: "F", waiting: "F", space: "F", surf: "F", cold: "F", pmr: "F", walk: "F", label: "A", kindness: "A", stop: "A", dump: "A", senses: "A", body: "A" };
 
   /** 1 − e^(−0.7k): k cues → a strength in [0, 1). */
-  const cue = k => r2(1 - Math.exp(-0.7 * Math.max(0, k)));
+  const cue = EQ.cue;
   const clean = t => String(t || "").toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/\s+/g, " ");
   const NEG = /^(not|never|no|nobody|noone|don't|didn't|doesn't|won't|wasn't|isn't|aren't|wouldn't|can't|cannot|couldn't|haven't|hasn't)$/;
   /** True when a negator sits in the four words before `at`, in the same clause. */
@@ -169,18 +171,16 @@ if (typeof module !== "undefined") require("./movers.js");
   function hook(text) {
     const c = cues(text);
     if (!c || (!c.kX && !c.kA && !c.kF && !c.kE && !c.kR && !c.kUrge && !c.attack)) return null;
-    return { data: { kai: c }, notes: c.kX ? ["outside criticism or judgment"] : [] };
+    return { data: { kai: c }, notes: c.kX ? Str.list("kai.hook.notes") : [] };
   }
   MF.Movers.addWordHook(hook);
   // Picker chips (no text): "criticized or judged" sets X = 0.75 (two cues' worth);
   // "holding back from reacting" sets p_F = ½.
-  const JUDGED = { id: "judged", label: "criticized or judged", fn: () => ({ notes: ["outside criticism or judgment"], data: { kaiPickX: PICK_X } }) };
-  const HOLDBACK = { id: "holdback", label: "holding back from reacting", fn: () => ({ data: { kaiPickF: PICK_F } }) };
+  const JUDGED = { id: "judged", label: Str.t("kai.JUDGED.label"), fn: () => ({ notes: Str.list("kai.fn.notes"), data: { kaiPickX: PICK_X } }) };
+  const HOLDBACK = { id: "holdback", label: Str.t("kai.HOLDBACK.label"), fn: () => ({ data: { kaiPickF: PICK_F } }) };
   MF.Movers.addPickExtra(JUDGED);
   MF.Movers.addPickExtra(HOLDBACK);
 
-  const cap = x => Math.min(V_MAX, Math.max(0, x));
-  const or = (...xs) => 1 - xs.reduce((p, x) => p * (1 - x), 1);
   /**
    * The shield for a reading. Pure and deterministic.
    * @param {number[]} e the reading's vector (before the push)
@@ -192,46 +192,37 @@ if (typeof module !== "undefined") require("./movers.js");
   function shield(e, data = {}, session = {}, G = 0) {
     const c = data.kai || { kX: 0, X: 0, kA: 0, kF: 0, kE: 0, kR: 0, kUrge: 0, byMe: [], attack: 0 };
     const s = k => (session && session[k] ? SESSION : 0);
-    const X = r2(Math.max(c.X, data.kaiPickX || 0));
-    const A = r2(cap((1 - G) * or(cue(c.kA), s("A"))));
-    const F = r2(cap(or(cue(c.kF), s("F"), data.kaiPickF || 0)));
-    const E = r2(cap(or(cue(c.kE), s("E"))));
-    const R = r2(cap((1 - c.attack) * or(cue(c.kR), s("R"))));
-    const S = Math.min(S_MAX, r2(1 - (1 - A) * (1 - F) * (1 - E) * (1 - R)));
-    const load = X * (1 - S);
-    const push = NAMES.map(n => r2(load * (W[n] || 0)));
-    const after = clamp01(e[idx.anger] + push[idx.anger]);
-    const u = r2(Math.max(after, cue(c.kUrge)));
-    const I = r2(load * u);
+    const { X, A, F, E, R, S, load, push } = EQ.kaiShield(c, s, data.kaiPickX, data.kaiPickF, G, e[idx.anger], NAMES);   // OE §Kai
+    const { u, I } = EQ.kaiImpulse(load, clamp01(e[idx.anger] + push[idx.anger]), c.kUrge);
     const vals = { A, F, E, R };
     const lever = ORDER.reduce((best, k) => (vals[k] < vals[best] - 1e-9 ? k : best), ORDER[0]);
     return { X, A, F, E, R, S, load: r2(load), push, I, u, lever, cues: c };
   }
   /** e_j ← clip01(e_j + X(1 − S)w_j), rounded to 0.01 (identity when X = 0). */
-  const apply = (e, k) => (k && k.X > 0 ? e.map((x, j) => r2(clamp01(x + k.push[j]))) : e);
+  const apply = EQ.kaiApply;
 
   // ---------- Words (card, story, Ada) ----------
   /** strong ≥ 0.6, growing ≥ 0.3, else just starting. */
-  const level = v => (v >= 0.6 ? "strong" : v >= 0.3 ? "growing" : "just starting");
+  const level = v => (v >= P.kai.LEVEL[1] ? "strong" : v >= P.kai.LEVEL[0] ? "growing" : Str.t("kai.level.just_starting"));
   /** One step for each virtue (words only). */
   const STEP = {
-    A: "Self-awareness: name it to yourself, \u201CI feel hurt, and I am still worth respect.\u201D",
-    F: "Forbearance: before you answer, breathe out slowly three times, then decide what to say.",
-    E: "Empathy: ask yourself once, \u201CWhat might they be carrying today?\u201D Understanding isn't agreeing.",
-    R: "Respect guard: say, \u201CI hear you. I see it differently, and I'm going to step away now.\u201D",
+    A: Str.t("kai.STEP.A"),
+    F: Str.t("kai.STEP.F"),
+    E: Str.t("kai.STEP.E"),
+    R: Str.t("kai.STEP.R"),
   };
   const SOURCE = {
-    A: "affect labeling: Lieberman et al., 2007; self-affirmation: Cohen & Sherman, 2014",
-    F: "patience: Schnitker, 2012",
-    E: "perspective taking: Davis, 1983",
-    R: "DEAR MAN and assertiveness: Linehan, 2015; Speed, Goldstein & Goldfried, 2018",
+    A: Str.t("kai.SOURCE.A"),
+    F: Str.t("kai.SOURCE.F"),
+    E: Str.t("kai.SOURCE.E"),
+    R: Str.t("kai.SOURCE.R"),
   };
   /** The impulsive-reaction line (with faith on, named as self-control, a fruit of the Spirit). */
   function impulseLine(k, faith) {
     const pre = faith ? "Self-control: " : "";
-    if (k.I < FLICKER) return `${pre}${faith ? "the" : "The"} urge to react flickers and fails; it can't break your balance.`;
-    if (k.I < 0.35) return `${pre}${faith ? "the" : "The"} urge to react is there, and your shield is holding.`;
-    return `${pre}${faith ? "the" : "The"} urge to react is strong right now. Steady first; you can answer later.`;
+    if (k.I < FLICKER) return Str.t("kai.impulseLine.urge_to_react_flickers_and", { pre: pre, v1: faith ? "the" : "The" });
+    if (k.I < P.kai.STRONG_I) return Str.t("kai.impulseLine.urge_to_react_is_there", { pre: pre, v1: faith ? "the" : "The" });
+    return Str.t("kai.impulseLine.urge_to_react_is_strong", { pre: pre, v1: faith ? "the" : "The" });
   }
   /**
    * The card lines (words only, no digits), only when outside hurt is present.
@@ -244,11 +235,11 @@ if (typeof module !== "undefined") require("./movers.js");
     if (!k || !(k.X > 0)) return [];
     const nm = opts.faith ? FRUIT : NAME;
     const out = [
-      `Your steadiness: ${ORDER.map(v => `${nm[v]} ${level(k[v])}`).join(", ")}.`,
+      Str.t("kai.cardLines.out.your_steadiness", { v0: ORDER.map(v => `${nm[v]} ${level(k[v])}`).join(", ") }),
       impulseLine(k, !!opts.faith),
-      `The weakest part of the shield is ${nm[k.lever].replace(/^(?=respect|the)/, "the ").replace(/^the the /, "the ")}; it can grow. ${STEP[k.lever]}`,
+      Str.t("kai.cardLines.out.the_weakest_part_of_the", { v0: nm[k.lever].replace(/^(?=respect|the)/, "the ").replace(/^the the /, "the "), v1: STEP[k.lever] }),
     ];
-    if (opts.faith) out.push("With faith: these are fruits of the Spirit, and steadiness can rest in Christ, who gives rest to the weary (from Galatians and Matthew). Same numbers, faith words.");
+    if (opts.faith) out.push(Str.t("kai.cardLines.with_faith_these_are_fruits"));
     return out;
   }
   /** Ada's lines (numbers). */
@@ -257,11 +248,11 @@ if (typeof module !== "undefined") require("./movers.js");
     if (!k) return [];
     const f = x => x.toFixed(2);
     return [
-      `Kai shield (outside pressure): X = ${f(k.X)} (k = ${k.cues.kX} to-me cues; by me: ${k.cues.byMe.length ? k.cues.byMe.join(", ") : "none"})`,
+      Str.t("kai.mathLines.kai_shield_outside_pressure_x", { v0: f(k.X), kX: k.cues.kX, v2: k.cues.byMe.length ? k.cues.byMe.join(", ") : "none" }),
       `  A = (1 \u2212 G)\u00B7[1 \u2212 (1 \u2212 c_A)(1 \u2212 \u00BD\u03C3_A)] = ${f(k.A)}   F = 1 \u2212 (1 \u2212 c_F)(1 \u2212 \u00BD\u03C3_F)(1 \u2212 p_F) = ${f(k.F)}`,
-      `  E = 1 \u2212 (1 \u2212 c_E)(1 \u2212 \u00BD\u03C3_E) = ${f(k.E)}   R = (1 \u2212 c_attack)\u00B7[1 \u2212 (1 \u2212 c_R)(1 \u2212 \u00BD\u03C3_R)] = ${f(k.R)}   (each \u2264 ${V_MAX})`,
-      `  S = 1 \u2212 (1 \u2212 A)(1 \u2212 F)(1 \u2212 E)(1 \u2212 R) = ${f(k.S)};  X(1 \u2212 S) = ${f(k.load)};  push = X(1 \u2212 S)\u00B7w, w = {anger ${W.anger}, shame ${W.shame}, fear ${W.fear}} \u2192 +${f(k.push[idx.anger])}, +${f(k.push[idx.shame])}, +${f(k.push[idx.fear])}`,
-      `  I = X(1 \u2212 S)\u00B7u = ${f(k.I)} (u = ${f(k.u)}; flickers and fails below ${FLICKER});  lever = weakest virtue: ${NAME[k.lever]}`,
+      Str.t("kai.mathLines.e_1_1_c_e", { v0: f(k.E), v1: f(k.R), V_MAX: V_MAX }),
+      Str.t("kai.mathLines.s_1_1_a_1", { v0: f(k.S), v1: f(k.load), anger: W.anger, shame: W.shame, fear: W.fear, v5: f(k.push[idx.anger]), v6: f(k.push[idx.shame]), v7: f(k.push[idx.fear]) }),
+      Str.t("kai.mathLines.i_x_1_s_u", { v0: f(k.I), v1: f(k.u), FLICKER: FLICKER, v3: NAME[k.lever] }),
     ];
   }
 
@@ -279,27 +270,27 @@ if (typeof module !== "undefined") require("./movers.js");
     const friend = opts.friend ? String(opts.friend).replace(/[^\p{L}\p{M} '\-]/gu, "").trim().slice(0, 20) : "";
     const L = v => level(k[v]);
     const lines = {
-      A: { strong: `With a deep breath, ${who} anchored in self-awareness, naming what he felt and remembering his own worth.`,
-        growing: `With a deep breath, ${who} began to name what he felt, and to remember that his worth was still his.`,
-        "just starting": `${who} took one breath and tried a first small sentence of self-awareness: \u201CI feel hurt, and I am still worth respect.\u201D` },
-      F: { strong: `He applied forbearance, holding back the urge to argue.`,
-        growing: `The urge to argue tugged at him; forbearance let one slow breath go first.`,
-        "just starting": `Forbearance was only a seed today, so he paused for one breath before answering.` },
-      E: { strong: `With empathy he saw the pain behind the villagers' words.`,
-        growing: `He wondered, with growing empathy, what the villagers might be carrying.`,
-        "just starting": `Empathy was just starting; he asked himself once what they might be carrying.` },
-      R: { strong: `His respect guard shone like a shield, blocking the barbs of judgment without harming anyone.`,
-        growing: `His respect guard was growing, a shield he could lift: \u201CI hear you. I see it differently.\u201D`,
-        "just starting": `His respect guard was just starting, so he practiced one calm sentence: \u201CI hear you. I see it differently, and I'm going to step away now.\u201D` },
+      A: { strong: Str.t("kai.story.lines.A.strong", { who: who }),
+        growing: Str.t("kai.story.lines.A.growing", { who: who }),
+        "just starting": Str.t("kai.story.lines.A.just_starting", { who: who }) },
+      F: { strong: Str.t("kai.story.lines.F.strong", {  }),
+        growing: Str.t("kai.story.lines.F.growing", {  }),
+        "just starting": Str.t("kai.story.lines.F.just_starting", {  }) },
+      E: { strong: Str.t("kai.story.lines.E.strong", {  }),
+        growing: Str.t("kai.story.lines.E.growing", {  }),
+        "just starting": Str.t("kai.story.lines.E.just_starting", {  }) },
+      R: { strong: Str.t("kai.story.lines.R.strong", {  }),
+        growing: Str.t("kai.story.lines.R.growing", {  }),
+        "just starting": Str.t("kai.story.lines.R.just_starting", {  }) },
     };
-    const sentences = [`${who} faced a storm of words in the village square.`];
-    if (friend) sentences.push(`${friend}, his small friend, stayed close beside him.`);
+    const sentences = [Str.t("kai.story.sentences.faced_a_storm_of_words", { who: who })];
+    if (friend) sentences.push(Str.t("kai.story.his_small_friend_stayed_close", { friend: friend }));
     ORDER.forEach(v => sentences.push(lines[v][L(v)]));
-    sentences.push(k.I < FLICKER ? "Impulsive reaction flickered and failed, unable to break his balance." : k.I < 0.35 ? "Impulsive reaction flickered, and the shield held." : "Impulsive reaction pushed hard, so he stepped back to steady himself first; that was strength too.");
-    sentences.push(`${who} stood unmoved, a calm center of peace in the storm.`);
-    sentences.push(`His ${NAME[k.lever]} was the part still growing, and that was all right; it grows a little each time he practices.`);
-    if (opts.faith) sentences.push(`${who} remembered Jesus before his accusers, who answered nothing, like a sheep that is silent before its shearers (from Matthew and Isaiah); when he was cursed, he didn't curse back (from First Peter), and he prayed, \u201CFather, forgive them\u201D (from Luke). Patience, kindness, gentleness and self-control are fruits of the Spirit (from Galatians).`);
-    sentences.push({ A: "What is one true sentence about your worth you could keep today?", F: "Where could one slow breath fit before you answer?", E: "What might they be carrying that you can't see?", R: "What is one calm sentence your respect guard could say today?" }[k.lever]);
+    sentences.push(k.I < FLICKER ? Str.t("kai.story.impulsive_reaction_flickered_and_failed") : k.I < 0.35 ? Str.t("kai.story.impulsive_reaction_flickered_and_the") : Str.t("kai.story.impulsive_reaction_pushed_hard_so"));
+    sentences.push(Str.t("kai.story.stood_unmoved_a_calm_center", { who: who }));
+    sentences.push(Str.t("kai.story.his_was_the_part_still", { v0: NAME[k.lever] }));
+    if (opts.faith) sentences.push(Str.t("kai.story.remembered_jesus_before_his_accusers", { who: who }));
+    sentences.push({ A: Str.t("kai.story.A"), F: Str.t("kai.story.F"), E: Str.t("kai.story.E"), R: Str.t("kai.story.R") }[k.lever]);
     return { text: sentences.join(" "), sentences, lever: k.lever, traveler: who };
   }
 

@@ -475,11 +475,16 @@ Code is grouped by feature. Every file starts with a header comment; every funct
 ```
 index.html            the one page: scene with your companion, Write / Pick feelings, input, Update, the name box, the short card (+ See more), the companion sheet with Watch something and six views
 style.css             calm styles, dark mode, reduced motion; large tap targets
-sw.js                 offline cache (v27); other sites (the film APIs) are never cached
+sw.js                 offline cache (v28); other sites (the film APIs) are never cached
 tools.html            redirects old shortcuts to the one page
 js/
+  data/               push28: the one place for text and numbers
+    strings.js        MF.Strings: every static user-facing string, grouped by feature; t(key, vars)
+    params.js         MF.Params: every equation constant, each with its paper equation/section and source
+    index.js          MF.Data: one index of the data files (verses, films, songs, credits, stories, games)
   app.js              page shell: state, Update, the card (insight slot, See more), the companion sheet (views, Back, focus trap, Esc)
   core/               the model; no page code
+    equations.js      MF.Equations: the papers' equations as pure functions (table below)
     signals.js        word patterns (thinking traps, needs)
     grounding.js      crisis wording and pattern reading
     movers.js         MF.Movers: the nine movers, W, variables, lexicon, fromText, the picker levels and fromPick
@@ -512,9 +517,52 @@ js/
 tests/                node tests (tests/mf.js loads every module)
 ```
 
-Load order in `index.html`: core (signals, grounding, movers, reality, peace, master, words), then features (relationship, forgiveness, practices, freeing, picker, stories, games, historian, writer, comfort, analyzer, scribe, scientist, companion, movies), then `app.js`.
+Load order in `index.html`: data/strings, data/params, core/equations, then core (signals, grounding, movers, reality, peace, master, words), then features (relationship, forgiveness, practices, freeing, picker, stories, games, historian, writer, comfort, analyzer, scribe, scientist, companion, movies), then `app.js`.
 
 Tests: `for f in tests/*.test.js; do node "$f"; done`.
+
+## Strings, params and equations (push28)
+
+- **Text** lives in `js/data/strings.js`, grouped by feature with comments. Code asks for it by key:
+  `MF.t("words.FEEL.rumination")` or `MF.t("kai.impulseLine.urge_to_react_is_there", { pre, v1 })`. A placeholder is written `{{name}}`. Templates are compiled once. An unknown key throws, so a typo can't show up silently. The page's own labels use `data-t`, `data-t-placeholder`, `data-t-aria-label` and `data-t-title`, and `Strings.apply(document)` fills them at load. To change any wording, edit only this file.
+- **Numbers** live in `js/data/params.js` (`MF.Params`). `MF.Params.REF["group.KEY"]` gives `[paper place, source]` for every key. A constant that isn't in the papers says so (the Grounding Loop, the storage limits).
+- **Math** lives in `js/core/equations.js` (`MF.Equations`). It has pure functions only: no DOM, no storage, no clock and no randomness. Features call these functions and keep no copy of the math.
+- **Data files** (verses, films, songs, credits, stories, games) keep their own files and are listed in `js/data/index.js` (`MF.Data`).
+- `tests/params.test.js` checks that REF covers every key, that every REF row names a real equation or section, that this table names only real functions and keys, that every param is used, and that every equation is used. `tests/strings.test.js` checks `t()`. `tests/golden.test.js` has snapshots recorded before the refactor that prove the outputs didn't change.
+
+Cross-reference (OE = One-Equation paper, GP = Grace-Peace paper):
+
+| Paper equation | Function (`MF.Equations`) | Params (`MF.Params`) |
+|---|---|---|
+| OE eq.(1)  c = 1 − e^(−0.7k) (every cue) | cue, cueRaw | words.CUE_RATE |
+| OE eq.(1)  n = 1 − e^(−raw) (lexicon) | sat | — |
+| OE eq.(1)  e₋ ⊕ n (saturating add) | oplus | — |
+| OE eq.(1)  + X(1 − S)w (Kai push) | kaiApply | kai.W |
+| OE §Kai    A, F, E, R, S, I | kaiShield, kaiImpulse | kai.* |
+| OE eq.(2)  a(e) = min(a_max, a0 + k‖e − h‖) | stepSize | model.VAR_SPEC, model.FIXED |
+| OE eq.(2)  s_j = e_j Σ_g min(0, W_gj) h_g | sVec | model.EDGES |
+| OE eq.(2)  e' = clip(e + a(h − e) + b s) | stepNext | — |
+| OE eq.(2)  λ = ρ(W_A) − d | lambda (memoized) | model.ACTIVE, model.POWER_ITERS |
+| OE eq.(3)  left-alone drift (hidden C) | drift | model.REST_GROUND |
+| OE eq.(3)  P = P_d(1 − γC)(1 − δG) | peace | VAR_SPEC d0, gamma, delta |
+| OE eq.(3)  G = 1 − e^(−raw) + absolutist | (reality.js, sat) | words.ABSOLUTIST_* |
+| OE eq.(4)  words: the peace band | peaceBand | peace.P_STAR, peace.BANDS |
+| OE §1      B_t = 0.8 B_{t−1} + 0.2 e_t | ema | model.FIXED.beta |
+| OE eq.(4)  F_self, F_other | forgiveness | forgive.F0, forgive.F1 |
+| OE eq.(4)  J = P − μN, N(e) | freeLoad, freeJ | freeing.MU |
+| OE τ14     x(1 − L), L = 1 − (1−L_t)(1−L_v) | gripLoosen | grip.L |
+| OE τ15     Π: past, after | pastPull | past.* |
+| OE §topo   ρ = min(.9, raw(1 − .5 will)) | resistance | topology.RHO_W, WILL_W, RHO_MAX |
+| OE §topo   τ_eff = τ(1 + e_rum)/(1 − ρ) | tauTyp, tauEff | topology.TAU |
+| OE §topo   k(dt) = max_i e^(−dt/τ_eff,i) | kdt, flow | topology.TAU |
+| OE §topo   t = max_i τ_eff ln(\|e−A\|/0.1) | timeTo | topology.NEAR |
+| OE §topo   q = 1 − a_lo | qHome | model.FIXED.aCap |
+| OE §topo   A' = clip(λA + (1−λ)(βe+(1−β)d)) | beta, nextAnchor | topology.LAMBDA, BETA0, BETA1 |
+| OE §topo   e ↦ clip(e + a(1−ρ)(A − e)) | anchorStep | — |
+| OE §topo   q_A, radius, q_ρ | chainBound | topology.LAMBDA, EPS_OUT |
+| OE §gov    U, Y, M_n | govSignals | governor.U_W, Y_W, MN_W |
+| OE §gov    α, ℓ(C), E, PI + anti-windup | activation, limit, pi | governor.KP, KI, LEAK, L0, KAPPA |
+| (not in papers) Grounding Loop G update | (grounding.js) | grounding.ETA |
 
 ## Papers
 

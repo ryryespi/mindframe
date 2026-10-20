@@ -11,7 +11,7 @@ const G = require("../js/core/governor.js");
 const SC = require("../js/features/scenes.js");
 const AB = require("../js/features/about.js");
 const PB = global.MF.Parable;
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 
 let passed = 0;
 function test(name, fn) {
@@ -180,12 +180,12 @@ test("About me: sample hobbies=coding,music field=software; local .mf line round
   ["js/features/about.js"].forEach(f => assert.ok(!/fetch\(|XMLHttpRequest|sendBeacon/.test(read(f))));
 });
 
-test("page: Anchor and About me rows and views, scripts in order, sw v27 caches the new files", () => {
+test("page: Anchor and About me rows and views, scripts in order, sw v28 caches the new files", () => {
   const html = read("index.html"), sw = read("sw.js");
   ["pet-anchor", "p-anchor", "an-words", "an-svg", "an-path", "an-math", "an-math-box", "an-tau", "gv", "gv-words", "gv-math", "an-review", "an-story", "an-save", "pet-about", "p-about", "ab-hobbies", "ab-field", "ab-save"].forEach(id => assert.match(html, new RegExp(`id="${id}"`), id));
   assert.match(html, /nothing quantum/);
   ["./js/core/topology.js", "./js/core/governor.js", "./js/features/scenes.js", "./js/features/about.js"].forEach(f => assert.ok(sw.includes(f), f));
-  assert.match(sw, /mindframe-shell-v27/);
+  assert.match(sw, /mindframe-shell-v28/);
   ["js/core/topology.js", "js/core/governor.js", "js/features/scenes.js"].forEach(f => assert.ok(!/fetch\(|XMLHttpRequest|sendBeacon/.test(read(f)), f));
 });
 

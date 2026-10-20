@@ -27,8 +27,10 @@ if (typeof module !== "undefined") {
   require("../core/master.js");
 }
 
+if (typeof window === "undefined") require("../data/strings.js");
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
   const { VERSION, NAMES, GROUND, SPEC, VAR_KEYS, MAX_CHECKPOINTS, MAX_DAYS, MAX_LINES, MAX_W, LABEL_RE, idx, r2, clamp01, fromObj, stamp, defaultState } = MF.Movers;
   const { refreshIdeal } = MF.Master;
   const G = typeof Grounding !== "undefined" ? Grounding : require("../core/grounding.js");
@@ -57,10 +59,10 @@ if (typeof module !== "undefined") {
     if (vs.length) out.push(join(["vars", ...vs.map(k => `${k}=${num(state.vars[k])}`)]));
     state.w.forEach(o => out.push(`w ${o.from}>${o.to}=${num(o.w)}`));
     state.days.forEach(x => out.push(join([`day ${x.day}`, vecCode(x.e)])));
-    state.cps.forEach(c => out.push(join([`cp ${c.n} ${c.t} label=${c.label}`, vecCode(c.e), `lambda=${num(c.lambda)}`])));
+    state.cps.forEach(c => out.push(join([Str.t("scribe.cp_label", { n: c.n, t: c.t, label: c.label }), vecCode(c.e), `lambda=${num(c.lambda)}`])));
     if (state.ideal) {
       out.push(`ideal a=${num(state.ideal.a)} b=${num(state.ideal.b)}`);
-      out.push(`eq step = act(clip01(e + ${num(state.ideal.a)}*(h - e) + ${num(state.ideal.b)}*s(e)))`);
+      out.push(Str.t("scribe.serialize.eq_step_act_clip01_e", { v0: num(state.ideal.a), v1: num(state.ideal.b) }));
     }
     if (state.pick) {
       out.push(join(["pick", vecCode(state.pick.e)]));
@@ -71,7 +73,7 @@ if (typeof module !== "undefined") {
       if (MF.Freeing) out.push(`free ${MF.Freeing.line(state.e, state.mix, state.pick ? state.pick.extras : [])}`);
     }
     if (state.about && MF.About) { const al = MF.About.line(state.about); if (al) out.push(al); }
-    if (state.pet) out.push(`pet points=${Math.max(0, Math.floor(state.pet.points || 0))} days=${Math.max(0, Math.floor(state.pet.days || 0))} name=${encodeURIComponent(petName(state.pet.name))}`);
+    if (state.pet) out.push(Str.t("scribe.serialize.pet_points_days_name", { v0: Math.max(0, Math.floor(state.pet.points || 0)), v1: Math.max(0, Math.floor(state.pet.days || 0)), v2: encodeURIComponent(petName(state.pet.name)) }));
     return out.join("\n") + "\n";
   }
 
@@ -107,7 +109,7 @@ if (typeof module !== "undefined") {
   /** Read mf 1 code via the mapping. Old variables and frameworks are dropped with a note. */
   function parseOld(raw) {
     const state = defaultState();
-    const notes = ["Imported from mf 1 and mapped onto the nine movers (best effort)."];
+    const notes = Str.list("scribe.parseOld.notes");
     let crisis = false;
     const P1 = new RegExp(`^([a-zA-Z.>]+)=(${NUM})$`);
     const pairs = toks => Object.fromEntries(toks.map(t => t.match(P1)).filter(Boolean).map(m => [m[1], Number(m[2])]));
@@ -142,7 +144,7 @@ if (typeof module !== "undefined") {
     cps.forEach(c => { if (Number.isInteger(c.n) && c.n > 0 && (!state.cps.length || c.n > state.cps[state.cps.length - 1].n)) state.cps.push({ n: c.n, t: c.t, label: c.label, e: mapOld(c.o, { g: c.o.g, target: ego.target }), lambda: r2(Number(c.o.lambda) || 0) }); });
     state.days = state.days.slice(-MAX_DAYS);
     state.cps = state.cps.slice(-MAX_CHECKPOINTS);
-    notes.push("Old variables, weights and frameworks were left out; the new defaults apply.");
+    notes.push(Str.t("scribe.parseOld.old_variables_weights_and_frameworks"));
     return { ok: true, state: refreshIdeal(state), notes, from: 1 };
   }
 
@@ -154,13 +156,13 @@ if (typeof module !== "undefined") {
     const errors = [];
     const err = (line, msg) => errors.push({ line, msg: `Line ${line}: ${msg}` });
     const raw = String(text || "").replace(/\r\n?/g, "\n").split("\n");
-    if (raw.length > MAX_LINES) return { ok: false, errors: [{ line: 0, msg: `That code is too long (more than ${MAX_LINES} lines).` }] };
+    if (raw.length > MAX_LINES) return { ok: false, errors: [{ line: 0, msg: Str.t("scribe.parse.errors.msg", { MAX_LINES: MAX_LINES }) }] };
     const first = raw.findIndex(l => l.replace(/#.*$/, "").trim());
-    if (first < 0) return { ok: false, errors: [{ line: 0, msg: "Nothing to import yet. Paste code that starts with \u201Cmf 4\u201D (mf 3, mf 2 and mf 1 also work)." }] };
+    if (first < 0) return { ok: false, errors: [{ line: 0, msg: Str.t("scribe.parse.errors.msg_2") }] };
     const head = raw[first].replace(/#.*$/, "").trim().split(/\s+/);
-    if (head[0] !== "mf") return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: the code should start with \u201Cmf 4\u201D (or mf 3, mf 2, mf 1).` }] };
+    if (head[0] !== "mf") return { ok: false, errors: [{ line: first + 1, msg: Str.t("scribe.parse.errors.msg_3", { v0: first + 1 }) }] };
     if (head[1] === "1") return parseOld(raw.slice(first + 1));
-    if (!["2", "3", String(VERSION)].includes(head[1])) return { ok: false, errors: [{ line: first + 1, msg: `Line ${first + 1}: this is version ${head[1] || "?"}; this app reads versions 1, 2, 3 and 4.` }] };
+    if (!["2", "3", String(VERSION)].includes(head[1])) return { ok: false, errors: [{ line: first + 1, msg: Str.t("scribe.parse.errors.msg_4", { v0: first + 1, v1: head[1] || "?" }) }] };
     const from = Number(head[1]);
     const state = defaultState();
     let crisis = false, sawHome = false;
@@ -168,12 +170,12 @@ if (typeof module !== "undefined") {
       const o = {}, ex = {};
       toks.forEach(tok => {
         const m = tok.match(PAIR);
-        if (!m) { err(line, `\u201C${tok}\u201D should look like name=0.50.`); return; }
+        if (!m) { err(line, Str.t("scribe.should_look_like_name_0", { tok: tok })); return; }
         const k = m[1], x = Number(m[2]);
         if (k in extra) { ex[k] = x; return; }
-        if (!(k in idx)) { err(line, `\u201C${k}\u201D isn't one of the nine movers (${NAMES.join(", ")}).`); return; }
-        if (k in o) { err(line, `${k} appears twice.`); return; }
-        if (x < 0 || x > 1) { err(line, `${k}=${m[2]} must be between 0 and 1.`); return; }
+        if (!(k in idx)) { err(line, Str.t("scribe.isn_t_one_of_the", { k: k, v1: NAMES.join(", ") })); return; }
+        if (k in o) { err(line, Str.t("scribe.appears_twice", { k: k })); return; }
+        if (x < 0 || x > 1) { err(line, Str.t("scribe.must_be_between_0_and", { k: k, v1: m[2] })); return; }
         o[k] = x;
       });
       return { vec: fromObj(o, NAMES.map(n => (GROUND.includes(n) ? 0.5 : 0))), ex };
@@ -185,11 +187,11 @@ if (typeof module !== "undefined") {
       const [kw, ...rest] = line.split(/\s+/);
       switch (kw) {
         case "home": {
-          if (sawHome) { err(n, "home appears twice."); break; }
+          if (sawHome) { err(n, Str.t("scribe.home_appears_twice")); break; }
           sawHome = true;
           rest.forEach(tok => {
             const m = tok.match(PAIR);
-            if (!m || !GROUND.includes(m[1]) || Number(m[2]) < 0 || Number(m[2]) > 1) { err(n, "home looks like home calm=0.80 connection=0.80 hope=0.80."); return; }
+            if (!m || !GROUND.includes(m[1]) || Number(m[2]) < 0 || Number(m[2]) > 1) { err(n, Str.t("scribe.home_looks_like_home_calm")); return; }
             state.home[idx[m[1]]] = r2(Number(m[2]));
           });
           break;
@@ -198,48 +200,48 @@ if (typeof module !== "undefined") {
         case "vars": {
           rest.forEach(tok => {
             const m = tok.match(PAIR);
-            if (!m || !VAR_KEYS.includes(m[1])) { err(n, `\u201C${tok}\u201D isn't a variable (${VAR_KEYS.join(", ")}).`); return; }
+            if (!m || !VAR_KEYS.includes(m[1])) { err(n, Str.t("scribe.isn_t_a_variable", { tok: tok, v1: VAR_KEYS.join(", ") })); return; }
             const x = Number(m[2]), sp = SPEC[m[1]];
-            if (!(x >= sp.min && x <= sp.max)) { err(n, `${m[1]} must be from ${sp.min} to ${sp.max}.`); return; }
+            if (!(x >= sp.min && x <= sp.max)) { err(n, Str.t("scribe.must_be_from_to", { v0: m[1], min: sp.min, max: sp.max })); return; }
             state.vars[m[1]] = r2(x);
           });
           break;
         }
         case "w": {
           const m = rest.length === 1 && rest[0].match(new RegExp(`^([a-z]+)>([a-z]+)=(${NUM})$`));
-          if (!m) { err(n, "a weight looks like w sadness>rumination=0.40."); break; }
+          if (!m) { err(n, Str.t("scribe.a_weight_looks_like_w")); break; }
           const [, from, to, v] = m, x = Number(v);
-          if (!(from in idx) || !(to in idx) || from === to) { err(n, "a weight joins two different movers."); break; }
-          if (x < -1 || x > 1) { err(n, "a weight must be between -1 and 1."); break; }
-          if (state.w.length >= MAX_W) { err(n, `at most ${MAX_W} weights.`); break; }
+          if (!(from in idx) || !(to in idx) || from === to) { err(n, Str.t("scribe.a_weight_joins_two_different")); break; }
+          if (x < -1 || x > 1) { err(n, Str.t("scribe.a_weight_must_be_between")); break; }
+          if (state.w.length >= MAX_W) { err(n, Str.t("scribe.at_most_weights", { MAX_W: MAX_W })); break; }
           state.w = state.w.filter(o => !(o.from === from && o.to === to)).concat({ from, to, w: r2(x) });
           break;
         }
         case "day": {
           const [dk, ...vals] = rest;
-          if (!DAY.test(dk || "")) { err(n, "a day looks like day 2026-10-17 sadness=0.50."); break; }
-          if (state.days.length && dk <= state.days[state.days.length - 1].day) { err(n, "days should go forward in time."); break; }
-          if (state.days.length >= MAX_DAYS) { err(n, `at most ${MAX_DAYS} days.`); break; }
+          if (!DAY.test(dk || "")) { err(n, Str.t("scribe.a_day_looks_like_day")); break; }
+          if (state.days.length && dk <= state.days[state.days.length - 1].day) { err(n, Str.t("scribe.days_should_go_forward_in")); break; }
+          if (state.days.length >= MAX_DAYS) { err(n, Str.t("scribe.at_most_days", { MAX_DAYS: MAX_DAYS })); break; }
           state.days.push({ day: dk, e: readVec(vals, n).vec });
           break;
         }
         case "cp": {
           const [nn, t, lab, ...vals] = rest;
           const k2 = Number(nn);
-          if (!Number.isInteger(k2) || k2 < 1) { err(n, "a checkpoint starts with its number, like cp 1."); break; }
-          if (state.cps.length && k2 <= state.cps[state.cps.length - 1].n) { err(n, "checkpoint numbers should go up."); break; }
-          if (!TIME.test(t || "")) { err(n, "the time should look like 2026-10-17T13:50."); break; }
+          if (!Number.isInteger(k2) || k2 < 1) { err(n, Str.t("scribe.a_checkpoint_starts_with_its")); break; }
+          if (state.cps.length && k2 <= state.cps[state.cps.length - 1].n) { err(n, Str.t("scribe.checkpoint_numbers_should_go_up")); break; }
+          if (!TIME.test(t || "")) { err(n, Str.t("scribe.the_time_should_look_like")); break; }
           const lm = (lab || "").match(/^label=(.*)$/);
-          if (!lm || !LABEL_RE.test(lm[1])) { err(n, "the label should look like label=start (a-z, 0-9, dashes)."); break; }
+          if (!lm || !LABEL_RE.test(lm[1])) { err(n, Str.t("scribe.the_label_should_look_like")); break; }
           if (G.isCrisis(lm[1].replace(/-/g, " "))) { crisis = true; break; }
-          if (state.cps.length >= MAX_CHECKPOINTS) { err(n, `at most ${MAX_CHECKPOINTS} checkpoints.`); break; }
+          if (state.cps.length >= MAX_CHECKPOINTS) { err(n, Str.t("scribe.at_most_checkpoints", { MAX_CHECKPOINTS: MAX_CHECKPOINTS })); break; }
           const { vec, ex } = readVec(vals, n, { lambda: true });
           state.cps.push({ n: k2, t, label: lm[1], e: vec, lambda: r2(Number.isFinite(ex.lambda) ? ex.lambda : 0) });
           break;
         }
         case "ideal": {
           const m = line.match(new RegExp(`^ideal a=(${NUM}) b=(${NUM})$`));
-          if (!m || ![m[1], m[2]].every(x => Number(x) >= 0 && Number(x) <= 1)) { err(n, "ideal looks like ideal a=0.10 b=0.15 (each 0 to 1)."); break; }
+          if (!m || ![m[1], m[2]].every(x => Number(x) >= 0 && Number(x) <= 1)) { err(n, Str.t("scribe.ideal_looks_like_ideal_a")); break; }
           state.ideal = { a: r2(Number(m[1])), b: r2(Number(m[2])) };
           break;
         }
@@ -247,7 +249,7 @@ if (typeof module !== "undefined") {
         case "pick": state.pick = { e: readVec(rest, n).vec, extras: state.pick ? state.pick.extras : [] }; break;
         case "extra": {
           const ids = EXTRA_IDS(), bad = rest.filter(x => !ids.includes(x));
-          if (bad.length) { err(n, `\u201C${bad[0]}\u201D isn't an extra chip (${ids.join(", ")}).`); break; }
+          if (bad.length) { err(n, Str.t("scribe.isn_t_an_extra_chip", { v0: bad[0], v1: ids.join(", ") })); break; }
           state.pick = { e: state.pick ? state.pick.e : state.e.slice(), extras: [...new Set(rest)] };
           break;
         }
@@ -258,13 +260,13 @@ if (typeof module !== "undefined") {
           const pet = { points: 0, days: 0, name: "Willow" };
           rest.forEach(tok => {
             const m = tok.match(/^(points|days|name)=(.*)$/);
-            if (!m) { err(n, `\u201C${tok}\u201D should look like points=12, days=3 or name=Willow.`); return; }
+            if (!m) { err(n, Str.t("scribe.should_look_like_points_12", { tok: tok })); return; }
             if (m[1] === "name") {
               let nm = "";
-              try { nm = decodeURIComponent(m[2]); } catch (e) { err(n, "the companion's name can't be read."); return; }
+              try { nm = decodeURIComponent(m[2]); } catch (e) { err(n, Str.t("scribe.the_companion_s_name_can")); return; }
               if (G.isCrisis(nm)) { crisis = true; return; }
               pet.name = petName(nm);
-            } else if (!/^\d{1,6}$/.test(m[2])) err(n, `${m[1]}=${m[2]} must be a whole number.`);
+            } else if (!/^\d{1,6}$/.test(m[2])) err(n, Str.t("scribe.must_be_a_whole_number", { v0: m[1], v1: m[2] }));
             else pet[m[1]] = Number(m[2]);
           });
           state.pet = pet;
@@ -278,8 +280,8 @@ if (typeof module !== "undefined") {
           state.about = r.about;
           break;
         }
-        case "mf": err(n, "the header appears twice."); break;
-        default: err(n, `\u201C${kw}\u201D isn't a keyword (mf, home, e, vars, w, day, cp, ideal, eq, pick, extra, mix, free, pet, about).`);
+        case "mf": err(n, Str.t("scribe.the_header_appears_twice")); break;
+        default: err(n, Str.t("scribe.isn_t_a_keyword_mf", { kw: kw }));
       }
     });
     if (crisis) return { ok: false, crisis: true, errors: [] };
@@ -311,7 +313,7 @@ if (typeof module !== "undefined") {
     $("import-file").addEventListener("change", e => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
-      if (file.size > 64 * 1024) { errors(["That file is too big for .mf code (over 64 KB)."]); return; }
+      if (file.size > 64 * 1024) { errors(Str.list("scribe.list")); return; }
       const r = new FileReader();
       r.onload = () => { $("import-text").value = String(r.result || ""); };
       r.readAsText(file);
@@ -327,10 +329,10 @@ if (typeof module !== "undefined") {
       $("import-text").value = "";
       errors([]);
       app.update({ care: false });
-      app.note(p.from === 1 ? p.notes.join(" ") : "Restored from code. New words add to it.");
+      app.note(p.from === 1 ? p.notes.join(" ") : Str.t("scribe.restored_from_code_new_words"));
     });
     $("clear").addEventListener("click", () => {
-      if (!confirm("Start over? This clears the numbers and checkpoints on this device (not your journal).")) return;
+      if (!confirm(Str.t("scribe.start_over_this_clears_the"))) return;
       app.startOver();
     });
     return function render() { $("code").textContent = serialize(MF.Master.refreshIdeal(app.state)); };

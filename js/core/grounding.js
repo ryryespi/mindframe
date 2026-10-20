@@ -16,13 +16,13 @@
 // Everything here runs on the phone. No network, no API.
 // Wrapped in one object so no name collides with the other scripts.
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("./equations.js"); }
 const Grounding = (function () {
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params;   // every number: data/params.js
   const analyzeFn = typeof analyze === "function" ? analyze : require("./signals.js").analyze;
 
-  const ETA = 0.2;
-  const START_G = 0.5;
-  const LOW_G = 0.3;
-  const LOW_DAYS = 3;
+  const { ETA, START_G, LOW_G, LOW_DAYS } = P.grounding;
 
   /** Clamp a number to [0, 1]; anything not finite becomes 0. */
   function clamp01(x) {
@@ -47,68 +47,61 @@ const Grounding = (function () {
   ];
 
   const LABELS = {
-    meaning: "Hidden-meaning story",
-    fortuneTelling: "Predicting the future",
-    mindReading: "Mind reading",
-    allOrNothing: "Absolute words",
-    labeling: "A harsh label",
-    catastrophizing: "Expecting the worst",
-    hopelessness: "Hopeless tone",
+    meaning: Str.t("grounding.LABELS.meaning"),
+    fortuneTelling: Str.t("grounding.LABELS.fortuneTelling"),
+    mindReading: Str.t("grounding.LABELS.mindReading"),
+    allOrNothing: Str.t("grounding.LABELS.allOrNothing"),
+    labeling: Str.t("grounding.LABELS.labeling"),
+    catastrophizing: Str.t("grounding.LABELS.catastrophizing"),
+    hopelessness: Str.t("grounding.LABELS.hopelessness"),
   };
 
   // Order matters: the first match picks the test question.
   const PRIORITY = ["meaning", "fortuneTelling", "mindReading", "allOrNothing", "labeling", "catastrophizing", "hopelessness"];
 
   const QUESTIONS = {
-    meaning: "What actually happened that you could show someone? What meaning did the thought add on top?",
-    fortuneTelling: "Do you know how this ends, or is the thought predicting? What is one other way it could go?",
-    mindReading: "What did they actually say or do? What else might they be thinking?",
-    allOrNothing: "Is it really {word}? Can you remember one time it went differently?",
-    labeling: "Would you call a friend that for the same thing? What did you do, rather than what are you?",
-    catastrophizing: "If it went badly, what would you do next? What is the most likely outcome, not the worst?",
-    hopelessness: "What is one thing, even small, that is still in your hands today?",
-    none: "What can you actually see, hear, or check right now?",
+    meaning: Str.t("grounding.QUESTIONS.meaning"),
+    fortuneTelling: Str.t("grounding.QUESTIONS.fortuneTelling"),
+    mindReading: Str.t("grounding.QUESTIONS.mindReading"),
+    allOrNothing: Str.t("grounding.QUESTIONS.allOrNothing"),
+    labeling: Str.t("grounding.QUESTIONS.labeling"),
+    catastrophizing: Str.t("grounding.QUESTIONS.catastrophizing"),
+    hopelessness: Str.t("grounding.QUESTIONS.hopelessness"),
+    none: Str.t("grounding.QUESTIONS.none"),
   };
 
   const REFRAMES = {
-    meaning: [
-      "Something hard happened, and that is real. The hidden meaning is a story the thought added, not something I can see.",
-      "I am not being punished. I am going through something hard, and I am not alone in it.",
-      "God's love isn't measured by how today went. I can still do one good thing.",
-    ],
-    fortuneTelling: ["I don't know how this will turn out yet. I can prepare for the next small step."],
-    mindReading: ["I don't know what they think. I can ask, or I can let it be."],
-    allOrNothing: ["Sometimes this happens, but not every time. There have been days it went differently."],
-    labeling: ["I made a mistake. That is something I did, not who I am."],
-    catastrophizing: ["This is hard, and it is probably not the worst case. I have handled hard things before."],
-    hopelessness: ["Today feels heavy. Heavy is not the same as hopeless, and one small step still counts."],
-    none: [
-      "This is a thought, not a fact. One real thing I can do now is take a small step.",
-      "I can notice this thought and still choose what I do next.",
-    ],
+    meaning: Str.list("grounding.REFRAMES.meaning"),
+    fortuneTelling: Str.list("grounding.REFRAMES.fortuneTelling"),
+    mindReading: Str.list("grounding.REFRAMES.mindReading"),
+    allOrNothing: Str.list("grounding.REFRAMES.allOrNothing"),
+    labeling: Str.list("grounding.REFRAMES.labeling"),
+    catastrophizing: Str.list("grounding.REFRAMES.catastrophizing"),
+    hopelessness: Str.list("grounding.REFRAMES.hopelessness"),
+    none: Str.list("grounding.REFRAMES.none"),
   };
 
   const ACTIONS = {
-    pray: "Pray for one minute: name the hard thing and ask for help with the next step",
-    text: "Text a friend: \"Thinking of you. Got a minute?\"",
-    walk: "Walk for five minutes and name three things you see",
-    task: "Do one task that takes two minutes",
-    ask: "Ask them one honest question",
-    plan: "Write down the very next step, and nothing after it",
+    pray: Str.t("grounding.ACTIONS.pray"),
+    text: Str.t("grounding.ACTIONS.text"),
+    walk: Str.t("grounding.ACTIONS.walk"),
+    task: Str.t("grounding.ACTIONS.task"),
+    ask: Str.t("grounding.ACTIONS.ask"),
+    plan: Str.t("grounding.ACTIONS.plan"),
   };
 
   // A reframe that names the absolute word the person used and offers a truer size.
   const BIG_WORD = {
-    never: "it hasn't happened yet, and today is not the end of the story",
-    always: "it happens sometimes, and there have been times it didn't",
-    nothing: "some things are hard right now, and some things are still okay",
-    everything: "some things are hard right now, and some things are still okay",
-    everyone: "some people may feel that way, and I don't know about the rest",
-    everybody: "some people may feel that way, and I don't know about the rest",
-    "no one": "it feels lonely right now, and that is not proof nobody cares",
-    nobody: "it feels lonely right now, and that is not proof nobody cares",
-    completely: "part of this is hard, not all of it",
-    totally: "part of this is hard, not all of it",
+    never: Str.t("grounding.BIG_WORD.never"),
+    always: Str.t("grounding.BIG_WORD.always"),
+    nothing: Str.t("grounding.BIG_WORD.nothing"),
+    everything: Str.t("grounding.BIG_WORD.nothing"),
+    everyone: Str.t("grounding.BIG_WORD.everyone"),
+    everybody: Str.t("grounding.BIG_WORD.everyone"),
+    "no one": Str.t("grounding.BIG_WORD.no_one"),
+    nobody: Str.t("grounding.BIG_WORD.no_one"),
+    completely: Str.t("grounding.BIG_WORD.completely"),
+    totally: Str.t("grounding.BIG_WORD.completely"),
   };
 
   /** A gentler phrasing for an absolute word ("always", "never", …). */
@@ -116,7 +109,7 @@ const Grounding = (function () {
     const truer = BIG_WORD[word];
     if (!truer) return "";
     const cap = word[0].toUpperCase() + word.slice(1);
-    return `"${cap}" is a big word. Truer: ${truer}.`;
+    return Str.t("grounding.bigWordReframe.is_a_big_word_truer", { cap: cap, truer: truer });
   }
 
   /** Round to the nearest 0.05. */

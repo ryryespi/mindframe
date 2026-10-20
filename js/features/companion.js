@@ -26,12 +26,15 @@
 // The pure parts (rules, mood, line, the SVG drawing) are tested in node;
 // mount() is browser only.
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params;   // every number: data/params.js
   const KEY = "mindframe-companion";
   const ANIMAL = "fawn";
   const DEFAULT_NAME = "Willow";
-  const NAME_MAX = 20;
+  const NAME_MAX = P.limits.NAME_MAX;
 
   // ---------- Growth ----------
   /** The five stages and the points where each begins. */
@@ -44,11 +47,11 @@
   ];
   /** Caring actions: points each, and how many count per day. */
   const RULES = {
-    update: { pts: 1, cap: 3, word: "checking in" },
-    step: { pts: 2, cap: 2, word: "trying a step" },
-    journal: { pts: 2, cap: 2, word: "a journal save" },
-    practice: { pts: 2, cap: 2, word: "finishing a practice" },
-    day: { pts: 3, cap: 1, word: "coming back" },
+    update: { pts: 1, cap: 3, word: Str.t("companion.RULES.update.word") },
+    step: { pts: 2, cap: 2, word: Str.t("companion.RULES.step.word") },
+    journal: { pts: 2, cap: 2, word: Str.t("companion.RULES.journal.word") },
+    practice: { pts: 2, cap: 2, word: Str.t("companion.RULES.practice.word") },
+    day: { pts: 3, cap: 1, word: Str.t("companion.RULES.day.word") },
   };
 
   /** The local calendar day (YYYY-MM-DD) of a time in ms. */
@@ -167,18 +170,18 @@
 
   // ---------- What it says (composed from the numbers) ----------
   const OPEN = {
-    rest: ["I'm resting right here beside you.", "I'm curled up close to you."],
-    near: ["I'm staying close to you.", "I'm right here, close by."],
-    breathe: ["I'm here with you, breathing slowly.", "I'm here with you."],
-    tuck: ["I'm here with you, just as you are.", "I'm on your side."],
-    watch: ["I'm here with you, watching the thoughts drift by.", "I'm here with you; thoughts can float past."],
-    peek: ["I'm here whenever you're ready.", "I'm right beside you, no rush."],
-    glow: ["I feel calm here with you.", "It's peaceful here with you."],
-    here: ["I'm here with you."],
+    rest: Str.list("companion.OPEN.rest"),
+    near: Str.list("companion.OPEN.near"),
+    breathe: Str.list("companion.OPEN.breathe"),
+    tuck: Str.list("companion.OPEN.tuck"),
+    watch: Str.list("companion.OPEN.watch"),
+    peek: Str.list("companion.OPEN.peek"),
+    glow: Str.list("companion.OPEN.glow"),
+    here: Str.list("companion.OPEN.here"),
   };
-  const LEVER = { fear: "the fear", sadness: "the sadness", anger: "the anger", shame: "the shame", rumination: "the replaying", avoidance: "the urge to avoid things", calm: "some calm", connection: "some connection", hope: "a little hope" };
-  const QUIET = "I'm here, keeping you company.";
-  const WELCOME = "Welcome back. I'm glad you're here.";
+  const LEVER = { fear: Str.t("words.LEVER_NOUN.fear"), sadness: Str.t("words.LEVER_NOUN.sadness"), anger: Str.t("words.LEVER_NOUN.anger"), shame: Str.t("words.LEVER_NOUN.shame"), rumination: Str.t("words.NOUN.rumination"), avoidance: Str.t("words.connectLines.creep.avoidance"), calm: Str.t("companion.LEVER.calm"), connection: Str.t("companion.LEVER.connection"), hope: Str.t("companion.LEVER.hope") };
+  const QUIET = Str.t("companion.QUIET.i_m_here_keeping_you");
+  const WELCOME = Str.t("companion.WELCOME.welcome_back_i_m_glad");
 
   /**
    * One short first-person line from the companion, composed from the
@@ -194,13 +197,13 @@
     const open = W.choose(OPEN[md.pose], `pet|${md.pose}|${md.mover || ""}|${md.band || ""}`, seed);
     const lv = m.peace && m.peace.lever && m.peace.lever.name;
     let act;
-    if (md.band === "steady" || !lv) act = "Let's enjoy this quiet moment together.";
-    else act = `Let's ${m.peace.lever.kind === "grow" ? "grow" : "ease"} ${LEVER[lv]} together.`;
-    return `${opts.welcome ? "Welcome back. " : ""}${open} ${act}`;
+    if (md.band === "steady" || !lv) act = Str.t("companion.line.let_s_enjoy_this_quiet");
+    else act = Str.t("companion.line.let_s_together", { v0: m.peace.lever.kind === "grow" ? "grow" : "ease", v1: LEVER[lv] });
+    return `${opts.welcome ? Str.t("companion.line.welcome_back") : ""}${open} ${act}`;
   }
 
   /** How it grows, in one plain sentence (for the sheet). */
-  const HOW = "I grow when you check in, try a step, save to your journal, finish a practice, or come back another day. Hard days never make me smaller.";
+  const HOW = Str.t("companion.HOW.i_grow_when_you_check");
 
   // ---------- The drawing (original SVG; five stages × eight poses) ----------
   const C = { fur: "#c98b5e", furDark: "#a86c45", cream: "#f7e6cc", ear: "#f0b6a6", eye: "#3b2a22", nose: "#4a3329", hoof: "#6b4a36", leaf: "#8fb38a", leaf2: "#6f9a6a", heart: "#e9a3a8", star: "#f3d98a" };
@@ -281,12 +284,12 @@
 
   // ---------- In the page (browser only) ----------
   const ACTIONS = [
-    { view: "writer", title: "Write a story", sub: "Your journal, a gentle story and a comfort prompt", ico: "i-leaf" },
-    { view: "historian", title: "My days", sub: "Your days, inner peace over time and checkpoints", ico: "i-sun" },
-    { view: "analyzer", title: "Look closer", sub: "Every insight and each feeling in words", ico: "i-eye" },
-    { view: "scribe", title: "Save & share code", sub: "Your freeing mix and the .mf code", ico: "i-open" },
-    { view: "scientist", title: "Show the math", sub: "The equations, and numbers you can adjust", ico: "i-spark" },
-    { view: "grace", title: "Forgive & breathe", sub: "Forgiveness paths, patience and the breathing circle", ico: "i-dove" },
+    { view: "writer", title: Str.t("companion.ACTIONS.title"), sub: Str.t("companion.ACTIONS.sub"), ico: "i-leaf" },
+    { view: "historian", title: Str.t("companion.ACTIONS.title_2"), sub: Str.t("companion.ACTIONS.sub_2"), ico: "i-sun" },
+    { view: "analyzer", title: Str.t("companion.ACTIONS.title_3"), sub: Str.t("companion.ACTIONS.sub_3"), ico: "i-eye" },
+    { view: "scribe", title: Str.t("companion.ACTIONS.title_4"), sub: Str.t("companion.ACTIONS.sub_4"), ico: "i-open" },
+    { view: "scientist", title: Str.t("governor.show_the_math"), sub: Str.t("companion.ACTIONS.sub_5"), ico: "i-spark" },
+    { view: "grace", title: Str.t("companion.ACTIONS.title_5"), sub: Str.t("companion.ACTIONS.sub_6"), ico: "i-dove" },
   ];
   /**
    * Mount the companion: the header button, the buddy beside the card, the
@@ -304,28 +307,30 @@
     rec = d.rec; welcome = d.welcome; save(localStorage, rec);
 
     /** Redraw every place the companion appears. */
+    // Write markup only when it changed (push28): the four companion drawings are the same on most Updates.
+    const put = (id, html) => { const el = $(id); if (el.__mf !== html) { el.innerHTML = html; el.__mf = html; } };
     function draw() {
       const s = stageOf(rec.points), m = app.inCrisis() ? null : app.m();
       md = app.inCrisis() ? { pose: "here", aura: null } : mood(m);
-      const label = `${rec.name}, your companion (${s.name.toLowerCase()} ${ANIMAL}). Open`;
-      $("pet-top").innerHTML = svg(s.i, md.pose, { aura: md.aura, uid: "top", size: 64 });
+      const label = Str.t("companion.draw.label.your_companion_open", { name: rec.name, v1: s.name.toLowerCase(), ANIMAL: ANIMAL });
+      put("pet-top", svg(s.i, md.pose, { aura: md.aura, uid: "top", size: 64 }));
       $("pet-top").setAttribute("aria-label", label);
       $("pet-top").disabled = app.inCrisis();
-      $("pet-card").innerHTML = svg(s.i, md.pose, { aura: md.aura, uid: "card", size: 72 });
+      put("pet-card", svg(s.i, md.pose, { aura: md.aura, uid: "card", size: 72 }));
       $("pet-card").setAttribute("aria-label", label);
       $("pet-say").textContent = app.inCrisis() ? "" : line(m, { welcome: welcome && !m });
-      $("pet-mini").innerHTML = svg(s.i, md.pose, { uid: "mini", size: 40 });
-      $("pet-big").innerHTML = svg(s.i, md.pose, { aura: md.aura, uid: "big", size: 132, title: `${rec.name}, a ${s.name.toLowerCase()} ${ANIMAL}` });
+      put("pet-mini", svg(s.i, md.pose, { uid: "mini", size: 40 }));
+      put("pet-big", svg(s.i, md.pose, { aura: md.aura, uid: "big", size: 132, title: `${rec.name}, a ${s.name.toLowerCase()} ${ANIMAL}` }));
       $("pet-title").textContent = rec.name;
-      $("pet-sub").textContent = `${s.name} ${ANIMAL} \u00B7 growing with you`;
+      $("pet-sub").textContent = Str.t("companion.draw.growing_with_you", { name: s.name, ANIMAL: ANIMAL });
       $("pet-home-say").textContent = app.inCrisis() ? "" : line(m, { welcome: welcome && !m });
       const pct = Math.round(s.frac * 100);
       const bar = $("pet-growth");
       bar.setAttribute("aria-valuenow", String(pct));
-      bar.setAttribute("aria-valuetext", s.next ? `${s.name}: ${pct} percent of the way to ${s.next.name}` : `${s.name}: fully grown`);
+      bar.setAttribute("aria-valuetext", s.next ? Str.t("companion.draw.percent_of_the_way_to", { name: s.name, pct: pct, name2: s.next.name }) : Str.t("companion.draw.fully_grown", { name: s.name }));
       bar.querySelector(".fill").style.width = `${pct}%`;
-      $("pet-stage").textContent = s.next ? `${s.name} \u2192 ${s.next.name}` : `${s.name}, fully grown`;
-      $("pet-days").textContent = rec.days > 1 ? `Days together: ${rec.days > 20 ? "more than twenty" : MF.Words.countWord(rec.days)}.` : "Our first day together.";
+      $("pet-stage").textContent = s.next ? `${s.name} \u2192 ${s.next.name}` : Str.t("companion.draw.fully_grown_2", { name: s.name });
+      $("pet-days").textContent = rec.days > 1 ? Str.t("companion.draw.days_together", { v0: rec.days > 20 ? Str.t("companion.draw.more_than_twenty") : MF.Words.countWord(rec.days) }) : Str.t("companion.draw.our_first_day_together");
       $("name-box").classList.toggle("hidden", rec.asked || app.inCrisis());
       $("name-pet").innerHTML = svg(0, "here", { uid: "name", size: 56 });
     }
@@ -335,17 +340,17 @@
       // Crisis wording in a name shows the 988/911 box, and nothing is kept.
       if (typeof Grounding !== "undefined" && Grounding.isCrisis(String(n || ""))) { app.crisis(true); return; }
       rec = { ...rec, name: cleanName(n), asked: true }; keep(); app.save();
-      app.note(`Nice to meet you, ${rec.name}.`);
+      app.note(Str.t("companion.setName.nice_to_meet_you", { name: rec.name }));
     };
     $("name-save").addEventListener("click", () => setName($("pet-name").value));
     $("pet-name").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); setName($("pet-name").value); } });
     $("name-skip").addEventListener("click", () => { rec = { ...rec, asked: true }; keep(); });
     $("pet-rename").addEventListener("click", () => {
-      const n = prompt("A new name for your companion?", rec.name);
+      const n = prompt(Str.t("companion.n.a_new_name_for_your"), rec.name);
       if (n !== null) setName(n);
     });
     $("pet-reset").addEventListener("click", () => {
-      if (!confirm(`Start ${rec.name}'s growth again from a newborn? Your journal and readings stay.`)) return;
+      if (!confirm(Str.t("companion.start_s_growth_again_from", { name: rec.name }))) return;
       rec = { ...fresh(), name: rec.name, asked: true, lastDay: rec.lastDay }; keep(); app.save();
     });
     // The action rows.
@@ -368,7 +373,7 @@
       const r = award(rec, kind, Date.now(), { crisis: app.inCrisis() });
       if (!r.gained) return 0;
       rec = r.rec; keep();
-      if (r.grew) app.note(`${rec.name} grew: now ${stageOf(rec.points).name.toLowerCase()}.`);
+      if (r.grew) app.note(Str.t("companion.grew_now", { name: rec.name, v1: stageOf(rec.points).name.toLowerCase() }));
       return r.gained;
     };
     app.companion = {

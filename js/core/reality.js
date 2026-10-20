@@ -57,8 +57,11 @@
 
 if (typeof module !== "undefined") require("./movers.js");
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("./equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params, EQ = MF.Equations;   // every number: data/params.js; every equation: core/equations.js
   const { NAMES, idx, r2 } = MF.Movers;
   const G = typeof Grounding !== "undefined" ? Grounding : require("./grounding.js");
 
@@ -101,13 +104,13 @@ if (typeof module !== "undefined") require("./movers.js");
     let raw = 0;
     GRAND.forEach(grp => grp.res.forEach(re => { const n = hits(t, re).length; counts[grp.kind] += n; raw += grp.w * n; }));
     counts.absolutist = hits(t, ABSOLUTIST).length;
-    raw += 0.1 * Math.min(3, counts.absolutist);
+    raw += P.words.ABSOLUTIST_W * Math.min(P.words.ABSOLUTIST_MAX, counts.absolutist);
     const kinds = ["grand", "catastrophic", "allOrNothing"].filter(k => counts[k] > 0);
     if (!kinds.length && counts.absolutist) kinds.push("absolutist");
-    return { g: r2(1 - Math.exp(-raw)), raw: r2(raw), kind: kinds[0] || null, kinds, counts };
+    return { g: EQ.sat(raw), raw: r2(raw), kind: kinds[0] || null, kinds, counts };
   }
   /** Show the reality check when g reaches this. */
-  const G_SHOW = 0.25;
+  const G_SHOW = P.reality.G_SHOW;
 
   // ---------- 1b. False humility (too small) ----------
   /** Self-deprecation and disqualifying-the-positive cues, by kind. */
@@ -128,10 +131,10 @@ if (typeof module !== "undefined") require("./movers.js");
     let k = 0;
     const kinds = [];
     SMALL.forEach(grp => grp.res.forEach(re => { if (hits(t, re).length) { k += 1; if (!kinds.includes(grp.kind)) kinds.push(grp.kind); } }));
-    return { u: r2(1 - Math.exp(-0.7 * k)), k, kinds, chip: false };
+    return { u: EQ.cue(k), k, kinds, chip: false };
   }
   /** Show the "too small" reality check when u reaches this (one cue is enough). */
-  const U_SHOW = 0.25;
+  const U_SHOW = P.reality.U_SHOW;
   /** The "putting myself down" chip: one cue, the same nudges as the words. */
   const PUTDOWN = { id: "putdown", label: "putting myself down", fn: () => ({ add: { shame: 0.2 }, neg: { hope: 0.2 }, notes: ["putting yourself down"], data: { small: { u: 0.5, k: 1, kinds: [], chip: true } } }) };
 
@@ -164,7 +167,7 @@ if (typeof module !== "undefined") require("./movers.js");
     { a: "rumination", b: "calm", side: "high" },
     { a: "avoidance", b: "hope", side: "high" },
   ];
-  const T_HARD = 0.3, T_HIGH = 0.6, T_NEED = 0.4;
+  const { T_HARD, T_HIGH, T_NEED } = P.reality;
   /**
    * Hidden conflicts from the movers plus the text clashes, strongest first.
    * @param {number[]} e the mover vector after the words
@@ -219,9 +222,9 @@ if (typeof module !== "undefined") require("./movers.js");
     if (!gr.g && !clashes.length && !sm.u) return null;
     const add = gr.g ? { rumination: 0.5 * gr.g, avoidance: 0.5 * gr.g } : {};
     const neg = {};
-    const notes = gr.g >= G_SHOW ? ["grand or absolute wording"] : [];
-    if (sm.u) { add.shame = 0.2; neg.hope = 0.2; notes.push("putting yourself down"); }
-    if (clashes.length) notes.push("mixed feelings in the words");
+    const notes = gr.g >= G_SHOW ? Str.list("reality.hook.notes") : [];
+    if (sm.u) { add.shame = 0.2; neg.hope = 0.2; notes.push(Str.t("reality.hook.putting_yourself_down")); }
+    if (clashes.length) notes.push(Str.t("reality.hook.mixed_feelings_in_the_words"));
     return { add, neg, notes, data: { grand: gr, clashes, small: sm } };
   }
   MF.Movers.addWordHook(hook);

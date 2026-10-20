@@ -30,8 +30,11 @@
 // colors to match; it is cleared on reset and in a crisis. Dark mode follows
 // prefers-color-scheme; motion follows prefers-reduced-motion.
 
+if (typeof window === "undefined") { require("./data/strings.js"); require("../../core/equations.js"); }
 (function () {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params;   // every number: data/params.js
   const { defaultState } = MF.Movers;
   const { master, masterPick, refreshIdeal } = MF.Master;
   const KEY = "mindframe-workspace";
@@ -65,9 +68,9 @@
     faith: () => $("faith").checked,
     /** True while the crisis box is showing. */
     inCrisis: () => inCrisis,
-    update, save, crisis, note, copy, renderAll,
+    update, save, crisis, note, copy, renderAll, replay: (el, cls) => replay(el, cls),
     /** Mark the card as out of date after a number changed. */
-    stale() { if (reading) note("Numbers changed. Tap Update to see the new reading."); },
+    stale() { if (reading) note(Str.t("app.stale.numbers_changed_tap_update_to")); },
     /** Register something to clear when the base resets (for example an open story). */
     onReset(fn) { resets.push(fn); },
     /** Register something to clear when the crisis box shows (for example the forgiveness notes, the breathing circle). */
@@ -115,9 +118,7 @@
       $("out").classList.add("hidden");
       $("card-tools").classList.add("hidden");
       closeSheet(false);
-      $("crisis").innerHTML = `<p><strong>You don't have to carry this alone.</strong> What you're feeling matters, and help is available right now.</p>
-        <p>Call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline, US, free, 24/7). If you're in immediate danger, call <strong>911</strong>.</p>
-        <p>Please also reach out to someone you trust.</p>`;
+      $("crisis").innerHTML = Str.t("app.crisis.you_don_t_have_to", {  });
       $("crisis").focus();
     }
   }
@@ -142,6 +143,7 @@
     state = { ...state, e: out.e.slice(), pick: picking ? { e: out.pick.base.slice(), extras: out.pick.extras.slice() } : null, mix: out.freeing ? out.freeing.target.slice() : null };
     if (picking) base = out.e.slice();
     note("");
+    batch = [];
     renderCard();
     if (!opts || opts.care !== false) app.care("update");
     renderAll();
@@ -151,7 +153,7 @@
 
   /** Fill the words-first card from the last reading. */
   function renderCard() {
-    const c = MF.Words.card(state, reading, { faith: app.faith(), seed: 1 });
+    const c = MF.Words.card(state, reading, { faith: app.faith(), seed: P.seeds.CARD });
     // The scene follows the inner-peace band (colors only; words stay on the card).
     if (reading.peace) document.body.dataset.peace = MF.Peace.band(reading.peace.P).replace(" ", "-");
     $("headline").textContent = c.headline;
@@ -172,7 +174,7 @@
     $("free-try").classList.toggle("hidden", !(c.freeing && c.freeing.tryIt));
     $("step-try").classList.toggle("hidden", !c.practice);
     $("step-try").dataset.practice = c.practice ? c.practice.id : "";
-    $("step-try").textContent = c.practice ? `Try it together: ${c.practice.name}` : "";
+    $("step-try").textContent = c.practice ? Str.t("app.renderCard.try_it_together", { name: c.practice.name }) : "";
     // A practice's caution (the cold-water reset always has one) shows with the step.
     $("step-caution").textContent = c.practice && c.practice.caution ? `Caution: ${c.practice.caution}` : "";
     $("step-caution").classList.toggle("hidden", !(c.practice && c.practice.caution));
@@ -208,7 +210,7 @@
     // A soft, staggered fade-in for the visible tiles (none with reduced motion; see style.css).
     let i = 0;
     out.querySelectorAll(".tile").forEach(t => { if (!t.classList.contains("hidden")) t.style.setProperty("--i", i++); });
-    out.classList.remove("fresh"); void out.offsetWidth; out.classList.add("fresh");
+    app.replay(out, "fresh");
   }
 
   // ---------- Short card + See more ----------
@@ -229,7 +231,7 @@
   function setMore(open) {
     $("more").classList.toggle("hidden", !open);
     $("more-toggle").setAttribute("aria-expanded", String(open));
-    $("more-toggle").textContent = open ? "See less" : "See more";
+    $("more-toggle").textContent = open ? Str.t("app.setMore.see_less") : Str.t("app.setMore.see_more");
     $("insight-slot").querySelectorAll(".tile").forEach(t => t.classList.toggle("compact", !open));
   }
   $("more-toggle").addEventListener("click", () => setMore(!expanded()));
@@ -237,7 +239,23 @@
   // ---------- Panels ----------
   const renders = [MF.Writer, MF.Comfort, MF.Historian, MF.Analyzer, MF.Scribe, MF.Scientist, MF.Forgive, MF.Practices, MF.Freeing, MF.Picker, MF.Companion, MF.Movies, MF.Governor, MF.Scripture, MF.Credits, MF.Topology, MF.About].map(f => f.mount(app));
   /** Re-render every panel (cheap; panels only display). */
-  function renderAll() { renders.forEach(r => r()); }
+  function renderAll() { batch = batch || []; renders.forEach(r => r()); flushReplays(); }
+  // ---------- CSS animation restarts, batched (push28) ----------
+  // Restarting an animation needs a forced layout between removing and adding the class. Inside one
+  // render pass (the card and every feature panel) the restarts are batched: one layout instead of one each.
+  let batch = null;
+  /** Restart the CSS animation `cls` on el (batched during a render pass). */
+  function replay(el, cls) {
+    el.classList.remove(cls);
+    if (batch) { batch.push([el, cls]); return; }
+    void el.getBoundingClientRect(); el.classList.add(cls);
+  }
+  function flushReplays() {
+    const list = batch || []; batch = null;
+    if (!list.length) return;
+    void document.body.getBoundingClientRect();
+    list.forEach(([el, cls]) => el.classList.add(cls));
+  }
 
   // ---------- The companion sheet ----------
   // One bottom sheet over the page (a modal dialog: focus moves in and stays in;
@@ -257,7 +275,7 @@
     $("pet-home").classList.toggle("hidden", !!who);
     VIEWS.forEach(v => $("p-" + v).classList.toggle("hidden", v !== who));
     $("sheet-back").classList.toggle("hidden", !who);
-    $("sheet-back").setAttribute("aria-label", `Back to ${app.companion ? app.companion.get().name : "your companion"}`);
+    $("sheet-back").setAttribute("aria-label", Str.t("app.showView.back_to", { v0: app.companion ? app.companion.get().name : Str.t("app.showView.your_companion") }));
     sheetEl().scrollTop = 0;
     (who ? $(`v-${who}-title`) : $("pet-title")).focus({ preventScroll: true });
   }
@@ -335,7 +353,7 @@
     const danger = Grounding.isCrisis($("input").value);
     if (danger) { if (!inCrisis) crisis(true); return; }
     if (inCrisis) crisis(false);
-    if (reading) note("Tap Update to refresh the reading.");
+    if (reading) note(Str.t("app.tap_update_to_refresh_the"));
   });
   $("faith").checked = localStorage.getItem(FAITH_KEY) === "1";
   $("faith").addEventListener("change", () => {
@@ -343,7 +361,7 @@
     if (reading) renderCard();
     renderAll();
   });
-  $("copy").addEventListener("click", () => { if (reading) copy(MF.Words.lines(state, reading, { faith: app.faith(), seed: 1 }).join("\n"), "copied"); });
+  $("copy").addEventListener("click", () => { if (reading) copy(MF.Words.lines(state, reading, { faith: app.faith(), seed: P.seeds.CARD }).join("\n"), "copied"); });
 
   /** Copy text to the clipboard, with a fallback for older browsers. */
   async function copy(text, where) {
@@ -357,8 +375,8 @@
       try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
       area.remove();
     }
-    if (where) $(where).textContent = ok ? "Copied" : "Select the text to copy it";
-    else note(ok ? "Copied." : "Select the text to copy it.");
+    if (where) $(where).textContent = ok ? "Copied" : Str.t("app.copy.select_the_text_to_copy");
+    else note(ok ? "Copied." : Str.t("app.copy.select_the_text_to_copy_2"));
   }
 
   /** Clear the numbers and checkpoints (not the journal). */

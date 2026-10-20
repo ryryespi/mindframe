@@ -21,8 +21,10 @@
 
 if (typeof module !== "undefined") require("../core/movers.js");
 
+if (typeof window === "undefined") require("../data/strings.js");
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
   const G = typeof Grounding !== "undefined" ? Grounding : require("../core/grounding.js");
 
   // Words that cancel a match when they come up to three words before it.
@@ -34,30 +36,30 @@ if (typeof module !== "undefined") require("../core/movers.js");
       name: "Criticism",
       patterns: [/\byou (always|never)\b/, /\bwhat'?s wrong with you\b/, /\bwhy can'?t you (ever|just)\b/, /\byou'?re (so |always )?(selfish|lazy|careless|inconsiderate|thoughtless|useless)\b/, /\byou (only|just) (ever )?care about yourself\b/],
       add: { anger: 0.4 },
-      antidote: "Gentle startup: talk about how you feel and what you need, not about what is wrong with them.",
-      example: "I feel worried when plans change last minute. Could we check in earlier?",
+      antidote: Str.t("relationship.HORSEMEN.criticism.antidote"),
+      example: Str.t("relationship.HORSEMEN.criticism.example"),
     },
     contempt: {
       name: "Contempt",
       patterns: [/\bpathetic\b/, /\bdisgusting\b/, /\byou'?re (such )?(an? )?(idiot|loser|moron|joke|clown)\b/, /\b(what an?|such an?) (idiot|loser|moron)\b/, /\broll(ed|ing)? (my|her|his|their) eyes\b/, /\beye[- ]?roll/, /\byeah,? right\b/, /\boh,? (great|sure|brilliant|wonderful|perfect),? (job|idea|move)?\b/, /\bmock(ed|ing)?\b/, /\bsneer(ed|ing)?\b/],
       add: { anger: 0.4, shame: 0.3 },
-      antidote: "Build a culture of appreciation: name one thing you respect or are grateful for in them.",
-      example: "I know you've been carrying a lot lately, and I appreciate it.",
+      antidote: Str.t("relationship.HORSEMEN.contempt.antidote"),
+      example: Str.t("relationship.HORSEMEN.contempt.example"),
     },
     defensiveness: {
       name: "Defensiveness",
       patterns: [/\bit'?s not my fault\b/, /\bit is not my fault\b/, /\b(yes|yeah),? but\b/, /\bi didn'?t do anything wrong\b/, /\bwhat about (you|when you)\b/, /\byou do it too\b/, /\byou'?re one to talk\b/, /\bwell,? you started it\b/, /\bthat'?s not what i said\b/],
       add: { shame: 0.3, fear: 0.3 },
-      antidote: "Take responsibility for a small part, even a little one.",
-      example: "You're right that I was late. I'm sorry about that part.",
+      antidote: Str.t("relationship.HORSEMEN.defensiveness.antidote"),
+      example: Str.t("relationship.HORSEMEN.defensiveness.example"),
     },
     stonewalling: {
       name: "Stonewalling",
       patterns: [/\b(i'?m|i am) done talking\b/, /\bdone talking\b/, /\bshut(s|ting)? (down|me out|him out|her out|them out)\b/, /\bsilent treatment\b/, /\bwalk(ed|ing|s)? out\b/, /\bstopped (talking|responding|answering)\b/, /\bcold shoulder\b/, /\b(won'?t|refuse to) (talk|speak) to (him|her|them|me)\b/],
       add: { avoidance: 0.5 },
       neg: { connection: 0.4 },
-      antidote: "Self-soothe with a structured break, and agree on a set time to come back.",
-      example: "I'm flooded and need twenty minutes. Let's talk again at eight.",
+      antidote: Str.t("relationship.HORSEMEN.stonewalling.antidote"),
+      example: Str.t("relationship.HORSEMEN.stonewalling.example"),
     },
   };
   const ORDER = ["criticism", "contempt", "defensiveness", "stonewalling"];
@@ -111,7 +113,7 @@ if (typeof module !== "undefined") require("../core/movers.js");
    * @returns {Array<{title:string, antidote:string, example:string}>}
    */
   function section(found) {
-    return (found || []).map(k => ({ title: `A pattern to notice: ${HORSEMEN[k].name}`, antidote: HORSEMEN[k].antidote, example: HORSEMEN[k].example }));
+    return (found || []).map(k => ({ title: Str.t("relationship.title", { name: HORSEMEN[k].name }), antidote: HORSEMEN[k].antidote, example: HORSEMEN[k].example }));
   }
 
   MF.Relationship = { HORSEMEN, ORDER, NEGATORS, clean, negated, detect, hook, section };

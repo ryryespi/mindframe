@@ -15,7 +15,7 @@ function test(name, fn) {
   try { fn(); passed += 1; console.log("ok  -", name); }
   catch (err) { console.error("FAIL -", name); console.error(err); process.exitCode = 1; }
 }
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 const index = read("index.html"), css = read("style.css"), app = read("js/app.js");
 const outHtml = index.slice(index.indexOf('<section id="out"'), index.indexOf("</section>", index.indexOf('<section id="out"')));
 const moreAt = outHtml.indexOf('<div id="more"');

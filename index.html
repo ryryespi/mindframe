@@ -36,7 +36,7 @@
   </svg>
 
   <!-- Always visible. Crisis support lives here even when the rest of the page changes. -->
-  <p class="safety-banner">In crisis, call or text <strong>988</strong> (US) &middot; practice, not therapy</p>
+  <p class="safety-banner"><span data-t="html.text.in_crisis_call_or"></span><strong>988</strong><span data-t="html.text.us_practice_not_therapy"></span></p>
 
   <div class="app">
     <!-- The scene: a sky and meadow whose colors follow the inner-peace band after Update
@@ -53,38 +53,38 @@
         <path class="hill1" d="M0 86C70 76 150 79 220 85S340 79 400 82V100H0Z"/>
       </svg>
       <div class="scene-text">
-        <h1>MindFrame</h1>
-        <p class="tagline">A quiet place to look at a thought.</p>
+        <h1 data-t="html.h1.mindframe"></h1>
+        <p class="tagline" data-t="html.p.a_quiet_place_to"></p>
       </div>
       <!-- Your companion lives here (drawn by js/features/companion.js); tap to open its sheet. -->
-      <button type="button" id="pet-top" class="pet-top pet-btn" aria-haspopup="dialog" aria-controls="p-companion" aria-expanded="false" aria-label="Your companion. Open"></button>
+      <button type="button" id="pet-top" class="pet-top pet-btn" aria-haspopup="dialog" aria-controls="p-companion" aria-expanded="false" data-t-aria-label="html.attr.aria_label.your_companion_open"></button>
     </header>
 
     <main>
       <!-- 1. Write (or pick feelings), then tap Update. Nothing is read until you do. -->
-      <div class="mode seg" role="group" aria-label="How to begin">
-        <button type="button" id="mode-write" aria-pressed="true">Write</button>
-        <button type="button" id="mode-pick" aria-pressed="false">Pick feelings</button>
+      <div class="mode seg" role="group" data-t-aria-label="html.attr.aria_label.how_to_begin">
+        <button type="button" id="mode-write" aria-pressed="true" data-t="html.mode_write"></button>
+        <button type="button" id="mode-pick" aria-pressed="false" data-t="html.mode_pick"></button>
       </div>
       <div id="write-box">
-        <label class="visually-hidden" for="input">What's on your mind?</label>
-        <textarea id="input" rows="4" placeholder="What's on your mind?"></textarea>
+        <label class="visually-hidden" for="input" data-t="html.label.what_s_on_your"></label>
+        <textarea id="input" rows="4" data-t-placeholder="html.attr.placeholder.what_s_on_your"></textarea>
       </div>
       <div id="picker" class="picker hidden" role="group" aria-labelledby="picker-title">
-        <div class="picker-top"><p id="picker-title" class="small quiet">Tap to set how strong: off, a little, quite, strongly.</p><button type="button" id="pick-reset" class="text small">Clear</button></div>
+        <div class="picker-top"><p id="picker-title" class="small quiet" data-t="html.picker_title"></p><button type="button" id="pick-reset" class="text small" data-t="html.pick_reset"></button></div>
         <div id="pick-chips" class="feel-chips"></div>
       </div>
-      <button type="button" id="update" class="primary">Update</button>
-      <p class="quiet small privacy">Private: your words stay on this device unless you save them to the journal. Nothing goes online unless you tap Find more online, which sends only film genres.</p>
+      <button type="button" id="update" class="primary" data-t="html.update"></button>
+      <p class="quiet small privacy" data-t="html.p.private_your_words_stay"></p>
 
       <!-- First use: name your companion (or skip and keep the default). Stored on this device only. -->
       <div id="name-box" class="name-box hidden">
         <span id="name-pet" class="name-pet" aria-hidden="true"></span>
         <div class="name-main">
-          <p class="small"><strong>A little fawn has come to keep you company.</strong> It grows as you take care of yourself. What would you like to call it?</p>
-          <label class="visually-hidden" for="pet-name">Your companion's name</label>
-          <div class="name-row"><input type="text" id="pet-name" maxlength="20" placeholder="Willow" autocomplete="off" /><button type="button" id="name-save" class="secondary">Name it</button></div>
-          <button type="button" id="name-skip" class="text small">Skip (call it Willow)</button>
+          <p class="small"><strong data-t="html.strong.a_little_fawn_has"></strong><span data-t="html.text.it_grows_as_you"></span></p>
+          <label class="visually-hidden" for="pet-name" data-t="html.label.your_companion_s_name"></label>
+          <div class="name-row"><input type="text" id="pet-name" maxlength="20" data-t-placeholder="html.attr.placeholder.willow" autocomplete="off" /><button type="button" id="name-save" class="secondary" data-t="html.name_save"></button></div>
+          <button type="button" id="name-skip" class="text small" data-t="html.name_skip"></button>
         </div>
       </div>
 
@@ -98,31 +98,31 @@
                the feeling, the one insight the numbers pick (moved into #insight-slot),
                and One step with two affirmations. Everything else is under See more.
                Your companion sits beside the card with one line (not a tile). -->
-          <div id="buddy" class="buddy"><button type="button" id="pet-card" class="pet-btn" aria-haspopup="dialog" aria-controls="p-companion" aria-expanded="false" aria-label="Your companion. Open"></button><p id="pet-say" class="pet-say"></p></div>
+          <div id="buddy" class="buddy"><button type="button" id="pet-card" class="pet-btn" aria-haspopup="dialog" aria-controls="p-companion" aria-expanded="false" data-t-aria-label="html.attr.aria_label.your_companion_open_2"></button><p id="pet-say" class="pet-say"></p></div>
           <div class="tile tile-head" id="t-head"><svg class="ico" aria-hidden="true"><use href="#i-leaf"/></svg><p id="headline" class="room"></p></div>
-          <div class="tile" id="t-feel"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg>What you may be feeling</span><p id="feel"></p></div>
+          <div class="tile" id="t-feel"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span data-t="html.text.what_you_may_be"></span></span><p id="feel"></p></div>
           <div id="insight-slot" class="insight-slot"></div>
-          <div class="tile tile-step" id="t-step"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-sprout"/></svg>One step</span><p id="step"></p><p id="step-caution" class="caution small hidden" role="note"></p><button type="button" id="step-try" class="secondary hidden">Try it together</button><ul id="affirm-top" class="affirm-slim" aria-label="Affirmations"></ul></div>
-          <button type="button" id="more-toggle" class="more-toggle" aria-expanded="false" aria-controls="more">See more</button>
+          <div class="tile tile-step" id="t-step"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-sprout"/></svg><span data-t="html.text.one_step"></span></span><p id="step"></p><p id="step-caution" class="caution small hidden" role="note"></p><button type="button" id="step-try" class="secondary hidden" data-t="html.step_try"></button><ul id="affirm-top" class="affirm-slim" data-t-aria-label="html.attr.aria_label.affirmations"></ul></div>
+          <button type="button" id="more-toggle" class="more-toggle" aria-expanded="false" aria-controls="more" data-t="html.more_toggle"></button>
           <div id="more" class="more hidden">
             <div class="tile tile-peace" id="t-peace"><svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg><p id="room" class="small"></p><div id="peace" class="peace-box"></div></div>
-            <div class="tile" id="t-connect"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg>How they connect</span><ul id="connect" class="plain"></ul></div>
+            <div class="tile" id="t-connect"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg><span data-t="html.text.how_they_connect"></span></span><ul id="connect" class="plain"></ul></div>
             <div class="tile tile-soft tile-kai hidden" id="t-kai"><svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg><div id="kai" class="soft-box"></div></div>
-            <div class="tile tile-soft tile-scripture hidden" id="t-scripture"><div id="cs-scene" class="cs-scene" role="img" aria-label="Seeds resting in water above a counter on a cornerstone; seed counter 0"><svg viewBox="0 0 320 96" aria-hidden="true" focusable="false"><rect class="cs-water" x="0" y="8" width="320" height="50" rx="10"/><path class="cs-wave" d="M0 22 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0"/><g class="cs-seeds"><ellipse class="cs-seed s1" cx="52" cy="34" rx="6" ry="4"/><ellipse class="cs-seed s2" cx="104" cy="40" rx="5" ry="3.5"/><ellipse class="cs-seed s3" cx="160" cy="31" rx="6" ry="4"/><ellipse class="cs-seed s4" cx="214" cy="42" rx="5" ry="3.5"/><ellipse class="cs-seed s5" cx="268" cy="35" rx="6" ry="4"/></g><rect class="cs-ledge" x="12" y="60" width="296" height="14" rx="3"/><rect class="cs-stone" x="128" y="74" width="64" height="20" rx="3"/></svg><span class="cs-count-wrap">seed counter <span id="cs-count">0</span></span></div><div id="scripture" class="soft-box"></div><button type="button" id="scripture-next" class="secondary hidden">Another verse</button></div>
+            <div class="tile tile-soft tile-scripture hidden" id="t-scripture"><div id="cs-scene" class="cs-scene" role="img" data-t-aria-label="html.attr.aria_label.seeds_resting_in_water"><svg viewBox="0 0 320 96" aria-hidden="true" focusable="false"><rect class="cs-water" x="0" y="8" width="320" height="50" rx="10"/><path class="cs-wave" d="M0 22 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0"/><g class="cs-seeds"><ellipse class="cs-seed s1" cx="52" cy="34" rx="6" ry="4"/><ellipse class="cs-seed s2" cx="104" cy="40" rx="5" ry="3.5"/><ellipse class="cs-seed s3" cx="160" cy="31" rx="6" ry="4"/><ellipse class="cs-seed s4" cx="214" cy="42" rx="5" ry="3.5"/><ellipse class="cs-seed s5" cx="268" cy="35" rx="6" ry="4"/></g><rect class="cs-ledge" x="12" y="60" width="296" height="14" rx="3"/><rect class="cs-stone" x="128" y="74" width="64" height="20" rx="3"/></svg><span class="cs-count-wrap"><span data-t="html.text.seed_counter"></span><span id="cs-count">0</span></span></div><div id="scripture" class="soft-box"></div><button type="button" id="scripture-next" class="secondary hidden" data-t="html.scripture_next"></button></div>
             <div class="tile tile-soft hidden" id="t-conflict"><svg class="ico" aria-hidden="true"><use href="#i-pull"/></svg><div id="conflict" class="soft-box"></div></div>
             <div class="tile tile-soft hidden" id="t-reality"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg><div id="reality" class="soft-box"></div></div>
-            <div class="tile tile-forgive hidden" id="t-forgive"><svg class="ico" aria-hidden="true"><use href="#i-dove"/></svg><div id="forgive" class="soft-box"></div><button type="button" id="forgive-open" class="secondary">Open the forgiveness guide</button></div>
+            <div class="tile tile-forgive hidden" id="t-forgive"><svg class="ico" aria-hidden="true"><use href="#i-dove"/></svg><div id="forgive" class="soft-box"></div><button type="button" id="forgive-open" class="secondary" data-t="html.forgive_open"></button></div>
             <div class="tile tile-free hidden" id="t-free"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg><div id="free" class="soft-box"></div><p id="free-step" class="free-step"></p>
-              <div class="row"><button type="button" id="free-try" class="secondary">Try the self-compassion break</button><button type="button" id="free-grace" class="secondary hidden">Forgive myself</button></div></div>
+              <div class="row"><button type="button" id="free-try" class="secondary" data-t="html.free_try"></button><button type="button" id="free-grace" class="secondary hidden" data-t="html.free_grace"></button></div></div>
             <div class="tile tile-soft hidden" id="t-pattern"><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg><div id="pattern" class="soft-box"></div></div>
-            <div class="tile" id="t-affirm"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg>Affirmations</span><ul id="affirm" class="affirm"></ul></div>
+            <div class="tile" id="t-affirm"><span class="label"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg><span data-t="html.text.affirmations"></span></span><ul id="affirm" class="affirm"></ul></div>
             <p id="movie-line" class="quiet small movie-line hidden"></p>
             <p id="progress" class="quiet small"></p>
           </div>
         </section>
         <div id="card-tools" class="card-tools hidden">
-          <label class="check small"><input type="checkbox" id="faith" /> Include faith</label>
-          <button type="button" class="text small" id="copy">Copy</button><span class="quiet small" id="copied"></span>
+          <label class="check small"><input type="checkbox" id="faith" /><span data-t="html.text.include_faith"></span></label>
+          <button type="button" class="text small" id="copy" data-t="html.copy"></button><span class="quiet small" id="copied"></span>
         </div>
         <p id="note" class="quiet small" aria-live="polite"></p>
 
@@ -132,40 +132,40 @@
         <div id="sheet-backdrop" class="backdrop hidden"></div>
         <section id="p-companion" class="panel card hidden" role="dialog" aria-modal="true" aria-labelledby="pet-title">
           <div class="panel-head"><span class="grab" aria-hidden="true"></span>
-            <button type="button" id="sheet-back" class="back hidden" aria-label="Back">&larr;</button>
+            <button type="button" id="sheet-back" class="back hidden" data-t-aria-label="html.attr.aria_label.back"><span data-t="html.text.x"></span></button>
             <span id="pet-mini" class="pet-mini" aria-hidden="true"></span>
-            <div class="panel-title"><h2 id="pet-title" tabindex="-1">Willow</h2><p id="pet-sub" class="persona"></p></div>
-            <button type="button" class="text panel-close" aria-label="Close">Close</button></div>
+            <div class="panel-title"><h2 id="pet-title" tabindex="-1" data-t="html.pet_title"></h2><p id="pet-sub" class="persona"></p></div>
+            <button type="button" class="text panel-close" data-t-aria-label="html.attr.aria_label.close" data-t="html.button.close"></button></div>
 
           <div id="pet-home" class="view">
             <div class="pet-hero"><span id="pet-big" class="pet-big"></span><p id="pet-home-say" class="pet-say"></p><p id="pet-verse" class="pet-say small hidden"></p></div>
             <div class="growth">
-              <div class="growth-top"><span class="label">Growth</span><span id="pet-stage" class="small"></span></div>
-              <div id="pet-growth" class="bar" role="progressbar" aria-label="Growth" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="fill"></span></div>
-              <p class="quiet small">I grow when you check in, try a step, save to your journal, finish a practice, or come back another day. Hard days never make me smaller. <span id="pet-days"></span></p>
+              <div class="growth-top"><span class="label" data-t="html.span.growth"></span><span id="pet-stage" class="small"></span></div>
+              <div id="pet-growth" class="bar" role="progressbar" data-t-aria-label="html.attr.aria_label.growth" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="fill"></span></div>
+              <p class="quiet small"><span data-t="html.text.i_grow_when_you"></span><span id="pet-days"></span></p>
             </div>
-            <button type="button" id="pet-watch" class="act act-watch" data-view="movies" aria-controls="p-movies"><svg class="ico" aria-hidden="true"><use href="#i-film"/></svg><span class="act-text"><strong>Watch something</strong><small>Want to watch something gentle together?</small></span><span class="act-go" aria-hidden="true">&rsaquo;</span></button>
+            <button type="button" id="pet-watch" class="act act-watch" data-view="movies" aria-controls="p-movies"><svg class="ico" aria-hidden="true"><use href="#i-film"/></svg><span class="act-text"><strong data-t="html.strong.watch_something"></strong><small data-t="html.small.want_to_watch_something"></small></span><span class="act-go" aria-hidden="true"><span data-t="html.text.x_2"></span></span></button>
             <div id="pet-actions" class="acts"></div>
-            <button type="button" id="pet-anchor" class="act act-anchor" data-view="anchor" aria-controls="p-anchor"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span class="act-text"><strong>Anchor</strong><small>How far you are from your anchor, and your path</small></span><span class="act-go" aria-hidden="true">&rsaquo;</span></button>
-            <button type="button" id="pet-about" class="act act-about" data-view="about" aria-controls="p-about"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span class="act-text"><strong>About me</strong><small>Optional: hobbies and work, kept on this device</small></span><span class="act-go" aria-hidden="true">&rsaquo;</span></button>
-            <button type="button" id="pet-credits" class="act act-credits" data-view="credits" aria-controls="p-credits"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span class="act-text"><strong>Credits</strong><small>The researchers and sources MindFrame stands on</small></span><span class="act-go" aria-hidden="true">&rsaquo;</span></button>
-            <div class="row pet-tools"><button type="button" id="pet-rename" class="text small">Rename</button><button type="button" id="pet-reset" class="text small">Reset growth</button></div>
+            <button type="button" id="pet-anchor" class="act act-anchor" data-view="anchor" aria-controls="p-anchor"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span class="act-text"><strong data-t="html.strong.anchor"></strong><small data-t="html.small.how_far_you_are"></small></span><span class="act-go" aria-hidden="true"><span data-t="html.text.x_3"></span></span></button>
+            <button type="button" id="pet-about" class="act act-about" data-view="about" aria-controls="p-about"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span class="act-text"><strong data-t="html.strong.about_me"></strong><small data-t="html.small.optional_hobbies_and_work"></small></span><span class="act-go" aria-hidden="true"><span data-t="html.text.x_4"></span></span></button>
+            <button type="button" id="pet-credits" class="act act-credits" data-view="credits" aria-controls="p-credits"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg><span class="act-text"><strong data-t="html.strong.credits"></strong><small data-t="html.small.the_researchers_and_sources"></small></span><span class="act-go" aria-hidden="true"><span data-t="html.text.x_5"></span></span></button>
+            <div class="row pet-tools"><button type="button" id="pet-rename" class="text small" data-t="html.pet_rename"></button><button type="button" id="pet-reset" class="text small" data-t="html.pet_reset"></button></div>
           </div>
 
         <!-- Write a story: journal + stories + path game -->
           <div id="p-writer" class="view hidden" role="group" aria-labelledby="v-writer-title">
-            <h3 class="view-title" id="v-writer-title" tabindex="-1">Write a story</h3>
+            <h3 class="view-title" id="v-writer-title" tabindex="-1" data-t="html.v_writer_title"></h3>
           <div class="row">
-            <button type="button" id="story-go" class="secondary">Write a story</button>
-            <button type="button" id="journal-save" class="secondary">Save to journal</button>
+            <button type="button" id="story-go" class="secondary" data-t="html.story_go"></button>
+            <button type="button" id="journal-save" class="secondary" data-t="html.journal_save"></button>
           </div>
           <div id="story" class="hidden">
             <p id="story-tag" class="creature-tag"></p>
             <p id="story-text"></p>
             <div class="row">
-              <button type="button" id="accept" class="secondary">Accept step</button>
-              <button type="button" id="play" class="secondary">Play this story</button>
-              <button type="button" id="story-again" class="text">Another story</button>
+              <button type="button" id="accept" class="secondary" data-t="html.accept"></button>
+              <button type="button" id="play" class="secondary" data-t="html.play"></button>
+              <button type="button" id="story-again" class="text" data-t="html.story_again"></button>
             </div>
             <div id="game" class="hidden">
               <p id="game-count" class="quiet small"></p>
@@ -174,108 +174,108 @@
               <p id="game-prompt" class="quiet"></p>
               <div id="game-choices" class="choices"></div>
               <p id="game-feedback" class="feedback"></p>
-              <button type="button" id="game-next" class="secondary hidden">Next</button>
+              <button type="button" id="game-next" class="secondary hidden" data-t="html.game_next"></button>
             </div>
           </div>
-          <h3>Comfort story from a public AI</h3>
-          <p class="quiet small">Optional. MindFrame writes its own replies from the equation and makes no network calls. This builds a prompt from the reading only (never your words) that you can read, edit, and open in a new tab.</p>
-          <button type="button" id="comfort-go" class="secondary">Comfort story from a public AI</button>
+          <h3 data-t="html.h3.comfort_story_from_a"></h3>
+          <p class="quiet small" data-t="html.p.optional_mindframe_writes_its"></p>
+          <button type="button" id="comfort-go" class="secondary" data-t="html.comfort_go"></button>
           <div id="comfort" class="hidden">
-            <p class="small"><strong>Only this text will be shared. Your journal stays on your phone.</strong></p>
-            <label class="visually-hidden" for="comfort-prompt">Prompt for the public AI</label>
+            <p class="small"><strong data-t="html.strong.only_this_text_will"></strong></p>
+            <label class="visually-hidden" for="comfort-prompt" data-t="html.label.prompt_for_the_public"></label>
             <textarea id="comfort-prompt" class="short" rows="12"></textarea>
             <div class="row">
-              <button type="button" id="open-grok" class="secondary">Open in Grok</button>
-              <button type="button" id="open-chatgpt" class="secondary">Open in ChatGPT</button>
-              <button type="button" id="comfort-copy" class="text">Copy prompt</button>
+              <button type="button" id="open-grok" class="secondary" data-t="html.open_grok"></button>
+              <button type="button" id="open-chatgpt" class="secondary" data-t="html.open_chatgpt"></button>
+              <button type="button" id="comfort-copy" class="text" data-t="html.comfort_copy"></button>
             </div>
-            <p class="quiet small">Opens in a new tab and copies the prompt too, in case the site doesn't fill it in. Grok may send it as soon as it opens. <span id="comfort-status"></span></p>
+            <p class="quiet small"><span data-t="html.text.opens_in_a_new"></span><span id="comfort-status"></span></p>
           </div>
-          <h3>Journal</h3>
-          <p class="quiet small">Only what you save here is kept, on this device.</p>
+          <h3 data-t="html.h3.journal"></h3>
+          <p class="quiet small" data-t="html.p.only_what_you_save"></p>
           <ul id="journal-list" class="journal"></ul>
-          <button type="button" id="journal-clear" class="text hidden">Clear journal</button>
+          <button type="button" id="journal-clear" class="text hidden" data-t="html.journal_clear"></button>
           </div>
 
         <!-- My days: history + checkpoints -->
           <div id="p-historian" class="view hidden" role="group" aria-labelledby="v-historian-title">
-            <h3 class="view-title" id="v-historian-title" tabindex="-1">My days</h3>
+            <h3 class="view-title" id="v-historian-title" tabindex="-1" data-t="html.v_historian_title"></h3>
           <p id="hazel-progress" class="small"></p>
           <ul id="week" class="plain"></ul>
-          <button type="button" id="save" class="secondary">Save checkpoint</button>
-          <h3>Checkpoints</h3>
-          <p id="cps-empty" class="quiet small">None yet. Save one to come back to it.</p>
+          <button type="button" id="save" class="secondary" data-t="html.save"></button>
+          <h3 data-t="html.h3.checkpoints"></h3>
+          <p id="cps-empty" class="quiet small" data-t="html.cps_empty"></p>
           <ol id="cps" class="cps"></ol>
           </div>
 
         <!-- Look closer: every insight and the nine movers in words -->
           <div id="p-analyzer" class="view hidden" role="group" aria-labelledby="v-analyzer-title">
-            <h3 class="view-title" id="v-analyzer-title" tabindex="-1">Look closer</h3>
-          <h3>All insights from your reading</h3>
+            <h3 class="view-title" id="v-analyzer-title" tabindex="-1" data-t="html.v_analyzer_title"></h3>
+          <h3 data-t="html.h3.all_insights_from_your"></h3>
           <ul id="remy-insights" class="plain"></ul>
-          <h3>How they connect</h3>
+          <h3 data-t="html.h3.how_they_connect"></h3>
           <ul id="remy-connect" class="plain"></ul>
-          <h3>Hidden pulls, reality check and forgiveness cues</h3>
+          <h3 data-t="html.h3.hidden_pulls_reality_check"></h3>
           <ul id="remy-extra" class="plain"></ul>
-          <h3>The nine movers</h3>
+          <h3 data-t="html.h3.the_nine_movers"></h3>
           <ul id="breakdown" class="plain"></ul>
           </div>
 
         <!-- Save & share code: export / import -->
           <div id="p-scribe" class="view hidden" role="group" aria-labelledby="v-scribe-title">
-            <h3 class="view-title" id="v-scribe-title" tabindex="-1">Save &amp; share code</h3>
-          <p class="quiet small">Your session as plain .mf code: numbers and labels only, never your words.</p>
+            <h3 class="view-title" id="v-scribe-title" tabindex="-1" data-t="html.v_scribe_title"></h3>
+          <p class="quiet small" data-t="html.p.your_session_as_plain"></p>
           <div class="mix-box">
-            <span class="label">Your freeing mix</span>
+            <span class="label" data-t="html.span.your_freeing_mix"></span>
             <p id="mix-line" class="mix-line"></p>
-            <button type="button" id="copy-mix" class="secondary">Copy freeing mix</button><span class="quiet small" id="mix-copied"></span>
+            <button type="button" id="copy-mix" class="secondary" data-t="html.copy_mix"></button><span class="quiet small" id="mix-copied"></span>
           </div>
           <pre id="code" class="code"></pre>
           <div class="row">
-            <button type="button" id="copy-code" class="secondary">Copy code</button>
-            <button type="button" id="download" class="secondary">Download .mf.txt</button>
+            <button type="button" id="copy-code" class="secondary" data-t="html.copy_code"></button>
+            <button type="button" id="download" class="secondary" data-t="html.download"></button>
           </div>
-          <label class="visually-hidden" for="import-text">Paste .mf code</label>
-          <textarea id="import-text" class="short" rows="5" placeholder="Paste code that starts with mf 4 (mf 3, mf 2 and mf 1 also work)"></textarea>
-          <label class="small" for="import-file">Or choose a file</label>
+          <label class="visually-hidden" for="import-text" data-t="html.label.paste_mf_code"></label>
+          <textarea id="import-text" class="short" rows="5" data-t-placeholder="html.attr.placeholder.paste_code_that_starts"></textarea>
+          <label class="small" for="import-file" data-t="html.label.or_choose_a_file"></label>
           <input type="file" id="import-file" accept=".txt,.mf,text/plain" />
           <ul id="import-errors" class="errors"></ul>
-          <button type="button" id="import-go" class="primary">Restore from code</button>
-          <div class="row"><button type="button" id="clear" class="text">Start over</button></div>
+          <button type="button" id="import-go" class="primary" data-t="html.import_go"></button>
+          <div class="row"><button type="button" id="clear" class="text" data-t="html.clear"></button></div>
           </div>
 
         <!-- Show the math: the math + adjust numbers and variables -->
           <div id="p-scientist" class="view hidden" role="group" aria-labelledby="v-scientist-title">
-            <h3 class="view-title" id="v-scientist-title" tabindex="-1">Show the math</h3>
-          <p class="quiet small">Every result comes from one function: step = act(clip01(e + a(e)(h &minus; e) + b&middot;s(e))). Model numbers, not measurements of you.</p>
+            <h3 class="view-title" id="v-scientist-title" tabindex="-1" data-t="html.v_scientist_title"></h3>
+          <p class="quiet small" data-t="html.p.every_result_comes_from"></p>
           <ul id="movers" class="movers"></ul>
           <ul id="math-lines" class="lines"></ul>
-          <h3>Adjust numbers</h3>
-          <p class="quiet small">Set any mover by hand; new words add to these. Tap Update to see the result.</p>
+          <h3 data-t="html.h3.adjust_numbers"></h3>
+          <p class="quiet small" data-t="html.p.set_any_mover_by"></p>
           <div id="sliders" class="sliders"></div>
-          <h3>Variables</h3>
-          <p class="quiet small">a0, k, a_max, b, decay d, inner-peace d₀, γ, δ, home targets and the main links. Design choices, not validated values.</p>
+          <h3 data-t="html.h3.variables"></h3>
+          <p class="quiet small" data-t="html.p.a0_k_a_max"></p>
           <div id="var-grid" class="var-grid"></div>
           <p id="var-notes" class="quiet small"></p>
-          <button type="button" id="vars-reset" class="secondary">Reset to defaults</button>
+          <button type="button" id="vars-reset" class="secondary" data-t="html.vars_reset"></button>
           </div>
 
         <!-- Forgive & breathe: forgive myself, forgive someone, and the patience & mindfulness practices -->
           <div id="p-grace" class="view hidden" role="group" aria-labelledby="v-grace-title">
-            <h3 class="view-title" id="v-grace-title" tabindex="-1">Forgive &amp; breathe</h3>
+            <h3 class="view-title" id="v-grace-title" tabindex="-1" data-t="html.v_grace_title"></h3>
           <p id="grace-hint" class="quiet small"></p>
           <div id="grace-reading" class="soft-box small"></div>
-          <div id="grace-tabs" class="tabs" role="tablist" aria-label="Forgive and breathe">
-            <button type="button" role="tab" id="tab-self" data-tab="self" aria-controls="grace-self" aria-selected="true">Forgive myself</button>
-            <button type="button" role="tab" id="tab-other" data-tab="other" aria-controls="grace-other" aria-selected="false" tabindex="-1">Forgive someone</button>
-            <button type="button" role="tab" id="tab-practice" data-tab="practice" aria-controls="grace-practice" aria-selected="false" tabindex="-1">Breathe &amp; be patient</button>
+          <div id="grace-tabs" class="tabs" role="tablist" data-t-aria-label="html.attr.aria_label.forgive_and_breathe">
+            <button type="button" role="tab" id="tab-self" data-tab="self" aria-controls="grace-self" aria-selected="true" data-t="html.tab_self"></button>
+            <button type="button" role="tab" id="tab-other" data-tab="other" aria-controls="grace-other" aria-selected="false" tabindex="-1" data-t="html.tab_other"></button>
+            <button type="button" role="tab" id="tab-practice" data-tab="practice" aria-controls="grace-practice" aria-selected="false" tabindex="-1" data-t="html.tab_practice"></button>
           </div>
           <div id="grace-self" class="path" role="tabpanel" aria-labelledby="tab-self">
             <p class="path-intro small"></p>
             <div class="path-step"><p class="path-count quiet small"></p><div class="path-dots"></div><h3 class="path-k" tabindex="-1"></h3><p class="path-say"></p>
               <textarea class="short path-box" rows="3"></textarea>
-              <p class="quiet small">Optional. Kept only on this page unless you save it.</p>
-              <div class="row"><button type="button" class="secondary path-back">Back</button><button type="button" class="secondary path-next">Next step</button><button type="button" class="text path-save">Save these notes to the journal</button></div>
+              <p class="quiet small" data-t="html.p.optional_kept_only_on"></p>
+              <div class="row"><button type="button" class="secondary path-back" data-t="html.button.back"></button><button type="button" class="secondary path-next" data-t="html.button.next_step"></button><button type="button" class="text path-save" data-t="html.button.save_these_notes_to"></button></div>
             </div>
             <p class="path-faith small hidden"></p>
             <p class="path-source quiet small"></p>
@@ -284,17 +284,17 @@
             <p class="path-intro small"></p>
             <div class="path-step"><p class="path-count quiet small"></p><div class="path-dots"></div><h3 class="path-k" tabindex="-1"></h3><p class="path-say"></p>
               <textarea class="short path-box" rows="3"></textarea>
-              <p class="quiet small">Optional. Kept only on this page unless you save it.</p>
-              <div class="row"><button type="button" class="secondary path-back">Back</button><button type="button" class="secondary path-next">Next step</button><button type="button" class="text path-save">Save these notes to the journal</button></div>
+              <p class="quiet small" data-t="html.p.optional_kept_only_on_2"></p>
+              <div class="row"><button type="button" class="secondary path-back" data-t="html.button.back_2"></button><button type="button" class="secondary path-next" data-t="html.button.next_step_2"></button><button type="button" class="text path-save" data-t="html.button.save_these_notes_to_2"></button></div>
             </div>
             <p class="path-faith small hidden"></p>
             <p class="path-source quiet small"></p>
           </div>
           <div id="grace-practice" class="hidden" role="tabpanel" aria-labelledby="tab-practice">
             <p id="practice-suggest" class="small"></p>
-            <span class="label">Mindfulness</span><div id="practice-mind" class="chips"></div>
-            <span class="label">Patience</span><div id="practice-patience" class="chips"></div>
-            <span class="label">Body</span><div id="practice-body" class="chips"></div>
+            <span class="label" data-t="html.span.mindfulness"></span><div id="practice-mind" class="chips"></div>
+            <span class="label" data-t="html.span.patience"></span><div id="practice-patience" class="chips"></div>
+            <span class="label" data-t="html.span.body"></span><div id="practice-body" class="chips"></div>
             <div id="practice-detail" class="practice-detail">
               <h3 id="practice-name"></h3>
               <ol id="practice-steps" class="steps"></ol>
@@ -304,18 +304,18 @@
             </div>
             <!-- Brain dump: a scratch box that is never saved (clears on Close, Update, Start over and Let it go). -->
             <div id="dump" class="dump hidden">
-              <div class="row"><button type="button" id="dump-go" class="secondary">Start the 10-minute timer</button><span id="dump-time" class="dump-time" aria-live="polite">10:00</span></div>
-              <label class="small" for="dump-text">Scratch box (never saved unless you tap Save to journal)</label>
-              <textarea id="dump-text" class="dump-text" rows="8" autocomplete="off" spellcheck="false" placeholder="Write whatever is going round. Nothing here is kept."></textarea>
-              <div class="row"><button type="button" id="dump-letgo" class="secondary">Let it go</button><button type="button" id="dump-save" class="text small">Save to journal</button></div>
-              <p class="quiet small">It clears when you close this, tap Update, or tap Let it go.</p>
+              <div class="row"><button type="button" id="dump-go" class="secondary" data-t="html.dump_go"></button><span id="dump-time" class="dump-time" aria-live="polite">10:00</span></div>
+              <label class="small" for="dump-text" data-t="html.label.scratch_box_never_saved"></label>
+              <textarea id="dump-text" class="dump-text" rows="8" autocomplete="off" spellcheck="false" data-t-placeholder="html.attr.placeholder.write_whatever_is_going"></textarea>
+              <div class="row"><button type="button" id="dump-letgo" class="secondary" data-t="html.dump_letgo"></button><button type="button" id="dump-save" class="text small" data-t="html.dump_save"></button></div>
+              <p class="quiet small" data-t="html.p.it_clears_when_you"></p>
             </div>
             <div class="breath" id="breath">
               <div class="breath-stage"><div id="breath-circle" class="breath-circle" aria-hidden="true"></div></div>
-              <p id="breath-phase" class="breath-phase" aria-live="polite">Ready when you are: in for four, out for six.</p>
+              <p id="breath-phase" class="breath-phase" aria-live="polite" data-t="html.breath_phase"></p>
               <p id="breath-count" class="quiet small"></p>
-              <button type="button" id="breath-go" class="secondary">Start the breathing circle</button>
-              <p class="quiet small">No sound. With reduced motion on, the circle stays still and only the words and color change.</p>
+              <button type="button" id="breath-go" class="secondary" data-t="html.breath_go"></button>
+              <p class="quiet small" data-t="html.p.no_sound_with_reduced"></p>
             </div>
           </div>
           </div>
@@ -324,75 +324,75 @@
              Works offline from a small curated list; "Find more online" is the
              app's only network call, shows what it sends first, and sends only film genres. -->
           <div id="p-movies" class="view hidden" role="group" aria-labelledby="v-movies-title">
-            <h3 class="view-title" id="v-movies-title" tabindex="-1">Watch something</h3>
+            <h3 class="view-title" id="v-movies-title" tabindex="-1" data-t="html.v_movies_title"></h3>
             <p id="mv-intro" class="pet-say mv-intro"></p>
             <p id="mv-mood" class="small mv-mood"></p>
-            <ol id="mv-list" class="mv-list" aria-label="Film suggestions"></ol>
-            <div class="row"><button type="button" id="mv-more" class="secondary">More</button><button type="button" id="mv-online" class="secondary">Find more online</button></div>
-            <div id="mv-confirm" class="soft-box mv-confirm hidden" role="group" aria-label="Before anything is sent">
+            <ol id="mv-list" class="mv-list" data-t-aria-label="html.attr.aria_label.film_suggestions"></ol>
+            <div class="row"><button type="button" id="mv-more" class="secondary" data-t="html.mv_more"></button><button type="button" id="mv-online" class="secondary" data-t="html.mv_online"></button></div>
+            <div id="mv-confirm" class="soft-box mv-confirm hidden" role="group" data-t-aria-label="html.attr.aria_label.before_anything_is_sent">
               <p id="mv-send-what" class="small"></p>
-              <div class="row"><button type="button" id="mv-send" class="secondary">Send and look</button><button type="button" id="mv-cancel" class="text small">Cancel</button></div>
+              <div class="row"><button type="button" id="mv-send" class="secondary" data-t="html.mv_send"></button><button type="button" id="mv-cancel" class="text small" data-t="html.mv_cancel"></button></div>
             </div>
             <p id="mv-status" class="quiet small" aria-live="polite"></p>
-            <p class="quiet small">A model, not a prescription: people often choose films to ease a hard mood or keep a good one (mood management theory, Zillmann, 1988). The films here are a small list kept in the app, so they work offline. Film facts from Wikidata (CC0).</p>
+            <p class="quiet small" data-t="html.p.a_model_not_a"></p>
             <details class="mv-key">
-              <summary class="small">Use my own TMDB key (optional, off)</summary>
+              <summary class="small" data-t="html.summary.use_my_own_tmdb"></summary>
               <p id="mv-key-state" class="quiet small"></p>
-              <label class="small" for="mv-key">TMDB v3 API key</label>
-              <input id="mv-key" type="password" autocomplete="off" spellcheck="false" inputmode="text" placeholder="32 letters and numbers" />
-              <div class="row"><button type="button" id="mv-key-save" class="secondary">Save key</button><button type="button" id="mv-key-clear" class="text small">Remove key</button></div>
-              <p class="quiet small">Stored only in this browser and never in your code. Sent only to api.themoviedb.org, and only when you tap Find more online, for posters and ratings. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+              <label class="small" for="mv-key" data-t="html.label.tmdb_v3_api_key"></label>
+              <input id="mv-key" type="password" autocomplete="off" spellcheck="false" inputmode="text" data-t-placeholder="html.attr.placeholder.32_letters_and_numbers" />
+              <div class="row"><button type="button" id="mv-key-save" class="secondary" data-t="html.mv_key_save"></button><button type="button" id="mv-key-clear" class="text small" data-t="html.mv_key_clear"></button></div>
+              <p class="quiet small" data-t="html.p.stored_only_in_this"></p>
             </details>
           </div>
           <!-- About me (features/about.js): optional, kept in the local .mf code, never sent. -->
           <div id="p-about" class="view hidden" role="group" aria-labelledby="v-about-title">
-            <h3 class="view-title" id="v-about-title" tabindex="-1">About me</h3>
-            <p class="small">Optional. It shapes the steps, story pictures and suggestions in your own way. It is kept on this device and never sent.</p>
-            <fieldset><legend>Hobbies</legend><div id="ab-hobbies" class="ab-chips"></div></fieldset>
-            <label for="ab-tags">Other interests (comma separated)</label>
+            <h3 class="view-title" id="v-about-title" tabindex="-1" data-t="html.v_about_title"></h3>
+            <p class="small" data-t="html.p.optional_it_shapes_the"></p>
+            <fieldset><legend data-t="html.legend.hobbies"></legend><div id="ab-hobbies" class="ab-chips"></div></fieldset>
+            <label for="ab-tags" data-t="html.label.other_interests_comma_separated"></label>
             <input id="ab-tags" type="text" maxlength="200" autocomplete="off">
-            <label for="ab-field">Field of study or work</label>
-            <select id="ab-field"><option value="">Not set</option></select>
-            <label for="ab-fieldtext">In your own words (optional)</label>
+            <label for="ab-field" data-t="html.label.field_of_study_or"></label>
+            <select id="ab-field"><option value="" data-t="html.option.not_set"></option></select>
+            <label for="ab-fieldtext" data-t="html.label.in_your_own_words"></label>
             <input id="ab-fieldtext" type="text" maxlength="40" autocomplete="off">
-            <div class="row"><button type="button" id="ab-save" class="secondary">Save</button><button type="button" id="ab-clear" class="text small">Clear</button></div>
+            <div class="row"><button type="button" id="ab-save" class="secondary" data-t="html.ab_save"></button><button type="button" id="ab-clear" class="text small" data-t="html.ab_clear"></button></div>
             <p id="ab-note" class="small" role="status"></p>
           </div>
           <!-- Anchor (core/topology.js): words first; the numbers behind Show the math. The path stays on this device. -->
           <div id="p-anchor" class="view hidden" role="group" aria-labelledby="v-anchor-title">
-            <h3 class="view-title" id="v-anchor-title" tabindex="-1">Your anchor</h3>
+            <h3 class="view-title" id="v-anchor-title" tabindex="-1" data-t="html.v_anchor_title"></h3>
             <p id="an-intro" class="small"></p>
             <div id="an-words"></div>
             <div id="an-svg" class="an-svg"></div>
             <section id="gv" class="hidden" aria-labelledby="gv-title">
-              <h4 id="gv-title" class="cr-cat">Room to express</h4>
+              <h4 id="gv-title" class="cr-cat" data-t="html.gv_title"></h4>
               <div id="gv-words"></div>
-              <button type="button" id="gv-math" class="text small" aria-expanded="false" aria-controls="gv-math-box">Show the math</button>
+              <button type="button" id="gv-math" class="text small" aria-expanded="false" aria-controls="gv-math-box" data-t="html.gv_math"></button>
               <div id="gv-math-box" class="hidden"><div id="gv-math-lines" class="wi-eq"></div></div>
             </section>
             <section id="an-review" aria-labelledby="an-review-title">
-              <h4 id="an-review-title" class="cr-cat">Evening review: your path as a story</h4>
+              <h4 id="an-review-title" class="cr-cat" data-t="html.an_review_title"></h4>
               <div id="an-story"></div>
-              <button type="button" id="an-save" class="text small">Save this story as a picture</button>
+              <button type="button" id="an-save" class="text small" data-t="html.an_save"></button>
             </section>
-            <h4 class="cr-cat">Your anchor path</h4>
+            <h4 class="cr-cat" data-t="html.h4.your_anchor_path"></h4>
             <ol id="an-path" class="cr-items"></ol>
-            <p class="small">The anchor moves with you: it gathers the feelings you hope for with where you are. When you stay near it for a while, it steps to a new stone. “Collapse” is only a picture for that step, nothing quantum. The path is kept on this device and never sent.</p>
-            <div class="row"><button type="button" id="an-math" class="text small" aria-expanded="false" aria-controls="an-math-box">Show the math</button><button type="button" id="an-clear" class="text small">Clear path</button></div>
+            <p class="small" data-t="html.p.the_anchor_moves_with"></p>
+            <div class="row"><button type="button" id="an-math" class="text small" aria-expanded="false" aria-controls="an-math-box" data-t="html.an_math"></button><button type="button" id="an-clear" class="text small" data-t="html.an_clear"></button></div>
             <div id="an-math-box" class="hidden">
               <div id="an-math-lines" class="wi-eq"></div>
-              <h4 class="cr-cat">Time constants (hours)</h4>
+              <h4 class="cr-cat" data-t="html.h4.time_constants_hours"></h4>
               <ul id="an-tau" class="cr-items"></ul>
             </div>
           </div>
           <!-- Credits (features/credits.js): offline, every source checked; flagged ones say why. -->
           <div id="p-credits" class="view hidden" role="group" aria-labelledby="v-credits-title">
-            <h3 class="view-title" id="v-credits-title" tabindex="-1">Credits</h3>
+            <h3 class="view-title" id="v-credits-title" tabindex="-1" data-t="html.v_credits_title"></h3>
             <section id="wi" aria-labelledby="wi-title">
-              <h4 id="wi-title" class="cr-cat">Where ideas come from</h4>
+              <h4 id="wi-title" class="cr-cat" data-t="html.wi_title"></h4>
               <p id="wi-sum" class="small"></p>
               <ul id="wi-list" class="cr-items"></ul>
-              <button type="button" id="wi-math" class="text small" aria-expanded="false" aria-controls="wi-math-box">Show the math</button>
+              <button type="button" id="wi-math" class="text small" aria-expanded="false" aria-controls="wi-math-box" data-t="html.wi_math"></button>
               <div id="wi-math-box" class="hidden">
                 <p id="wi-eq" class="wi-eq"></p>
                 <p id="wi-label" class="small"></p>
@@ -406,12 +406,15 @@
           </div>
         </section>
 
-        <p class="quiet small foot">A model built from design assumptions and informed by research, not validated science and not a diagnosis.</p>
+        <p class="quiet small foot" data-t="html.p.a_model_built_from"></p>
       </div>
     </main>
   </div>
 
   <!-- core: signals → grounding → movers → reality → peace → master → words -->
+  <script src="js/data/strings.js"></script>
+  <script src="js/data/params.js"></script>
+  <script src="js/core/equations.js"></script>
   <script src="js/core/signals.js"></script>
   <script src="js/core/grounding.js"></script>
   <script src="js/core/movers.js"></script>
@@ -445,6 +448,7 @@
   <script src="js/features/scenes.js"></script>
   <script src="js/features/about.js"></script>
   <script src="js/features/credits.js"></script>
+  <script src="js/data/index.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

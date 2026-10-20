@@ -17,8 +17,10 @@ if (typeof module !== "undefined") {
   require("../core/movers.js");
 }
 
+if (typeof window === "undefined") require("../data/strings.js");
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
   const { PICK_WORD, PICK_ORDER, LEVELS, pickDefault, nextLevel, levelOf } = MF.Movers;
   /** The extra chips, in screen order. */
   const EXTRA_ORDER = ["blame", "putdown", "judged", "holdback"];
@@ -74,12 +76,12 @@ if (typeof module !== "undefined") {
         for (let k = 1; k <= 3; k++) { const d = document.createElement("i"); if (k <= on) d.className = "on"; dots.appendChild(d); }
         const lv = document.createElement("span"); lv.className = "feel-level visually-hidden"; lv.textContent = l;
         b.append(w, dots, lv);
-        b.setAttribute("aria-label", `${PICK_WORD[n]}: ${l}. Tap to change.`);
+        b.setAttribute("aria-label", Str.t("picker.tap_to_change", { v0: PICK_WORD[n], l: l }));
       });
       extraBox.querySelectorAll(".feel-chip.extra").forEach(b => b.setAttribute("aria-pressed", extras.includes(b.dataset.extra) ? "true" : "false"));
     }
     /** A chip changed: the card is out of date until Update. */
-    const changed = () => { if (app.m()) app.note("Tap Update to read the feelings you picked."); };
+    const changed = () => { if (app.m()) app.note(Str.t("picker.changed.tap_update_to_read_the")); };
     /** Switch between Write and Pick feelings. */
     function setMode(m) {
       mode = m;

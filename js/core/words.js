@@ -36,8 +36,10 @@ if (typeof module !== "undefined") {
   require("./peace.js");
 }
 
+if (typeof window === "undefined") require("../data/strings.js");
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
   const { NAMES, GROUND, HARD, FIXED, ACTIVE, idx, isGround, cap, listJoin, weights } = MF.Movers;
   const { G_SHOW } = MF.Reality;
   const PEACE = MF.Peace;
@@ -72,14 +74,14 @@ if (typeof module !== "undefined") {
   const SIZE = { strongly: ["strong", "loud"], quite: ["present", "noticeable"], "a little": ["faint", "small"] };
   const FEEL = {
     fear: "anxious", sadness: "sad", anger: "angry", shame: "ashamed",
-    rumination: "caught in replaying thoughts", avoidance: "pulled to avoid things",
+    rumination: Str.t("words.FEEL.rumination"), avoidance: Str.t("words.FEEL.avoidance"),
     calm: "restless", connection: "alone", hope: "discouraged",
   };
   const FEEL_HIGH = { calm: "calm", connection: "connected", hope: "hopeful" };
-  const NOUN = { fear: "fear", sadness: "sadness", anger: "anger", shame: "shame", rumination: "the replaying", avoidance: "avoiding", calm: "calm", connection: "connection", hope: "hope" };
+  const NOUN = { fear: "fear", sadness: "sadness", anger: "anger", shame: "shame", rumination: Str.t("words.NOUN.rumination"), avoidance: "avoiding", calm: "calm", connection: "connection", hope: "hope" };
   /** Nouns for a low grounding mover. */
   const LOW_NOUN = { calm: "restlessness", connection: "loneliness", hope: "discouragement" };
-  const SOFTENER = { calm: "slowing down", connection: "connection", hope: "hope" };
+  const SOFTENER = { calm: Str.t("words.SOFTENER.calm"), connection: "connection", hope: "hope" };
   /** Subject form of a mover inside a sentence. */
   const subj = n => (HARD.includes(n) ? `the ${NOUN[n]}` : NOUN[n]);
   /**
@@ -87,28 +89,28 @@ if (typeof module !== "undefined") {
    * up: i raises j (hard/process target); down: i lowers grounding j; soft: grounding i softens j.
    */
   const LINK_VERB = {
-    up: { strong: ["fuels", "feeds"], mid: ["stirs up", "adds to"], weak: ["nudges up", "can add a little to"] },
-    down: { strong: ["wears down", "drains"], mid: ["dims", "chips away at"], weak: ["can dim", "can wear on"] },
-    soft: { strong: ["softens", "eases"], mid: ["can soften", "takes the edge off"], weak: ["can ease a little"] },
+    up: { strong: ["fuels", "feeds"], mid: Str.list("words.LINK_VERB.up.mid"), weak: Str.list("words.LINK_VERB.up.weak") },
+    down: { strong: Str.list("words.LINK_VERB.down.strong"), mid: Str.list("words.LINK_VERB.down.mid"), weak: Str.list("words.LINK_VERB.down.weak") },
+    soft: { strong: ["softens", "eases"], mid: Str.list("words.LINK_VERB.soft.mid"), weak: Str.list("words.LINK_VERB.soft.weak") },
   };
   /** Strength class of |w|: ≥ 0.5 strong, ≥ 0.3 mid, else weak. */
   const strength = w => (Math.abs(w) >= 0.5 ? "strong" : Math.abs(w) >= 0.3 ? "mid" : "weak");
   /** How a mover eases: [base, third person, past] ("loosen its grip" / "loosens its grip" / "loosened its grip"). */
   const EASE = {
-    anger: ["loosen its grip", "loosens its grip", "loosened its grip"], shame: ["grow quieter", "grows quieter", "grew quieter"],
-    fear: ["settle", "settles", "settled"], sadness: ["grow lighter", "grows lighter", "grew lighter"],
-    rumination: ["slow down", "slows down", "slowed"], avoidance: ["ease", "eases", "eased"],
-    calm: ["come back", "comes back", "came back"], connection: ["grow", "grows", "grew"], hope: ["come back", "comes back", "came back"],
+    anger: Str.list("words.EASE.anger"), shame: Str.list("words.EASE.shame"),
+    fear: ["settle", "settles", "settled"], sadness: Str.list("words.EASE.sadness"),
+    rumination: Str.list("words.EASE.rumination"), avoidance: ["ease", "eases", "eased"],
+    calm: Str.list("words.EASE.calm"), connection: ["grow", "grows", "grew"], hope: Str.list("words.EASE.hope"),
   };
   /** Small grounded actions, first person, as verb phrases. */
   const ACT = {
-    fear: "take one safe step", sadness: "do one small kind thing for myself", anger: "choose how I respond",
-    shame: "treat myself the way I'd treat a friend", rumination: "set this thought down for now", avoidance: "face one small piece of this",
-    calm: "slow my breath", connection: "let one person in a little", hope: "plan one small thing",
+    fear: Str.t("words.ACT.fear"), sadness: Str.t("words.ACT.sadness"), anger: Str.t("words.ACT.anger"),
+    shame: Str.t("words.ACT.shame"), rumination: Str.t("words.ACT.rumination"), avoidance: Str.t("words.ACT.avoidance"),
+    calm: Str.t("words.ACT.calm"), connection: Str.t("words.ACT.connection"), hope: Str.t("words.ACT.hope"),
   };
   /** What a low grounding mover feels like, as a clause. */
-  const LOW_STATE = { connection: "you feel alone", calm: "you're restless", hope: "hope runs low" };
-  const LOW_FIX = { connection: "reaching toward one person", calm: "slowing your breath", hope: "one small plan" };
+  const LOW_STATE = { connection: Str.t("words.LOW_STATE.connection"), calm: Str.t("words.LOW_STATE.calm"), hope: Str.t("words.LOW_STATE.hope") };
+  const LOW_FIX = { connection: Str.t("words.LOW_FIX.connection"), calm: Str.t("words.LOW_FIX.calm"), hope: Str.t("words.LOW_FIX.hope") };
 
   /** How present a mover is: hard/process by value, grounding by how far below neutral. */
   const presence = (n, x) => (isGround[idx[n]] ? (x <= 0.4 ? (0.5 - x) / 0.5 : 0) : (x >= ACTIVE ? x : 0));
@@ -127,9 +129,9 @@ if (typeof module !== "undefined") {
    */
   function feelingLine(m, seed = 1) {
     const f = felt(m.e);
-    if (f.length) return `You may be feeling ${listJoin(f.map(x => `${choose(DEGREE[band(x.x)], `deg|${x.n}|${k2(x.x)}`, seed)} ${FEEL[x.n]}`))}.`;
+    if (f.length) return Str.t("words.feelingLine.you_may_be_feeling", { v0: listJoin(f.map(x => `${choose(DEGREE[band(x.x)], `deg|${x.n}|${k2(x.x)}`, seed)} ${FEEL[x.n]}`)) });
     const high = GROUND.filter(n => m.e[idx[n]] >= 0.65).map(n => FEEL_HIGH[n]);
-    return high.length ? `You may be feeling ${listJoin(high)}.` : "Nothing strong stands out right now; you may be feeling fairly even.";
+    return high.length ? Str.t("words.feelingLine.you_may_be_feeling_2", { v0: listJoin(high) }) : Str.t("words.feelingLine.nothing_strong_stands_out_right");
   }
 
   // ---------- Room for: positive emotions ----------
@@ -143,7 +145,7 @@ if (typeof module !== "undefined") {
     const j = m.mover ? idx[m.mover] : -1;
     const g = j >= 0 ? gainOf(m, j) : 0;
     const as = j >= 0 && g > 0.005 ? `, as ${subj(m.mover)} ${EASE[m.mover][1]}${g < 0.15 ? " a little" : ""}` : "";
-    return `Room for: ${listJoin(words)}${as}.`;
+    return Str.t("words.roomLine.room_for", { v0: listJoin(words), as: as });
   }
 
   // ---------- How they connect ----------
@@ -173,53 +175,53 @@ if (typeof module !== "undefined") {
     if (m.top) {
       const t = idx[m.top], L = strongestLink(m, W);
       const stabW = m.stabilizer ? W[idx[m.stabilizer]][t] : 0;
-      const soft = m.stabilizer ? `${SOFTENER[m.stabilizer]} ${choose(LINK_VERB.soft[strength(stabW)], `soft|${m.stabilizer}|${k2(stabW)}`, seed)} it` : "one small step can soften it";
+      const soft = m.stabilizer ? `${SOFTENER[m.stabilizer]} ${choose(LINK_VERB.soft[strength(stabW)], `soft|${m.stabilizer}|${k2(stabW)}`, seed)} it` : Str.t("words.connectLines.soft.one_small_step_can_soften");
       const size = choose(SIZE[band(m.e[t])], `size|${m.top}|${k2(m.e[t])}`, seed);
       if (L) {
         const kind = isGround[idx[L.to]] ? "down" : "up";
         const verb = choose(LINK_VERB[kind][strength(L.w)], `link|${m.top}|${L.to}|${k2(L.w)}|${k2(m.e[t])}`, seed);
-        out.push(`When ${subj(m.top)} is ${size}, it ${verb} ${isGround[idx[L.to]] ? "your " : ""}${NOUN[L.to]}; ${soft}.`);
-      } else out.push(`${cap(subj(m.top))} is the ${size === "faint" || size === "small" ? "main" : "loudest"} part right now; ${soft}.`);
+        out.push(Str.t("words.connectLines.when_is_it", { v0: subj(m.top), size: size, verb: verb, v3: isGround[idx[L.to]] ? "your " : "", v4: NOUN[L.to], soft: soft }));
+      } else out.push(Str.t("words.connectLines.is_the_part_right_now", { v0: cap(subj(m.top)), v1: size === "faint" || size === "small" ? "main" : "loudest", soft: soft }));
       const loop = m.loops[0];
       if (loop && ![loop.a, loop.b].every(x => x === m.top || (L && x === L.to))) {
-        const v = loop.gain >= 0.5 ? ["keep feeding each other", "keep each other going"] : ["nudge each other", "stir each other a little"];
+        const v = loop.gain >= 0.5 ? Str.list("words.connectLines.v") : Str.list("words.connectLines.v_2");
         out.push(`${cap(NOUN[loop.a])} and ${NOUN[loop.b]} ${choose(v, `loop|${loop.a}|${loop.b}|${k2(loop.u)}`, seed)}.`);
       }
     } else if (m.stabilizer && LOW_STATE[m.stabilizer]) {
       const g = idx[m.stabilizer];
       const eased = NAMES.filter((n, j) => !isGround[j] && W[g][j] < 0).sort((p, q) => W[g][idx[p]] - W[g][idx[q]]).slice(0, 2).map(n => NOUN[n]);
       const verb = choose(LINK_VERB.soft[strength(m.h[g] - m.e[g])], `low|${m.stabilizer}|${k2(m.e[g])}`, seed);
-      out.push(`When ${LOW_STATE[m.stabilizer]}, ${listJoin(eased)} grow more easily; ${LOW_FIX[m.stabilizer]} ${verb} it.`);
+      out.push(Str.t("words.connectLines.when_grow_more_easily_it", { v0: LOW_STATE[m.stabilizer], v1: listJoin(eased), v2: LOW_FIX[m.stabilizer], verb: verb }));
     }
     if (m.lambda !== null) {
-      out.push(m.unstable ? `These feelings are ${choose(["building on", "feeding"], `lam|${k2(m.lambda)}`, seed)} each other right now, so go gently.`
-        : m.lambda <= -0.2 ? "These feelings tend to ease on their own." : "These feelings tend to ease on their own, slowly.");
+      out.push(m.unstable ? Str.t("words.connectLines.these_feelings_are_each_other", { v0: choose(Str.list("words.connectLines"), `lam|${k2(m.lambda)}`, seed) })
+        : m.lambda <= -0.2 ? Str.t("words.connectLines.these_feelings_tend_to_ease") : Str.t("words.connectLines.these_feelings_tend_to_ease_2"));
     }
     if (m.hidden[0]) {
       const hd = m.hidden[0], rise = hd.to - hd.from;
-      const creep = { fear: "worry", sadness: "sadness", anger: "anger", shame: "shame", rumination: "replaying thoughts", avoidance: "the urge to avoid things" }[hd.name];
-      out.push(`If this stays unspoken, ${creep} ${choose(rise >= 0.2 ? ["may grow", "may rise"] : ["may creep in", "may slip in"], `hid|${hd.name}|${k2(rise)}`, seed)}.`);
+      const creep = { fear: "worry", sadness: "sadness", anger: "anger", shame: "shame", rumination: Str.t("movers.PICK_WORD.rumination"), avoidance: Str.t("words.connectLines.creep.avoidance") }[hd.name];
+      out.push(Str.t("words.connectLines.if_this_stays_unspoken", { creep: creep, v1: choose(rise >= 0.2 ? Str.list("words.connectLines_2") : Str.list("words.connectLines_3"), `hid|${hd.name}|${k2(rise)}`, seed) }));
     }
-    if (!out.length) out.push("Nothing is pulling hard on anything else right now.");
+    if (!out.length) out.push(Str.t("words.connectLines.nothing_is_pulling_hard_on"));
     return out;
   }
 
   // ---------- Hidden conflicts ----------
   /** The two sides of each conflict, as verb phrases after "part of you". `l` is the band of that side. */
   const PULL = {
-    fear: l => `is ${l} afraid of what could go wrong`,
-    anger: l => `is ${l} angry`,
-    shame: l => `${l === "very" || l === "really" ? "badly " : ""}wants to hide`,
-    rumination: l => `keeps going over it${l === "very" || l === "really" ? " again and again" : ""}`,
-    avoidance: l => `${l === "very" || l === "really" ? "really " : ""}wants to pull back`,
+    fear: l => Str.t("words.fear.is_afraid_of_what_could", { l: l }),
+    anger: l => Str.t("words.anger.is_angry", { l: l }),
+    shame: l => Str.t("words.shame.wants_to_hide", { v0: l === "very" || l === "really" ? "badly " : "" }),
+    rumination: l => Str.t("words.rumination.keeps_going_over_it", { v0: l === "very" || l === "really" ? Str.t("words.rumination.again_and_again") : "" }),
+    avoidance: l => Str.t("words.avoidance.wants_to_pull_back", { v0: l === "very" || l === "really" ? "really " : "" }),
   };
   const PULL_B = {
-    "fear>hope": "is hoping it goes well", "anger>connection": "wants to stay close", "shame>connection": "needs to be close to someone",
-    "rumination>calm": "wants some peace", "avoidance>hope": "hopes to move forward",
+    "fear>hope": Str.t("words.PULL_B.fear_hope"), "anger>connection": Str.t("words.PULL_B.anger_connection"), "shame>connection": Str.t("words.PULL_B.shame_connection"),
+    "rumination>calm": Str.t("words.PULL_B.rumination_calm"), "avoidance>hope": Str.t("words.PULL_B.avoidance_hope"),
   };
   const TEXT_PULL = {
-    wantBut: ["wants something", "is holding back"], shouldBut: ["knows what it would like to do", "isn't ready yet"],
-    loveBut: ["cares deeply", "is hurt or unsure"], partOfMe: ["feels one way", "feels another"],
+    wantBut: Str.list("words.TEXT_PULL.wantBut"), shouldBut: Str.list("words.TEXT_PULL.shouldBut"),
+    loveBut: Str.list("words.TEXT_PULL.loveBut"), partOfMe: Str.list("words.TEXT_PULL.partOfMe"),
   };
   /**
    * The two sides of a conflict in words. Mover sides take an adverb from the
@@ -229,7 +231,7 @@ if (typeof module !== "undefined") {
   function pulls(c, seed = 1) {
     if (c.from === "words") return TEXT_PULL[c.a];
     const adv = choose(ADV[band(c.x)], `pull|${c.a}|${k2(c.x)}`, seed);
-    return [PULL[c.a](adv), `${c.y >= 0.8 ? "really " : ""}${PULL_B[`${c.a}>${c.b}`]}`.replace(/^really is /, "is really ")];
+    return [PULL[c.a](adv), `${c.y >= 0.8 ? "really " : ""}${PULL_B[`${c.a}>${c.b}`]}`.replace(/^really is /, Str.t("words.pulls.is_really"))];
   }
   /**
    * "A hidden pull: part of you … while part of you …" for the strongest
@@ -241,39 +243,39 @@ if (typeof module !== "undefined") {
     if (!c) return [];
     const [a, b] = pulls(c, seed);
     const hold = c.c >= 0.6
-      ? choose(["Feeling both is a normal part of change; you can hold both and still take one small step.", "Being pulled both ways is a normal part of change; you can hold both and still choose one small step."], `hold|${k2(c.c)}`, seed)
-      : choose(["It's normal to feel two ways at once; you don't have to settle it today.", "Mixed feelings are normal; you can let both be here for now."], `hold|${k2(c.c)}`, seed);
-    return [`A hidden pull: part of you ${a}, while part of you ${b}.`, hold];
+      ? choose(Str.list("words.conflictLines.hold"), `hold|${k2(c.c)}`, seed)
+      : choose(Str.list("words.conflictLines.hold_2"), `hold|${k2(c.c)}`, seed);
+    return [Str.t("words.conflictLines.a_hidden_pull_part_of", { a: a, b: b }), hold];
   }
 
   // ---------- Reality check (grand vs. true-sized) ----------
   const CLAIM = {
-    grand: "it all depends on you, or that you can't fall short", catastrophic: "the worst will happen",
-    allOrNothing: "it's all or nothing", absolutist: "it is always or never this way",
+    grand: Str.t("words.CLAIM.grand"), catastrophic: Str.t("words.CLAIM.catastrophic"),
+    allOrNothing: Str.t("words.CLAIM.allOrNothing"), absolutist: Str.t("words.CLAIM.absolutist"),
   };
   const TRUE_SIZE = {
-    grand: "You matter, and you are also human; one good step is enough.",
-    catastrophic: "The ending isn't written yet; you can handle the next hour, and that is enough.",
-    allOrNothing: "Partly done and partly good still counts.",
-    absolutist: "Some of the time, with some people, is usually closer to true.",
+    grand: Str.t("words.TRUE_SIZE.grand"),
+    catastrophic: Str.t("words.TRUE_SIZE.catastrophic"),
+    allOrNothing: Str.t("words.TRUE_SIZE.allOrNothing"),
+    absolutist: Str.t("words.TRUE_SIZE.absolutist"),
   };
   /** How sure the thought sounds, from the band of g. */
   /** What a put-down claims, by kind (core/reality.js SMALL). */
   const SMALL_CLAIM = {
-    worthless: "you are worth nothing",
-    undeserving: "you don't deserve good things",
-    disqualify: "what went well was only luck",
-    compare: "everyone is better than you",
+    worthless: Str.t("words.SMALL_CLAIM.worthless"),
+    undeserving: Str.t("words.SMALL_CLAIM.undeserving"),
+    disqualify: Str.t("words.SMALL_CLAIM.disqualify"),
+    compare: Str.t("words.SMALL_CLAIM.compare"),
   };
   /** The true-size answer to a put-down: not bigger, not smaller (Burns, 1980: disqualifying the positive). */
   const SMALL_TRUE = {
-    worthless: "Not bigger, not smaller: you are a person with real worth, having a hard time.",
-    undeserving: "Not bigger, not smaller: kindness isn't a prize you earn; you can receive it while you keep learning.",
-    disqualify: "Not bigger, not smaller: what went well counts too; you can name your part in it plainly.",
-    compare: "Not bigger, not smaller: you are not worse than others, and you don't need to be better.",
-    chip: "Not bigger, not smaller: you can name what went wrong and what went right, both at their real size.",
+    worthless: Str.t("words.SMALL_TRUE.worthless"),
+    undeserving: Str.t("words.SMALL_TRUE.undeserving"),
+    disqualify: Str.t("words.SMALL_TRUE.disqualify"),
+    compare: Str.t("words.SMALL_TRUE.compare"),
+    chip: Str.t("words.SMALL_TRUE.chip"),
   };
-  const SURE = { strongly: "very sure", quite: "sure", "a little": "a bit sure" };
+  const SURE = { strongly: Str.t("words.SURE.strongly"), quite: "sure", "a little": Str.t("words.SURE.a_little") };
   /**
    * The reality check when grand.g ≥ 0.25: the thought's claim (by kind) at the
    * certainty of g's band, then the true-sized version. No labels, no shaming.
@@ -282,14 +284,14 @@ if (typeof module !== "undefined") {
     const gr = m.grand, out = [];
     if (gr && gr.g >= G_SHOW && gr.kinds.length) {
       const kinds = gr.kinds.slice(0, 2);
-      out.push(`Reality check: part of this thought sounds ${SURE[band(gr.g)]} that ${kinds.map(k => CLAIM[k]).join(", and that ")}.`, TRUE_SIZE[kinds[0]]);
+      out.push(Str.t("words.realityLines.reality_check_part_of_this", { v0: SURE[band(gr.g)], v1: kinds.map(k => CLAIM[k]).join(Str.t("words.realityLines.and_that")) }), TRUE_SIZE[kinds[0]]);
     }
     // The other side of the same check: too small (false humility).
     const sm = m.small;
     if (sm && sm.u >= MF.Reality.U_SHOW) {
       out.push(sm.kinds.length
-        ? `Reality check: part of this thought sounds ${SURE[band(sm.u)]} that ${sm.kinds.slice(0, 2).map(k => SMALL_CLAIM[k]).join(", and that ")}. That is smaller than true.`
-        : "Reality check: you marked putting yourself down. That voice makes you sound smaller than you are.");
+        ? Str.t("words.realityLines.reality_check_part_of_this_2", { v0: SURE[band(sm.u)], v1: sm.kinds.slice(0, 2).map(k => SMALL_CLAIM[k]).join(Str.t("words.realityLines.and_that")) })
+        : Str.t("words.realityLines.reality_check_you_marked_putting"));
       out.push(SMALL_TRUE[sm.kinds[0] || "chip"]);
     }
     return out;
@@ -298,9 +300,9 @@ if (typeof module !== "undefined") {
   // ---------- Affirmations ----------
   /** First-person stances per intensity band; the seed and value pick one of two. */
   const STANCE = {
-    strongly: [(n, act) => `I can feel ${FEEL[n]} and still ${act}.`, (n, act) => `Even when I feel this ${FEEL[n]}, I can ${act}.`],
-    quite: [(n, act) => `${cap(isGround[idx[n]] ? LOW_NOUN[n] : NOUN[n])} is here, and I can ${act}.`, (n, act) => `I can make room for ${isGround[idx[n]] ? LOW_NOUN[n] : NOUN[n]} and ${act}.`],
-    "a little": [(n, act) => `I notice a little ${isGround[idx[n]] ? LOW_NOUN[n] : NOUN[n]}; I can ${act}.`, (n, act) => `This is small enough to hold, and I can ${act}.`],
+    strongly: [(n, act) => Str.t("words.i_can_feel_and_still", { v0: FEEL[n], act: act }), (n, act) => Str.t("words.even_when_i_feel_this", { v0: FEEL[n], act: act })],
+    quite: [(n, act) => Str.t("words.is_here_and_i_can", { v0: cap(isGround[idx[n]] ? LOW_NOUN[n] : NOUN[n]), act: act }), (n, act) => Str.t("words.i_can_make_room_for", { v0: isGround[idx[n]] ? LOW_NOUN[n] : NOUN[n], act: act })],
+    "a little": [(n, act) => Str.t("words.i_notice_a_little_i", { v0: isGround[idx[n]] ? LOW_NOUN[n] : NOUN[n], act: act }), (n, act) => Str.t("words.this_is_small_enough_to", { act: act })],
   };
   /**
    * Three affirmations composed from the reading (plus one with faith on):
@@ -316,14 +318,14 @@ if (typeof module !== "undefined") {
     const x = presence(main, m.e[idx[main]]);
     const out = [choose(STANCE[band(x)], `st|${main}|${k2(x)}`, seed)(main, ACT[main])];
     const pos = (m.positives || [])[0];
-    if (pos) out.push(choose([`There is room for ${pos.word} here, even now.`, `I can make a little room for ${pos.word} today.`], `pos|${pos.word}|${k2(pos.score)}`, seed));
+    if (pos) out.push(choose([Str.t("words.affirmations.there_is_room_for_here", { word: pos.word }), Str.t("words.affirmations.i_can_make_a_little", { word: pos.word })], `pos|${pos.word}|${k2(pos.score)}`, seed));
     const c = (m.conflicts || [])[0];
-    if (c) { const [a, b] = pulls(c, seed); out.push(`Part of me ${a}, and part of me ${b}; I can hold both.`); }
-    else if (m.grand && m.grand.g >= G_SHOW) out.push(m.grand.kind === "grand" ? "I matter, and I am human; one good step is enough." : m.grand.kind === "catastrophic" ? "I don't know the ending yet, and I can handle the next hour." : "Some of the time is not all of the time.");
+    if (c) { const [a, b] = pulls(c, seed); out.push(Str.t("words.affirmations.part_of_me_and_part", { a: a, b: b })); }
+    else if (m.grand && m.grand.g >= G_SHOW) out.push(m.grand.kind === "grand" ? Str.t("words.affirmations.i_matter_and_i_am") : m.grand.kind === "catastrophic" ? Str.t("words.affirmations.i_don_t_know_the") : Str.t("words.affirmations.some_of_the_time_is"));
     else if (m.stabilizer && m.stabilizer !== main) out.push(`I can ${ACT[m.stabilizer]}.`);
     if (opts.faith) {
-      const span = m.d >= 1 ? "this hard day" : m.d >= 0.5 ? "the next hour" : "this moment";
-      out.push(choose([`God can give me ${pos ? pos.word : "peace"} for ${span}.`, `I can bring this ${(isGround[idx[main]] ? LOW_NOUN[main] : NOUN[main]).replace(/^the /, "")} to God and ask for ${pos ? pos.word : "peace"}.`], `faith|${main}|${k2(m.d)}`, seed));
+      const span = m.d >= 1 ? Str.t("words.affirmations.span.this_hard_day") : m.d >= 0.5 ? Str.t("words.affirmations.span.the_next_hour") : Str.t("words.affirmations.span.this_moment");
+      out.push(choose([Str.t("words.affirmations.god_can_give_me_for", { v0: pos ? pos.word : "peace", span: span }), Str.t("words.affirmations.i_can_bring_this_to", { v0: (isGround[idx[main]] ? LOW_NOUN[main] : NOUN[main]).replace(/^the /, ""), v1: pos ? pos.word : "peace" })], `faith|${main}|${k2(m.d)}`, seed));
     }
     return out;
   }
@@ -333,15 +335,15 @@ if (typeof module !== "undefined") {
   const dose = d => (d >= 1 ? { min: "ten", times: "five" } : d >= 0.5 ? { min: "five", times: "four" } : { min: "two", times: "three" });
   /** The technique for each mover; the dose comes from d. */
   const TECHNIQUE = {
-    fear: x => `breathe out longer than in, ${x.times} times, then name one thing you can see`,
-    sadness: x => `do one thing you used to enjoy, for ${x.min} minutes`,
-    anger: x => `pause: step away for ${x.min} minutes, then name what matters to you here`,
-    shame: () => "say to yourself what you'd say to a friend, then tell one safe person",
-    rumination: x => `give the replay ${x.min} minutes later today, then turn to one task now`,
-    avoidance: x => `do ${x.min} minutes of the thing you've been putting off`,
-    calm: x => `breathe out longer than in, ${x.times} times`,
-    connection: () => "send one short message to someone kind",
-    hope: () => "write down one small thing for tomorrow",
+    fear: x => Str.t("words.fear.breathe_out_longer_than_in", { times: x.times }),
+    sadness: x => Str.t("words.sadness.do_one_thing_you_used", { min: x.min }),
+    anger: x => Str.t("words.anger.pause_step_away_for_minutes", { min: x.min }),
+    shame: () => Str.t("words.shame.say_to_yourself_what_you"),
+    rumination: x => Str.t("words.rumination.give_the_replay_minutes_later", { min: x.min }),
+    avoidance: x => Str.t("words.avoidance.do_minutes_of_the_thing", { min: x.min }),
+    calm: x => Str.t("words.calm.breathe_out_longer_than_in", { times: x.times }),
+    connection: () => Str.t("words.connection.send_one_short_message_to"),
+    hope: () => Str.t("words.hope.write_down_one_small_thing"),
   };
   /**
    * One step: the technique for master's mover, sized by d, and why, from
@@ -350,13 +352,13 @@ if (typeof module !== "undefined") {
   function stepLine(m) {
     // The most helpful lever for inner peace (∂P/∂e_i), else the mover that moves most.
     const n = (m.peace && m.peace.lever && m.peace.lever.name) || m.mover;
-    if (!n) return "Keep going: notice one good thing and stay with it for a breath.";
+    if (!n) return Str.t("master.act.action.keep_going_notice_one_good");
     const g = gainOf(m, idx[n]);
     // A patience or mindfulness practice when features/practices.js picked one
     // for this mover (m.practice, from its master pass); else the mover's technique.
     const lib = MF.Practices && m.practice && m.practice.mover === n ? MF.Practices.LIBRARY[m.practice.id] : null;
     const how = lib ? lib.say(dose(m.d)) : TECHNIQUE[n](dose(m.d));
-    return `${cap(how)}, so ${subj(n)} can ${EASE[n][0]}${g < 0.15 ? " a little" : ""}.`;
+    return Str.t("words.stepLine.so_can", { v0: cap(how), v1: subj(n), v2: EASE[n][0], g_s: g < 0.15 ? " a little" : "" });
   }
 
   // ---------- Inner peace ----------
@@ -364,9 +366,9 @@ if (typeof module !== "undefined") {
   /** A count as words (over twenty: "many"). */
   const countWord = n => (n <= 20 ? NUMBER[n] : "many");
   /** What the lever acts on, as an object of "easing" / "growing". */
-  const LEVER_NOUN = { fear: "the fear", sadness: "the sadness", anger: "the anger", shame: "the shame", rumination: "the replaying", avoidance: "the urge to avoid things", calm: "calm", connection: "connection", hope: "hope" };
+  const LEVER_NOUN = { fear: Str.t("words.LEVER_NOUN.fear"), sadness: Str.t("words.LEVER_NOUN.sadness"), anger: Str.t("words.LEVER_NOUN.anger"), shame: Str.t("words.LEVER_NOUN.shame"), rumination: Str.t("words.NOUN.rumination"), avoidance: Str.t("words.connectLines.creep.avoidance"), calm: "calm", connection: "connection", hope: "hope" };
   /** Endings for the peace band line (no "growing, and it can grow"). */
-  const PEACE_TAIL = { "a little": [", for now.", ", and it can grow."], growing: [", little by little.", ", and gently rising."], close: [", nearly there.", ", within reach."] };
+  const PEACE_TAIL = { "a little": Str.list("words.PEACE_TAIL.a_little"), growing: Str.list("words.PEACE_TAIL.growing"), close: Str.list("words.PEACE_TAIL.close") };
   /** "a little" when a factor takes less than 0.15 of peace, else "some". */
   const takes = x => (x >= 0.15 ? "some" : "a little");
   /**
@@ -379,44 +381,44 @@ if (typeof module !== "undefined") {
     const p = m.peace;
     if (!p) return [];
     const b = PEACE.band(p.P);
-    const out = [`Inner peace: ${b}${b === "steady" ? "." : choose(PEACE_TAIL[b], `peace|${k2(p.P)}`, seed)}`];
-    const lv = p.lever && p.lever.name ? `${p.lever.kind === "grow" ? "growing" : "easing"} ${LEVER_NOUN[p.lever.name]}` : "keeping things gentle";
+    const out = [Str.t("words.peaceLines.out.inner_peace", { b: b, b_s: b === "steady" ? "." : choose(PEACE_TAIL[b], `peace|${k2(p.P)}`, seed) })];
+    const lv = p.lever && p.lever.name ? `${p.lever.kind === "grow" ? "growing" : "easing"} ${LEVER_NOUN[p.lever.name]}` : Str.t("words.peaceLines.lv.keeping_things_gentle");
     const sv = p.solve;
-    if (sv && sv.n === 0) out.push(`Path to peace: you're there right now; the biggest help is ${lv}.`);
-    else if (sv && sv.n !== null) out.push(`Path to peace: about ${countWord(sv.n)} gentle step${sv.n === 1 ? "" : "s"}; the biggest help right now is ${lv}.`);
-    else out.push(`Path to peace: this may take longer, and you don't have to do it alone; the biggest help right now is ${lv}.`);
-    if (1 - p.Pc >= 0.03) out.push(`The hidden pull takes ${takes(1 - p.Pc)} of your peace; holding both parts kindly gives it back.`);
+    if (sv && sv.n === 0) out.push(Str.t("words.peaceLines.path_to_peace_you_re", { lv: lv }));
+    else if (sv && sv.n !== null) out.push(Str.t("words.peaceLines.path_to_peace_about_gentle", { v0: countWord(sv.n), v1: sv.n === 1 ? "" : "s", lv: lv }));
+    else out.push(Str.t("words.peaceLines.path_to_peace_this_may", { lv: lv }));
+    if (1 - p.Pc >= 0.03) out.push(Str.t("words.peaceLines.the_hidden_pull_takes_of", { v0: takes(1 - p.Pc) }));
     // The true-size factor counts too big (g) and too small (u); name the side that sets it.
     const smallSide = m.small && m.small.u > (m.grand ? m.grand.g : 0);
     if (1 - p.Pg >= 0.03) out.push(smallSide
-      ? `Putting yourself down takes ${takes(1 - p.Pg)} too; seeing yourself at your true size makes room for peace.`
-      : `The grand thought takes ${takes(1 - p.Pg)} too; seeing it at its true size makes room for peace.`);
+      ? Str.t("words.peaceLines.putting_yourself_down_takes_too", { v0: takes(1 - p.Pg) })
+      : Str.t("words.peaceLines.the_grand_thought_takes_too", { v0: takes(1 - p.Pg) }));
     return out;
   }
   /** Faith wording for peace (only with Include faith on). */
-  const PEACE_FAITH = "May the peace of God, which surpasses all understanding, guard your heart and mind (from Philippians).";
+  const PEACE_FAITH = Str.t("words.PEACE_FAITH.may_the_peace_of_god");
 
   // ---------- Progress ----------
   /** Steps as words: ≤ 2 "one or two", ≤ 5 "a few", ≤ 12 "several", else "many". */
-  const howMany = n => (n <= 2 ? "one or two" : n <= 5 ? "a few" : n <= 12 ? "several" : "many");
+  const howMany = n => (n <= 2 ? Str.t("words.howMany.one_or_two") : n <= 5 ? "a few" : n <= 12 ? "several" : "many");
   /**
    * Progress from the baseline (Δ = d_prev − d: direction and degree) and the
    * recovery count (as words).
    */
   function progressLine(m) {
     const parts = [], p = m.baseline;
-    if (p.dPrev === null) parts.push("This is your first check-in here, so there's nothing to compare yet.");
+    if (p.dPrev === null) parts.push(Str.t("words.progressLine.this_is_your_first_check"));
     else {
       const diff = p.dPrev - m.d, deg = Math.abs(diff) > 0.15 ? "noticeably" : "a little";
-      parts.push(Math.abs(diff) <= 0.03 ? "You're about where you've been lately."
-        : diff > 0 ? `You're ${deg} closer to steady than your recent days.`
-        : `You're ${deg} further from steady than your recent days; one small step is enough.`);
+      parts.push(Math.abs(diff) <= 0.03 ? Str.t("words.progressLine.you_re_about_where_you")
+        : diff > 0 ? Str.t("words.progressLine.you_re_closer_to_steady", { deg: deg })
+        : Str.t("words.progressLine.you_re_further_from_steady", { deg: deg }));
     }
     const r = m.recovery;
     if (r) {
-      if (m.d < FIXED.eps) parts.push("You're close to steady right now.");
-      else if (!r.reached) parts.push("This may take time, and you don't have to do it alone.");
-      else parts.push(`${cap(howMany(r.steps))} small step${r.steps <= 1 ? "" : "s"} could bring you close to steady.`);
+      if (m.d < FIXED.eps) parts.push(Str.t("words.progressLine.you_re_close_to_steady"));
+      else if (!r.reached) parts.push(Str.t("words.progressLine.this_may_take_time_and"));
+      else parts.push(Str.t("words.progressLine.small_step_could_bring_you", { v0: cap(howMany(r.steps)), v1: r.steps <= 1 ? "" : "s" }));
     }
     return parts.join(" ");
   }
@@ -456,12 +458,16 @@ if (typeof module !== "undefined") {
   }
   /** The headline: the peace band line, then "Room for …" (one short tile). */
   function headline(m, seed = 1) {
-    const room = roomLine(m).replace(/^Room for: /, "Room for ");
+    const room = roomLine(m).replace(/^Room for: /, Str.t("words.headline.room.room_for"));
     const p = m.peace ? peaceLines(m, seed)[0] : "";
     return p ? `${p} ${room}` : room;
   }
 
-  function card(state, m, opts = {}) {
+  const cardMemo = MF.Movers.memoOn((m, state, opts) => cardOf(state, m, opts));
+  /** The words-first card for a reading: computed once per reading m (same state and options). */
+  function card(state, m, opts = {}) { return cardMemo(m, state, opts); }
+  /** The card for one reading (memoized per m by card(); see MF.Movers.memoOn). */
+  function cardOf(state, m, opts = {}) {
     const seed = Number.isFinite(opts.seed) ? opts.seed : 1;
     const c = {
       room: roomLine(m),
@@ -491,12 +497,12 @@ if (typeof module !== "undefined") {
     return [
       c.room,
       ...c.peace, ...(c.peaceFaith ? [c.peaceFaith] : []),
-      `What you may be feeling: ${c.feeling.replace(/^You may be feeling /, "")}`,
-      `How they connect: ${c.connect.join(" ")}`,
+      Str.t("words.lines.what_you_may_be_feeling", { v0: c.feeling.replace(/^You may be feeling /, "") }),
+      Str.t("words.lines.how_they_connect", { v0: c.connect.join(" ") }),
       ...c.kai, ...c.conflict, ...c.reality, ...c.forgive,
       ...(c.freeing ? [...c.freeing.lines, c.freeing.step] : []),
       "Affirmations:", ...c.affirmations.map(x => `  ${x}`),
-      `One step: ${c.step}`,
+      Str.t("words.lines.one_step", { step: c.step }),
       ...(c.practice && c.practice.caution ? [`Caution: ${c.practice.caution}`] : []),
       c.progress,
     ];

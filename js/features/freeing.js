@@ -51,12 +51,15 @@ if (typeof module !== "undefined") {
   require("./practices.js");
 }
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params, EQ = MF.Equations;   // every number: data/params.js; every equation: core/equations.js
   const { NAMES, LEVELS, LEVEL_ORDER, PICK_WORD, idx, isGround, r2, levelOf, listJoin, cap } = MF.Movers;
   const R = MF.Reality, PEACE = MF.Peace;
 
-  const MU = 0.5, K = 3, T = 3, MIN_GAIN = 0.001;
+  const { MU, K, T, MIN_GAIN } = P.freeing;
   /** The picker's ladder: band midpoints, by band index (off, a little, quite, strongly). */
   const LADDER = LEVEL_ORDER.map(l => LEVELS[l]);
   /** Band index of a value (0 off … 3 strongly), the same cut points as levelOf. */
@@ -74,7 +77,7 @@ if (typeof module !== "undefined") {
   }
 
   /** The nudge load N(e) = e_shame + c_self·e_rumination + u·max(0, h_hope − e_hope). */
-  const load = (e, h, cSelf, u) => e[idx.shame] + cSelf * e[idx.rumination] + u * Math.max(0, h[idx.hope] - e[idx.hope]);
+  const load = (e, h, cSelf, u) => EQ.freeLoad(e[idx.shame], e[idx.rumination], e[idx.hope], h[idx.hope], cSelf, u);
 
   /** All subsets of 1..k indices from a list. */
   function subsets(list, k) {
@@ -98,19 +101,19 @@ if (typeof module !== "undefined") {
    */
   function solve(e0, h, V, ctx = {}) {
     const clashes = ctx.clashes || [], ts = ctx.tsize || 0, cSelf = ctx.cSelf || 0, u = ctx.u || 0;
-    const P = e => PEACE.score(e, h, V, R.conflicts(e, clashes), ts).raw;
-    const J = e => P(e) - MU * load(e, h, cSelf, u);
+    const Praw = e => PEACE.score(e, h, V, R.conflicts(e, clashes), ts).raw;
+    const J = e => EQ.freeJ(Praw(e), load(e, h, cSelf, u));   // OE eq.(4): J = P − μN
     let cur = e0.slice();
     const steps = [];
     for (let t = 0; t < T; t++) {
-      const Pc = P(cur), Jc = J(cur);
+      const Pc = Praw(cur), Jc = J(cur);
       const movable = NAMES.map((n, j) => j).filter(j => Math.abs(oneBand(cur[j], h[j]) - cur[j]) > 1e-9);
       let best = null;
       subsets(movable, K).forEach(set => {
         const e2 = cur.slice();
         set.forEach(j => { e2[j] = r2(oneBand(cur[j], h[j])); });
         if (e2[idx.shame] > cur[idx.shame] + 1e-9) return;
-        const p2 = P(e2);
+        const p2 = Praw(e2);
         if (p2 < Pc - 1e-12) return;
         const j2 = J(e2);
         if (!best || j2 > best.J + 1e-12 || (Math.abs(j2 - best.J) <= 1e-12 && set.length < best.set.length)) best = { e: e2, J: j2, P: p2, set };
@@ -119,7 +122,7 @@ if (typeof module !== "undefined") {
       steps.push({ moves: best.set.map(j => ({ name: NAMES[j], from: cur[j], to: best.e[j], kind: best.e[j] < cur[j] ? "ease" : "grow" })), P: r4(best.P), J: r4(best.J) });
       cur = best.e;
     }
-    return { target: cur, steps, P0: r4(P(e0)), P1: r4(P(cur)), J0: r4(J(e0)), J1: r4(J(cur)), N0: r4(load(e0, h, cSelf, u)), N1: r4(load(cur, h, cSelf, u)) };
+    return { target: cur, steps, P0: r4(Praw(e0)), P1: r4(Praw(cur)), J0: r4(J(e0)), J1: r4(J(cur)), N0: r4(load(e0, h, cSelf, u)), N1: r4(load(cur, h, cSelf, u)) };
   }
   /** Round to four decimals. */
   const r4 = x => Math.round(x * 10000) / 10000;
@@ -145,15 +148,15 @@ if (typeof module !== "undefined") {
   MF.Master.addPass(pass);
 
   // ---------- Words (card) ----------
-  const EASE_NOUN = { fear: "the fear", sadness: "the sadness", anger: "the anger", shame: "the shame", rumination: "the replaying", avoidance: "the avoiding", calm: "the calm", connection: "the closeness", hope: "the hope" };
+  const EASE_NOUN = { fear: Str.t("words.LEVER_NOUN.fear"), sadness: Str.t("words.LEVER_NOUN.sadness"), anger: Str.t("words.LEVER_NOUN.anger"), shame: Str.t("words.LEVER_NOUN.shame"), rumination: Str.t("words.NOUN.rumination"), avoidance: Str.t("freeing.EASE_NOUN.avoidance"), calm: Str.t("freeing.EASE_NOUN.calm"), connection: Str.t("freeing.EASE_NOUN.connection"), hope: Str.t("freeing.EASE_NOUN.hope") };
   const GROW_NOUN = { calm: "calm", connection: "connection", hope: "hope", fear: "fear", sadness: "sadness", anger: "anger", shame: "shame", rumination: "replaying", avoidance: "avoiding" };
-  const BAND_WORD = { "a little": "a little peace", growing: "growing peace", close: "close to steady", steady: "steady" };
+  const BAND_WORD = { "a little": Str.t("freeing.BAND_WORD.a_little"), growing: Str.t("freeing.BAND_WORD.growing"), close: Str.t("freeing.BAND_WORD.close"), steady: "steady" };
   const NUMBER = ["no", "one", "two", "three"];
   /** The true-humility line (always on the freeing tile). */
-  const TRUE_HUMILITY = "True humility sees you at your real size: not worse than others, not better; worthy of kindness and still learning.";
+  const TRUE_HUMILITY = Str.t("freeing.TRUE_HUMILITY.true_humility_sees_you_at");
   /** Faith wording (only with Include faith on). */
-  const FAITH = "Think of yourself with sober judgment (from Romans). To be humble is to walk in truth (Teresa of \u00C1vila), and your worth rests on God's love, not on your record: we love because he first loved us (from First John).";
-  const GRACE = "The Forgive myself path can help you own your part and set the rest down.";
+  const FAITH = Str.t("freeing.FAITH.think_of_yourself_with_sober");
+  const GRACE = Str.t("freeing.GRACE.the_forgive_myself_path_can");
 
   /**
    * The "Your freeing mix" tile, in words (empty when it isn't relevant).
@@ -168,19 +171,19 @@ if (typeof module !== "undefined") {
     if (f.ease.length) parts.push(`ease ${listJoin(f.ease.map(n => EASE_NOUN[n]))}`);
     if (f.grow.length) parts.push(`grow ${listJoin(f.grow.map(n => GROW_NOUN[n]))}`);
     // Order matters for the short card: the mix and the true-humility line come first.
-    const lines = [`Your freeing mix: ${parts.join("; ")}.`, TRUE_HUMILITY];
+    const lines = [Str.t("freeing.cardLines.lines.your_freeing_mix", { v0: parts.join("; ") }), TRUE_HUMILITY];
     const b0 = PEACE.band(f.P0), b1 = PEACE.band(f.P1), n = f.steps.length;
-    const how = `${cap(NUMBER[n])} gentle step${n === 1 ? "" : "s"}, one band at a time`;
+    const how = Str.t("freeing.cardLines.how.gentle_step_one_band_at", { v0: cap(NUMBER[n]), n_s: n === 1 ? "" : "s" });
     lines.push(b0 === b1
-      ? `${how}: inner peace rises within ${BAND_WORD[b0]}, and shame only goes down.`
-      : `${how}: inner peace could go from ${BAND_WORD[b0]} to ${BAND_WORD[b1]}, and shame only goes down.`);
+      ? Str.t("freeing.cardLines.inner_peace_rises_within_and", { how: how, v1: BAND_WORD[b0] })
+      : Str.t("freeing.cardLines.inner_peace_could_go_from", { how: how, v1: BAND_WORD[b0], v2: BAND_WORD[b1] }));
     if (opts.faith) lines.push(FAITH);
     // Grace's route in words only when the forgiveness tile isn't already saying it (the button shows either way).
     if (f.selfBlame && !(m.forgive && m.forgive.path === "self")) lines.push(GRACE);
     const lib = MF.Practices && MF.Practices.LIBRARY[f.practice];
     // When the card's own One step is already this practice, point to it instead of repeating it.
     const same = m.practice && m.practice.id === f.practice;
-    const step = !lib ? "" : same ? "One step: start with the self-compassion break in the One step below." : `One step: ${lib.say({ min: "two", times: "three" })}.`;
+    const step = !lib ? "" : same ? Str.t("freeing.cardLines.step.one_step_start_with_the") : Str.t("freeing.cardLines.step.one_step", { v0: lib.say({ min: "two", times: "three" }) });
     return { lines, step, grace: f.selfBlame, practice: f.practice, tryIt: !same };
   }
 
@@ -189,7 +192,7 @@ if (typeof module !== "undefined") {
   const SHORT = { ...PICK_WORD, rumination: "replaying" };
   /** Line order: the hard feelings, then replaying and avoiding, then the grounding ones. */
   const LINE_ORDER = ["fear", "sadness", "anger", "shame", "rumination", "avoidance", "calm", "connection", "hope"];
-  const EXTRA_WORD = { blame: "blaming myself", putdown: "putting myself down" };
+  const EXTRA_WORD = { blame: Str.t("freeing.EXTRA_WORD.blame"), putdown: Str.t("freeing.EXTRA_WORD.putdown") };
   /**
    * "Now: … → Freeing mix: …". A hard/process mover is listed when it is not
    * off on either side; a grounding mover when its level changes or is not "quite".
@@ -206,7 +209,7 @@ if (typeof module !== "undefined") {
     });
     const side = v => keep.map(n => `${SHORT[n]} ${levelOf(v[idx[n]])}`);
     const nowSide = side(now).concat(Object.keys(EXTRA_WORD).filter(x => extras.includes(x)).map(x => EXTRA_WORD[x]));
-    return `Now: ${nowSide.join(", ") || "at rest"} \u2192 Freeing mix: ${side(target).join(", ") || "at rest"}`;
+    return Str.t("freeing.line.now_freeing_mix", { v0: nowSide.join(", ") || Str.t("freeing.line.at_rest"), v1: side(target).join(", ") || Str.t("freeing.line.at_rest") });
   }
 
   // ---------- Panel bits (browser only) ----------
@@ -223,7 +226,7 @@ if (typeof module !== "undefined") {
     $("copy-mix").addEventListener("click", () => { const t = current(); if (t) app.copy(t, "mix-copied"); });
     return function render() {
       const t = current();
-      $("mix-line").textContent = t || "Tap Update to see your freeing mix.";
+      $("mix-line").textContent = t || Str.t("freeing.render.tap_update_to_see_your");
       $("copy-mix").disabled = !t;
     };
   }

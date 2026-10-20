@@ -20,8 +20,11 @@ if (typeof module !== "undefined") {
   require("./signals.js");
 }
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("./equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params, EQ = MF.Equations;   // every number lives in js/data/params.js, every equation in core/equations.js
   const G = typeof Grounding !== "undefined" ? Grounding : require("./grounding.js");
   const analyzeFn = typeof analyze === "function" ? analyze : require("./signals.js").analyze;
 
@@ -34,14 +37,14 @@ if (typeof module !== "undefined") {
   const N = NAMES.length;
   const idx = Object.fromEntries(NAMES.map((n, i) => [n, i]));
   const isGround = NAMES.map(n => GROUND.includes(n));
-  const REST = NAMES.map(n => (GROUND.includes(n) ? 0.5 : 0));
-  const HOME = { calm: 0.8, connection: 0.8, hope: 0.8 };
+  const REST = NAMES.map(n => (GROUND.includes(n) ? P.model.REST_GROUND : 0));
+  const HOME = P.model.HOME;
   const VERSION = 4;
   const LABEL_RE = /^[a-z0-9-]{1,24}$/;
-  const ACTIVE = 0.1, MAX_SIM = 200, MAX_CHECKPOINTS = 50, MAX_DAYS = 60, MAX_LINES = 400, MAX_W = 30;
+  const { ACTIVE, MAX_SIM } = P.model, { MAX_CHECKPOINTS, MAX_DAYS, MAX_LINES, MAX_W } = P.limits;
 
   /** Round to two decimals. */
-  const r2 = x => Math.round(x * 100) / 100;
+  const r2 = EQ.r2;
   /** Clamp x into [lo, hi]. */
   const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
   /** Clamp x into [0, 1]. */
@@ -54,18 +57,10 @@ if (typeof module !== "undefined") {
   const homeVec = (o = HOME) => NAMES.map(n => r2(clamp01(Number(o[n]) || 0)));
 
   // ---------- Variables (the Scientist panel shows these; the rest are fixed) ----------
-  const VAR_SPEC = [
-    ["aBase", 0.2, 0.05, 0.5, "a0: base step size toward home"],
-    ["k", 0.05, 0, 0.2, "k: how much distance from home adds to the step"],
-    ["aMax", 0.25, 0.05, 0.5, "a_max: largest step"],
-    ["b", 0.1, 0, 0.5, "stabilizer pull (grounding movers press on hard ones)"],
-    ["d", 0.3, 0.05, 1, "decay: how fast a mover settles on its own"],
-    // Inner peace (core/peace.js): P = 1/(1 + (d/d0)²) · (1 − γ·C_max) · (1 − δ·g)
-    ["d0", 0.6, 0.2, 2, "d0: distance at which inner peace is half"],
-    ["gamma", 0.3, 0, 0.6, "γ: how much the strongest hidden pull lowers peace"],
-    ["delta", 0.3, 0, 0.6, "δ: how much grand or absolute thinking lowers peace"],
-  ];
-  const FIXED = { aMin: 0.05, aCap: 0.12, bU: 0.15, dt: 0.15, rise: 0.15, eps: 0.3, k: 8, beta: 0.2 };
+  // Numbers from params.js (model.VAR_SPEC); the notes from strings.js.
+  const VAR_NOTE = { aBase: Str.t("movers.VAR_SPEC.a0_base_step_size_toward"), k: Str.t("movers.VAR_SPEC.k_how_much_distance_from"), aMax: Str.t("movers.VAR_SPEC.a_max_largest_step"), b: Str.t("movers.VAR_SPEC.stabilizer_pull_grounding_movers_press"), d: Str.t("movers.VAR_SPEC.decay_how_fast_a_mover"), d0: Str.t("movers.VAR_SPEC.d0_distance_at_which_inner"), gamma: Str.t("movers.VAR_SPEC.how_much_the_strongest_hidden"), delta: Str.t("movers.VAR_SPEC.how_much_grand_or_absolute") };
+  const VAR_SPEC = P.model.VAR_SPEC.map(([k, def, min, max]) => [k, def, min, max, VAR_NOTE[k]]);
+  const FIXED = P.model.FIXED;
   const SPEC = Object.fromEntries(VAR_SPEC.map(([k, def, min, max, note]) => [k, { def, min, max, note }]));
   const VAR_KEYS = VAR_SPEC.map(v => v[0]);
   /** The default adjustable variables {aBase, k, aMax, b, d, d0, gamma, delta}. */
@@ -79,29 +74,18 @@ if (typeof module !== "undefined") {
     VAR_KEYS.forEach(k => {
       if (!(k in input)) return;
       const x = Number(input[k]);
-      if (!Number.isFinite(x)) { notes.push(`${k}: not a number, kept ${vars[k]}`); return; }
+      if (!Number.isFinite(x)) { notes.push(Str.t("movers.not_a_number_kept", { k: k, v1: vars[k] })); return; }
       const c = r2(clamp(x, SPEC[k].min, SPEC[k].max));
-      if (c !== r2(x)) notes.push(`${k}: kept inside ${SPEC[k].min}\u2013${SPEC[k].max}`);
+      if (c !== r2(x)) notes.push(Str.t("movers.kept_inside", { k: k, min: SPEC[k].min, max: SPEC[k].max }));
       vars[k] = c;
     });
-    if (vars.aMax < Math.max(FIXED.aMin, vars.aBase / 2)) { vars.aMax = r2(Math.max(FIXED.aMin, vars.aBase / 2)); notes.push("aMax: raised to fit aBase"); }
+    if (vars.aMax < Math.max(FIXED.aMin, vars.aBase / 2)) { vars.aMax = r2(Math.max(FIXED.aMin, vars.aBase / 2)); notes.push(Str.t("movers.validateVars.amax_raised_to_fit_abase")); }
     return { vars, notes };
   }
 
   // ---------- W: who amplifies (+) or dampens (−) whom ----------
   // Design assumptions informed by the research in the README; adjustable.
-  const EDGES = [
-    ["sadness", "rumination", 0.4], ["rumination", "sadness", 0.4],   // depressive rumination
-    ["fear", "avoidance", 0.4], ["avoidance", "fear", 0.3],           // avoidance keeps anxiety going
-    ["shame", "avoidance", 0.4], ["avoidance", "sadness", 0.3],       // hiding, then withdrawal
-    ["shame", "sadness", 0.3], ["rumination", "shame", 0.2],
-    ["anger", "rumination", 0.3], ["rumination", "anger", 0.2],       // angry replaying
-    ["rumination", "fear", 0.2], ["fear", "anger", 0.2],
-    ["calm", "fear", -0.5], ["calm", "anger", -0.4], ["calm", "rumination", -0.3],
-    ["connection", "shame", -0.5], ["connection", "sadness", -0.4],
-    ["hope", "sadness", -0.5], ["hope", "avoidance", -0.3],
-    ["fear", "calm", -0.3], ["sadness", "hope", -0.3], ["shame", "connection", -0.3], ["avoidance", "connection", -0.2],
-  ];
+  const EDGES = P.model.EDGES;   // design assumptions informed by the research in the README (params.js)
   const MAIN_PAIRS = [["sadness", "rumination"], ["rumination", "sadness"], ["fear", "avoidance"], ["shame", "avoidance"], ["calm", "fear"], ["connection", "shame"], ["hope", "sadness"]];
   /** Turn a list of [from, to, w] edges into a 9×9 matrix. */
   function matrix(edges) {
@@ -114,8 +98,18 @@ if (typeof module !== "undefined") {
    * W with the user's overrides applied.
    * @param {Array<{from:string,to:string,w:number}>} w overrides
    */
+  // Memoized on the overrides (push28): master builds W once per reading, and the recovery and
+  // peace solve read it hundreds of times per Update. Callers never write into W.
+  const W_MEMO = new Map();
   function weights(w = []) {
     if (!w.length) return W0;
+    const key = JSON.stringify(w);
+    let M = W_MEMO.get(key);
+    if (!M) { M = weightsOf(w); W_MEMO.set(key, M); if (W_MEMO.size > 16) W_MEMO.delete(W_MEMO.keys().next().value); }
+    return M;
+  }
+  /** Build W from the defaults with the overrides w applied. */
+  function weightsOf(w) {
     const edges = EDGES.filter(([a, b]) => !w.some(o => o.from === a && o.to === b));
     return matrix(edges.concat(w.map(o => [o.from, o.to, o.w])));
   }
@@ -152,8 +146,7 @@ if (typeof module !== "undefined") {
     connection: [["lonel", 1], ["alone", 1], ["isolat", 1], ["nobody cares", 1], ["no one cares", 1], ["left out", 0.9], ["abandon", 1], ["ignored", 0.7], ["rejected", 0.8], ["no friends", 1], ["by myself", 0.6]],
     hope: [["hopeless", 1], ["no point", 1], ["pointless", 0.8], ["never get better", 1], ["give up", 0.6], ["what's the use", 0.8], ["no future", 1], ["far from god", 0.6]],
   };
-  const INTENSIFIERS = { very: 1.5, so: 1.4, really: 1.4, extremely: 1.7, totally: 1.5, completely: 1.5, always: 1.3, super: 1.4, deeply: 1.5, too: 1.2 };
-  const SOFTENERS = { little: 0.6, bit: 0.6, slightly: 0.5, somewhat: 0.7, kinda: 0.7 };
+  const { INTENSIFIERS, SOFTENERS } = P.words;
   const NEGATORS = new Set(["not", "no", "never", "without", "hardly", "isn't", "aren't", "wasn't", "don't", "doesn't", "didn't", "cannot", "can't", "won't", "nor"]);
   const SELF = /\b(i|i'm|im|i've|i'd|i'll|me|my|myself|mine)\b/g;
 
@@ -237,13 +230,13 @@ if (typeof module !== "undefined") {
     const notes = [];
     // A word the person negated ("not angry") also blocks the analyzer's matching category.
     const bump = (n, v, why) => { if (negd.has(n) && hp[n] === 0) return; hp[n] += v; if (why) notes.push(why); };
-    if (signals.categories.includes("hopelessness")) { bump("sadness", 0.6, "hopeless wording"); neg.hope += 0.6; }
+    if (signals.categories.includes("hopelessness")) { bump("sadness", 0.6, Str.t("movers.fromText.hopeless_wording")); neg.hope += 0.6; }
     if (signals.categories.includes("selfBlame")) bump("shame", 0.5, "self-blame");
-    if (signals.categories.includes("anxiety") && hp.fear === 0) bump("fear", 0.5, "worry wording");
-    if (signals.categories.includes("anger") && hp.anger === 0) bump("anger", 0.5, "anger wording");
-    if (read.patterns.includes("meaning")) { bump("fear", 0.4, "hidden-meaning (curse/sign) language"); hp.avoidance += 0.3; }
-    if (signals.distortions.includes("labeling")) { bump("shame", 0.3, "harsh label"); hp.avoidance += 0.2; }
-    if (signals.distortions.includes("mindReading")) { bump("fear", 0.2, "mind reading"); hp.shame += 0.2; }
+    if (signals.categories.includes("anxiety") && hp.fear === 0) bump("fear", 0.5, Str.t("movers.fromText.worry_wording"));
+    if (signals.categories.includes("anger") && hp.anger === 0) bump("anger", 0.5, Str.t("movers.fromText.anger_wording"));
+    if (read.patterns.includes("meaning")) { bump("fear", 0.4, Str.t("movers.fromText.hidden_meaning_curse_sign_language")); hp.avoidance += 0.3; }
+    if (signals.distortions.includes("labeling")) { bump("shame", 0.3, Str.t("movers.fromText.harsh_label")); hp.avoidance += 0.2; }
+    if (signals.distortions.includes("mindReading")) { bump("fear", 0.2, Str.t("movers.fromText.mind_reading")); hp.shame += 0.2; }
     if (signals.distortions.includes("catastrophizing")) { bump("fear", 0.3, "worst-case wording"); hp.rumination += 0.2; }
     // Fusion: how tightly the thought is believed (the old mirage grip M and believability B).
     if (read.patterns.length) hp.avoidance += Math.max(0, read.suggestedM - 0.3);
@@ -251,7 +244,7 @@ if (typeof module !== "undefined") {
     if (abs) {
       HARD.concat(["rumination"]).forEach(n => { if (hp[n] > 0) hp[n] *= 1 + 0.15 * abs; });
       hp.avoidance += 0.15 * abs;
-      notes.push("absolute words");
+      notes.push(Str.t("movers.fromText.absolute_words"));
     }
     // Self-focus in hard sentences adds a little rumination (the old ego grip).
     let selfN = 0, tokN = 0;
@@ -276,7 +269,7 @@ if (typeof module !== "undefined") {
       (r.found || []).forEach(x => found.push(x));
       Object.assign(data, r.data || {});
     });
-    const sat = x => r2(1 - Math.exp(-Math.max(0, x)));
+    const sat = EQ.sat;
     const w = { e: NAMES.map(n => (isGround[idx[n]] ? 0 : sat(hp[n]))), pos: Object.fromEntries(GROUND.map(n => [n, sat(pos[n])])), neg: Object.fromEntries(GROUND.map(n => [n, sat(neg[n])])) };
     return { crisis: false, w, notes: [...new Set(notes)], read, found, data };
   }
@@ -285,13 +278,7 @@ if (typeof module !== "undefined") {
 
   // New words add to the base vector.
   /** Add new word contributions to a base vector (hard/process saturate; grounding moves up or down). */
-  function combine(base, w) {
-    return base.map((b, i) => {
-      const n = NAMES[i];
-      if (!isGround[i]) return r2(1 - (1 - b) * (1 - w.e[i]));
-      return r2(clamp01(b + w.pos[n] * (1 - b) - w.neg[n] * b));
-    });
-  }
+  function combine(base, w) { return EQ.oplus(base, w, NAMES, isGround); }
 
 
   // ---------- Word hooks (features register small nudges here) ----------
@@ -307,10 +294,10 @@ if (typeof module !== "undefined") {
   // (strongly is the midpoint of 0.6–1.0). Grounding chips (calm, connected,
   // hopeful) start at "quite", near their rest of 0.5, because "off" for them
   // means "not at all calm", which is itself a strong reading; the others start off.
-  const LEVELS = { off: 0, "a little": 0.15, quite: 0.45, strongly: 0.8 };
+  const LEVELS = P.words.LEVELS;
   const LEVEL_ORDER = ["off", "a little", "quite", "strongly"];
   /** Plain words for the chips. */
-  const PICK_WORD = { fear: "afraid", sadness: "sad", anger: "angry", shame: "ashamed", calm: "calm", connection: "connected", hope: "hopeful", rumination: "replaying thoughts", avoidance: "avoiding" };
+  const PICK_WORD = { fear: "afraid", sadness: "sad", anger: "angry", shame: "ashamed", calm: "calm", connection: "connected", hope: "hopeful", rumination: Str.t("movers.PICK_WORD.rumination"), avoidance: "avoiding" };
   /** The chip order on screen. */
   const PICK_ORDER = ["fear", "sadness", "anger", "shame", "calm", "connection", "hope", "rumination", "avoidance"];
   /** A chip's starting level. */
@@ -353,16 +340,33 @@ if (typeof module !== "undefined") {
       (r.notes || []).forEach(x => notes.push(x));
       Object.assign(data, r.data || {});
     });
-    const sat = x => r2(1 - Math.exp(-Math.max(0, x)));
+    const sat = EQ.sat;
     const w = { e: NAMES.map(n => (isGround[idx[n]] ? 0 : sat(hp[n]))), pos: { calm: 0, connection: 0, hope: 0 }, neg: Object.fromEntries(GROUND.map(n => [n, sat(neg[n])])) };
     return { crisis: false, picked: true, base, e: combine(base, w), w, notes, read: null, found: [], data, extras: extras.sort() };
   }
 
   // ---------- Small shared helpers ----------
+  /**
+   * Remember fn's last result per first argument (an object such as master's output m), for the same
+   * other arguments (compared with ===, opts objects by their JSON). One Update reads the same m in
+   * several panels; this computes each view once (push28). Results are shared, so callers must not mutate them.
+   */
+  function memoOn(fn) {
+    const seen = new WeakMap();
+    const same = (a, b) => a === b || (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && JSON.stringify(a) === JSON.stringify(b));
+    return function (first, ...rest) {
+      if (!first || typeof first !== "object") return fn(first, ...rest);
+      const hit = seen.get(first);
+      if (hit && hit.rest.length === rest.length && hit.rest.every((x, i) => same(x, rest[i]))) return hit.out;
+      const out = fn(first, ...rest);
+      seen.set(first, { rest, out });
+      return out;
+    };
+  }
   /** Euclidean length of a vector. */
-  const norm = v => Math.sqrt(v.reduce((s, x) => s + x * x, 0));
+  const norm = EQ.norm;
   /** ‖a − b‖. */
-  const distance = (a, b) => norm(a.map((x, i) => x - b[i]));
+  const distance = EQ.distance;
   /** Local timestamp YYYY-MM-DDTHH:MM for a time in ms. */
   function stamp(ts) {
     const d = new Date(ts), p = x => String(x).padStart(2, "0");
@@ -397,6 +401,7 @@ if (typeof module !== "undefined") {
   }
 
   MF.Movers = {
+    memoOn,
     VERSION, NAMES, HARD, GROUND, PROCESS, LABEL, HOME, REST, FIXED, VAR_SPEC, SPEC, VAR_KEYS, ACTIVE, MAX_SIM, MAX_CHECKPOINTS, MAX_DAYS, MAX_LINES, MAX_W, LABEL_RE, N, idx, isGround, r2, clamp, clamp01, rest, fromObj, homeVec, norm, distance, stamp, dayOf, f2, sgn, label, cap, listJoin, rng, defaultState, defaultVars, validateVars, weights, defaultWeight, setWeight, fromText, combine, EDGES, MAIN_PAIRS, addWordHook,
     LEVELS, LEVEL_ORDER, PICK_WORD, PICK_ORDER, EXTRAS, pickDefault, levelOf, nextLevel, pickVector, vectorLevels, addPickExtra, fromPick,
   };

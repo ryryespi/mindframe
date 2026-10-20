@@ -17,7 +17,7 @@ function test(name, fn) {
   try { fn(); passed += 1; console.log("ok  -", name); }
   catch (err) { console.error("FAIL -", name); console.error(err); process.exitCode = 1; }
 }
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 const r2 = x => Math.round(x * 100) / 100;
 const clip = x => Math.min(1, Math.max(0, x));
 const GROUND = ["calm", "connection", "hope"];

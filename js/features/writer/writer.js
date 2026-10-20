@@ -15,8 +15,10 @@ if (typeof module !== "undefined") {
   require("../historian.js");
 }
 
+if (typeof window === "undefined") require("../../data/strings.js");
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
   const { HARD, PROCESS, idx, cap } = MF.Movers;
   const { SKILL, REFRAME, focus } = MF.Master;
   const { SOFTENER, LINK_VERB, EASE, strength, choose, affirmations } = MF.Words;
@@ -26,7 +28,7 @@ if (typeof module !== "undefined") {
   const G = typeof Grounding !== "undefined" ? Grounding : require("../../core/grounding.js");
   // ---------- Stories (driven by the master step) ----------
   const ARC_FOR = { shame: "labeling", sadness: "hopelessness", fear: "catastrophizing", anger: "catastrophizing", rumination: "allOrNothing", avoidance: "fortuneTelling" };
-  const STEP_FOR = { calm: SKILL.calm.split(": ")[1].replace(/\.$/, "").toLowerCase(), connection: "send one short message to someone who is kind", hope: "pick one small thing for tomorrow and write it down" };
+  const STEP_FOR = { calm: SKILL.calm.split(": ")[1].replace(/\.$/, "").toLowerCase(), connection: Str.t("writer.writer.STEP_FOR.connection"), hope: Str.t("writer.writer.STEP_FOR.hope") };
   /** Which mover the story is about: the strongest one, else the biggest grounding gap. */
   function storyFocus(state, m) { return focus({ e: m.e, home: state.home }).name || m.top || "calm"; }
   /**
@@ -39,7 +41,7 @@ if (typeof module !== "undefined") {
     if (!m || m.crisis) return null;
     if (MF.Kai && m.kai && m.kai.X > 0) {
       const k = MF.Kai.story(m, { traveler: opts.traveler, friend: opts.friend, faith: !!opts.faith });
-      return { kind: "kai", guide: k.traveler, tag: `${k.traveler}, a traveler who stands calm in a storm of words`, focus: m.top || "anger", arc: "kai", lever: k.lever, from: null, to: null, affirmation: null, text: k.text, sentences: k.sentences, next: m.next };
+      return { kind: "kai", guide: k.traveler, tag: Str.t("writer.writer.story.tag", { traveler: k.traveler }), focus: m.top || "anger", arc: "kai", lever: k.lever, from: null, to: null, affirmation: null, text: k.text, sentences: k.sentences, next: m.next };
     }
     if (m.d < 0.005) return null;
     const top = storyFocus(state, m);
@@ -56,12 +58,12 @@ if (typeof module !== "undefined") {
     // Composed from the numbers: the stabilizer's verb from |W[stab][top]|, the
     // easing verb and "a little" from the step's gain, the room line from master's positives.
     const sw = stab ? weights(state.w)[idx[stab]][i] : 0;
-    const helper = stab && stab !== top ? `They knew ${SOFTENER[stab]} ${choose(LINK_VERB.soft[strength(sw)], `story-soft|${stab}|${sw}`, opts.seed || 1)} it, so the plan stayed small and real.` : "The plan stayed small and real.";
-    const subject = HARD.includes(top) ? `the ${top}` : top === "rumination" ? "the replaying" : top === "avoidance" ? "the urge to look away" : top;
-    const room = (m.positives || []).length ? ` There was room for ${listJoin(m.positives.map(p => p.word))} now.` : "";
-    const loosen = `${cap(subject)} ${EASE[top][2]}${moved >= 0.15 ? "" : " a little"}. Not all the way. Just closer.${room}`;
+    const helper = stab && stab !== top ? Str.t("writer.writer.story.helper.they_knew_it_so_the", { v0: SOFTENER[stab], v1: choose(LINK_VERB.soft[strength(sw)], `story-soft|${stab}|${sw}`, opts.seed || 1) }) : Str.t("writer.writer.story.helper.the_plan_stayed_small_and");
+    const subject = HARD.includes(top) ? `the ${top}` : top === "rumination" ? Str.t("words.NOUN.rumination") : top === "avoidance" ? Str.t("writer.writer.story.subject.the_urge_to_look_away") : top;
+    const room = (m.positives || []).length ? Str.t("writer.writer.story.room.there_was_room_for_now", { v0: listJoin(m.positives.map(p => p.word)) }) : "";
+    const loosen = Str.t("writer.writer.story.loosen.not_all_the_way_just", { v0: cap(subject), v1: EASE[top][2], moved_s: moved >= 0.15 ? "" : " a little", room: room });
     const aff = affirmations(m, { seed: opts.seed || 1 })[0];
-    const keep = `They kept one sentence close: \u201C${aff}\u201D`;
+    const keep = Str.t("writer.writer.story.keep.they_kept_one_sentence_close", { aff: aff });
     const b = base.sentences;
     const sentences = [b[0], helper, ...b.slice(1, -1), loosen, keep, b[b.length - 1]];
     return { guide, tag: base.tag, focus: top, arc, opening: base.opening, openingFrom: base.openingFrom, from, to, affirmation: aff, text: sentences.join(" "), next: m.next };
@@ -110,7 +112,7 @@ if (typeof module !== "undefined") {
     function tell() {
       if (!app.update()) return;
       current = story(app.state, app.m(), { seed, faith: app.faith(), friend: app.companion ? app.companion.get().name : "" });
-      if (!current) { hide(); app.note("You're close to steady; there's no story to tell right now."); return; }
+      if (!current) { hide(); app.note(Str.t("writer.writer.tell.you_re_close_to_steady")); return; }
       $("story-tag").textContent = "Guide: " + current.tag;
       $("story-text").textContent = current.text;
       $("story").classList.remove("hidden");
@@ -126,7 +128,7 @@ if (typeof module !== "undefined") {
       app.resetBase("");
       hide();
       app.update({ care: false });
-      app.note("Step accepted and saved as a checkpoint. The next reading starts from here.");
+      app.note(Str.t("writer.writer.step_accepted_and_saved_as"));
     });
     $("play").addEventListener("click", () => {
       if (!current) return;
@@ -143,13 +145,13 @@ if (typeof module !== "undefined") {
       $("game-next").classList.add("hidden");
       if (i >= g.scenes.length) {
         $("game-count").textContent = "";
-        $("game-title").textContent = "You found the real path";
+        $("game-title").textContent = Str.t("writer.writer.scene.you_found_the_real_path");
         $("game-text").textContent = g.ending.join(" ");
         $("game-prompt").textContent = "";
         return;
       }
       const sc = g.scenes[i];
-      $("game-count").textContent = `Scene ${["one", "two", "three", "four"][i] || ""} of four`;
+      $("game-count").textContent = Str.t("writer.writer.scene.scene_of_four", { v0: ["one", "two", "three", "four"][i] || "" });
       $("game-title").textContent = sc.title;
       $("game-text").textContent = sc.text;
       $("game-prompt").textContent = sc.prompt;
@@ -174,20 +176,20 @@ if (typeof module !== "undefined") {
     $("journal-save").addEventListener("click", () => {
       const text = $("input").value.trim();
       if (G.isCrisis(text)) { app.crisis(true); return; }
-      if (!journalAdd(localStorage, text)) { app.note("Write something above to save it in your journal."); return; }
+      if (!journalAdd(localStorage, text)) { app.note(Str.t("writer.writer.write_something_above_to_save")); return; }
       render();
-      app.note("Saved in your journal on this device.");
+      app.note(Str.t("forgiveness.saved_in_your_journal_on"));
       app.care("journal");
     });
     $("journal-clear").addEventListener("click", () => {
-      if (!confirm("Clear every journal entry on this device?")) return;
+      if (!confirm(Str.t("writer.writer.clear_every_journal_entry_on"))) return;
       journalClear(localStorage);
       render();
     });
     function render() {
       const items = journalLoad(localStorage).slice().reverse(), ul = $("journal-list");
       ul.innerHTML = "";
-      if (!items.length) ul.appendChild(li("Nothing kept yet."));
+      if (!items.length) ul.appendChild(li(Str.t("writer.writer.render.nothing_kept_yet")));
       items.forEach(x => {
         const el = document.createElement("li");
         const t = document.createElement("time");

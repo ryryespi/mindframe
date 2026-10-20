@@ -200,7 +200,7 @@ test("routing: accept step lands exactly on master's next; recovery counts maste
 });
 test("routing: no other code path steps e (the old ideal/simulate are gone)", () => {
   ["ideal", "simulate", "step", "lambda", "hidden"].forEach(k => assert.equal(M[k], undefined, k));
-  const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+  const { read } = require("./resolve.js");
   const outside = ["js/app.js", "js/features/historian.js", "js/features/writer/writer.js", "js/features/writer/comfort.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/features/relationship.js", "js/features/forgiveness.js", "js/features/practices.js"];
   outside.forEach(f => assert.ok(!/\bcombine\(|\bfromText\([^)]*\)\.w|_parts/.test(read(f)), `${f} does not compute steps itself`));
   assert.ok(/\bmaster\(\$\("input"\)\.value/.test(read("js/app.js")), "the app calls the master function on Update");
@@ -470,7 +470,7 @@ test("crisis: a crisis label inside code is refused", () => {
 });
 
 // ---------- one page ----------
-test("single page: index has no tools links; tools.html only redirects; the service worker is v27", () => {
+test("single page: index has no tools links; tools.html only redirects; the service worker is v28", () => {
   const root = path.join(__dirname, "..");
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   const tools = fs.readFileSync(path.join(root, "tools.html"), "utf8");
@@ -479,11 +479,11 @@ test("single page: index has no tools links; tools.html only redirects; the serv
   assert.ok(/history\.replaceState/.test(index), "old ?view/?chip links are stripped");
   assert.ok(/location\.replace\("\.\/"\)/.test(tools) && /http-equiv="refresh"/.test(tools));
   assert.ok(!/<textarea|<script src/.test(tools), "tools.html is only a redirect");
-  assert.match(sw, /mindframe-shell-v27/);
+  assert.match(sw, /mindframe-shell-v28/);
   const scripts = [...index.matchAll(/<script src="([^"]+)"/g)].map(x => x[1]);
-  assert.deepEqual(scripts, ["js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/reality.js", "js/core/peace.js", "js/core/kai.js", "js/core/master.js", "js/core/topology.js", "js/core/governor.js", "js/core/words.js",
+  assert.deepEqual(scripts, ["js/data/strings.js", "js/data/params.js", "js/core/equations.js", "js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/reality.js", "js/core/peace.js", "js/core/kai.js", "js/core/master.js", "js/core/topology.js", "js/core/governor.js", "js/core/words.js",
     "js/features/relationship.js", "js/features/forgiveness.js", "js/features/practices.js", "js/features/freeing.js", "js/features/picker.js", "js/features/writer/stories.js", "js/features/writer/games.js", "js/features/historian.js",
-    "js/features/writer/writer.js", "js/features/writer/comfort.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/features/companion.js", "js/features/movies.js", "js/features/scripture.js", "js/features/grip.js", "js/features/past.js", "js/features/parable.js", "js/features/scenes.js", "js/features/about.js", "js/features/credits.js", "js/app.js"]);
+    "js/features/writer/writer.js", "js/features/writer/comfort.js", "js/features/analyzer.js", "js/features/scribe.js", "js/features/scientist.js", "js/features/companion.js", "js/features/movies.js", "js/features/scripture.js", "js/features/grip.js", "js/features/past.js", "js/features/parable.js", "js/features/scenes.js", "js/features/about.js", "js/features/credits.js", "js/data/index.js", "js/app.js"]);
   scripts.forEach(s => assert.ok(sw.includes(`./${s}`), `${s} cached`));
   ["presets", "Compare", "Optimize", "Check-in", "Spot the mirage", "Rebuild"].forEach(w => assert.ok(!index.includes(w), `no ${w}`));
 });

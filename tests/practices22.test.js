@@ -18,7 +18,7 @@ function test(name, fn) {
 }
 const I = n => M.NAMES.indexOf(n);
 const DIGIT = /[0-9]/;
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 const e0 = M.defaultState().home.slice();
 // A synthetic reading: lever, feelings, dose d, c_wait, peace P, c_tense, c_tired.
 const m = (lever, set = {}, o = {}) => {

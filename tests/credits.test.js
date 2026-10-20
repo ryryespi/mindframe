@@ -13,7 +13,7 @@ function test(name, fn) {
   try { fn(); passed += 1; console.log("ok  -", name); }
   catch (err) { console.error("FAIL -", name); console.error(err); process.exitCode = 1; }
 }
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 
 test("entries: 113 sources, 111 verified, 2 flagged (the classical works), each with how it was checked", () => {
   assert.deepEqual(C.counts(), { verified: 111, flagged: 2, total: 113 });
@@ -51,7 +51,7 @@ test("app: the Credits view in the sheet, offline, cached, no network", () => {
   assert.match(app, /"movies", "credits", "anchor", "about"\]/);
   assert.match(app, /MF\.Credits, MF\.Topology, MF\.About\]\.map/);
   assert.ok(sw.includes("./js/features/credits.js"));
-  assert.match(sw, /mindframe-shell-v27/);
+  assert.match(sw, /mindframe-shell-v28/);
   assert.ok(!/fetch\(|XMLHttpRequest/.test(src));
 });
 

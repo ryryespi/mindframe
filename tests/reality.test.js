@@ -16,7 +16,7 @@ function test(name, fn) {
 }
 const I = n => M.NAMES.indexOf(n);
 const DIGIT = /[0-9]/;
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 const GRAND = "Only I can fix this and nothing can stop me. I want to rest but I keep going over it.";
 const CAT = "I always mess up, I will never be happy, everyone hates me";
 const CONFLICT = "I hope it goes well but I'm scared it will all go wrong";

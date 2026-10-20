@@ -11,8 +11,10 @@ if (typeof module !== "undefined") {
   require("../core/master.js");
 }
 
+if (typeof window === "undefined") require("../data/strings.js");
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
   const { MAX_CHECKPOINTS, MAX_DAYS, LABEL_RE, r2, norm, distance, stamp, dayOf } = MF.Movers;
   const { master, refreshIdeal, baselineSeries } = MF.Master;
   /** Record today's vector as one point per day (the last checkpoint or step of the day wins). */
@@ -58,9 +60,9 @@ if (typeof module !== "undefined") {
   const WEEKDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   /** Weekday name for a YYYY-MM-DD day. */
   const dayName = day => WEEKDAY[new Date(`${day}T12:00:00`).getDay()];
-  const DIR_WORDS = { up: "a step toward steady", side: "a sideways day (showing up still counts)", down: "a heavier day" };
+  const DIR_WORDS = { up: Str.t("historian.DIR_WORDS.up"), side: Str.t("historian.DIR_WORDS.side"), down: Str.t("historian.DIR_WORDS.down") };
   /** The week in words. */
-  const weekLines = (state, now) => week(state, now).map(x => `${dayName(x.day)}: ${x.dir ? DIR_WORDS[x.dir] : "the first day on the map"}`);
+  const weekLines = (state, now) => week(state, now).map(x => `${dayName(x.day)}: ${x.dir ? DIR_WORDS[x.dir] : Str.t("historian.the_first_day_on_the")}`);
   /**
    * Inner peace P for each saved day (last seven), from master's peace score
    * of that day's vector (no text, so only mover conflicts count).
@@ -78,10 +80,10 @@ if (typeof module !== "undefined") {
     const t = peaceTrend(state, now);
     if (!t.length) return null;
     const band = MF.Peace.band;
-    if (t.length === 1) return `Inner peace on your first saved day: ${band(t[0].P)}.`;
+    if (t.length === 1) return Str.t("historian.peaceLine.inner_peace_on_your_first", { v0: band(t[0].P) });
     const a = t[0], b = t[t.length - 1], diff = b.P - a.P;
-    const dir = diff >= 0.05 ? "rising" : diff <= -0.05 ? "dipping for now" : "holding steady";
-    return band(a.P) === band(b.P) ? `Inner peace across your saved days: ${band(b.P)}, ${dir}.` : `Inner peace across your saved days: from ${band(a.P)} to ${band(b.P)}, ${dir}.`;
+    const dir = diff >= 0.05 ? "rising" : diff <= -0.05 ? Str.t("historian.peaceLine.dir.dipping_for_now") : Str.t("historian.peaceLine.dir.holding_steady");
+    return band(a.P) === band(b.P) ? Str.t("historian.peaceLine.inner_peace_across_your_saved", { v0: band(b.P), dir: dir }) : Str.t("historian.peaceLine.inner_peace_across_your_saved_2", { v0: band(a.P), v1: band(b.P), dir: dir });
   }
   /** The week in numbers (for the math view). */
   const weekMath = (state, now) => week(state, now).map(x => `${x.day.slice(5)}  \u2016B \u2212 h\u2016 = ${x.dB.toFixed(2)}  ${x.dir || "start"}`)
@@ -103,7 +105,7 @@ if (typeof module !== "undefined") {
       app.state = addCheckpoint(app.state, app.state.cps.length ? "" : "start");
       app.save();
       app.renderAll();
-      app.note("Checkpoint saved (numbers only).");
+      app.note(Str.t("historian.checkpoint_saved_numbers_only"));
     });
     return function render() {
       const s = app.state, m = app.m();
@@ -112,7 +114,7 @@ if (typeof module !== "undefined") {
       const wk = $("week");
       wk.innerHTML = "";
       const lines = weekLines(s);
-      if (!lines.length) wk.appendChild(li("Nothing recorded yet. Save a checkpoint or accept a step."));
+      if (!lines.length) wk.appendChild(li(Str.t("historian.render.nothing_recorded_yet_save_a")));
       lines.forEach(l => wk.appendChild(li(l)));
       const pl = peaceLine(s);
       if (pl) wk.appendChild(li(pl, "peace-trend"));
@@ -125,12 +127,12 @@ if (typeof module !== "undefined") {
         btn.type = "button";
         btn.className = "cp";
         btn.textContent = `${cp.label} \u00B7 ${new Date(cp.t).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" })}`;
-        btn.setAttribute("aria-label", `Go back to checkpoint ${cp.label}`);
+        btn.setAttribute("aria-label", Str.t("historian.go_back_to_checkpoint", { label: cp.label }));
         btn.addEventListener("click", () => {
           app.state = restore(app.state, cp.n);
           app.resetBase("");
           app.update({ care: false });
-          app.note(`Back at checkpoint ${cp.label}. New words add to it.`);
+          app.note(Str.t("historian.back_at_checkpoint_new_words", { label: cp.label }));
         });
         item.appendChild(btn);
         ol.appendChild(item);

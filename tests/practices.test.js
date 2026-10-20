@@ -15,7 +15,7 @@ function test(name, fn) {
 }
 const I = n => M.NAMES.indexOf(n);
 const DIGIT = /[0-9]/;
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 const DOSES = [{ min: "two", times: "three" }, { min: "five", times: "four" }, { min: "ten", times: "five" }];
 
 test("library: fourteen practices, seven mindfulness (with self-compassion and the brain dump), four patience, three body, each with steps and a source", () => {

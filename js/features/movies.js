@@ -25,8 +25,11 @@
 // 4. A crisis shows no films. Watching is not a caring action (no growth).
 // The pure parts are tested in node; mount() is browser only.
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params;   // every number: data/params.js
 
   // Wikidata genre items (labels checked on wikidata.org).
   const WD = {
@@ -55,20 +58,20 @@
 
   /** The "what might help" film moods. */
   const MOODS = {
-    gentle: { name: "gentle and uplifting", short: "something gentle", ask: "Want to watch something gentle together?",
-      why: "When sadness is heavy, a warm, gentle story can lift the mood a little.", wd: ["Q1361932", "Q202866", "Q859369"], tmdb: [10751, 16] },
-    cozy: { name: "cozy and safe", short: "something cozy and safe", ask: "Want to watch something cozy and safe together?",
-      why: "When fear is loud, a familiar, funny film with a safe ending can help you settle.", wd: ["Q2143665", "Q202866"], not: Object.keys(NOT_SOFT), tmdb: [16, 35] },
-    calm: { name: "calming, with some perspective", short: "something calming", ask: "Want to watch something calming together?",
-      why: "When anger runs hot, slow nature films and quiet stories can cool things down and widen the view.", wd: ["Q1760864"], not: Object.keys(NOT_SOFT), min: 8, tmdb: [99] },
-    worth: { name: "about second chances and self-worth", short: "a story about second chances", ask: "Want to watch a story about second chances together?",
-      why: "When shame or self-blame is strong, stories of second chances can remind you that people grow and are worth kindness.", wd: ["Q859369", "Q102429885"], tmdb: [18, 10751] },
-    together: { name: "about friendship and family", short: "a friendship story", ask: "Want to watch a friendship story together?",
-      why: "When you feel alone, films about friendship and family can feel like company.", wd: ["Q663106", "Q1361932", "Q102429885"], tmdb: [10751] },
-    absorb: { name: "absorbing, a light adventure", short: "a light adventure", ask: "Want to get lost in a light adventure together?",
-      why: "When thoughts keep replaying, an absorbing adventure can give your mind a rest.", wd: ["Q319221", "Q157394", "Q202866"], tmdb: [12, 14] },
-    inspire: { name: "inspiring", short: "something inspiring", ask: "Want to watch something inspiring together?",
-      why: "When you feel calm or hopeful, an inspiring story can build on it.", wd: ["Q645928", "Q842256", "Q1339864"], tmdb: [36, 10402, 18] },
+    gentle: { name: Str.t("movies.MOODS.gentle.name"), short: Str.t("movies.MOODS.gentle.short"), ask: Str.t("movies.MOODS.gentle.ask"),
+      why: Str.t("movies.MOODS.gentle.why"), wd: ["Q1361932", "Q202866", "Q859369"], tmdb: [10751, 16] },
+    cozy: { name: Str.t("movies.MOODS.cozy.name"), short: Str.t("movies.MOODS.cozy.short"), ask: Str.t("movies.MOODS.cozy.ask"),
+      why: Str.t("movies.MOODS.cozy.why"), wd: ["Q2143665", "Q202866"], not: Object.keys(NOT_SOFT), tmdb: [16, 35] },
+    calm: { name: Str.t("movies.MOODS.calm.name"), short: Str.t("movies.MOODS.calm.short"), ask: Str.t("movies.MOODS.calm.ask"),
+      why: Str.t("movies.MOODS.calm.why"), wd: ["Q1760864"], not: Object.keys(NOT_SOFT), min: 8, tmdb: [99] },
+    worth: { name: "about second chances and self-worth", short: Str.t("movies.MOODS.worth.short"), ask: Str.t("movies.MOODS.worth.ask"),
+      why: Str.t("movies.MOODS.worth.why"), wd: ["Q859369", "Q102429885"], tmdb: [18, 10751] },
+    together: { name: Str.t("movies.MOODS.together.name"), short: Str.t("movies.MOODS.together.short"), ask: Str.t("movies.MOODS.together.ask"),
+      why: Str.t("movies.MOODS.together.why"), wd: ["Q663106", "Q1361932", "Q102429885"], tmdb: [10751] },
+    absorb: { name: Str.t("movies.MOODS.absorb.name"), short: Str.t("movies.MOODS.absorb.short"), ask: Str.t("movies.MOODS.absorb.ask"),
+      why: Str.t("movies.MOODS.absorb.why"), wd: ["Q319221", "Q157394", "Q202866"], tmdb: [12, 14] },
+    inspire: { name: "inspiring", short: Str.t("movies.MOODS.inspire.short"), ask: Str.t("movies.MOODS.inspire.ask"),
+      why: Str.t("movies.MOODS.inspire.why"), wd: ["Q645928", "Q842256", "Q1339864"], tmdb: [36, 10402, 18] },
   };
   const MOVER_MOOD = { sadness: "gentle", fear: "cozy", avoidance: "cozy", anger: "calm", shame: "worth", rumination: "absorb" };
 
@@ -199,13 +202,13 @@
     const p = pick(m);
     if (!p) return null;
     const f = pool(p.id, opts).find(x => !/[0-9]/.test(x.t));
-    return `Watch something: ${MOODS[p.id].short}, like ${f.t}. ${opts.name || "Your companion"} has more ideas.`;
+    return Str.t("movies.cardLine.watch_something_like_has_more", { short: MOODS[p.id].short, t: f.t, v2: opts.name || Str.t("movies.cardLine.your_companion") });
   }
 
   // ---------- Online (only on a tap) ----------
   const WDQS = "https://query.wikidata.org/sparql";
-  const AGENT = "MindFrame/21 (https://github.com/ryryespi/mindframe)";
-  const MIN_LINKS = 25;
+  const AGENT = Str.t("movies.AGENT.mindframe_21_https_github_com");
+  const MIN_LINKS = P.limits.MIN_LINKS;
   const vals = ids => ids.map(q => "wd:" + q).join(" ");
 
   /**
@@ -217,28 +220,28 @@
    */
   function wikidataRequest(id, opts = {}) {
     const mood = MOODS[id];
-    if (!mood) throw new Error("unknown mood");
+    if (!mood) throw new Error(Str.t("movies.wikidataRequest.unknown_mood"));
     const genres = mood.wd.concat(opts.faith ? FAITH_WD : []);
     const not = Object.keys(NOT_WD).concat(mood.not || []), min = mood.min || MIN_LINKS;
     const query = [
       "SELECT ?film (SAMPLE(?t) AS ?title) (MIN(?y) AS ?year) (SAMPLE(?a) AS ?article) (SAMPLE(?g) AS ?genre) (SAMPLE(?n) AS ?links) WHERE {",
-      '  hint:Query hint:optimizer "None".',
+      Str.t("movies.wikidataRequest.query.hint_query_hint_optimizer_none"),
       `  VALUES ?g { ${vals(genres)} }`,
-      "  ?film wdt:P136 ?g.",
+      Str.t("movies.wikidataRequest.query.film_wdt_p136_g"),
       `  ?film wikibase:sitelinks ?n. FILTER(?n >= ${min})`,
-      "  ?film wdt:P31 wd:Q11424.",
-      `  FILTER EXISTS { { ?film wdt:P1657 ?ok. VALUES ?ok { ${vals(RATED_OK)} } } UNION { ?film wdt:P136 ?kid. VALUES ?kid { ${vals(KIDS.concat(FAITH_WD))} } } }`,
-      `  FILTER NOT EXISTS { ?film wdt:P1657 ?no. VALUES ?no { ${vals(RATED_NO)} } }`,
-      `  FILTER NOT EXISTS { ?film wdt:P136 ?skip. VALUES ?skip { ${vals(not)} } }`,
+      Str.t("movies.wikidataRequest.query.film_wdt_p31_wd_q11424"),
+      Str.t("movies.wikidataRequest.query.filter_exists_film_wdt_p1657", { v0: vals(RATED_OK), v1: vals(KIDS.concat(FAITH_WD)) }),
+      Str.t("movies.wikidataRequest.query.filter_not_exists_film_wdt", { v0: vals(RATED_NO) }),
+      Str.t("movies.wikidataRequest.query.filter_not_exists_film_wdt_2", { v0: vals(not) }),
       "  ?film wdt:P577 ?d. BIND(YEAR(?d) AS ?y)",
-      "  ?a schema:about ?film; schema:isPartOf <https://en.wikipedia.org/>.",
+      Str.t("movies.wikidataRequest.query.a_schema_about_film_schema"),
       '  ?film rdfs:label ?t. FILTER(LANG(?t) = "en")',
       "} GROUP BY ?film ORDER BY DESC(?links) LIMIT 30",
     ].join("\n");
     return {
       url: `${WDQS}?format=json&query=${encodeURIComponent(query)}`, query, host: "query.wikidata.org",
-      genres, not, filters: [`well known (${min}+ Wikipedia languages)`, "rated G or PG, or a family, children's or nature film", "not PG-13 or R",
-        `no ${not.map(q => (NOT_WD[q] || NOT_SOFT[q]).replace(/ film$/, "")).join(", ")} films`, "has an English Wikipedia page"],
+      genres, not, filters: [Str.t("movies.wikidataRequest.filters.well_known_wikipedia_languages", { min: min }), Str.t("movies.wikidataRequest.filters.rated_g_or_pg_or"), Str.t("movies.wikidataRequest.filters.not_pg_13_or_r"),
+        Str.t("movies.wikidataRequest.filters.no_films", { v0: not.map(q => (NOT_WD[q] || NOT_SOFT[q]).replace(/ film$/, "")).join(", ") }), Str.t("movies.wikidataRequest.filters.has_an_english_wikipedia_page")],
     };
   }
 
@@ -252,19 +255,19 @@
    */
   function tmdbRequest(id, key) {
     const mood = MOODS[id];
-    if (!mood) throw new Error("unknown mood");
-    if (!validKey(key)) throw new Error("no key");
+    if (!mood) throw new Error(Str.t("movies.wikidataRequest.unknown_mood"));
+    if (!validKey(key)) throw new Error(Str.t("movies.tmdbRequest.no_key"));
     const params = [["with_genres", mood.tmdb.join("|")], ["certification_country", "US"], ["certification.lte", "PG"], ["include_adult", "false"],
       ["sort_by", "vote_average.desc"], ["vote_count.gte", "1000"], ["language", "en-US"], ["page", "1"]];
     const qs = params.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
     return { url: `https://api.themoviedb.org/3/discover/movie?${qs}&api_key=${encodeURIComponent(key.trim())}`, shown: `https://api.themoviedb.org/3/discover/movie?${qs}&api_key=(your key)`,
-      host: "api.themoviedb.org", genres: mood.tmdb, filters: ["rated G or PG (US)", "rated by 1000+ people", "no adult titles"] };
+      host: "api.themoviedb.org", genres: mood.tmdb, filters: Str.list("movies.tmdbRequest.filters") };
   }
 
   /** Plain words for what will be sent (shown before anything is fetched). */
   function preview(req) {
     const names = req.genres.map(g => WD[g] || TMDB_GENRES[g] || String(g));
-    return `Only this goes to ${req.host}: film genres (${names.join(", ")}) and fixed filters (${req.filters.join("; ")}). Nothing you typed, no feelings and no names.`;
+    return Str.t("movies.preview.only_this_goes_to_film", { host: req.host, v1: names.join(", "), v2: req.filters.join("; ") });
   }
 
   /** Wikidata JSON → films (title, year, id, Wikipedia article). Bad rows are skipped. */
@@ -277,7 +280,7 @@
       const art = (v("article").match(/^https:\/\/en\.wikipedia\.org\/wiki\/(.+)$/) || [])[1];
       if (!q || !t || !(y > 1880 && y < 2100) || SKIP.includes(q)) return;
       const g = (v("genre").match(/\/(Q\d+)$/) || [])[1];
-      out.push({ t, y, q, w: art ? decodeURIComponent(art) : "", m: [], online: true, why: `A well-known ${WD[g] || "film"} (from Wikidata).` });
+      out.push({ t, y, q, w: art ? decodeURIComponent(art) : "", m: [], online: true, why: Str.t("movies.why", { v0: WD[g] || "film" }) });
     });
     return out;
   }
@@ -289,7 +292,7 @@
       t: String(r.title).slice(0, 120), y: parseInt(String(r.release_date || "").slice(0, 4), 10) || null, tmdb: r.id, m: [], online: true,
       poster: /^\/[\w.-]+$/.test(r.poster_path || "") ? `https://image.tmdb.org/t/p/w92${r.poster_path}` : null,
       rating: typeof r.vote_average === "number" ? Math.round(r.vote_average * 10) / 10 : null,
-      why: "Well rated on TMDB.",
+      why: Str.t("movies.why_2"),
     }));
   }
 
@@ -316,9 +319,9 @@
     } finally { if (timer) clearTimeout(timer); }
   }
   const SORRY = {
-    offline: "You seem to be offline. The films above still work without the network.",
-    busy: "The film database is busy right now. Try again in a little while.",
-    error: "Couldn't get more films just now. The films above still work.",
+    offline: Str.t("movies.SORRY.offline"),
+    busy: Str.t("movies.SORRY.busy"),
+    error: Str.t("movies.SORRY.error"),
   };
 
   /** Mount the "Watch something" view in Willow's sheet and the card line. */
@@ -339,27 +342,27 @@
         if (f.poster) { const img = document.createElement("img"); img.src = f.poster; img.alt = ""; img.width = 46; img.loading = "lazy"; img.referrerPolicy = "no-referrer"; li.appendChild(img); }
         const div = document.createElement("div");
         const a = document.createElement("a");
-        a.href = link(f); a.target = "_blank"; a.rel = "noopener noreferrer";
+        a.href = link(f); a.target = "_blank"; a.rel = Str.t("movies.noopener_noreferrer");
         a.textContent = f.y ? `${f.t} (${f.y})` : f.t;
         const p = document.createElement("p"); p.className = "small";
-        p.textContent = f.rating != null ? `${f.why} Rated ${f.rating} of ten.` : f.why;
+        p.textContent = f.rating != null ? Str.t("movies.rated_of_ten", { why: f.why, rating: f.rating }) : f.why;
         div.append(a, p); li.appendChild(div); ul.appendChild(li);
       });
     }
     function render() {
       const m = app.inCrisis() ? null : app.m();
       current = pick(m);
-      const ask = current ? MOODS[current.id].ask : "Want to watch something gentle together?";
+      const ask = current ? MOODS[current.id].ask : Str.t("movies.MOODS.gentle.ask");
       $("pet-watch").querySelector("small").textContent = app.inCrisis() ? "" : ask;
       $("pet-watch").disabled = app.inCrisis();
       const line = app.inCrisis() ? null : cardLine(m, { faith: app.faith(), name: app.companion ? app.companion.get().name : "" });
       $("movie-line").textContent = line || "";
       $("movie-line").classList.toggle("hidden", !line);
-      $("mv-intro").textContent = !current ? "Tap Update first and I'll suggest a film for how you feel. Here are some gentle ones." : `${ask} ${MOODS[current.id].why}`;
+      $("mv-intro").textContent = !current ? Str.t("movies.render.tap_update_first_and_i") : `${ask} ${MOODS[current.id].why}`;
       if (!current && !app.inCrisis()) current = { id: "gentle", mover: null, fallback: true };
-      $("mv-mood").textContent = current && !app.inCrisis() ? `Film mood: ${MOODS[current.id].name}.` : "";
+      $("mv-mood").textContent = current && !app.inCrisis() ? Str.t("movies.render.film_mood", { name: MOODS[current.id].name }) : "";
       $("mv-online").disabled = app.inCrisis();
-      $("mv-key-state").textContent = key() ? "Your TMDB key is saved on this device. Find more online uses TMDB." : "Off. Find more online uses Wikidata (no key).";
+      $("mv-key-state").textContent = key() ? Str.t("movies.render.your_tmdb_key_is_saved") : Str.t("movies.render.off_find_more_online_uses");
       list();
       cancel();
     }
@@ -380,20 +383,20 @@
       if (!pending || app.inCrisis()) return;
       const req = pending, id = current.id, slot = id + (req.host === "api.themoviedb.org" ? "|tmdb" : "");
       cancel();
-      $("mv-status").textContent = "Looking for more films\u2026";
+      $("mv-status").textContent = Str.t("movies.looking_for_more_films");
       const r = await fetchMore(req, (u, o) => fetch(u, o), { online: navigator.onLine !== false });
       if (app.inCrisis()) return;
       if (!r.ok) { $("mv-status").textContent = SORRY[r.reason]; return; }
       const fresh = r.items.filter(x => !FILMS.some(f => f.q && f.q === x.q));
       extra[slot] = fresh;
-      if (!fresh.length) { $("mv-status").textContent = "No new films found this time; the list above still works."; return; }
+      if (!fresh.length) { $("mv-status").textContent = Str.t("movies.no_new_films_found_this"); return; }
       start = pool(id, { faith: app.faith() }).length; // the new films first
       list();
-      $("mv-status").textContent = `Found more films from ${req.host === "api.themoviedb.org" ? "TMDB" : "Wikidata"} (kept only until you close the app).`;
+      $("mv-status").textContent = Str.t("movies.found_more_films_from_kept", { v0: req.host === "api.themoviedb.org" ? "TMDB" : "Wikidata" });
     });
     $("mv-key-save").addEventListener("click", () => {
       const k = $("mv-key").value.trim();
-      if (!validKey(k)) { $("mv-key-state").textContent = "That doesn't look like a TMDB v3 API key (32 letters and numbers)."; return; }
+      if (!validKey(k)) { $("mv-key-state").textContent = Str.t("movies.that_doesn_t_look_like"); return; }
       if (store) store.setItem(TMDB_KEY, k);
       $("mv-key").value = "";
       render();

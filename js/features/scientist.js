@@ -18,8 +18,10 @@ if (typeof module !== "undefined") {
   require("./historian.js");
 }
 
+if (typeof window === "undefined") require("../data/strings.js");
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
   const { NAMES, HARD, GROUND, FIXED, VAR_SPEC, ACTIVE, idx, homeVec, f2, sgn, label, defaultVars, validateVars, weights, setWeight, MAIN_PAIRS } = MF.Movers;
   const { recText } = MF.Master;
   // ---------- The math behind the card ----------
@@ -34,64 +36,64 @@ if (typeof module !== "undefined") {
     const mv = shown(m.e);
     // The whole model on one page (core/master.js header; README).
     MF.Master.ONE_PAGE.forEach(x => L.push(x));
-    if (opts.faith) L.push(`h (home), with faith on: ${MF.Master.FAITH_HOME} Wording only; the numbers are the same.`);
-    L.push(`e: ${mv.length ? mv.map(x => `${x.label} ${f2(x.v)}`).join(", ") : "at rest"}`);
+    if (opts.faith) L.push(Str.t("scientist.mathLines.h_home_with_faith_on", { FAITH_HOME: MF.Master.FAITH_HOME }));
+    L.push(`e: ${mv.length ? mv.map(x => `${x.label} ${f2(x.v)}`).join(", ") : Str.t("freeing.line.at_rest")}`);
     // The Kai shield (core/kai.js): the X(1 \u2212 S)\u00B7w term of line (1).
     if (MF.Kai) MF.Kai.mathLines(m).forEach(x => L.push(x));
-    L.push("step = act(clip01(e + a(e)\u00B7(h \u2212 e) + b\u00B7s(e)))");
+    L.push(Str.t("scientist.mathLines.step_act_clip01_e_a"));
     const raw = V.aBase + V.k * m.d;
-    L.push(`a(e) = min(a_max, a0 + k\u2016e \u2212 h\u2016) = min(${f2(V.aMax)}, ${f2(V.aBase)} + ${f2(V.k)}\u00B7${f2(m.d)}) = ${f2(Math.min(V.aMax, raw))}${m.unstable ? `, capped at a_cap = ${f2(FIXED.aCap)} (\u03BB > 0) \u2192 ${f2(m.a)}` : ""}`);
+    L.push(Str.t("scientist.mathLines.a_e_min_a_max", { v0: f2(V.aMax), v1: f2(V.aBase), v2: f2(V.k), v3: f2(m.d), v4: f2(Math.min(V.aMax, raw)), v5: m.unstable ? Str.t("scientist.mathLines.capped_at_a_cap_0", { v0: f2(FIXED.aCap), v1: f2(m.a) }) : "" }));
     L.push(`b = ${f2(m.b)}${m.unstable ? " (b_U, \u03BB > 0)" : ""}`);
-    L.push(`d = \u2016e \u2212 h\u2016 = ${f2(m.d)} \u2192 ${f2(m.dNext)} after one step`);
-    L.push(`\u03BB = \u03C1(W_active) \u2212 d = ${m.lambda === null ? "none (nothing active)" : `${sgn(m.lambda)} (${m.unstable ? "unstable" : "settles"})`}`);
-    if (m.loops[0]) L.push(`strongest loop: ${label(m.loops[0].a)} \u00D7 ${label(m.loops[0].b)} (gain ${f2(m.loops[0].gain)})`);
-    if (m.hidden[0]) L.push(`hidden rise: ${label(m.hidden[0].name)} ${f2(m.hidden[0].from)} \u2192 ${f2(m.hidden[0].to)} in ${FIXED.k} steps${m.hidden[0].via ? ` via ${label(m.hidden[0].via)}` : ""}`);
-    L.push(`act(): ${m.mover ? `${label(m.mover)} moves most toward home` : "no move"}; stabilizer ${m.stabilizer || "none"}`);
+    L.push(Str.t("scientist.mathLines.d_e_h_after_one", { v0: f2(m.d), v1: f2(m.dNext) }));
+    L.push(`\u03BB = \u03C1(W_active) \u2212 d = ${m.lambda === null ? Str.t("scientist.mathLines.none_nothing_active") : `${sgn(m.lambda)} (${m.unstable ? "unstable" : "settles"})`}`);
+    if (m.loops[0]) L.push(Str.t("scientist.mathLines.strongest_loop_gain", { v0: label(m.loops[0].a), v1: label(m.loops[0].b), v2: f2(m.loops[0].gain) }));
+    if (m.hidden[0]) L.push(Str.t("scientist.mathLines.hidden_rise_in_steps", { v0: label(m.hidden[0].name), v1: f2(m.hidden[0].from), v2: f2(m.hidden[0].to), k: FIXED.k, v4: m.hidden[0].via ? ` via ${label(m.hidden[0].via)}` : "" }));
+    L.push(Str.t("scientist.mathLines.act_stabilizer", { v0: m.mover ? Str.t("scientist.mathLines.moves_most_toward_home", { v0: label(m.mover) }) : Str.t("scientist.mathLines.no_move"), v1: m.stabilizer || "none" }));
     L.push(`B = 0.8\u00B7B\u208B\u2081 + 0.2\u00B7e: \u2016B \u2212 h\u2016 = ${f2(m.baseline.dB)}${m.baseline.dPrev === null ? "" : ` (yesterday's B: ${f2(m.baseline.dPrev)})`}`);
-    if (m.recovery) L.push(`recovery: ${recText(m.recovery)} until d < ${f2(FIXED.eps)} (model estimate)`);
+    if (m.recovery) L.push(Str.t("scientist.mathLines.recovery_until_d_model_estimate", { v0: recText(m.recovery), v1: f2(FIXED.eps) }));
     // Same pass (core/reality.js): grandiosity, hidden conflicts, positive emotions.
     const g = m.grand || { g: 0, raw: 0, kinds: [] };
-    L.push(`g = 1 \u2212 e^(\u2212raw), raw = 0.6\u00B7grand + 0.5\u00B7certain-worst + 0.25\u00B7all-or-nothing + 0.1\u00B7min(3, absolutist) = ${f2(g.raw)} \u2192 g = ${f2(g.g)}${g.kinds.length ? ` (${g.kinds.join(", ")})` : ""}; adds 0.5\u00B7g to rumination and fusion`);
-    L.push("conflict c = \u221A(x_i\u00B7y_j): hard/process x \u2265 0.30 with grounding y = e \u2265 0.60 (pull toward) or y = 1 \u2212 e when e \u2264 0.40 (need); clashes in the words c = 0.50");
-    (m.conflicts || []).forEach(c => L.push(c.from === "words" ? `  clash in the words (${c.a}): c = ${f2(c.c)}` : `  ${label(c.a)} ${f2(c.x)} \u00D7 ${c.side === "need" ? `need for ${c.b}` : c.b} ${f2(c.y)}: c = \u221A(${f2(c.x)}\u00B7${f2(c.y)}) = ${f2(c.c)}`));
-    L.push(`positives from gain_j = |e_j \u2212 h_j| \u2212 |next_j \u2212 h_j|: ${(m.positives || []).map(p => `${p.word} ${f2(p.score)}`).join(", ") || "none"}`);
+    L.push(Str.t("scientist.mathLines.g_1_e_raw_raw", { v0: f2(g.raw), v1: f2(g.g), v2: g.kinds.length ? ` (${g.kinds.join(", ")})` : "" }));
+    L.push(Str.t("scientist.mathLines.conflict_c_x_i_y"));
+    (m.conflicts || []).forEach(c => L.push(c.from === "words" ? Str.t("scientist.clash_in_the_words_c", { a: c.a, v1: f2(c.c) }) : `  ${label(c.a)} ${f2(c.x)} \u00D7 ${c.side === "need" ? Str.t("scientist.need_for", { b: c.b }) : c.b} ${f2(c.y)}: c = \u221A(${f2(c.x)}\u00B7${f2(c.y)}) = ${f2(c.c)}`));
+    L.push(Str.t("scientist.mathLines.positives_from_gain_j_e", { v0: (m.positives || []).map(p => `${p.word} ${f2(p.score)}`).join(", ") || "none" }));
     // Inner peace (core/peace.js) and its solve.
     const p = m.peace;
     if (p) {
       const V2 = state.vars;
-      L.push(`P = 1/(1 + (d/d\u2080)\u00B2)\u00B7(1 \u2212 \u03B3\u00B7C_max)\u00B7(1 \u2212 \u03B4\u00B7g) = ${f2(p.Pd)}\u00B7${f2(p.Pc)}\u00B7${f2(p.Pg)} = ${f2(p.P)} (d = ${f2(p.d)}, d\u2080 = ${f2(V2.d0)}, C_max = ${f2(p.Cmax)}, \u03B3 = ${f2(V2.gamma)}, g = ${f2(p.g)}, \u03B4 = ${f2(V2.delta)})`);
+      L.push(Str.t("scientist.mathLines.p_1_1_d_d", { v0: f2(p.Pd), v1: f2(p.Pc), v2: f2(p.Pg), v3: f2(p.P), v4: f2(p.d), v5: f2(V2.d0), v6: f2(p.Cmax), v7: f2(V2.gamma), v8: f2(p.g), v9: f2(V2.delta) }));
       if (p.grad) L.push(`\u2202P/\u2202e: ${NAMES.map((n, i) => `${label(n)} ${p.grad[i] >= 0 ? "+" : ""}${p.grad[i].toFixed(3)}`).join(", ")}`);
-      if (p.lever) L.push(`lever = argmax \u0394P_i for e_i \u2192 h_i by 0.05: ${p.lever.name ? `${p.lever.kind} ${label(p.lever.name)} (\u0394P = +${p.lever.dP.toFixed(3)})` : "none (already at home)"}`);
+      if (p.lever) L.push(Str.t("scientist.mathLines.lever_argmax_p_i_for", { v0: p.lever.name ? `${p.lever.kind} ${label(p.lever.name)} (\u0394P = +${p.lever.dP.toFixed(3)})` : Str.t("scientist.mathLines.none_already_at_home") }));
       if (p.solve) {
         const sv = p.solve;
-        L.push(`n* = steps until P \u2265 0.80: ${sv.n === null ? `not reached in ${sv.steps} steps` : sv.n}`);
-        L.push(`e* (fixed point after ${sv.steps} steps${sv.converged ? "" : ", not converged"}): ${NAMES.map((n, i) => `${label(n)} ${f2(sv.eStar[i])}`).join(", ")}; \u2016e* \u2212 h\u2016 = ${f2(sv.dStar)}, P(e*) = ${f2(sv.PStar)}`);
+        L.push(Str.t("scientist.mathLines.n_steps_until_p_0", { v0: sv.n === null ? Str.t("scientist.mathLines.not_reached_in_steps", { steps: sv.steps }) : sv.n }));
+        L.push(Str.t("scientist.mathLines.e_fixed_point_after_steps", { steps: sv.steps, v1: sv.converged ? "" : Str.t("scientist.mathLines.not_converged"), v2: NAMES.map((n, i) => `${label(n)} ${f2(sv.eStar[i])}`).join(", "), v3: f2(sv.dStar), v4: f2(sv.PStar) }));
       }
-      L.push("convergence: grounding next \u2212 h = (1 \u2212 a)(e \u2212 h); hard/process 0 \u2264 next \u2264 (1 \u2212 a)e (s \u2264 0, clip at 0 = h)");
-      L.push(`  \u21D2 \u2016next \u2212 h\u2016 \u2264 (1 \u2212 a)\u2016e \u2212 h\u2016 with a \u2265 min(a0, a_max, a_cap) = ${f2(Math.min(V2.aBase, V2.aMax, FIXED.aCap))} > 0: a contraction to e* = h, where P = 1 (rounding to 0.01 stops within 0.005/a)`);
-      L.push("  the Kai term X(1 \u2212 S)\u00B7w only enters the reading (line 1), pushes hard movers up and is bounded by X\u00B7w; the step map is unchanged, so the proof holds");
+      L.push(Str.t("scientist.mathLines.convergence_grounding_next_h_1"));
+      L.push(Str.t("scientist.mathLines.next_h_1_a_e", { v0: f2(Math.min(V2.aBase, V2.aMax, FIXED.aCap)) }));
+      L.push(Str.t("scientist.mathLines.the_kai_term_x_1"));
     }
     // Forgiveness (features/forgiveness.js) and the practice pick (features/practices.js).
     const f = m.forgive;
     if (f) {
-      L.push(`F_self = e_shame\u00B7(0.4 + 0.6\u00B7c_self) = ${f2(m.e[idx.shame])}\u00B7(0.4 + 0.6\u00B7${f2(f.cSelf)}) = ${f2(f.Fself)};  F_other = e_anger\u00B7(0.4 + 0.6\u00B7c_other) = ${f2(m.e[idx.anger])}\u00B7(0.4 + 0.6\u00B7${f2(f.cOther)}) = ${f2(f.Fother)}`);
-      L.push(`forgiveness path (\u03B8_F = 0.35): ${f.path || "none"};  \u0394P_F self ${f.dP.self >= 0 ? "+" : ""}${f.dP.self.toFixed(3)}, other ${f.dP.other >= 0 ? "+" : ""}${f.dP.other.toFixed(3)};  Grace recommended: ${f.grace ? "yes (lever in the path's movers)" : "no"}`);
+      L.push(Str.t("scientist.mathLines.f_self_e_shame_0", { v0: f2(m.e[idx.shame]), v1: f2(f.cSelf), v2: f2(f.Fself), v3: f2(m.e[idx.anger]), v4: f2(f.cOther), v5: f2(f.Fother) }));
+      L.push(Str.t("scientist.mathLines.forgiveness_path_f_0_35", { v0: f.path || "none", v1: f.dP.self >= 0 ? "+" : "", v2: f.dP.self.toFixed(3), v3: f.dP.other >= 0 ? "+" : "", v4: f.dP.other.toFixed(3), v5: f.grace ? Str.t("scientist.mathLines.yes_lever_in_the_path") : "no" }));
     }
     // True size, the small side (core/reality.js) and the freeing mix (features/freeing.js).
-    if (m.small) L.push(`u = 1 \u2212 e^(\u22120.7k) (putting yourself down, k = ${m.small.k}${m.small.chip ? ", the chip" : ""}) = ${f2(m.small.u)}; true size max(g, u) = ${f2(m.tsize || 0)} in P_g = 1 \u2212 \u03B4\u00B7max(g, u); adds shame +0.20, hope \u22120.20`);
+    if (m.small) L.push(Str.t("scientist.mathLines.u_1_e_0_7k", { k: m.small.k, v1: m.small.chip ? Str.t("scientist.mathLines.the_chip") : "", v2: f2(m.small.u), v3: f2(m.tsize || 0) }));
     const fr = m.freeing;
     if (fr) {
-      L.push(`freeing mix: max J = P \u2212 \u03BC\u00B7N, \u03BC = ${f2(fr.mu)}, N = e_shame + c_self\u00B7e_rumination + u\u00B7max(0, h_hope \u2212 e_hope) (c_self = ${f2(fr.cSelf)}, u = ${f2(fr.u)})`);
-      L.push(`  moves: \u2264 ${fr.K} movers per step, one band each toward h (ladder 0, 0.15, 0.45, 0.80), master's step direction; keep P' \u2265 P and shame' \u2264 shame; \u2264 ${fr.T} steps, exhaustive over the subsets`);
+      L.push(Str.t("scientist.mathLines.freeing_mix_max_j_p", { v0: f2(fr.mu), v1: f2(fr.cSelf), v2: f2(fr.u) }));
+      L.push(Str.t("scientist.mathLines.moves_movers_per_step_one", { K: fr.K, T: fr.T }));
       fr.steps.forEach((st, k) => L.push(`  step ${k + 1}: ${st.moves.map(x => `${label(x.name)} ${f2(x.from)}\u2192${f2(x.to)}`).join(", ")}; P = ${f2(st.P)}, J = ${f2(st.J)}`));
-      L.push(`  P ${f2(fr.P0)} \u2192 ${f2(fr.P1)}, N ${f2(fr.N0)} \u2192 ${f2(fr.N1)}, J ${f2(fr.J0)} \u2192 ${f2(fr.J1)}${fr.steps.length ? "" : " (no feasible move raises J)"}`);
+      L.push(`  P ${f2(fr.P0)} \u2192 ${f2(fr.P1)}, N ${f2(fr.N0)} \u2192 ${f2(fr.N1)}, J ${f2(fr.J0)} \u2192 ${f2(fr.J1)}${fr.steps.length ? "" : Str.t("scientist.mathLines.no_feasible_move_raises_j")}`);
     }
     if ("wait" in m) {
       const band = m.peace && MF.Peace ? MF.Peace.band(m.peace.P) : "none";
-      L.push(`practice = pick(lever, e, d, c_wait = ${f2(m.wait || 0)}, c_tense = ${f2(m.tense || 0)}, c_tired = ${f2(m.tired || 0)}, peace band = ${band}) \u2192 ${m.practice ? `${m.practice.id} for ${label(m.practice.mover)}` : "none (the mover's own step)"}`);
-      L.push("  cold-water reset: lever fear or anger, that mover \u2265 0.75 (very high) and peace band a little (P < 0.40); always with its caution");
-      L.push("  brain dump: lever rumination \u2265 0.75;  progressive muscle relaxation: lever fear, avoidance or calm with c_tense \u2265 0.30");
-      L.push("  short brisk walk: lever sadness or avoidance with sadness \u2265 0.30, avoidance \u2265 0.30 and c_tired \u2265 0.30; or lever anger > 0.60 with peace not low");
+      L.push(Str.t("scientist.mathLines.practice_pick_lever_e_d", { v0: f2(m.wait || 0), v1: f2(m.tense || 0), v2: f2(m.tired || 0), band: band, v4: m.practice ? `${m.practice.id} for ${label(m.practice.mover)}` : Str.t("scientist.mathLines.none_the_mover_s_own") }));
+      L.push(Str.t("scientist.mathLines.cold_water_reset_lever_fear"));
+      L.push(Str.t("scientist.mathLines.brain_dump_lever_rumination_0"));
+      L.push(Str.t("scientist.mathLines.short_brisk_walk_lever_sadness"));
     }
     return L;
   }
@@ -145,9 +147,9 @@ if (typeof module !== "undefined") {
       lab.append(span, inp);
       grid.appendChild(lab);
     };
-    GROUND.forEach(n => field("home", n, `h.${n}`, 0, 1, `home target for ${n}`));
+    GROUND.forEach(n => field("home", n, `h.${n}`, 0, 1, Str.t("scientist.home_target_for", { n: n })));
     VAR_SPEC.forEach(([k, , min, max, hint]) => field("var", k, ({ aBase: "a0", aMax: "a_max", d0: "d\u2080", gamma: "\u03B3", delta: "\u03B4" })[k] || k, min, max, hint));
-    MAIN_PAIRS.forEach(([a, b]) => field("w", `${a}>${b}`, `${a}\u2192${b}`, -1, 1, `how much ${a} changes ${b}`));
+    MAIN_PAIRS.forEach(([a, b]) => field("w", `${a}>${b}`, `${a}\u2192${b}`, -1, 1, Str.t("scientist.how_much_changes", { a: a, b: b })));
     grid.addEventListener("change", ev => {
       const inp = ev.target;
       if (!inp.dataset.kind) return;
@@ -155,7 +157,7 @@ if (typeof module !== "undefined") {
       let s = app.state;
       if (kind === "home") {
         const c = Math.min(1, Math.max(0, Math.round((Number.isFinite(x) ? x : 0) * 100) / 100));
-        if (c !== x) notes.push(`h.${key}: kept inside 0\u20131`);
+        if (c !== x) notes.push(Str.t("scientist.h_kept_inside_0_1", { key: key }));
         const home = s.home.slice();
         home[idx[key]] = c;
         s = { ...s, home };
@@ -166,7 +168,7 @@ if (typeof module !== "undefined") {
       } else {
         const [a, b] = key.split(">");
         const c = Math.min(1, Math.max(-1, Number.isFinite(x) ? x : 0));
-        if (c !== x) notes.push(`${a}\u2192${b}: kept inside \u22121 to 1`);
+        if (c !== x) notes.push(Str.t("scientist.kept_inside_1_to_1", { a: a, b: b }));
         s = setWeight(s, a, b, c);
       }
       app.state = s;
@@ -199,7 +201,7 @@ if (typeof module !== "undefined") {
       const m = app.m(), ul = $("movers"), ml = $("math-lines");
       ul.innerHTML = "";
       ml.innerHTML = "";
-      if (!m) ml.appendChild(app.li("Tap Update to see the math."));
+      if (!m) ml.appendChild(app.li(Str.t("scientist.render.tap_update_to_see_the")));
       else {
         shown(m.e).forEach(x => {
           const el = document.createElement("li");

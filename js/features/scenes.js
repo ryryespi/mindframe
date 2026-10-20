@@ -24,8 +24,11 @@
 // kindness and the well-being of the giver, a small average effect (Curry et al.,
 // 2018). Pictures here are a gentle aid, not a treatment.
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params;   // every number: data/params.js
   const PAL = { sky: "#cfe3f2", dusk: "#f3d3b4", water: "#8fbcd9", deep: "#5f93b8", land: "#b9d3a0", path: "#e7d8b9", stone: "#a9a39a", coat: "#3f6fa8", skin: "#e8c4a0", fawn: "#c8925c", spot: "#f4e6d0", wood: "#9b6b43", warm: "#f2b84b", ink: "#3b3b3b", leaf: "#6f9f5a" };
   const CALM = { sky: "#dde8ef", dusk: "#efe2d6", water: "#a9c6d8", deep: "#88a9bf", land: "#c9d8bb", warm: "#e9cf98" };
   const pal = calm => (calm ? { ...PAL, ...CALM } : PAL);
@@ -46,19 +49,19 @@
 
   // Each scene: (P, o) → inner SVG. o = {stage, calm, detail}
   const SCENES = {
-    seeds: { label: "Seeds resting in still water above a stone counter on a cornerstone", draw: (P, o) => `${sky(P)}${water(70, P)}<rect x="120" y="96" width="80" height="34" fill="${P.stone}"/><rect x="132" y="84" width="56" height="14" fill="#c9c3b9"/>${[0, 1, 2, 3, 4].map(i => `<ellipse cx="${138 + i * 11}" cy="80" rx="3.5" ry="2.4" fill="${P.wood}"/>`).join("")}` },
-    road: { label: "The traveler walks a winding road with the fawn beside her", draw: (P, o) => `${sky(P)}${land(80, P)}<path d="M150 150 C120 120 210 110 170 80" stroke="${P.path}" stroke-width="22" fill="none"/>${o.detail ? `<circle cx="270" cy="34" r="14" fill="${P.warm}"/>` : ""}${traveler(140, 130, P)}${fawn(172, 132, P, o.stage)}` },
-    loop: { label: "A loose loop of string drifts away on the breeze as the traveler walks on", draw: (P, o) => `${sky(P)}${land(90, P)}${traveler(110, 130, P)}${fawn(140, 132, P, o.stage)}<path d="M170 70 c30 -30 60 10 30 20 c-25 8 -10 -30 20 -25" stroke="${P.ink}" stroke-width="1.6" fill="none" stroke-dasharray="3 3"/>` },
-    crossroads: { label: "At a crossroads, a signpost points back and ahead; the traveler holds a small note", draw: (P, o) => `${sky(P)}${land(85, P)}<path d="M0 120 L320 120 M160 150 L160 85" stroke="${P.path}" stroke-width="16"/><rect x="180" y="60" width="4" height="50" fill="${P.wood}"/><path d="M182 64 h34 l8 6 -8 6 h-34 z M182 82 h-34 l-8 6 8 6 h34 z" fill="${P.wood}"/>${traveler(140, 128, P)}<rect x="146" y="98" width="9" height="7" fill="#fff"/>${fawn(112, 130, P, o.stage)}` },
-    bend: { label: "At a quiet bend, the traveler breathes slowly while the fawn rests", draw: (P, o) => `${sky(P)}${land(85, P)}<path d="M0 140 C90 100 230 140 320 100" stroke="${P.path}" stroke-width="18" fill="none"/><circle class="sc-breath" cx="150" cy="70" r="16" fill="none" stroke="${P.deep}" stroke-width="2"/>${traveler(150, 126, P, true)}${fawn(190, 128, P, o.stage)}` },
-    lamp: { label: "A lamp glows in the window of a small house at dusk", draw: (P, o) => `${sky(P, true)}${land(100, P)}<rect x="120" y="60" width="80" height="50" fill="#d9c7ad"/><path d="M112 62 L160 30 L208 62 z" fill="${P.wood}"/><rect x="146" y="74" width="20" height="18" fill="${P.warm}"/>${o.detail ? `<circle cx="156" cy="83" r="14" fill="${P.warm}" opacity=".25"/>` : ""}${fawn(230, 128, P, o.stage)}` },
-    horizon: { label: "A wide horizon at dusk with open space", draw: (P, o) => `${sky(P, true)}<circle cx="160" cy="96" r="22" fill="${P.warm}"/>${water(96, P)}${traveler(80, 140, P, true)}` },
-    table: { label: "She shares bread with neighbors at a long table", draw: (P, o) => `${sky(P, true)}${land(96, P)}<rect x="70" y="100" width="180" height="8" fill="${P.wood}"/><path d="M80 108 v24 M240 108 v24" stroke="${P.wood}" stroke-width="4"/><ellipse cx="160" cy="97" rx="16" ry="5" fill="${P.warm}"/>${traveler(110, 112, P, true)}<g opacity=".9">${traveler(200, 112, { ...P, coat: "#8a6fb0" }, true)}${traveler(160, 110, { ...P, coat: "#5e9a72" }, true)}</g>${fawn(270, 138, P, o.stage)}` },
-    garden: { label: "Tending a small garden, hands in the soil", draw: (P, o) => `${sky(P)}${land(90, P)}${[0, 1, 2, 3].map(i => `<path d="M${90 + i * 40} 120 q-6 -18 0 -26 q6 8 0 26" fill="${P.leaf}"/>`).join("")}<rect x="70" y="120" width="180" height="8" fill="${P.wood}" opacity=".6"/>${traveler(250, 132, P, true)}${fawn(40, 134, P, o.stage)}` },
-    friend: { label: "A walk with a friend along a quiet path", draw: (P, o) => `${sky(P)}${land(86, P)}<path d="M0 132 C100 120 220 128 320 112" stroke="${P.path}" stroke-width="18" fill="none"/>${traveler(140, 128, P)}${traveler(165, 126, { ...P, coat: "#5e9a72" })}${fawn(200, 128, P, o.stage)}` },
-    hands: { label: "Two hands helping lift a basket", draw: (P, o) => `${sky(P)}${land(110, P)}<rect x="130" y="80" width="60" height="30" rx="6" fill="${P.wood}"/><ellipse cx="124" cy="96" rx="10" ry="6" fill="${P.skin}"/><ellipse cx="196" cy="96" rx="10" ry="6" fill="#c99e7a"/>${fawn(250, 140, P, o.stage)}` },
-    stones: { label: "Stepping stones across still water, one at a time", draw: (P, o) => `${sky(P)}${water(80, P)}${[0, 1, 2, 3, 4].map(i => `<ellipse cx="${50 + i * 55}" cy="${130 - i * 8}" rx="18" ry="6" fill="${P.stone}"/>`).join("")}${traveler(50, 128, P)}${fawn(85, 126, P, o.stage)}` },
-    still: { label: "Evening rest by still water, the traveler and the fawn together", draw: (P, o) => `${sky(P, true)}${water(92, P)}${land(120, P)}${o.detail ? `<circle cx="250" cy="40" r="12" fill="${P.warm}"/>` : ""}${traveler(140, 132, P, true)}${fawn(178, 134, P, o.stage)}` },
+    seeds: { label: Str.t("scenes.SCENES.seeds.label"), draw: (P, o) => `${sky(P)}${water(70, P)}<rect x="120" y="96" width="80" height="34" fill="${P.stone}"/><rect x="132" y="84" width="56" height="14" fill="#c9c3b9"/>${[0, 1, 2, 3, 4].map(i => `<ellipse cx="${138 + i * 11}" cy="80" rx="3.5" ry="2.4" fill="${P.wood}"/>`).join("")}` },
+    road: { label: Str.t("scenes.SCENES.road.label"), draw: (P, o) => `${sky(P)}${land(80, P)}<path d="M150 150 C120 120 210 110 170 80" stroke="${P.path}" stroke-width="22" fill="none"/>${o.detail ? `<circle cx="270" cy="34" r="14" fill="${P.warm}"/>` : ""}${traveler(140, 130, P)}${fawn(172, 132, P, o.stage)}` },
+    loop: { label: Str.t("scenes.SCENES.loop.label"), draw: (P, o) => `${sky(P)}${land(90, P)}${traveler(110, 130, P)}${fawn(140, 132, P, o.stage)}<path d="M170 70 c30 -30 60 10 30 20 c-25 8 -10 -30 20 -25" stroke="${P.ink}" stroke-width="1.6" fill="none" stroke-dasharray="3 3"/>` },
+    crossroads: { label: Str.t("scenes.SCENES.crossroads.label"), draw: (P, o) => `${sky(P)}${land(85, P)}<path d="M0 120 L320 120 M160 150 L160 85" stroke="${P.path}" stroke-width="16"/><rect x="180" y="60" width="4" height="50" fill="${P.wood}"/><path d="M182 64 h34 l8 6 -8 6 h-34 z M182 82 h-34 l-8 6 8 6 h34 z" fill="${P.wood}"/>${traveler(140, 128, P)}<rect x="146" y="98" width="9" height="7" fill="#fff"/>${fawn(112, 130, P, o.stage)}` },
+    bend: { label: Str.t("scenes.SCENES.bend.label"), draw: (P, o) => `${sky(P)}${land(85, P)}<path d="M0 140 C90 100 230 140 320 100" stroke="${P.path}" stroke-width="18" fill="none"/><circle class="sc-breath" cx="150" cy="70" r="16" fill="none" stroke="${P.deep}" stroke-width="2"/>${traveler(150, 126, P, true)}${fawn(190, 128, P, o.stage)}` },
+    lamp: { label: Str.t("scenes.SCENES.lamp.label"), draw: (P, o) => `${sky(P, true)}${land(100, P)}<rect x="120" y="60" width="80" height="50" fill="#d9c7ad"/><path d="M112 62 L160 30 L208 62 z" fill="${P.wood}"/><rect x="146" y="74" width="20" height="18" fill="${P.warm}"/>${o.detail ? `<circle cx="156" cy="83" r="14" fill="${P.warm}" opacity=".25"/>` : ""}${fawn(230, 128, P, o.stage)}` },
+    horizon: { label: Str.t("scenes.SCENES.horizon.label"), draw: (P, o) => `${sky(P, true)}<circle cx="160" cy="96" r="22" fill="${P.warm}"/>${water(96, P)}${traveler(80, 140, P, true)}` },
+    table: { label: Str.t("scenes.SCENES.table.label"), draw: (P, o) => `${sky(P, true)}${land(96, P)}<rect x="70" y="100" width="180" height="8" fill="${P.wood}"/><path d="M80 108 v24 M240 108 v24" stroke="${P.wood}" stroke-width="4"/><ellipse cx="160" cy="97" rx="16" ry="5" fill="${P.warm}"/>${traveler(110, 112, P, true)}<g opacity=".9">${traveler(200, 112, { ...P, coat: "#8a6fb0" }, true)}${traveler(160, 110, { ...P, coat: "#5e9a72" }, true)}</g>${fawn(270, 138, P, o.stage)}` },
+    garden: { label: Str.t("scenes.SCENES.garden.label"), draw: (P, o) => `${sky(P)}${land(90, P)}${[0, 1, 2, 3].map(i => `<path d="M${90 + i * 40} 120 q-6 -18 0 -26 q6 8 0 26" fill="${P.leaf}"/>`).join("")}<rect x="70" y="120" width="180" height="8" fill="${P.wood}" opacity=".6"/>${traveler(250, 132, P, true)}${fawn(40, 134, P, o.stage)}` },
+    friend: { label: Str.t("scenes.SCENES.friend.label"), draw: (P, o) => `${sky(P)}${land(86, P)}<path d="M0 132 C100 120 220 128 320 112" stroke="${P.path}" stroke-width="18" fill="none"/>${traveler(140, 128, P)}${traveler(165, 126, { ...P, coat: "#5e9a72" })}${fawn(200, 128, P, o.stage)}` },
+    hands: { label: Str.t("scenes.SCENES.hands.label"), draw: (P, o) => `${sky(P)}${land(110, P)}<rect x="130" y="80" width="60" height="30" rx="6" fill="${P.wood}"/><ellipse cx="124" cy="96" rx="10" ry="6" fill="${P.skin}"/><ellipse cx="196" cy="96" rx="10" ry="6" fill="#c99e7a"/>${fawn(250, 140, P, o.stage)}` },
+    stones: { label: Str.t("scenes.SCENES.stones.label"), draw: (P, o) => `${sky(P)}${water(80, P)}${[0, 1, 2, 3, 4].map(i => `<ellipse cx="${50 + i * 55}" cy="${130 - i * 8}" rx="18" ry="6" fill="${P.stone}"/>`).join("")}${traveler(50, 128, P)}${fawn(85, 126, P, o.stage)}` },
+    still: { label: Str.t("scenes.SCENES.still.label"), draw: (P, o) => `${sky(P, true)}${water(92, P)}${land(120, P)}${o.detail ? `<circle cx="250" cy="40" r="12" fill="${P.warm}"/>` : ""}${traveler(140, 132, P, true)}${fawn(178, 134, P, o.stage)}` },
   };
   // Small field motifs (About me), drawn in the top-left corner.
   const MOTIF = {
@@ -79,14 +82,14 @@
   const BEAT_SCENE = { open: "seeds", road: "road", grip: "loop", crossroads: "crossroads", bend: "bend", verses: "lamp", remember: "lamp", peace: "horizon", share: "table", evening: "still" };
 
   const PROMPTS = {
-    table: "Share something ordinary: make tea or a snack for someone, or eat slowly with someone nearby.",
-    garden: "Do one ordinary task slowly: water a plant, fold laundry, wash one dish with care.",
-    friend: "Write one kind text to someone nearby, or ask a friend for a short walk.",
-    still: "Sit by a window or near water for a few minutes, and let your breath slow.",
-    horizon: "Give yourself some space: step outside and look at the farthest thing you can see.",
-    hands: "Use your hands: hold something warm, notice its weight and texture, then help with one small thing.",
-    lamp: "Name three things you can see and two you can hear, right where you are.",
-    stones: "Take just the next small step, then pause before the one after it.",
+    table: Str.t("scenes.PROMPTS.table"),
+    garden: Str.t("scenes.PROMPTS.garden"),
+    friend: Str.t("scenes.PROMPTS.friend"),
+    still: Str.t("scenes.PROMPTS.still"),
+    horizon: Str.t("scenes.PROMPTS.horizon"),
+    hands: Str.t("scenes.PROMPTS.hands"),
+    lamp: Str.t("scenes.PROMPTS.lamp"),
+    stones: Str.t("scenes.PROMPTS.stones"),
   };
   /** Pick the grounding image from the governor result and true size. Returns null when writing should simply go on. */
   function grounding(gov, m, about) {

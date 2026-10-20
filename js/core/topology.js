@@ -66,11 +66,14 @@ if (typeof module !== "undefined") {
   require("./master.js");
 }
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("./equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params, EQ = MF.Equations;   // every number: data/params.js; every equation: core/equations.js
   const MV = MF.Movers;
-  const { NAMES, r2, clamp01, FIXED } = MV;
-  const N = NAMES.length, at = (e, n) => e[NAMES.indexOf(n)];
+  const { NAMES, r2, clamp01 } = MV;
+  const at = (e, n) => e[NAMES.indexOf(n)];
   const dist = (x, y) => Math.sqrt(x.reduce((s, v, i) => s + (v - y[i]) ** 2, 0));
 
   // ---------- 1. Every variable, by layer ----------
@@ -78,100 +81,99 @@ if (typeof module !== "undefined") {
   const VARS = [
     // L1 feelings and the step (core/movers.js, core/master.js)
     ...NAMES.map(n => V(1, `e_${n}`, `mover ${n}`, "core/movers.js")),
-    V(1, "e₋", "where you were", "core/master.js"), V(1, "n(text)", "what the words add", "core/movers.js"), V(1, "e'", "the stepped vector", "core/master.js"),
-    V(1, "h", "home", "core/movers.js"), V(1, "d", "‖e − h‖", "core/master.js"), V(1, "a", "step size a(e)", "core/master.js"), V(1, "a0", "base step", "core/movers.js"),
-    V(1, "k", "distance gain", "core/movers.js"), V(1, "a_max", "largest step", "core/movers.js"), V(1, "a_cap", "step when feeding", "core/movers.js"), V(1, "b", "stabilizer pull", "core/movers.js"),
-    V(1, "b_U", "stabilizer when feeding", "core/movers.js"), V(1, "s", "grounding pressure s(e)", "core/master.js"), V(1, "W", "who amplifies whom", "core/movers.js"), V(1, "λ", "growth rate ρ(W_A) − d", "core/master.js"),
+    V(1, "e₋", Str.t("topology.VARS.where_you_were"), "core/master.js"), V(1, "n(text)", Str.t("topology.VARS.what_the_words_add"), "core/movers.js"), V(1, "e'", Str.t("topology.VARS.the_stepped_vector"), "core/master.js"),
+    V(1, "h", "home", "core/movers.js"), V(1, "d", "‖e − h‖", "core/master.js"), V(1, "a", Str.t("topology.VARS.step_size_a_e"), "core/master.js"), V(1, "a0", Str.t("topology.VARS.base_step"), "core/movers.js"),
+    V(1, "k", Str.t("topology.VARS.distance_gain"), "core/movers.js"), V(1, "a_max", Str.t("topology.VARS.largest_step"), "core/movers.js"), V(1, "a_cap", Str.t("topology.VARS.step_when_feeding"), "core/movers.js"), V(1, "b", Str.t("topology.VARS.stabilizer_pull"), "core/movers.js"),
+    V(1, "b_U", Str.t("topology.VARS.stabilizer_when_feeding"), "core/movers.js"), V(1, "s", Str.t("topology.VARS.grounding_pressure_s_e"), "core/master.js"), V(1, "W", Str.t("topology.VARS.who_amplifies_whom"), "core/movers.js"), V(1, "λ", Str.t("topology.VARS.growth_rate_w_a_d"), "core/master.js"),
     V(1, "B_t", "baseline", "core/master.js"),
     // L2 virtues and the Kai shield (core/kai.js)
-    ...["X", "A", "F", "E", "R", "S", "w_anger", "w_shame", "w_fear", "I", "c_attack", "σ_v", "p_F", "V_MAX"].map(s => V(2, s, "Kai shield", "core/kai.js")),
+    ...["X", "A", "F", "E", "R", "S", "w_anger", "w_shame", "w_fear", "I", "c_attack", "σ_v", "p_F", "V_MAX"].map(s => V(2, s, Str.t("topology.kai_shield"), "core/kai.js")),
     // L3 peace, conflict, true size (core/peace.js, core/reality.js)
     ...["P", "P_d", "d0", "C", "γ", "G", "g", "u", "δ", "ℓ", "ΔP_i", "P*"].map(s => V(3, s, "peace", "core/peace.js")),
     // L4 grip, rumination, time and resistance (features/grip.js, this file)
     ...["pull_fear", "pull_loop", "pull_vice", "days", "k_loop", "L_tool", "L_value", "L", "x'"].map(s => V(4, s, "grip", "features/grip.js")),
-    ...["τ", "m_rum", "τeff", "dt", "k(dt)", "ρ", "c_sup", "inertia", "c_sustain", "c_will"].map(s => V(4, s, "time and resistance", "core/topology.js")),
+    ...["τ", "m_rum", "τeff", "dt", "k(dt)", "ρ", "c_sup", "inertia", "c_sustain", "c_will"].map(s => V(4, s, Str.t("topology.time_and_resistance"), "core/topology.js")),
     // L5 past to future, hope, forgiveness, the freeing mix, the moving anchor
-    ...["past", "k_past", "tech", "L_p", "L_h", "future", "shame'", "rumination'", "hope'"].map(s => V(5, s, "past to future", "features/past.js")),
+    ...["past", "k_past", "tech", "L_p", "L_h", "future", "shame'", "rumination'", "hope'"].map(s => V(5, s, Str.t("topology.past_to_future"), "features/past.js")),
     ...["F_self", "F_other", "c_self", "c_other"].map(s => V(5, s, "forgiveness", "features/forgiveness.js")),
-    ...["J", "μ", "N_mix"].map(s => V(5, s, "freeing mix", "features/freeing.js")),
-    ...["A_k", "λ_A", "β", "d_desired", "ε_in", "ε_out", "τ_dwell"].map(s => V(5, s, "moving anchor", "core/topology.js")),
+    ...["J", "μ", "N_mix"].map(s => V(5, s, Str.t("topology.freeing_mix"), "features/freeing.js")),
+    ...["A_k", "λ_A", "β", "d_desired", "ε_in", "ε_out", "τ_dwell"].map(s => V(5, s, Str.t("topology.moving_anchor"), "core/topology.js")),
     // L6 faith and meaning (wording only) and the companion (never from e)
-    ...["faith", "seed", "H_numbers", "H_text", "counter", "CORNERSTONE", "verse"].map(s => V(6, s, "scripture seed (wording only)", "features/scripture.js")),
-    ...["growth", "stage"].map(s => V(6, s, "companion growth (caring actions only)", "features/companion.js")),
+    ...["faith", "seed", "H_numbers", "H_text", "counter", "CORNERSTONE", "verse"].map(s => V(6, s, Str.t("topology.scripture_seed_wording_only"), "features/scripture.js")),
+    ...["growth", "stage"].map(s => V(6, s, Str.t("topology.companion_growth_caring_actions_only"), "features/companion.js")),
   ];
-  const LAYERS = { 1: "Feelings", 2: "Steadiness (virtues and shield)", 3: "Peace, conflict and true size", 4: "Grip, time and resistance", 5: "Past to future and hope", 6: "Faith and meaning (wording only)" };
+  const LAYERS = { 1: "Feelings", 2: Str.t("topology.LAYERS.2"), 3: Str.t("topology.LAYERS.3"), 4: Str.t("topology.LAYERS.4"), 5: Str.t("topology.LAYERS.5"), 6: Str.t("topology.LAYERS.6") };
   const counts = () => Object.fromEntries(Object.keys(LAYERS).map(k => [k, VARS.filter(v => v.layer === Number(k)).length]));
 
   // ---------- 3. Time constants (hours; low, high) ----------
-  const VL = "Verduyn & Lavrijsen, 2015, Motiv Emot 39(1):119–127";
-  const TAU = {
-    fear: { lo: 0.25, hi: 3, src: `${VL}: fear is among the shortest emotions (and shorter than anxiety)` },
-    sadness: { lo: 24, hi: 120, src: `${VL}: sadness lasts longest (about 120 hours on average to a lasting return)` },
-    anger: { lo: 0.5, hi: 48, src: `${VL}: irritation is short; longer forms such as hatred last days` },
-    shame: { lo: 0.25, hi: 2, src: `${VL}: shame is the shortest on average (about half an hour); guilt lasts longer` },
-    calm: { lo: 1, hi: 24, src: "design choice (no duration data for the grounding movers)" },
-    connection: { lo: 1, hi: 24, src: "design choice (no duration data for the grounding movers)" },
-    hope: { lo: 1, hi: 24, src: "design choice (no duration data for the grounding movers)" },
-    rumination: { lo: 2, hi: 48, src: `design choice; rumination prolongs emotions (${VL}; Verduyn et al., 2009, Emotion 9(1):83–91)` },
-    avoidance: { lo: 2, hi: 48, src: "design choice; avoidance keeps feelings going (see ρ)" },
+  const VL = Str.t("topology.VL.verduyn_lavrijsen_2015_motiv_emot");
+  // Ranges (hours) from params.js (topology.TAU); the source words from strings.js.
+  const TAU_SRC = {
+    fear: Str.t("topology.TAU.fear.src", { VL: VL }),
+    sadness: Str.t("topology.TAU.sadness.src", { VL: VL }),
+    anger: Str.t("topology.TAU.anger.src", { VL: VL }),
+    shame: Str.t("topology.TAU.shame.src", { VL: VL }),
+    calm: Str.t("topology.TAU.calm.src"),
+    connection: Str.t("topology.TAU.calm.src"),
+    hope: Str.t("topology.TAU.calm.src"),
+    rumination: Str.t("topology.TAU.rumination.src", { VL: VL }),
+    avoidance: Str.t("topology.TAU.avoidance.src"),
   };
-  const tauTyp = n => Math.sqrt(TAU[n].lo * TAU[n].hi);
-  const OMITTED = "The popular \"90-second\" rule for an emotion's chemical wave (Bolte Taylor, My Stroke of Insight, 2008) is not peer-reviewed and is not used here.";
+  const TAU = Object.fromEntries(Object.entries(P.topology.TAU).map(([n, [lo, hi]]) => [n, { lo, hi, src: TAU_SRC[n] }]));
+  const tauTyp = EQ.tauTyp;
+  const OMITTED = Str.t("topology.OMITTED.the_popular_90_second_rule");
   const PATIENCE = {
-    fear: "Fear often eases in minutes to hours.", shame: "Shame often passes within the hour, though guilt can stay longer.",
-    anger: "Irritation often eases within hours; deeper anger can take days.", sadness: "Sadness can take days. Be patient with yourself.",
-    rumination: "Replaying keeps feelings around longer; each gentle return to now helps.", avoidance: "Feelings we push away tend to stay longer.",
+    fear: Str.t("topology.PATIENCE.fear"), shame: Str.t("topology.PATIENCE.shame"),
+    anger: Str.t("topology.PATIENCE.anger"), sadness: Str.t("topology.PATIENCE.sadness"),
+    rumination: Str.t("topology.PATIENCE.rumination"), avoidance: Str.t("topology.PATIENCE.avoidance"),
   };
 
   // ---------- 4. Resistance ----------
   const SUP = /\b(stop (thinking|feeling)|push (it|this|them|that) (away|down)|get rid of|make (it|this) (go away|stop)|fight(ing)? (it|this)|shouldn'?t feel|block (it|this) out|force myself|won'?t let myself feel)\b/g;
   const SUSTAIN = /\b(i can'?t change|nothing will (change|help)|it'?s pointless|no point|i don'?t want to change|always be like this|why bother)\b/g;
   const WILL = /\b(let it be|make room|allow (it|this|myself)|i'?m willing|willing to|accept(ing)? (it|this|that)|it'?s okay to feel|sit with (it|this))\b/g;
-  const cue = k => 1 - Math.exp(-0.7 * k);
+  const cue = EQ.cueRaw;
   const hits = (re, t) => ((t || "").toLowerCase().match(re) || []).length;
   /** Lag-1 autocorrelation of the saved days' mean hard mover (0 with fewer than 4 days), clipped to [0, 1]. */
   function inertia(days) {
-    const xs = (days || []).filter(d => d && d.e).slice(-14).map(d => (d.e[0] + d.e[1] + d.e[2] + d.e[3]) / 4);
-    if (xs.length < 4) return 0;
+    const xs = (days || []).filter(d => d && d.e).slice(-P.topology.INERTIA_DAYS).map(d => (d.e[0] + d.e[1] + d.e[2] + d.e[3]) / 4);
+    if (xs.length < P.topology.INERTIA_MIN) return 0;
     const m = xs.reduce((s, x) => s + x, 0) / xs.length, v = xs.reduce((s, x) => s + (x - m) ** 2, 0);
     if (v < 1e-9) return 0;
     let c = 0; for (let i = 1; i < xs.length; i++) c += (xs[i] - m) * (xs[i - 1] - m);
     return clamp01(c / v);
   }
   /** ρ and its parts from the vector, the words and the saved days. */
-  function resistance(e, text, days) {
+  const resistance = MF.Movers.memoOn(resistanceOf);
+  /** ρ for e (memoized per e by resistance). */
+  function resistanceOf(e, text, days) {
     const p = { avoid: at(e, "avoidance"), sup: cue(hits(SUP, text)), rum: at(e, "rumination"), inertia: inertia(days), sustain: cue(hits(SUSTAIN, text)), will: cue(hits(WILL, text)) };
-    const raw = 1 - (1 - 0.4 * p.avoid) * (1 - 0.5 * p.sup) * (1 - 0.3 * p.rum) * (1 - 0.3 * p.inertia) * (1 - 0.3 * p.sustain);
-    return { rho: Math.min(0.9, raw * (1 - 0.5 * p.will)), raw, parts: p };
+    const { rho, raw } = EQ.resistance(p);   // OE §topology: ρ
+    return { rho, raw, parts: p };
   }
 
   // ---------- 3. Time to the anchor ----------
-  const tauEff = (n, e, rho, which = "typ") => (which === "typ" ? tauTyp(n) : TAU[n][which]) * (1 + at(e, "rumination")) / (1 - rho);
+  const tauEff = (n, e, rho, which = "typ") => EQ.tauEff(n, at(e, "rumination"), rho, which);
   /** k(dt): the per-gap contraction factor toward the anchor (dt in hours). */
-  const kdt = (dt, e, rho) => Math.max(...NAMES.map(n => Math.exp(-dt / tauEff(n, e, rho))));
+  const kdt = (dt, e, rho) => EQ.kdt(dt, NAMES, at(e, "rumination"), rho);
   /** Continuous-time move over dt hours toward A. */
-  const flow = (e, A, dt, rho) => e.map((x, i) => A[i] + (x - A[i]) * Math.exp(-dt / tauEff(NAMES[i], e, rho)));
+  const flow = (e, A, dt, rho) => EQ.flow(e, A, dt, NAMES, at(e, "rumination"), rho);
   /** Hours until every mover is within 0.1 of A: {lo, hi, typ, slow} (slow = the mover that takes longest). */
-  function timeTo(e, A, rho) {
-    const one = w => NAMES.map((n, i) => { const g = Math.abs(e[i] - A[i]); return g > 0.1 ? tauEff(n, e, rho, w) * Math.log(g / 0.1) : 0; });
-    const typ = one("typ"), slowI = typ.indexOf(Math.max(...typ));
-    return { lo: Math.max(...one("lo")), hi: Math.max(...one("hi")), typ: Math.max(...typ), slow: typ[slowI] > 0 ? NAMES[slowI] : null };
-  }
+  const timeTo = (e, A, rho) => EQ.timeTo(e, A, NAMES, at(e, "rumination"), rho);
   /** Hours in words: "minutes", "a few hours", "about a day", "a few days", "a week or more". */
-  function span(h) { return h < 1 ? "minutes" : h < 8 ? "a few hours" : h < 36 ? "about a day" : h < 120 ? "a few days" : "a week or more"; }
+  function span(h) { return h < 1 ? "minutes" : h < 8 ? Str.t("topology.span.a_few_hours") : h < 36 ? Str.t("topology.span.about_a_day") : h < 120 ? Str.t("topology.span.a_few_days") : Str.t("topology.span.a_week_or_more"); }
 
   // ---------- 2. The step as a map, its anchor and its contraction ----------
   /** The exact (unrounded) step (2) of master for e, as the code computes it. */
   function T(e, state) {
     const h = state.home, Vv = state.vars, W = MV.weights(state.w);
+    // The same equations master uses (core/equations.js), without the rounding.
     const lam = MF.Master._parts.lambda(e, W, Vv.d), unstable = lam !== null && lam > 0;
-    let a = Math.min(Vv.aMax, Vv.aBase + Vv.k * dist(e, h));
-    if (unstable) a = Math.min(a, FIXED.aCap);
-    const b = unstable ? FIXED.bU : Vv.b, s = MF.Master._parts.sVec(e, h, W);
-    return e.map((x, j) => clamp01(x + a * (h[j] - x) + b * s[j]));
+    const { a, b } = EQ.stepSize(Vv, dist(e, h), unstable);
+    return EQ.stepNext(e, h, a, b, MF.Master._parts.sVec(e, h, W), false);
   }
   /** q = 1 − a_lo, the toward-home contraction constant for these variables. */
-  const q = vars => 1 - Math.min(vars.aBase, vars.aMax, FIXED.aCap);
+  const q = EQ.qHome;
   /** Iterate master itself (rounded, as the app does) from e until it stops moving. */
   function anchorOf(e, state, max = 400) {
     let cur = e.slice(), t = 0;
@@ -179,7 +181,7 @@ if (typeof module !== "undefined") {
     return { e: cur, steps: t };
   }
   /** Sampled sup of ‖T(x) − T(y)‖ / ‖x − y‖ (seeded) and of ‖T(x) − h‖ / ‖x − h‖. */
-  function lipschitz(state, n = 4000, seed = 7) {
+  function lipschitz(state, n = P.seeds.LIPSCHITZ_N, seed = P.seeds.LIPSCHITZ) {
     const rnd = MV.rng ? MV.rng(seed) : Math.random;
     const pt = () => NAMES.map(() => rnd());
     let L = 0, toward = 0;
@@ -212,15 +214,15 @@ if (typeof module !== "undefined") {
   }
 
   // ---------- 5. The moving anchor ----------
-  const LAMBDA = 0.6, EPS_IN = 0.15, EPS_OUT = 0.25, PATH_MAX = 30, MOVE_MIN = 0.02;
-  const beta = rho => 0.25 + 0.25 * rho;
+  const { LAMBDA, EPS_IN, EPS_OUT, PATH_MAX, MOVE_MIN } = P.topology;
+  const beta = EQ.beta;
   /** One anchor update: A' = clip(λA + (1 − λ)(βe + (1 − β)d)). */
-  const nextAnchor = (A, e, d, rho) => A.map((x, i) => r2(clamp01(LAMBDA * x + (1 - LAMBDA) * (beta(rho) * e[i] + (1 - beta(rho)) * d[i]))));
+  const nextAnchor = EQ.nextAnchor;
   /** The dwell time in hours: the typical τ of the strongest hard mover (or fear), times (1 + ρ), in [0.25, 24]. */
   function dwell(e, rho) {
     const hard = ["fear", "sadness", "anger", "shame"];
     const top = hard.reduce((a, n) => (at(e, n) > at(e, a) ? n : a), "fear");
-    return Math.min(24, Math.max(0.25, tauTyp(top) * (1 + rho)));
+    return Math.min(P.topology.DWELL[1], Math.max(P.topology.DWELL[0], tauTyp(top) * (1 + rho)));
   }
   /** A fresh path: A_0 from home, the first reading and its desired feelings. */
   const startPath = (h, e, d, rho, t) => ({ v: 1, A: nextAnchor(h, e, d, rho), since: null, stones: [{ t, A: nextAnchor(h, e, d, rho) }] });
@@ -243,22 +245,22 @@ if (typeof module !== "undefined") {
     return p;
   }
   /** The anchor step inside one epoch: e ↦ clip(e + a(1 − ρ)(A − e)). */
-  const anchorStep = (e, A, a, rho) => e.map((x, i) => clamp01(x + a * (1 - rho) * (A[i] - x)));
+  const anchorStep = EQ.anchorStep;
   /** Bounds for the chain: q_A, the ball radius around d, and q_ρ. */
-  const chainBound = (rho, aLo) => ({ qA: LAMBDA + (1 - LAMBDA) * beta(rho), radius: beta(rho) * EPS_OUT / (1 - beta(rho)), qRho: 1 - aLo * (1 - rho) });
+  const chainBound = EQ.chainBound;
   /** The anchor in words: what it holds most (two grounding feelings, and the hard ones it eases). */
   function anchorWords(A) {
     const WORD = { rumination: "replaying", avoidance: "avoiding" };
     const name = n => WORD[n] || n;
-    const lvl = x => (x >= 0.6 ? "a lot of" : x >= 0.3 ? "some" : "a little");
+    const lvl = x => (x >= 0.6 ? Str.t("topology.lvl.a_lot_of") : x >= 0.3 ? "some" : "a little");
     const g = ["calm", "connection", "hope"].sort((a, b) => at(A, b) - at(A, a));
     const hard = ["fear", "sadness", "anger", "shame", "rumination", "avoidance"].filter(n => at(A, n) >= 0.15);
-    return `${lvl(at(A, g[0]))} ${name(g[0])} and ${lvl(at(A, g[1]))} ${name(g[1])}${hard.length ? `, with ${hard.map(name).join(" and ")} easing` : ""}`;
+    return `${lvl(at(A, g[0]))} ${name(g[0])} and ${lvl(at(A, g[1]))} ${name(g[1])}${hard.length ? Str.t("topology.anchorWords.with_easing", { v0: hard.map(name).join(" and ") }) : ""}`;
   }
 
   const HEB619 = "This hope we have as an anchor of the soul, a hope both sure and steadfast and entering into that which is within the veil,";
-  const FAITH = `With faith, the anchor is rest in Christ: \u201C${HEB619.replace(/,$/, "")}\u201D (Hebrews 6:19, WEB). This changes the words, not the math.`;
-  const LAYER_WORD = { 1: "your feelings", 2: "outside pressure", 3: "inner peace and mixed pulls", 4: "the grip, and resistance", 5: "the past and hope" };
+  const FAITH = Str.t("topology.FAITH.with_faith_the_anchor_is", { v0: HEB619.replace(/,$/, "") });
+  const LAYER_WORD = { 1: Str.t("topology.LAYER_WORD.1"), 2: Str.t("topology.LAYER_WORD.2"), 3: Str.t("topology.LAYER_WORD.3"), 4: Str.t("topology.LAYER_WORD.4"), 5: Str.t("topology.LAYER_WORD.5") };
 
   /** The Anchor view's words (no digits) and math lines, from a reading. */
   function view(m, text, state, path, opts = {}) {
@@ -272,14 +274,14 @@ if (typeof module !== "undefined") {
     const far = dist(m.e, A), tt = timeTo(m.e, A, res.rho);
     const slowHard = ["sadness", "anger", "fear", "shame", "rumination", "avoidance"].find(n => at(m.e, n) >= 0.3 && Math.abs(at(m.e, n) - at(A, n)) > 0.1);
     const words = [
-      `You are ${far < EPS_IN ? "near" : far < 0.4 ? "some way from" : "far from"} your anchor: ${anchorWords(A)}.`,
-      `What pulls most right now: ${LAYER_WORD[top]}.`,
+      Str.t("topology.view.words.you_are_your_anchor", { far_s: far < EPS_IN ? "near" : far < 0.4 ? Str.t("topology.view.words.some_way_from") : Str.t("topology.view.words.far_from"), v1: anchorWords(A) }),
+      Str.t("topology.view.words.what_pulls_most_right_now", { v0: LAYER_WORD[top] }),
     ];
     if (slowHard && PATIENCE[slowHard]) words.push(PATIENCE[slowHard]);
-    words.push(tt.hi > 0 ? `A rough guess to feel near your anchor: from ${span(tt.lo)} to ${span(tt.hi)}. It is a wide guess, not a promise.` : "You are already close to your anchor. Stay with it for a while.");
+    words.push(tt.hi > 0 ? Str.t("topology.view.a_rough_guess_to_feel", { v0: span(tt.lo), v1: span(tt.hi) }) : Str.t("topology.view.you_are_already_close_to"));
     if (res.rho >= 0.3) {
-      const why = res.parts.sup >= 0.3 ? "pushing the feeling away" : res.parts.rum >= res.parts.avoid ? "replaying it" : "avoiding it";
-      words.push(`Some resistance is here (${why}). Fighting a feeling can keep it around longer. A willingness step: make a little room for it and say, \u201CI'm willing to feel this for one breath.\u201D`);
+      const why = res.parts.sup >= 0.3 ? Str.t("topology.view.why.pushing_the_feeling_away") : res.parts.rum >= res.parts.avoid ? Str.t("topology.view.why.replaying_it") : Str.t("topology.view.why.avoiding_it");
+      words.push(Str.t("topology.view.some_resistance_is_here_fighting", { why: why }));
     }
     const stones = path && path.stones ? path.stones : [{ A }];
     const pathWords = stones.map(s => anchorWords(s.A).replace(/^./, c => c.toUpperCase()));
@@ -289,12 +291,12 @@ if (typeof module !== "undefined") {
     const cb = chainBound(res.rho, 1 - q(state.vars));
     const math = [
       `Anchor A_k (${stones.length - 1}): [${A.map(x => x.toFixed(2)).join(", ")}]`,
-      `‖e − A_k‖ = ${far.toFixed(2)};  ε_in = ${EPS_IN}, ε_out = ${EPS_OUT};  τ_dwell = ${dwell(m.e, res.rho).toFixed(2)} h`,
-      `Layer pull (RMS): ${Object.keys(pull).map(k => `L${k} ${pull[k].toFixed(2)}`).join(", ")}`,
-      `ρ = ${res.rho.toFixed(2)} (avoid ${res.parts.avoid.toFixed(2)}, suppress ${res.parts.sup.toFixed(2)}, rumination ${res.parts.rum.toFixed(2)}, inertia ${res.parts.inertia.toFixed(2)}, sustain ${res.parts.sustain.toFixed(2)}, willing ${res.parts.will.toFixed(2)})`,
-      `τeff = τ(1 + e_rum)/(1 − ρ): ${NAMES.map(n => `${n} ${tauEff(n, m.e, res.rho).toFixed(1)}h`).join(", ")}`,
-      `Time to within 0.1 per mover: ${tt.lo.toFixed(1)}–${tt.hi.toFixed(1)} h (typical ${tt.typ.toFixed(1)} h)`,
-      `k(1 h) = ${kdt(1, m.e, res.rho).toFixed(3)};  q (master, toward h) = ${q(state.vars).toFixed(2)};  q_ρ = ${cb.qRho.toFixed(3)};  q_A = ${cb.qA.toFixed(2)}, radius ${cb.radius.toFixed(2)}`,
+      Str.t("topology.view.math.e_a_k_in_out", { v0: far.toFixed(2), EPS_IN: EPS_IN, EPS_OUT: EPS_OUT, v3: dwell(m.e, res.rho).toFixed(2) }),
+      Str.t("topology.view.math.layer_pull_rms", { v0: Object.keys(pull).map(k => `L${k} ${pull[k].toFixed(2)}`).join(", ") }),
+      Str.t("topology.view.math.avoid_suppress_rumination_inertia_sustain", { v0: res.rho.toFixed(2), v1: res.parts.avoid.toFixed(2), v2: res.parts.sup.toFixed(2), v3: res.parts.rum.toFixed(2), v4: res.parts.inertia.toFixed(2), v5: res.parts.sustain.toFixed(2), v6: res.parts.will.toFixed(2) }),
+      Str.t("topology.view.math.eff_1_e_rum_1", { v0: NAMES.map(n => `${n} ${tauEff(n, m.e, res.rho).toFixed(1)}h`).join(", ") }),
+      Str.t("topology.view.math.time_to_within_0_1", { v0: tt.lo.toFixed(1), v1: tt.hi.toFixed(1), v2: tt.typ.toFixed(1) }),
+      Str.t("topology.view.math.k_1_h_q_master", { v0: kdt(1, m.e, res.rho).toFixed(3), v1: q(state.vars).toFixed(2), v2: cb.qRho.toFixed(3), v3: cb.qA.toFixed(2), v4: cb.radius.toFixed(2) }),
     ];
     return { words, pathWords, math, A, rho: res.rho, pull, top: Number(top), time: tt, stones, far };
   }
@@ -317,10 +319,10 @@ if (typeof module !== "undefined") {
   function review(stones, opts = {}) {
     const st = (stones || []).slice(-6);
     if (!st.length) return [];
-    const out = [`Today the traveler set out with the fawn, looking for ${anchorWords(st[0].A)}.`];
-    st.slice(1).forEach((s, i) => out.push(`${i ? "Then" : "After a while"} she stepped to a new stone: ${anchorWords(s.A)}.`));
-    out.push(st.length > 1 ? "Each stone held long enough for the next one to appear." : "She stayed by that stone, and it was enough for today.");
-    if (opts.faith) out.push(`\u201C${HEB619.replace(/,$/, "")}\u201D (Hebrews 6:19, WEB).`);
+    const out = [Str.t("topology.review.out.today_the_traveler_set_out", { v0: anchorWords(st[0].A) })];
+    st.slice(1).forEach((s, i) => out.push(Str.t("topology.she_stepped_to_a_new", { v0: i ? "Then" : Str.t("topology.after_a_while"), v1: anchorWords(s.A) })));
+    out.push(st.length > 1 ? Str.t("topology.review.each_stone_held_long_enough") : Str.t("topology.review.she_stayed_by_that_stone"));
+    if (opts.faith) out.push(Str.t("topology.review.hebrews_6_19_web", { v0: HEB619.replace(/,$/, "") }));
     return out;
   }
   /** The review as one standalone SVG picture (made on this device; nothing is sent). */
@@ -340,14 +342,14 @@ if (typeof module !== "undefined") {
     let path = null; try { path = JSON.parse((store && store.getItem(PATH_KEY)) || "null"); } catch (e) { path = null; }
     let seen = null;
     $("pet-anchor").addEventListener("click", () => app.open("anchor"));
-    $("an-math").addEventListener("click", () => { const box = $("an-math-box"), open = box.classList.toggle("hidden") === false; $("an-math").setAttribute("aria-expanded", String(open)); $("an-math").textContent = open ? "Hide the math" : "Show the math"; });
+    $("an-math").addEventListener("click", () => { const box = $("an-math-box"), open = box.classList.toggle("hidden") === false; $("an-math").setAttribute("aria-expanded", String(open)); $("an-math").textContent = open ? Str.t("governor.hide_the_math") : Str.t("governor.show_the_math"); });
     $("an-save").addEventListener("click", () => {
       const lines = Array.from($("an-story").querySelectorAll("p")).map(p => p.textContent);
       const stage = app.companion && MF.Companion ? MF.Companion.stageOf(app.companion.get().points || 0).i : 0;
       const url = URL.createObjectURL(new Blob([reviewSvg(lines, stage)], { type: "image/svg+xml" }));
       const a = document.createElement("a"); a.href = url; a.download = "mindframe-story.svg"; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      app.note("Saved the story as a picture on this device.");
+      app.note(Str.t("topology.saved_the_story_as_a"));
     });
     $("an-clear").addEventListener("click", () => { path = null; if (store) store.removeItem(PATH_KEY); seen = null; render(); });
     const fill = (id, list, tag = "p") => { const el = $(id); el.innerHTML = ""; list.forEach(t => { const p = document.createElement(tag); p.textContent = t; el.appendChild(p); }); };
@@ -361,7 +363,7 @@ if (typeof module !== "undefined") {
         if (store) store.setItem(PATH_KEY, JSON.stringify(path));
       }
       const v = view(m, text, app.state, path, { faith: app.faith() });
-      $("an-intro").textContent = v ? "" : "Tap Update first, and I'll show how far you are from your anchor.";
+      $("an-intro").textContent = v ? "" : Str.t("topology.render.tap_update_first_and_i");
       fill("an-words", v ? v.words : []);
       fill("an-path", v ? v.pathWords : [], "li");
       $("an-svg").innerHTML = v ? svg(v) : "";

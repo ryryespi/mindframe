@@ -16,7 +16,7 @@ function test(name, fn) {
 }
 const I = n => M.NAMES.indexOf(n);
 const DIGIT = /[0-9]/;
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 const SAMPLE = "My coworkers criticized me in front of everyone, I want to snap back but I know they're stressed";
 const X = t => (K.cues(t) || { X: 0 }).X;
 
@@ -144,7 +144,7 @@ test("verified verse wording (World English Bible) in the faith lines; no quote 
   const src = read("js/core/kai.js");
   assert.match(src, /who answered nothing, like a sheep that is silent before its shearers \(from Matthew and Isaiah\)/); // Matt 27:12 "he answered nothing"; Isa 53:7
   assert.match(src, /when he was cursed, he didn't curse back \(from First Peter\)/); // 1 Pet 2:23
-  assert.match(src, /\\u201CFather, forgive them\\u201D \(from Luke\)/); // Luke 23:34
+  assert.match(src, /\u201CFather, forgive them\u201D \(from Luke\)/); // Luke 23:34
   const rd = read("README.md");
   [/Isaiah 53:7/, /Matthew 27:12[–-]14/, /Luke 23:34/, /1 Peter 2:23/, /Galatians 5:22[–-]23/, /Matthew 11:28[–-]30/, /Philippians 4:7/, /World English Bible/].forEach(r => assert.match(rd, r));
 });

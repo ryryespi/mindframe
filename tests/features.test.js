@@ -16,7 +16,7 @@ function test(name, fn) {
 }
 const I = n => M.NAMES.indexOf(n);
 const DIGIT = /[0-9]/;
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 
 // ---------- relationship: the Four Horsemen ----------
 test("relationship: detects each of the four patterns", () => {
@@ -146,8 +146,8 @@ test("page: one companion replaces the six helpers; its sheet has six actions th
   assert.ok(read("sw.js").includes("./js/features/companion.js"));
 });
 test("code: every js file has a header comment, and every function a JSDoc or a one-line comment", () => {
-  const files = ["js/app.js", ...["core", "features", "features/writer"].flatMap(d => fs.readdirSync(path.join(__dirname, "../js", d)).filter(f => f.endsWith(".js")).map(f => `js/${d}/${f}`))];
-  assert.equal(files.length, 33);
+  const files = ["js/app.js", ...["data", "core", "features", "features/writer"].flatMap(d => fs.readdirSync(path.join(__dirname, "../js", d)).filter(f => f.endsWith(".js")).map(f => `js/${d}/${f}`))];
+  assert.equal(files.length, 37);
   files.forEach(f => {
     const src = read(f);
     assert.match(src.split("\n")[0], /^\/\/ js\/|^\/\/ /, `${f} header`);

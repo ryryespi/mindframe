@@ -71,8 +71,11 @@ if (typeof module !== "undefined") {
   require("./relationship.js");
 }
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params, EQ = MF.Equations;   // every number: data/params.js; every equation: core/equations.js
   const { idx, ACTIVE } = MF.Movers;
   const REL = MF.Relationship;
 
@@ -86,80 +89,80 @@ if (typeof module !== "undefined") {
    */
   const LIBRARY = {
     stop: {
-      name: "STOP", kind: "mindfulness", breath: BREATH.exhale, source: "Stahl & Goldstein, 2010 (MBSR)",
-      say: x => `STOP: stop what you're doing, take ${x.times} slow breaths, observe what's here in your body and mind, then proceed with one kind next action`,
-      steps: ["Stop: pause whatever you're doing.", "Take a breath: one or a few slow breaths, a little longer out than in.", "Observe: notice your body, your feelings and your thoughts, without fixing anything.", "Proceed: choose one kind, useful next action."],
+      name: "STOP", kind: "mindfulness", breath: BREATH.exhale, source: Str.t("practices.LIBRARY.stop.source"),
+      say: x => Str.t("practices.say.stop_stop_what_you_re", { times: x.times }),
+      steps: Str.list("practices.LIBRARY.stop.steps"),
     },
     space: {
-      name: "Three-minute breathing space", kind: "mindfulness", breath: BREATH.exhale, source: "Segal, Williams & Teasdale, 2013 (MBCT)",
-      say: x => `Three-minute breathing space: notice what's here, gather your attention on ${x.times} slow breaths, then widen it to your whole body`,
-      steps: ["About a minute: notice what's here right now: thoughts, feelings, body sensations.", "About a minute: gather your attention on the breath in your belly.", "About a minute: widen your attention to your whole body, breathing with it as it is."],
+      name: Str.t("practices.LIBRARY.space.name"), kind: "mindfulness", breath: BREATH.exhale, source: Str.t("practices.LIBRARY.space.source"),
+      say: x => Str.t("practices.say.three_minute_breathing_space_notice", { times: x.times }),
+      steps: Str.list("practices.LIBRARY.space.steps"),
     },
     senses: {
-      name: "5-4-3-2-1 senses", kind: "mindfulness", breath: null, source: "a common grounding exercise (no single primary source)",
-      say: () => "Five senses: name five things you can see, four you can touch, three you can hear, two you can smell and one you can taste",
-      steps: ["Name five things you can see.", "Four things you can touch.", "Three things you can hear.", "Two things you can smell.", "One thing you can taste, or one kind thing about this moment."],
+      name: "5-4-3-2-1 senses", kind: "mindfulness", breath: null, source: Str.t("practices.LIBRARY.senses.source"),
+      say: () => Str.t("practices.say.five_senses_name_five_things"),
+      steps: Str.list("practices.LIBRARY.senses.steps"),
     },
     body: {
-      name: "Short body scan", kind: "mindfulness", breath: null, source: "Kabat-Zinn, 1990",
-      say: x => `Short body scan: for ${x.min} minutes, move your attention slowly from your feet to your head, noticing without changing anything`,
-      steps: ["Sit or lie comfortably and let your breath be as it is.", "Bring your attention to your feet, then slowly up through legs, belly, chest, hands, shoulders, face.", "Where there's tension, just notice it; breathe into it if you like.", "Finish with a sense of the whole body breathing."],
+      name: Str.t("practices.LIBRARY.body.name"), kind: "mindfulness", breath: null, source: Str.t("practices.LIBRARY.body.source"),
+      say: x => Str.t("practices.say.short_body_scan_for_minutes", { min: x.min }),
+      steps: Str.list("practices.LIBRARY.body.steps"),
     },
     label: {
-      name: "Name it to tame it", kind: "mindfulness", breath: BREATH.exhale, source: "affect labeling: Lieberman et al., 2007",
-      say: x => `Name it to tame it: put the feeling into one or two words, like \u201Cthis is worry\u201D, then breathe out slowly ${x.times} times`,
-      steps: ["Notice the strongest feeling right now.", "Name it in one or two plain words: \u201Cthis is worry\u201D, \u201Cthis is hurt\u201D.", "Let a thought be a thought: \u201CI'm having the thought that\u2026\u201D", "Breathe out slowly and come back to what's in front of you."],
+      name: Str.t("practices.LIBRARY.label.name"), kind: "mindfulness", breath: BREATH.exhale, source: Str.t("practices.LIBRARY.label.source"),
+      say: x => Str.t("practices.say.name_it_to_tame_it", { times: x.times }),
+      steps: Str.list("practices.LIBRARY.label.steps"),
     },
     kindness: {
-      name: "Self-compassion break", kind: "mindfulness", breath: null, source: "Neff, 2003",
-      say: () => "Self-compassion break: with a hand on your heart, say \u201Cthis is hard\u201D, \u201Cothers feel this too\u201D, and \u201Cmay I be kind to myself\u201D, then tell one safe person",
-      steps: ["Mindfulness: \u201CThis is a moment of suffering.\u201D", "Common humanity: \u201CEveryone struggles and makes mistakes; I'm not alone.\u201D", "Self-kindness: hand on your heart, \u201CMay I be kind to myself.\u201D"],
+      name: Str.t("practices.LIBRARY.kindness.name"), kind: "mindfulness", breath: null, source: "Neff, 2003",
+      say: () => Str.t("practices.say.self_compassion_break_with_a"),
+      steps: Str.list("practices.LIBRARY.kindness.steps"),
     },
     pause: {
-      name: "Pause and breathe", kind: "patience", breath: BREATH.exhale, source: "slow breathing: Zaccaro et al., 2018",
-      say: x => `Pause: step away for ${x.min} minutes and breathe out longer than in, ${x.times} times, then name what matters to you here`,
-      steps: ["Step back from the moment if you can, even a few feet.", "Breathe in for about four, out for about six.", "Let the urge to act right now pass a little.", "Name what matters to you here, then choose your response."],
+      name: Str.t("practices.LIBRARY.pause.name"), kind: "patience", breath: BREATH.exhale, source: Str.t("practices.LIBRARY.pause.source"),
+      say: x => Str.t("practices.say.pause_step_away_for_minutes", { min: x.min, times: x.times }),
+      steps: Str.list("practices.LIBRARY.pause.steps"),
     },
     waiting: {
-      name: "Reframe the wait", kind: "patience", breath: BREATH.exhale, source: "reappraisal: Gross, 1998; patience: Schnitker, 2012",
-      say: x => `Reframe the wait: breathe out slowly ${x.times} times, then name one thing this wait gives you room for`,
-      steps: ["Notice the impatience in your body, without judging it.", "Breathe out slowly a few times.", "Look at the wait another way: what does it give you room for, or what is it protecting?", "Choose one small thing to do with this time."],
+      name: Str.t("practices.LIBRARY.waiting.name"), kind: "patience", breath: BREATH.exhale, source: Str.t("practices.LIBRARY.waiting.source"),
+      say: x => Str.t("practices.say.reframe_the_wait_breathe_out", { times: x.times }),
+      steps: Str.list("practices.LIBRARY.waiting.steps"),
     },
     surf: {
-      name: "Urge surfing", kind: "patience", breath: BREATH.exhale, source: "Bowen & Marlatt, 2009",
-      say: x => `Urge surfing: notice the pull to put it off as a wave, breathe with it as it rises, peaks and falls, then do ${x.min} minutes of the thing you've been putting off`,
-      steps: ["Notice the urge and where you feel it in your body.", "Picture it as a wave: it rises, peaks, and falls on its own.", "Breathe with it and ride it without acting on it.", "When it passes a little, take the smallest first step."],
+      name: Str.t("practices.LIBRARY.surf.name"), kind: "patience", breath: BREATH.exhale, source: Str.t("practices.LIBRARY.surf.source"),
+      say: x => Str.t("practices.say.urge_surfing_notice_the_pull", { min: x.min }),
+      steps: Str.list("practices.LIBRARY.surf.steps"),
     },
     gratitude: {
-      name: "Gratitude for what's here", kind: "patience", breath: null, source: "Emmons & McCullough, 2003",
-      say: x => `Gratitude for what's here: name ${x.times} things that are already okay right now; small ones count`,
-      steps: ["Look around: what is already here that you're glad of?", "Name three small things, as specific as you can.", "Stay with one of them for a breath or two."],
+      name: Str.t("practices.LIBRARY.gratitude.name"), kind: "patience", breath: null, source: Str.t("practices.LIBRARY.gratitude.source"),
+      say: x => Str.t("practices.say.gratitude_for_what_s_here", { times: x.times }),
+      steps: Str.list("practices.LIBRARY.gratitude.steps"),
     },
   };
   /** The cold-water caution, shown every time the practice is (card, Copy, panel). */
-  const COLD_CAUTION = "Skip this if you have a heart condition, low blood pressure, fainting, or an eating disorder; check with your doctor first.";
+  const COLD_CAUTION = Str.t("practices.COLD_CAUTION.skip_this_if_you_have");
   Object.assign(LIBRARY, {
     cold: {
-      name: "Cold-water reset", kind: "body", breath: BREATH.exhale, source: "TIP skills (Temperature): Linehan, 2015", caution: COLD_CAUTION, fast: true,
-      say: () => "Cold-water reset: splash cool or cold water on your face, or hold something cold, for fifteen to thirty seconds while you breathe out slowly",
-      steps: ["Use cool or cold water, not icy: splash your face, or hold a cold pack or a cold drink against your cheeks and eyes.", "Keep it there for about 15 to 30 seconds while you breathe out slowly.", "Notice your body slowing down a little.", "Then take one slow breath and choose your next step."],
+      name: Str.t("practices.cold.name"), kind: "body", breath: BREATH.exhale, source: Str.t("practices.cold.source"), caution: COLD_CAUTION, fast: true,
+      say: () => Str.t("practices.say.cold_water_reset_splash_cool"),
+      steps: Str.list("practices.cold.steps"),
     },
     pmr: {
-      name: "Progressive muscle relaxation", kind: "body", breath: BREATH.exhale, source: "Jacobson, 1938; review: McCallie, Blum & Hood, 2006",
-      caution: "Tense gently, never to the point of pain, and skip any area that's injured.",
-      say: () => "Progressive muscle relaxation: for about three minutes, tense your hands, shoulders, jaw and feet in turn for about five seconds, then let go for about ten",
-      steps: ["Hands: make fists for about 5 seconds, then let go for about 10 and notice the difference.", "Shoulders: lift them toward your ears for about 5 seconds, then let them drop for about 10.", "Jaw: clench gently for about 5 seconds, then let it hang loose for about 10.", "Feet: curl your toes for about 5 seconds, then let go for about 10.", "Breathe out as you let go each time. About three minutes in all."],
+      name: Str.t("practices.pmr.name"), kind: "body", breath: BREATH.exhale, source: Str.t("practices.pmr.source"),
+      caution: Str.t("practices.pmr.caution"),
+      say: () => Str.t("practices.say.progressive_muscle_relaxation_for_about"),
+      steps: Str.list("practices.pmr.steps"),
     },
     dump: {
-      name: "Brain dump", kind: "mindfulness", breath: null, source: "expressive writing: Pennebaker & Beall, 1986; Frattaroli, 2006 (small effects)", writes: true,
-      say: () => "Brain dump: for ten minutes, write down whatever is going round in your head without fixing it, then keep what helps and let the rest go",
-      steps: ["Start the 10-minute timer below.", "Write whatever comes, as fast or slow as you like; spelling and sense don't matter.", "When the time is up, read it once if you want.", "Keep what helps (Save to journal), or tap Let it go and watch it clear."],
+      name: Str.t("practices.dump.name"), kind: "mindfulness", breath: null, source: Str.t("practices.dump.source"), writes: true,
+      say: () => Str.t("practices.say.brain_dump_for_ten_minutes"),
+      steps: Str.list("practices.dump.steps"),
     },
     walk: {
-      name: "Short brisk walk", kind: "body", breath: null, source: "physical activity: Rebar et al., 2015; short walks: Ekkekakis et al., 2000",
-      caution: "Only where it's safe to walk; an easy pace is fine.",
-      say: () => "Short brisk walk: walk at a brisk, comfortable pace for five to ten minutes, outside if you can, noticing what you see",
-      steps: ["Put on shoes and step outside if it's safe, or walk indoors.", "Walk briskly enough to breathe a little faster, still able to talk.", "Keep going for 5 to 10 minutes; notice three things you see on the way.", "When you stop, notice how your body and mood feel now."],
+      name: Str.t("practices.walk.name"), kind: "body", breath: null, source: Str.t("practices.walk.source"),
+      caution: Str.t("practices.walk.caution"),
+      say: () => Str.t("practices.say.short_brisk_walk_walk_at"),
+      steps: Str.list("practices.walk.steps"),
     },
   });
   const ORDER = ["stop", "space", "senses", "body", "label", "kindness", "dump", "pause", "waiting", "surf", "gratitude", "cold", "pmr", "walk"];
@@ -173,12 +176,12 @@ if (typeof module !== "undefined") {
     return WAIT.filter(re => { const g = new RegExp(re.source, "g"); let m; while ((m = g.exec(t))) if (!REL.negated(t, m.index)) return true; return false; }).length;
   }
   /** c = 1 − e^(−0.7·k), two decimals. */
-  const cueStrength = k => Math.round((1 - Math.exp(-0.7 * k)) * 100) / 100;
+  const cueStrength = EQ.cue;
   /** Word hook: impatience nudges anger +0.2 and calm −0.2; c_wait passes to master as data.wait. */
   function hook(text) {
     const k = waitCues(text);
     if (!k) return null;
-    return { add: { anger: 0.2 }, neg: { calm: 0.2 }, notes: ["impatience wording"], data: { wait: cueStrength(k) } };
+    return { add: { anger: 0.2 }, neg: { calm: 0.2 }, notes: Str.list("practices.hook.notes"), data: { wait: cueStrength(k) } };
   }
   MF.Movers.addWordHook(hook);
 
@@ -197,7 +200,7 @@ if (typeof module !== "undefined") {
   function bodyHook(text) {
     const a = cues(TENSE, text), b = cues(TIRED, text);
     if (!a && !b) return null;
-    return { data: { ...(a ? { tense: cueStrength(a) } : {}), ...(b ? { tired: cueStrength(b) } : {}) }, notes: [...(a ? ["body tension wording"] : []), ...(b ? ["low energy wording"] : [])] };
+    return { data: { ...(a ? { tense: cueStrength(a) } : {}), ...(b ? { tired: cueStrength(b) } : {}) }, notes: [...(a ? Str.list("practices.bodyHook.notes") : []), ...(b ? Str.list("practices.bodyHook.notes_2") : [])] };
   }
   MF.Movers.addWordHook(bodyHook);
 
@@ -208,13 +211,13 @@ if (typeof module !== "undefined") {
    * @returns {{id:string, mover:string}|null} null keeps the earlier step for that mover
    */
   /** The card's "strongly" band starts above 0.6 (core/words.js). */
-  const STRONG = 0.6;
+  const STRONG = P.practices.STRONG;
   /**
    * "Very high": the upper part of the strongly band. One plain feeling word
    * already reads 0.63, so the fast reset and the brain dump wait for 0.75
    * (an intensifier or several cues, or "strongly" in the picker at 0.80).
    */
-  const VERY = 0.75;
+  const VERY = P.practices.VERY;
   function pick(m) {
     if (!m || m.crisis) return null;
     const n = (m.peace && m.peace.lever && m.peace.lever.name) || m.mover;
@@ -269,8 +272,8 @@ if (typeof module !== "undefined") {
   MF.Master.addPass(pass);
 
   // ---------- Grace's "Breathe & be patient" tab (browser only) ----------
-  const FAITH = { mindfulness: "Be still, and know that I am God (from the Psalms).", patience: "Love is patient, love is kind (from 1 Corinthians).", body: "Come to me, all who are weary, and I will give you rest (from Matthew)." };
-  const PHASE = { in: "Breathe in\u2026", hold: "Hold gently\u2026", out: "Breathe out, slowly\u2026" };
+  const FAITH = { mindfulness: Str.t("practices.FAITH.mindfulness"), patience: Str.t("practices.FAITH.patience"), body: Str.t("practices.FAITH.body") };
+  const PHASE = { in: Str.t("practices.PHASE.in"), hold: Str.t("practices.PHASE.hold"), out: Str.t("practices.PHASE.out") };
   /**
    * Mount the practice library and the breathing circle in Grace's panel.
    * @param {object} app the app shell (see js/app.js)
@@ -317,9 +320,9 @@ if (typeof module !== "undefined") {
       if (timer) clearTimeout(timer);
       timer = null;
       $("breath-circle").className = "breath-circle";
-      $("breath-phase").textContent = msg || "Ready when you are: in for four, out for six.";
+      $("breath-phase").textContent = msg || Str.t("practices.stop.ready_when_you_are_in");
       $("breath-count").textContent = "";
-      $("breath-go").textContent = "Start the breathing circle";
+      $("breath-go").textContent = Str.t("practices.stop.start_the_breathing_circle");
     }
     /** Run the schedule: each phase sets the circle's class and transition time. */
     function start() {
@@ -330,12 +333,12 @@ if (typeof module !== "undefined") {
       let k = 0;
       $("breath-go").textContent = "Stop";
       const tick = () => {
-        if (k >= plan.length) { stop("Done. Notice how you feel now."); app.care("practice"); if (app.practised && MF.Kai) app.practised(MF.Kai.PRACTICE_VIRTUE[chosen]); return; }
+        if (k >= plan.length) { stop(Str.t("practices.tick.done_notice_how_you_feel")); app.care("practice"); if (app.practised && MF.Kai) app.practised(MF.Kai.PRACTICE_VIRTUE[chosen]); return; }
         const s = plan[k], c = $("breath-circle");
         c.style.setProperty("--dur", `${s.ms}ms`);
-        c.className = `breath-circle ${s.phase}`;
+        c.className = Str.t("practices.tick.breath_circle", { phase: s.phase });
         $("breath-phase").textContent = PHASE[s.phase];
-        $("breath-count").textContent = `Breath ${Math.floor(k / (plan.length / rounds)) + 1} of ${rounds}`;
+        $("breath-count").textContent = Str.t("practices.tick.breath_of", { v0: Math.floor(k / (plan.length / rounds)) + 1, rounds: rounds });
         k += 1;
         timer = setTimeout(tick, s.ms);
       };
@@ -350,7 +353,7 @@ if (typeof module !== "undefined") {
     function dumpStop(msg) {
       if (dumpTimer) clearInterval(dumpTimer);
       dumpTimer = null;
-      $("dump-go").textContent = "Start the 10-minute timer";
+      $("dump-go").textContent = Str.t("practices.dumpStop.start_the_10_minute_timer");
       $("dump-time").textContent = msg || "10:00";
     }
     /** Clear the scratch box (with a gentle fade when asked); it is never stored anywhere. */
@@ -358,7 +361,7 @@ if (typeof module !== "undefined") {
       const box = $("dump-text");
       dumpStop(msg);
       if (!box.value) return;
-      if (fade && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (fade && !window.matchMedia(Str.t("practices.dumpClear.prefers_reduced_motion_reduce")).matches) {
         box.classList.add("fading");
         setTimeout(() => { box.value = ""; box.classList.remove("fading"); }, 600);
       } else box.value = "";
@@ -366,11 +369,11 @@ if (typeof module !== "undefined") {
     $("dump-go").addEventListener("click", () => {
       if (dumpTimer) { dumpStop(); return; }
       dumpEnd = Date.now() + DUMP_MS;
-      $("dump-go").textContent = "Stop the timer";
+      $("dump-go").textContent = Str.t("practices.stop_the_timer");
       $("dump-time").textContent = mmss(DUMP_MS);
       dumpTimer = setInterval(() => {
         const left = dumpEnd - Date.now();
-        if (left <= 0) { dumpStop("Time. Keep what helps, or let it go."); app.care("practice"); if (app.practised) app.practised("A"); return; }
+        if (left <= 0) { dumpStop(Str.t("practices.time_keep_what_helps_or")); app.care("practice"); if (app.practised) app.practised("A"); return; }
         $("dump-time").textContent = mmss(left);
       }, 1000);
       $("dump-text").focus();
@@ -380,14 +383,14 @@ if (typeof module !== "undefined") {
       // Crisis wording here clears the box and shows only the 988/911 box.
       if (Grounding.isCrisis(box.value)) { box.value = ""; dumpStop(); app.crisis(true); }
     });
-    $("dump-letgo").addEventListener("click", () => { const had = !!$("dump-text").value; dumpClear(true); app.note(had ? "Let go. Nothing was kept." : "Nothing to let go of yet."); });
+    $("dump-letgo").addEventListener("click", () => { const had = !!$("dump-text").value; dumpClear(true); app.note(had ? Str.t("practices.let_go_nothing_was_kept") : Str.t("practices.nothing_to_let_go_of")); });
     $("dump-save").addEventListener("click", () => {
       const t = $("dump-text").value.trim();
-      if (!t) { app.note("Write something first; nothing is saved otherwise."); return; }
-      if (!MF.Writer.journalAdd(localStorage, `Brain dump\n${t}`)) return;
+      if (!t) { app.note(Str.t("practices.write_something_first_nothing_is")); return; }
+      if (!MF.Writer.journalAdd(localStorage, Str.t("practices.brain_dump", { t: t }))) return;
       $("dump-text").value = "";
       dumpStop();
-      app.note("Saved in your journal on this device.");
+      app.note(Str.t("forgiveness.saved_in_your_journal_on"));
       app.care("journal");
       app.renderAll();
     });
@@ -399,7 +402,7 @@ if (typeof module !== "undefined") {
 
     return function render() {
       const m = app.m(), pk = m ? m.practice : null;
-      $("practice-suggest").textContent = pk ? `Suggested now: ${LIBRARY[pk.id].name}, from your reading.` : "Pick any practice. After Update, one is suggested from your reading.";
+      $("practice-suggest").textContent = pk ? Str.t("practices.render.suggested_now_from_your_reading", { name: LIBRARY[pk.id].name }) : Str.t("practices.render.pick_any_practice_after_update");
       // A new reading brings its suggestion forward; otherwise keep what was picked.
       // A new reading (Update) also clears the brain dump's scratch box.
       if (m !== seen) { seen = m; picked = false; dumpClear(false); }

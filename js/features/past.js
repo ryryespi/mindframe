@@ -31,40 +31,36 @@
 // 4. Faith on adds Philippians 3:13–14, Isaiah 43:18–19, Lamentations
 //    3:22–23 and Colossians 3:13 (exact WEB text from features/scripture.js).
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params, EQ = MF.Equations;   // every number: data/params.js; every equation: core/equations.js
 
-  const SHOW = 0.3;
-  const LP = { self: 0.2, other: 0.15, loop: 0.2 };
-  const LH = { bps: 0.2, future: 0.15 };
+  const { SHOW, LP, LH } = P.past;
   const PAST = [/\bi should have\b/, /\bi shouldn't have\b/, /\bif only\b/, /\bregret(s|ted)?\b/, /\bmy past\b/, /\bback then\b/, /\bi ruined\b/, /\bi messed up\b/, /\bwhat i did\b/, /\bwhat (they|he|she) did to me\b/, /\bcan't undo\b/, /\byears ago\b/];
-  const cue = k => Math.round((1 - Math.exp(-0.7 * Math.max(0, k))) * 100) / 100;
-  const clamp = x => Math.max(0, Math.min(1, x));
-  const r2 = x => Math.round(x * 100) / 100;
   const clean = t => String(t || "").toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/\s+/g, " ");
   const hits = (list, t) => list.filter(re => { const g = new RegExp(re.source, "g"); let x; while ((x = g.exec(t))) if (!(MF.Kai && MF.Kai.negated(t, x.index))) return true; return false; }).length;
 
-  function detect(m, text) {
+  const detect = MF.Movers.memoOn(detectOf);
+  /** The past-to-future reading for m (memoized per m by detect). */
+  function detectOf(m, text) {
     if (!m || m.crisis || !m.e) return null;
     const N = MF.Movers.NAMES, at = n => m.e[N.indexOf(n)];
     const k = hits(PAST, clean(text));
-    const past = r2(clamp(Math.max(at("shame"), at("rumination")) + 0.3 * cue(k)));
     const f = m.forgive || {};
-    const score = { self: r2(at("shame") + (f.path === "self" ? 0.2 : 0)), other: r2(f.path === "other" ? f.cOther || 0 : 0), loop: r2(at("rumination")) };
-    const tech = ["self", "other", "loop"].reduce((a, x) => (score[x] > score[a] + 1e-9 ? x : a), "self");
-    const future = at("hope") < 0.4 ? "bps" : "future";
-    const after = { shame: r2(at("shame") * (1 - LP[tech])), rumination: r2(at("rumination") * (1 - LP[tech])), hope: r2(at("hope") + (1 - at("hope")) * LH[future]) };
-    return { show: past >= SHOW && (k > 0 || at("shame") >= 0.4), past, k, score, tech, future, before: { shame: at("shame"), rumination: at("rumination"), hope: at("hope") }, after };
+    const { past, score, tech, future, after } = EQ.pastPull(at, k, f.path, f.cOther);   // OE τ15: Π
+    return { show: past >= SHOW && (k > 0 || at("shame") >= P.past.SHAME_SHOW), past, k, score, tech, future, before: { shame: at("shame"), rumination: at("rumination"), hope: at("hope") }, after };
   }
 
   const TECH = {
-    self: "Self-compassion: speak to yourself as you would to a friend, remember that everyone stumbles, and notice the hurt without drowning in it. Then the four Rs: take responsibility, feel remorse without self-punishment, restore what you can, and renew your commitment to your values.",
-    other: "Loving-kindness: wish well slowly, first to yourself, then someone you love, then someone neutral, then the person who is hard for you, then all people. Wishing well is not excusing what happened.",
-    loop: "Acceptance: say to yourself, \u201CThis happened, and I'm having thoughts about it,\u201D and let the memory be there without replaying it to fix it. You can carry it and still move.",
+    self: Str.t("past.TECH.self"),
+    other: Str.t("past.TECH.other"),
+    loop: Str.t("past.TECH.loop"),
   };
   const FUTURE = {
-    bps: "Toward the future: write for a few minutes about your best possible self, a life where things have gone as well as they reasonably could, and notice one thing you could start now.",
-    future: "Toward the future: write a short note to yourself a year from now, about who you are growing into; that future you is still you.",
+    bps: Str.t("past.FUTURE.bps"),
+    future: Str.t("past.FUTURE.future"),
   };
   const word = x => (x >= 0.7 ? "a lot" : x >= 0.4 ? "some" : "a little");
   const FAITH = [["PHI 3:13", "PHI 3:14"], ["ISA 43:18", "ISA 43:19"], ["LAM 3:22", "LAM 3:23"], ["COL 3:13"]];
@@ -73,14 +69,14 @@
 
   function lines(p, opts = {}) {
     if (!p || !p.show) return [];
-    const out = ["Past to future: what happened is real, and it doesn't have to decide what comes next."];
+    const out = Str.list("past.lines.out");
     out.push(TECH[p.tech]);
     out.push(FUTURE[p.future]);
     const big = p.before.shame >= p.before.rumination ? "shame" : "rumination";
-    const what = big === "shame" ? "the weight of the past" : "replaying the past";
+    const what = big === "shame" ? Str.t("past.lines.what.the_weight_of_the_past") : Str.t("past.lines.what.replaying_the_past");
     const a = word(p.before[big]), b = word(p.after[big]), h0 = word(p.before.hope), h1 = word(p.after.hope);
-    out.push(`With practice over days, ${what} may ease${a === b ? " a little" : ` from ${a} toward ${b}`}, and hope may grow${h0 === h1 ? " a little" : ` from ${h0} toward ${h1}`}. The past stays part of your story; it doesn't have to lead it.`);
-    if (opts.faith && MF.Scripture) out.push(`With faith: Scripture speaks of pressing on toward what is ahead, of a new thing springing up, of mercies new every morning, and of forgiving as Christ forgave (${faithPassages().map(x => x.ref).join("; ")}).`);
+    out.push(Str.t("past.lines.with_practice_over_days_may", { what: what, a_s: a === b ? " a little" : Str.t("past.lines.from_toward", { a: a, b: b }), h0_s: h0 === h1 ? " a little" : Str.t("past.lines.from_toward_2", { h0: h0, h1: h1 }) }));
+    if (opts.faith && MF.Scripture) out.push(Str.t("past.lines.with_faith_scripture_speaks_of", { v0: faithPassages().map(x => x.ref).join("; ") }));
     return out;
   }
 

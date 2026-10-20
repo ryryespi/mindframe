@@ -30,20 +30,20 @@
 //    from features/scripture.js) as a framing: taking thoughts captive and
 //    setting the mind on what is true, as practice, not as suppression.
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params, EQ = MF.Equations;   // every number: data/params.js; every equation: core/equations.js
 
-  const SHOW = 0.3;
-  const L = { defuse: 0.25, surf: 0.3, window: 0.2, value: 0.15 };
-  const cue = k => Math.round((1 - Math.exp(-0.7 * Math.max(0, k))) * 100) / 100;
-  const clamp = x => Math.max(0, Math.min(1, x));
-  const r2 = x => Math.round(x * 100) / 100;
+  const { SHOW, L } = P.grip;
+  const { cue, r2 } = EQ;
   /** Gentle names (no shaming), and negation-aware cue lists. */
   const VICE = {
-    desire: { name: "a strong pull of desire", res: [/\blust(ing|ful)?\b/, /\bporn\b/, /\bcan't stop looking at\b/, /\bcraving\b/] },
-    envy: { name: "comparing yourself (envy)", res: [/\b(jealous|envious|envy)\b/, /\bwhy do(es)? (they|he|she) get\b/, /\bwish i had (their|his|her)\b/] },
-    resentment: { name: "an old hurt held tight (resentment)", res: [/\bresent(ment|ful|ing)?\b/, /\bgrudge\b/, /\b(forgive|let go of) (them|him|her|what (they|he|she) did)\b/] },
-    pride: { name: "needing to be above others (pride)", res: [/\bbetter than (them|everyone|him|her|all of)\b/, /\bbeneath me\b/, /\bi'?m always right\b/] },
+    desire: { name: Str.t("grip.VICE.desire.name"), res: [/\blust(ing|ful)?\b/, /\bporn\b/, /\bcan't stop looking at\b/, /\bcraving\b/] },
+    envy: { name: Str.t("grip.VICE.envy.name"), res: [/\b(jealous|envious|envy)\b/, /\bwhy do(es)? (they|he|she) get\b/, /\bwish i had (their|his|her)\b/] },
+    resentment: { name: Str.t("grip.VICE.resentment.name"), res: [/\bresent(ment|ful|ing)?\b/, /\bgrudge\b/, /\b(forgive|let go of) (them|him|her|what (they|he|she) did)\b/] },
+    pride: { name: Str.t("grip.VICE.pride.name"), res: [/\bbetter than (them|everyone|him|her|all of)\b/, /\bbeneath me\b/, /\bi'?m always right\b/] },
   };
   const LOOP = [/\bover and over\b/, /\bagain and again\b/, /\bcan't stop (thinking|checking|scrolling|replaying)\b/, /\bkeep (replaying|going over|checking)\b/, /\bon a loop\b/];
   const clean = t => String(t || "").toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/\s+/g, " ");
@@ -57,42 +57,43 @@
    * @param {string} text the words (empty in pick mode)
    * @param {{days?: {e:number[]}[]}} [state] for the repetition across days
    */
-  function detect(m, text, state) {
+  const detect = MF.Movers.memoOn(detectOf);
+  /** The grip reading for m (memoized per m by detect). */
+  function detectOf(m, text, state) {
     if (!m || m.crisis || !m.e) return null;
     const N = MF.Movers.NAMES, at = n => m.e[N.indexOf(n)], t = clean(text);
-    const days = ((state && state.days) || []).slice(-7).filter(d => d.e && d.e[N.indexOf("rumination")] >= 0.5).length;
+    const days = ((state && state.days) || []).slice(-P.grip.DAYS).filter(d => d.e && d.e[N.indexOf("rumination")] >= P.grip.LOOP_DAY).length;
     const kLoop = hits(LOOP, t);
     const vices = Object.keys(VICE).filter(k => hits(VICE[k].res, t) > 0);
     if (m.grand && MF.Reality && m.grand.g >= MF.Reality.G_SHOW && !vices.includes("pride")) vices.push("pride");
     if (m.forgive && m.forgive.path === "other" && m.forgive.cOther >= 0.5 && !vices.includes("resentment")) vices.push("resentment");
-    const pull = { fear: r2(at("fear")), loop: r2(clamp(at("rumination") + 0.1 * days + 0.2 * cue(kLoop))), vice: cue(vices.length) };
+    const pull = { fear: r2(at("fear")), loop: EQ.loopPull(at("rumination"), days, kLoop), vice: cue(vices.length) };
     const top = ["vice", "loop", "fear"].reduce((a, k) => (pull[k] > pull[a] + 1e-9 ? k : a), "vice");
     const tool = top === "vice" ? "surf" : top === "loop" && (days >= 2 || kLoop > 0) ? "window" : "defuse";
-    const Lt = r2(1 - (1 - L[tool]) * (1 - L.value));
-    const after = Object.fromEntries(Object.keys(pull).map(k => [k, r2(pull[k] * (1 - Lt))]));
+    const { Lt, after } = EQ.gripLoosen(pull, tool);   // OE τ14: x(1 − L)
     return { show: pull[top] >= SHOW, top, pull, after, L: Lt, tool, vices, days, kLoop };
   }
 
   const TOOL = {
-    defuse: "Notice, name, defuse: notice the thought, name it (\u201CI'm having the thought that…\u201D), and let it sit there like a passing car, without arguing.",
-    surf: "Urge surfing: notice where the pull sits in your body and ride it like a wave as it rises, peaks and falls, without acting on it or fighting it.",
-    window: "A worry window: when the loop starts, write it down and save it for a set quarter hour later in the day; outside that time, gently come back to now.",
+    defuse: Str.t("grip.TOOL.defuse"),
+    surf: Str.t("grip.TOOL.surf"),
+    window: Str.t("grip.TOOL.window"),
   };
-  const WHAT = { fear: "fear", loop: "a looping, replaying mind", vice: null };
+  const WHAT = { fear: "fear", loop: Str.t("grip.WHAT.loop"), vice: null };
 
   /** The card lines (words only; never a promise to remove thoughts). */
   function lines(g, m, opts = {}) {
     if (!g || !g.show) return [];
     const what = g.top === "vice" ? g.vices.map(v => VICE[v].name).join(" and ") : WHAT[g.top];
-    const out = [`Loosen the grip: ${what} is pulling at you. Thoughts like this are common and human; pushing them away tends to bring them back, so the aim is to loosen their hold, not to get rid of them.`];
+    const out = [Str.t("grip.lines.out.loosen_the_grip_is_pulling", { what: what })];
     out.push(TOOL[g.tool]);
     const pr = m && m.practice && MF.Practices && MF.Practices.LIBRARY[m.practice.id];
-    out.push(`Then one small step toward what matters to you${pr ? `: ${pr.name.replace(/:.*$/, "")}` : ", like a kind word or a short walk"}.`);
+    out.push(Str.t("grip.lines.then_one_small_step_toward", { v0: pr ? `: ${pr.name.replace(/:.*$/, "")}` : Str.t("grip.lines.like_a_kind_word_or") }));
     const from = level(g.pull[g.top]), to = level(g.after[g.top]);
-    out.push(from === to ? `With practice, its hold may loosen a little, even if it still feels like ${from}. It may come back; each time is practice, not failure.` : `With practice, its hold may loosen from ${from} toward ${to}, slowly. It may come back; each time is practice, not failure.`);
+    out.push(from === to ? Str.t("grip.lines.with_practice_its_hold_may", { from: from }) : Str.t("grip.lines.with_practice_its_hold_may_2", { from: from, to: to }));
     if (opts.faith && MF.Scripture) {
       const v = c => MF.Scripture.VERSES.find(x => x.code === c);
-      out.push(`With faith: Scripture speaks of bringing thoughts to Christ and setting the mind on what is true (${v("2CO 10:5").ref}; ${v("PHI 4:8").ref}); as a practice of turning, not of forcing thoughts away.`);
+      out.push(Str.t("grip.lines.with_faith_scripture_speaks_of", { ref: v("2CO 10:5").ref, ref1: v("PHI 4:8").ref }));
     }
     return out;
   }

@@ -15,7 +15,7 @@ function test(name, fn) {
   try { fn(); passed += 1; console.log("ok  -", name); }
   catch (err) { console.error("FAIL -", name); console.error(err); process.exitCode = 1; }
 }
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 const DAY = 24 * 3600 * 1000;
 const T0 = new Date(2026, 9, 18, 9, 0).getTime();
 const DIGIT = /[0-9]/;

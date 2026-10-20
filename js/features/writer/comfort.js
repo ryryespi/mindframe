@@ -30,14 +30,16 @@ if (typeof module !== "undefined") {
   require("../../core/words.js");
 }
 
+if (typeof window === "undefined") require("../../data/strings.js");
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
   const { NAMES, LABEL, idx, isGround, f2 } = MF.Movers;
   const W = MF.Words;
 
-  const ASK = "Please write a short, gentle, grounded comfort story (about 200 words) with a friendly animal as the main character, followed by three short first-person affirmations. "
-    + "Base both ONLY on the analysis below. Keep it warm and realistic, give no medical or diagnostic advice, and end on a hopeful note.";
-  const ABOUT = "The analysis comes from a small local equation model of nine feelings (a model, not a measurement or a diagnosis).";
+  const ASK = Str.t("writer.comfort.ASK.please_write_a_short_gentle")
+    + Str.t("writer.comfort.ASK.base_both_only_on_the");
+  const ABOUT = Str.t("writer.comfort.ABOUT.the_analysis_comes_from_a");
 
   /**
    * The compact numbers summary: movers with bands, step direction, conflicts, g, positives.
@@ -50,24 +52,24 @@ if (typeof module !== "undefined") {
       .filter(({ n, x }) => (isGround[idx[n]] ? true : x >= 0.1))
       .map(({ n, x }) => `${LABEL[n] || n} ${f2(x)} (${isGround[idx[n]] ? (x >= 0.65 ? "high" : x <= 0.4 ? "low" : "middle") : W.band(x)})`);
     const j = m.mover ? idx[m.mover] : -1;
-    const dir = `distance from steady ${f2(m.d)} -> ${f2(m.dNext)}${j >= 0 ? `; biggest move: ${LABEL[m.mover] || m.mover} ${f2(m.e[j])} -> ${f2(m.next[j])}` : ""}`;
+    const dir = Str.t("writer.comfort.numbers.dir.distance_from_steady", { v0: f2(m.d), v1: f2(m.dNext), j_s: j >= 0 ? Str.t("writer.comfort.numbers.dir.biggest_move", { v0: LABEL[m.mover] || m.mover, v1: f2(m.e[j]), v2: f2(m.next[j]) }) : "" });
     const conf = (m.conflicts || []).map(c => {
-      if (c.from === "words") { const [a, b] = W.pulls(c); return `${a} vs ${b} (in the words) ${f2(c.c)}`; }
-      return `${c.a} vs ${c.side === "need" ? `need for ${c.b}` : c.b} ${f2(c.c)}`;
+      if (c.from === "words") { const [a, b] = W.pulls(c); return Str.t("writer.comfort.vs_in_the_words", { a: a, b: b, v2: f2(c.c) }); }
+      return `${c.a} vs ${c.side === "need" ? Str.t("writer.comfort.need_for", { b: c.b }) : c.b} ${f2(c.c)}`;
     });
     const g = m.grand || { g: 0, kinds: [] };
     return [
       `Movers: ${movers.join(", ")}`,
-      `Step direction: ${dir}`,
-      `Hidden conflicts: ${conf.length ? conf.join("; ") : "none"}`,
-      `Grandiosity signal: ${f2(g.g)}${g.kinds.length ? ` (${g.kinds.join(", ")})` : ""}`,
-      `Positive emotions it points toward: ${(m.positives || []).map(p => p.word).join(", ") || "calm"}`,
-      ...(m.peace ? [`Inner peace P: ${f2(m.peace.P)} (${MF.Peace.band(m.peace.P)}); steps until P >= 0.80: ${m.peace.solve ? (m.peace.solve.n === null ? "not reached" : m.peace.solve.n) : "?"}; biggest lever: ${m.peace.lever && m.peace.lever.name ? `${m.peace.lever.kind === "grow" ? "growing" : "easing"} ${m.peace.lever.name}` : "none"}`] : []),
-      ...(m.forgive ? [`Forgiveness: self F=${f2(m.forgive.Fself)}, others F=${f2(m.forgive.Fother)} (threshold 0.35); suggested path: ${m.forgive.path === "self" ? "forgiving yourself" : m.forgive.path === "other" ? "forgiving someone" : "none"}`] : []),
-      ...(m.small && m.small.u > 0 ? [`Putting yourself down (false humility) signal: ${f2(m.small.u)}${m.small.kinds.length ? ` (${m.small.kinds.join(", ")})` : " (chosen in the feelings picker)"}`] : []),
-      ...(m.freeing && MF.Freeing ? [`Freeing mix (inner peace ${f2(m.freeing.P0)} -> ${f2(m.freeing.P1)}, shame only goes down): ${MF.Freeing.line(m.e, m.freeing.target, m.pick ? m.pick.extras : [])}`] : []),
-      ...(m.practice && MF.Practices ? [`Practice for the one step: ${MF.Practices.LIBRARY[m.practice.id].name}`] : []),
-      ...(m.kai && m.kai.X > 0 && MF.Kai ? [`Steadiness under outside criticism (Kai shield): pressure X=${f2(m.kai.X)}, shield S=${f2(m.kai.S)} (self-awareness ${f2(m.kai.A)}, forbearance ${f2(m.kai.F)}, empathy ${f2(m.kai.E)}, respect guard ${f2(m.kai.R)}); impulsive reaction I=${f2(m.kai.I)}; weakest: ${MF.Kai.NAME[m.kai.lever]}`] : []),
+      Str.t("writer.comfort.numbers.step_direction", { dir: dir }),
+      Str.t("writer.comfort.numbers.hidden_conflicts", { v0: conf.length ? conf.join("; ") : "none" }),
+      Str.t("writer.comfort.numbers.grandiosity_signal", { v0: f2(g.g), v1: g.kinds.length ? ` (${g.kinds.join(", ")})` : "" }),
+      Str.t("writer.comfort.numbers.positive_emotions_it_points_toward", { v0: (m.positives || []).map(p => p.word).join(", ") || "calm" }),
+      ...(m.peace ? [Str.t("writer.comfort.numbers.inner_peace_p_steps_until", { v0: f2(m.peace.P), v1: MF.Peace.band(m.peace.P), v2: m.peace.solve ? (m.peace.solve.n === null ? Str.t("writer.comfort.numbers.not_reached") : m.peace.solve.n) : "?", v3: m.peace.lever && m.peace.lever.name ? `${m.peace.lever.kind === "grow" ? "growing" : "easing"} ${m.peace.lever.name}` : "none" })] : []),
+      ...(m.forgive ? [Str.t("writer.comfort.numbers.forgiveness_self_f_others_f", { v0: f2(m.forgive.Fself), v1: f2(m.forgive.Fother), v2: m.forgive.path === "self" ? Str.t("writer.comfort.numbers.forgiving_yourself") : m.forgive.path === "other" ? Str.t("writer.comfort.numbers.forgiving_someone") : "none" })] : []),
+      ...(m.small && m.small.u > 0 ? [Str.t("writer.comfort.numbers.putting_yourself_down_false_humility", { v0: f2(m.small.u), v1: m.small.kinds.length ? ` (${m.small.kinds.join(", ")})` : Str.t("writer.comfort.numbers.chosen_in_the_feelings_picker") })] : []),
+      ...(m.freeing && MF.Freeing ? [Str.t("writer.comfort.numbers.freeing_mix_inner_peace_shame", { v0: f2(m.freeing.P0), v1: f2(m.freeing.P1), v2: MF.Freeing.line(m.e, m.freeing.target, m.pick ? m.pick.extras : []) })] : []),
+      ...(m.practice && MF.Practices ? [Str.t("writer.comfort.numbers.practice_for_the_one_step", { name: MF.Practices.LIBRARY[m.practice.id].name })] : []),
+      ...(m.kai && m.kai.X > 0 && MF.Kai ? [Str.t("writer.comfort.numbers.steadiness_under_outside_criticism_kai", { v0: f2(m.kai.X), v1: f2(m.kai.S), v2: f2(m.kai.A), v3: f2(m.kai.F), v4: f2(m.kai.E), v5: f2(m.kai.R), v6: f2(m.kai.I), v7: MF.Kai.NAME[m.kai.lever] })] : []),
     ];
   }
 
@@ -103,19 +105,19 @@ if (typeof module !== "undefined") {
       `- ${c.room}`,
       ...c.peace.map(x => `- ${x}`),
       `- ${c.feeling}`,
-      `- How they connect: ${c.connect.join(" ")}`,
+      Str.t("writer.comfort.buildPrompt.words.how_they_connect", { v0: c.connect.join(" ") }),
       ...c.conflict.map(x => `- ${x}`),
       ...c.reality.map(x => `- ${x}`),
       ...(c.forgive || []).map(x => `- ${x}`),
       ...(c.freeing ? c.freeing.lines.map(x => `- ${x}`) : []),
-      `- Suggested step: ${c.step}`,
-      `- Affirmations the app composed: ${c.affirmations.join(" / ")}`,
+      Str.t("writer.comfort.buildPrompt.words.suggested_step", { step: c.step }),
+      Str.t("writer.comfort.buildPrompt.words.affirmations_the_app_composed", { v0: c.affirmations.join(" / ") }),
     ];
-    const out = [ASK, "", ABOUT, "", "In words:", ...scrub(words, opts.raw), "", "Numbers (0 to 1):", ...numbers(m).map(x => `- ${x}`)];
-    if (m.forgive && m.forgive.path) out.push("", "If the story touches forgiveness, keep it gentle and unhurried: forgiving is not excusing what happened, reconciling, or staying anywhere unsafe.");
+    const out = [ASK, "", ABOUT, "", Str.t("writer.comfort.buildPrompt.out.in_words"), ...scrub(words, opts.raw), "", Str.t("writer.comfort.buildPrompt.out.numbers_0_to_1"), ...numbers(m).map(x => `- ${x}`)];
+    if (m.forgive && m.forgive.path) out.push("", Str.t("writer.comfort.buildPrompt.if_the_story_touches_forgiveness"));
     // The user's companion may star in the story (its name and stage only; never the typed text).
-    if (opts.pet && opts.pet.name) out.push("", `Companion: please make the friendly animal my companion, a little ${opts.pet.animal || "fawn"} named ${opts.pet.name} (${String(opts.pet.stage || "young").toLowerCase()} stage), gentle and kind.`);
-    if (opts.faith) out.push("", "Faith: please include one gentle line of Christian faith, for example the peace of God that surpasses understanding (Philippians 4:7).");
+    if (opts.pet && opts.pet.name) out.push("", Str.t("writer.comfort.buildPrompt.companion_please_make_the_friendly", { v0: opts.pet.animal || "fawn", name: opts.pet.name, v2: String(opts.pet.stage || "young").toLowerCase() }));
+    if (opts.faith) out.push("", Str.t("writer.comfort.buildPrompt.faith_please_include_one_gentle"));
     return out.join("\n");
   }
 

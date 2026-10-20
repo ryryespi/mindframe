@@ -43,13 +43,16 @@ if (typeof module !== "undefined") {
   require("./relationship.js");
 }
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
-  const { idx, r2 } = MF.Movers;
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params, EQ = MF.Equations;   // every number: data/params.js; every equation: core/equations.js
+  const { idx } = MF.Movers;
   const R = MF.Reality, PEACE = MF.Peace, REL = MF.Relationship;
   const G = typeof Grounding !== "undefined" ? Grounding : require("../core/grounding.js");
 
-  const THETA = 0.35;
+  const THETA = P.forgive.THETA;
   const WHO = "(him|her|them|you|my \\w+)";
   /** Self-blame cues. */
   const SELF = [/\bmy fault\b/, /\bi blame myself\b/, /\b(can'?t|cannot|can not|never|won'?t) forgive myself\b/, /\bhate myself\b/, /\bi (messed|screwed) (it |everything |things )?up\b/, /\bi (ruined|wrecked) (it|everything|things)\b/, /\bi should(n'?t)? have\b/, new RegExp(`\\bi let ${WHO.replace("you|", "you|everyone|")} down\\b`), /\bi regret\b/, /\bi feel (so )?guilty\b/, /\bashamed of (myself|what i did)\b/, new RegExp(`\\bi hurt ${WHO}\\b`), /\bi'?m (such )?an? (terrible|horrible|awful|bad) (person|friend|parent|mom|dad|mother|father|partner|son|daughter|wife|husband)\b/];
@@ -68,7 +71,7 @@ if (typeof module !== "undefined") {
     const t = REL.clean(text);
     if (!t.trim() || G.isCrisis(t)) return { self: 0, other: 0, cSelf: 0, cOther: 0 };
     const self = count(SELF, t), other = count(OTHER, t);
-    const c = k => r2(1 - Math.exp(-0.7 * k));
+    const c = EQ.cue;
     return { self, other, cSelf: c(self), cOther: c(other) };
   }
 
@@ -77,8 +80,8 @@ if (typeof module !== "undefined") {
     const q = cues(text);
     if (!q.self && !q.other) return null;
     const add = {}, neg = {}, notes = [];
-    if (q.self) { add.shame = 0.2; add.rumination = 0.2; notes.push("self-blame (forgiveness)"); }
-    if (q.other) { add.anger = 0.3; add.rumination = (add.rumination || 0) + 0.2; neg.connection = 0.2; notes.push("resentment (forgiveness)"); }
+    if (q.self) { add.shame = 0.2; add.rumination = 0.2; notes.push(Str.t("forgiveness.hook.self_blame_forgiveness")); }
+    if (q.other) { add.anger = 0.3; add.rumination = (add.rumination || 0) + 0.2; neg.connection = 0.2; notes.push(Str.t("forgiveness.hook.resentment_forgiveness")); }
     return { add, neg, notes, data: { forgive: { cSelf: q.cSelf, cOther: q.cOther } } };
   }
   MF.Movers.addWordHook(hook);
@@ -87,7 +90,7 @@ if (typeof module !== "undefined") {
   MF.Movers.addPickExtra(BLAME);
 
   /** What each path is modeled to move, toward home (capped by the gap). */
-  const RELEASE = { self: { shame: 0.10, rumination: 0.05 }, other: { anger: 0.10, rumination: 0.05, connection: 0.05 } };
+  const RELEASE = P.forgive.RELEASE;
   /** The movers each path works on (for the Grace recommendation). */
   const PATH_MOVERS = { self: ["shame", "rumination"], other: ["anger", "rumination", "connection"] };
 
@@ -109,7 +112,7 @@ if (typeof module !== "undefined") {
   function pass(out, ctx) {
     const f = ctx.data.forgive || { cSelf: 0, cOther: 0 };
     const e = out.e, h = ctx.h, g = out.grand ? out.grand.g : 0;
-    const Fs = r2(e[idx.shame] * (0.4 + 0.6 * f.cSelf)), Fo = r2(e[idx.anger] * (0.4 + 0.6 * f.cOther));
+    const { Fs, Fo } = EQ.forgiveness(e[idx.shame], e[idx.anger], f.cSelf, f.cOther);   // OE eq.(4) passes
     const best = Fs >= Fo ? "self" : "other", top = Math.max(Fs, Fo);
     const path = top >= THETA ? best : null;
     const P0 = PEACE.score(e, h, ctx.V, R.conflicts(e, ctx.clashes), g).raw;
@@ -123,8 +126,8 @@ if (typeof module !== "undefined") {
   // ---------- Words (card) ----------
   const SAFE = "Forgiving is not excusing what happened, making up, or staying anywhere unsafe.";
   const FAITH = {
-    self: "Forgive us our debts, as we also forgive our debtors (from the Lord's Prayer); that mercy is meant for you too.",
-    other: "Bear with each other and forgive one another, as the Lord forgave you (from Colossians); you can ask for help to begin.",
+    self: Str.t("forgiveness.FAITH.self"),
+    other: Str.t("forgiveness.FAITH.other"),
   };
   /**
    * The forgiveness tile in words (empty when no path is suggested).
@@ -138,12 +141,12 @@ if (typeof module !== "undefined") {
     if (!f || !f.path) return [];
     const out = [];
     if (f.path === "self") {
-      out.push(`Forgiving yourself: there's ${f.Fself >= 0.6 ? "a heavy weight" : "some weight"} of self-blame here. You can own your part and still be kind to yourself.`);
+      out.push(Str.t("forgiveness.cardLines.forgiving_yourself_there_s_of", { v0: f.Fself >= 0.6 ? Str.t("forgiveness.cardLines.a_heavy_weight") : Str.t("forgiveness.cardLines.some_weight") }));
     } else {
-      out.push(`Forgiving someone: there's ${f.Fother >= 0.6 ? "a deep hurt" : "a hurt"} here that still stings. Forgiveness can come slowly, as a gift you choose, for your own peace.`);
+      out.push(Str.t("forgiveness.cardLines.forgiving_someone_there_s_here", { v0: f.Fother >= 0.6 ? Str.t("forgiveness.cardLines.a_deep_hurt") : "a hurt" }));
       out.push(SAFE);
     }
-    out.push("You can go one gentle step at a time, whenever you are ready.");
+    out.push(Str.t("forgiveness.cardLines.you_can_go_one_gentle"));
     if (opts.faith) out.push(FAITH[f.path]);
     return out;
   }
@@ -152,36 +155,36 @@ if (typeof module !== "undefined") {
     const f = m && m.forgive;
     if (!f || !f.grace) return null;
     const lv = m.peace.lever;
-    const noun = { shame: "the shame", rumination: "the replaying", anger: "the anger", connection: "connection" }[lv.name];
-    return `Forgive & breathe can help here: forgiving ${f.path === "self" ? "yourself" : "someone"} is a gentle way to ${lv.kind === "grow" ? "grow" : "ease"} ${noun}.`;
+    const noun = { shame: Str.t("words.LEVER_NOUN.shame"), rumination: Str.t("words.NOUN.rumination"), anger: Str.t("words.LEVER_NOUN.anger"), connection: "connection" }[lv.name];
+    return Str.t("forgiveness.peaceLine.forgive_breathe_can_help_here", { v0: f.path === "self" ? "yourself" : "someone", v1: lv.kind === "grow" ? "grow" : "ease", noun: noun });
   }
 
   // ---------- The guided paths (Grace's panel) ----------
   const PATHS = {
     self: {
-      title: "Forgive myself",
-      intro: "Self-forgiveness isn't letting yourself off the hook. It's owning what's yours, making what repair you can, and treating yourself with the kindness you'd give a friend. If you weren't at fault (for example, if someone harmed you), there's nothing here to forgive in yourself; the self-compassion step is still for you.",
+      title: Str.t("forgiveness.PATHS.self.title"),
+      intro: Str.t("forgiveness.PATHS.self.intro"),
       steps: [
-        { k: "Responsibility", say: "Name what happened, plainly and fairly: not bigger, not smaller. Which part is yours, and which part isn't?", box: "The part that's mine is\u2026" },
-        { k: "Remorse", say: "Let yourself feel sorry without punishing yourself. Guilt says \u201CI did something wrong\u201D; it doesn't have to become \u201CI am bad.\u201D", box: "I'm sorry that\u2026" },
-        { k: "Restoration", say: "Is there one way to repair it: an apology, making amends, or doing it differently next time? If repair isn't possible or safe, a kind act toward someone else counts.", box: "One way I can make it right is\u2026" },
-        { k: "Renewal", say: "Self-compassion: with a hand on your heart, say \u201CThis is hard\u201D (mindfulness), \u201CEveryone makes mistakes\u201D (common humanity), \u201CMay I be kind to myself\u201D (self-kindness). Then name how you'll grow.", box: "Next time I'll\u2026" },
+        { k: "Responsibility", say: Str.t("forgiveness.PATHS.self.steps.say"), box: Str.t("forgiveness.PATHS.self.steps.box") },
+        { k: "Remorse", say: Str.t("forgiveness.PATHS.self.steps.say_2"), box: Str.t("forgiveness.PATHS.self.steps.box_2") },
+        { k: "Restoration", say: Str.t("forgiveness.PATHS.self.steps.say_3"), box: Str.t("forgiveness.PATHS.self.steps.box_3") },
+        { k: "Renewal", say: Str.t("forgiveness.PATHS.self.steps.say_4"), box: Str.t("forgiveness.PATHS.self.steps.box_4") },
       ],
-      source: "The four Rs of self-forgiveness: Cornish & Wade (2015). Self-compassion: Neff (2003).",
-      faith: "Forgive us our debts, as we also forgive our debtors (from the Lord's Prayer). God's mercy is meant for you too.",
+      source: Str.t("forgiveness.PATHS.self.source"),
+      faith: Str.t("forgiveness.PATHS.self.faith"),
     },
     other: {
-      title: "Forgive someone",
-      intro: "Forgiving is a choice you can make slowly, at your own pace, for your own peace. It often unfolds over time: noticing the hurt, deciding to forgive, working to understand, and finding meaning. " + SAFE + " If you're not safe, reach out for help first.",
+      title: Str.t("forgiveness.PATHS.other.title"),
+      intro: Str.t("forgiveness.PATHS.other.intro.forgiving_is_a_choice_you") + SAFE + Str.t("forgiveness.PATHS.other.intro.if_you_re_not_safe"),
       steps: [
-        { k: "Recall", say: "Recall the hurt as calmly as you can, like a fair witness. No need to replay every detail.", box: "What happened was\u2026" },
-        { k: "Empathize", say: "Imagine what might have been going on for them: pressures, fears, their own history. Understanding isn't agreeing.", box: "Maybe they were\u2026" },
-        { k: "Altruistic gift", say: "Remember a time you were forgiven and how it felt. Forgiveness can be a gift you give, not because they earned it.", box: "A time I was forgiven\u2026" },
-        { k: "Commit", say: "Commit to the forgiveness you've reached, even a little: write it here, or tell someone you trust.", box: "Today I choose to\u2026" },
-        { k: "Hold on", say: "When the hurt comes back, it doesn't mean you didn't forgive. Come back to what you committed to.", box: "When it comes back, I'll remember\u2026" },
+        { k: "Recall", say: Str.t("forgiveness.PATHS.other.steps.say"), box: Str.t("forgiveness.PATHS.other.steps.box") },
+        { k: "Empathize", say: Str.t("forgiveness.PATHS.other.steps.say_2"), box: Str.t("forgiveness.PATHS.other.steps.box_2") },
+        { k: Str.t("forgiveness.PATHS.other.steps.k"), say: Str.t("forgiveness.PATHS.other.steps.say_3"), box: Str.t("forgiveness.PATHS.other.steps.box_3") },
+        { k: "Commit", say: Str.t("forgiveness.PATHS.other.steps.say_4"), box: Str.t("forgiveness.PATHS.other.steps.box_4") },
+        { k: Str.t("forgiveness.PATHS.other.steps.k_2"), say: Str.t("forgiveness.PATHS.other.steps.say_5"), box: Str.t("forgiveness.PATHS.other.steps.box_5") },
       ],
-      source: "REACH: Worthington (2006); evidence: Wade, Hoyt, Kidwell & Worthington (2014). Process model: Enright & Fitzgibbons (2015).",
-      faith: "Bear with each other and forgive one another, as the Lord forgave you (from Colossians). Even on the cross, Jesus prayed, \u201CFather, forgive them\u201D (from Luke). You can ask God for help to begin.",
+      source: Str.t("forgiveness.PATHS.other.source"),
+      faith: Str.t("forgiveness.PATHS.other.faith"),
     },
   };
 
@@ -217,16 +220,16 @@ if (typeof module !== "undefined") {
       ["self", "other"].forEach(p => {
         const P = PATHS[p], i = at[p], s = P.steps[i], root = $(`grace-${p}`);
         root.querySelector(".path-intro").textContent = P.intro;
-        root.querySelector(".path-count").textContent = `Step ${i + 1} of ${P.steps.length}`;
+        root.querySelector(".path-count").textContent = Str.t("forgiveness.step_of", { v0: i + 1, length: P.steps.length });
         root.querySelector(".path-dots").innerHTML = P.steps.map((x, j) => `<span class="dot${j === i ? " on" : j < i ? " done" : ""}" aria-hidden="true"></span>`).join("");
         root.querySelector(".path-k").textContent = s.k;
         root.querySelector(".path-say").textContent = s.say;
         const box = root.querySelector("textarea");
         box.placeholder = s.box;
-        box.setAttribute("aria-label", `${s.k}: optional note, kept only on this page`);
+        box.setAttribute("aria-label", Str.t("forgiveness.optional_note_kept_only_on", { k: s.k }));
         box.value = notes[p][i] || "";
         root.querySelector(".path-back").disabled = i === 0;
-        root.querySelector(".path-next").textContent = i === P.steps.length - 1 ? "Start over" : "Next step";
+        root.querySelector(".path-next").textContent = i === P.steps.length - 1 ? Str.t("forgiveness.start_over") : Str.t("forgiveness.next_step");
         root.querySelector(".path-source").textContent = P.source;
         const fl = root.querySelector(".path-faith");
         fl.textContent = P.faith;
@@ -250,9 +253,9 @@ if (typeof module !== "undefined") {
       });
       root.querySelector(".path-save").addEventListener("click", () => {
         const kept = PATHS[p].steps.map((s, i) => (notes[p][i] || "").trim() ? `${s.k}: ${notes[p][i].trim()}` : null).filter(Boolean);
-        if (!kept.length) { app.note("Write in a step's box first; nothing is saved otherwise."); return; }
+        if (!kept.length) { app.note(Str.t("forgiveness.write_in_a_step_s")); return; }
         MF.Writer.journalAdd(localStorage, `${PATHS[p].title}\n${kept.join("\n")}`);
-        app.note("Saved in your journal on this device.");
+        app.note(Str.t("forgiveness.saved_in_your_journal_on"));
         app.care("journal");
         app.renderAll();
       });
@@ -261,14 +264,14 @@ if (typeof module !== "undefined") {
     return function render() {
       const m = app.m();
       const hint = $("grace-hint");
-      if (!m || !m.forgive) hint.textContent = "Tap Update for a suggested path. You can open either one any time.";
-      else if (m.forgive.path === "self") hint.textContent = "From your reading: forgiving yourself may help most right now.";
-      else if (m.forgive.path === "other") hint.textContent = "From your reading: forgiving someone may help most right now, at your own pace.";
-      else hint.textContent = "From your reading: no forgiveness path stands out. Both are here if you want them.";
+      if (!m || !m.forgive) hint.textContent = Str.t("forgiveness.render.tap_update_for_a_suggested");
+      else if (m.forgive.path === "self") hint.textContent = Str.t("forgiveness.render.from_your_reading_forgiving_yourself");
+      else if (m.forgive.path === "other") hint.textContent = Str.t("forgiveness.render.from_your_reading_forgiving_someone");
+      else hint.textContent = Str.t("forgiveness.render.from_your_reading_no_forgiveness");
       // The card's forgiveness lines, shown here in full (the short card may not show them).
       const box = $("grace-reading");
       box.innerHTML = "";
-      const lines = m ? MF.Words.card(app.state, m, { faith: app.faith(), seed: 1 }).forgive : [];
+      const lines = m ? MF.Words.card(app.state, m, { faith: app.faith(), seed: P.seeds.CARD }).forgive : [];
       lines.forEach(t => { const p = document.createElement("p"); p.textContent = t; box.appendChild(p); });
       box.classList.toggle("hidden", !lines.length);
       draw();

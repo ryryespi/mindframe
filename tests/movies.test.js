@@ -16,7 +16,7 @@ function test(name, fn) {
   const fail = err => { console.error("FAIL -", name); console.error(err); process.exitCode = 1; };
   try { const r = fn(); if (r && r.then) pending.push(r.then(done, fail)); else done(); } catch (err) { fail(err); }
 }
-const read = f => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+const { read } = require("./resolve.js");
 const st = M.defaultState();
 const N = M.NAMES;
 /** A synthetic reading: e from a map, peace from P (with an optional lever). */
@@ -167,7 +167,7 @@ test("offline first and gentle fallbacks: offline, busy, errors and timeouts nev
   Object.keys(V.MOODS).forEach(id => assert.equal(V.suggest(id).length, 3, id));
   // The service worker never caches other sites (the film APIs go straight to the network).
   assert.match(read("sw.js"), /if \(new URL\(request\.url\)\.origin !== self\.location\.origin\) return;/);
-  assert.match(read("sw.js"), /mindframe-shell-v27/);
+  assert.match(read("sw.js"), /mindframe-shell-v28/);
   assert.ok(read("sw.js").includes('"./js/features/movies.js"'));
 });
 
@@ -216,7 +216,7 @@ test("page and docs: one Watch something row, its view, the card line, honest pr
   assert.match(readme, /## Watch something/);
   assert.match(readme, /query\.wikidata\.org/);
   assert.match(readme, /Zillmann, D\. \(1988\)\. Mood management through communication choices\. \*American Behavioral Scientist, 31\*\(3\), 327–340/);
-  assert.match(readme, /offline cache \(v27\)/);
+  assert.match(readme, /offline cache \(v28\)/);
 });
 
 Promise.all(pending).then(() => console.log(`\n${passed} passed`));

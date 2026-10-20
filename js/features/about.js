@@ -14,35 +14,38 @@
 //  5. Anchor suggestion: hobbies suggest room for flow, the absorbed calm of doing
 //     something you are good at (Csikszentmihalyi, 1990), words only.
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("../core/equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const P = MF.Params;   // every number: data/params.js
   const HOBBIES = {
-    coding: { label: "Coding", step: "Rubber-duck your feeling: explain it out loud, step by step, as if to a patient friend.", kind: "Help someone with one small question, or leave one kind comment on their work.", flow: "solving one small problem" },
-    music: { label: "Music", step: "Play or listen to one song slowly, all the way through, and notice one instrument.", kind: "Share one calm song with someone you like.", flow: "playing or listening closely" },
-    sports: { label: "Sports", step: "A brisk ten-minute walk, or a few easy drills at half speed.", kind: "Invite someone for an easy walk or a few gentle drills together.", flow: "moving with a steady rhythm" },
-    reading: { label: "Reading", step: "Read one page slowly, then write one line you want to remember.", kind: "Send a friend one line you liked, and why.", flow: "getting lost in a good page" },
-    writing: { label: "Writing", step: "Write five honest sentences, then stop and breathe.", kind: "Write a short thank-you note to someone.", flow: "finding the right words" },
-    art: { label: "Art and drawing", step: "Draw one ordinary object for ten minutes, just its outline.", kind: "Make a small sketch for someone and give it to them.", flow: "a line following your hand" },
-    cooking: { label: "Cooking", step: "Make something simple, one step at a time, tasting as you go.", kind: "Cook something simple and share it.", flow: "the rhythm of chopping and stirring" },
-    gardening: { label: "Gardening and nature", step: "Water a plant or step outside and touch one leaf.", kind: "Give someone a cutting, or water a neighbor's plants.", flow: "hands in the soil" },
-    gaming: { label: "Games", step: "Play one calm game for a set fifteen minutes, then stand and stretch.", kind: "Play a calm co-op game with a friend, for a set time.", flow: "a game that is just hard enough" },
-    films: { label: "Films and shows", step: "Watch one short gentle scene and notice what helped the character.", kind: "Ask someone to watch something gentle with you.", flow: "a story that holds your attention" },
-    faith: { label: "Faith and service", step: "Sit quietly for a minute, then do one small act of service.", kind: "Do one small act of service for someone nearby.", flow: "quiet, steady service" },
-    crafts: { label: "Crafts and making", step: "Work on one small piece for ten minutes with your hands.", kind: "Make or fix one small thing for someone.", flow: "careful work with your hands" },
+    coding: { label: "Coding", step: Str.t("about.HOBBIES.coding.step"), kind: Str.t("about.HOBBIES.coding.kind"), flow: Str.t("about.HOBBIES.coding.flow") },
+    music: { label: "Music", step: Str.t("about.HOBBIES.music.step"), kind: Str.t("about.HOBBIES.music.kind"), flow: Str.t("about.HOBBIES.music.flow") },
+    sports: { label: "Sports", step: Str.t("about.HOBBIES.sports.step"), kind: Str.t("about.HOBBIES.sports.kind"), flow: Str.t("about.HOBBIES.sports.flow") },
+    reading: { label: "Reading", step: Str.t("about.HOBBIES.reading.step"), kind: Str.t("about.HOBBIES.reading.kind"), flow: Str.t("about.HOBBIES.reading.flow") },
+    writing: { label: "Writing", step: Str.t("about.HOBBIES.writing.step"), kind: Str.t("about.HOBBIES.writing.kind"), flow: Str.t("about.HOBBIES.writing.flow") },
+    art: { label: Str.t("about.HOBBIES.art.label"), step: Str.t("about.HOBBIES.art.step"), kind: Str.t("about.HOBBIES.art.kind"), flow: Str.t("about.HOBBIES.art.flow") },
+    cooking: { label: "Cooking", step: Str.t("about.HOBBIES.cooking.step"), kind: Str.t("about.HOBBIES.cooking.kind"), flow: Str.t("about.HOBBIES.cooking.flow") },
+    gardening: { label: Str.t("about.HOBBIES.gardening.label"), step: Str.t("about.HOBBIES.gardening.step"), kind: Str.t("about.HOBBIES.gardening.kind"), flow: Str.t("about.HOBBIES.gardening.flow") },
+    gaming: { label: "Games", step: Str.t("about.HOBBIES.gaming.step"), kind: Str.t("about.HOBBIES.gaming.kind"), flow: Str.t("about.HOBBIES.gaming.flow") },
+    films: { label: Str.t("about.HOBBIES.films.label"), step: Str.t("about.HOBBIES.films.step"), kind: Str.t("about.HOBBIES.films.kind"), flow: Str.t("about.HOBBIES.films.flow") },
+    faith: { label: Str.t("about.HOBBIES.faith.label"), step: Str.t("about.HOBBIES.faith.step"), kind: Str.t("about.HOBBIES.faith.kind"), flow: Str.t("about.HOBBIES.faith.flow") },
+    crafts: { label: Str.t("about.HOBBIES.crafts.label"), step: Str.t("about.HOBBIES.crafts.step"), kind: Str.t("about.HOBBIES.crafts.kind"), flow: Str.t("about.HOBBIES.crafts.flow") },
   };
   const FIELDS = {
-    software: { label: "Software development", motif: "lantern", metaphor: "the way she would step through code, one line at a time, without blaming herself for the bug" },
-    nursing: { label: "Nursing and care", motif: "hand", metaphor: "the way she would care for a patient, gently and without hurry" },
-    art: { label: "Art and design", motif: "canvas", metaphor: "the way a painter lets a first layer dry before the next" },
-    teaching: { label: "Teaching and study", motif: "book", metaphor: "the way a good teacher lets a student try again" },
-    science: { label: "Science and research", motif: "lantern", metaphor: "the way a careful scientist treats a thought as a question to test" },
-    trades: { label: "Trades and building", motif: "tool", metaphor: "the way a builder checks the level before the next row" },
-    business: { label: "Business and office", motif: "book", metaphor: "the way she would clear one task before opening the next" },
-    health: { label: "Health and medicine", motif: "hand", metaphor: "the way a clinician listens before deciding" },
-    student: { label: "Student", motif: "book", metaphor: "the way a student reads one paragraph at a time" },
-    other: { label: "Something else", motif: "seed", metaphor: "the way small steady work grows over time" },
+    software: { label: Str.t("about.FIELDS.software.label"), motif: "lantern", metaphor: Str.t("about.FIELDS.software.metaphor") },
+    nursing: { label: Str.t("about.FIELDS.nursing.label"), motif: "hand", metaphor: Str.t("about.FIELDS.nursing.metaphor") },
+    art: { label: Str.t("about.FIELDS.art.label"), motif: "canvas", metaphor: Str.t("about.FIELDS.art.metaphor") },
+    teaching: { label: Str.t("about.FIELDS.teaching.label"), motif: "book", metaphor: Str.t("about.FIELDS.teaching.metaphor") },
+    science: { label: Str.t("about.FIELDS.science.label"), motif: "lantern", metaphor: Str.t("about.FIELDS.science.metaphor") },
+    trades: { label: Str.t("about.FIELDS.trades.label"), motif: "tool", metaphor: Str.t("about.FIELDS.trades.metaphor") },
+    business: { label: Str.t("about.FIELDS.business.label"), motif: "book", metaphor: Str.t("about.FIELDS.business.metaphor") },
+    health: { label: Str.t("about.FIELDS.health.label"), motif: "hand", metaphor: Str.t("about.FIELDS.health.metaphor") },
+    student: { label: "Student", motif: "book", metaphor: Str.t("about.FIELDS.student.metaphor") },
+    other: { label: Str.t("about.FIELDS.other.label"), motif: "seed", metaphor: Str.t("about.FIELDS.other.metaphor") },
   };
-  const MAX_TAG = 24, MAX_TAGS = 8;
+  const { MAX_TAG, MAX_TAGS } = P.limits;
   const cleanTag = t => String(t || "").toLowerCase().replace(/[^a-z0-9 \-]/g, "").trim().slice(0, MAX_TAG);
   /** Normalize an about record: {hobbies: [ids], tags: [free], field: id|null, fieldText}. */
   function normalize(a) {
@@ -55,7 +58,7 @@
   /** The first hobby (by list order) a free tag or a picked hobby names. */
   const hobbyOf = a => (a ? a.hobbies[0] || Object.keys(HOBBIES).find(k => a.tags.some(t => t.includes(k))) || null : null);
   /** 1. A step in your own way. */
-  const step = a => { const h = hobbyOf(a); return h ? `A step in your own way: ${HOBBIES[h].step}` : null; };
+  const step = a => { const h = hobbyOf(a); return h ? Str.t("about.step.a_step_in_your_own", { step: HOBBIES[h].step }) : null; };
   /** 4. A kind action tied to a hobby. */
   const kind = a => { const h = hobbyOf(a); return h ? HOBBIES[h].kind : null; };
   /** 2. The field motif and metaphor. */
@@ -64,7 +67,7 @@
   /** 5. Anchor suggestion in words. */
   function flowWords(a) {
     const hs = a ? a.hobbies.slice(0, 2) : [];
-    return hs.length ? `Your anchor has room for flow: the absorbed calm of ${hs.map(h => HOBBIES[h].flow).join(" or ")}.` : null;
+    return hs.length ? Str.t("about.flowWords.your_anchor_has_room_for", { v0: hs.map(h => HOBBIES[h].flow).join(" or ") }) : null;
   }
   /** 3. Extra picks for Continue your story. */
   const extras = a => ({ songs: a && a.hobbies.includes("music") ? 1 : 0, films: a && a.hobbies.includes("films") ? 1 : 0 });
@@ -84,13 +87,13 @@
     const a = { hobbies: [], tags: [], field: null, fieldText: "" }, errors = [];
     tokens.forEach(tok => {
       const m = tok.match(/^(hobbies|tags|field|fieldtext)=(.*)$/);
-      if (!m) { errors.push(`\u201C${tok}\u201D should look like hobbies=music,coding or field=software.`); return; }
+      if (!m) { errors.push(Str.t("about.should_look_like_hobbies_music", { tok: tok })); return; }
       try {
         if (m[1] === "hobbies") a.hobbies = m[2].split(",");
         else if (m[1] === "tags") a.tags = m[2].split(",").map(decodeURIComponent);
         else if (m[1] === "field") a.field = m[2];
         else a.fieldText = decodeURIComponent(m[2]);
-      } catch (e) { errors.push("an about value can't be read."); }
+      } catch (e) { errors.push(Str.t("about.an_about_value_can_t")); }
     });
     return { about: normalize(a), errors };
   }
@@ -116,7 +119,7 @@
       const about = normalize({ hobbies: Array.from(box.querySelectorAll("input:checked")).map(c => c.value), tags: $("ab-tags").value.split(","), field: sel.value || null, fieldText: $("ab-fieldtext").value });
       app.state = { ...app.state, about };
       app.save(); app.renderAll();
-      $("ab-note").textContent = about ? "Saved on this device. It is never sent." : "Cleared.";
+      $("ab-note").textContent = about ? Str.t("about.saved_on_this_device_it") : "Cleared.";
     });
     $("ab-clear").addEventListener("click", () => { app.state = { ...app.state, about: null }; app.save(); fillForm(); app.renderAll(); $("ab-note").textContent = "Cleared."; });
     return () => {};

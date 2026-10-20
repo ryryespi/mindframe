@@ -70,37 +70,22 @@ if (typeof module !== "undefined") {
   require("./kai.js");
 }
 
+if (typeof window === "undefined") { require("../data/strings.js"); require("./equations.js"); }
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
+  const EQ = MF.Equations;   // every equation: core/equations.js (numbers: data/params.js)
   const R = MF.Reality, PEACE = MF.Peace, KAI = MF.Kai;
-  const { NAMES, GROUND, REST, FIXED, ACTIVE, MAX_SIM, N, idx, isGround, r2, clamp01, norm, distance, stamp, dayOf, weights, fromText, fromPick, combine } = MF.Movers;
+  const { NAMES, GROUND, REST, FIXED, ACTIVE, MAX_SIM, idx, isGround, r2, clamp01, distance, stamp, dayOf, weights, fromText, fromPick, combine } = MF.Movers;
   // ---------- Vectors, dynamics, λ ----------
 
-  /** One left-alone dynamics step: e ← clamp01(e + dt·(Wᵀ(e − rest) − d·(e − rest))). */
-  function step(e, W, dt, d) {
-    return e.map((x, j) => {
-      let inflow = 0;
-      for (let i = 0; i < N; i++) inflow += W[i][j] * (e[i] - REST[i]);
-      return clamp01(x + dt * (inflow - d * (x - REST[j])));
-    });
-  }
+  /** One left-alone dynamics step (core/equations.js drift). */
+  const step = (e, W, dt, d) => EQ.drift(e, W, dt, d, REST);
 
   // Largest growth rate among the active hard and process movers: ρ(W_A) − d.
   // That block has only non-negative weights, so ρ is a real eigenvalue (Perron).
   /** Growth rate λ = ρ(W on the active hard/process movers) − d, or null when nothing is active. */
-  function lambda(e, W, d) {
-    const A = NAMES.map((n, i) => i).filter(i => !isGround[i] && e[i] > ACTIVE);
-    if (!A.length) return null;
-    let v = A.map(() => 1), rho = 0;
-    for (let it = 0; it < 200; it++) {
-      const nv = A.map((j) => A.reduce((s, i, k) => s + Math.max(0, W[i][j]) * v[k], 0));
-      const nn = norm(nv);
-      if (nn < 1e-12) { rho = 0; break; }
-      rho = nn / norm(v);
-      v = nv.map(x => x / nn);
-    }
-    return r2(rho - d);
-  }
+  const lambda = (e, W, d) => EQ.lambda(e, W, d, isGround);
 
   /** Two-way positive loops between active movers, strongest first. */
   function loops(e, W, d) {
@@ -131,24 +116,24 @@ if (typeof module !== "undefined") {
 
   // ---------- Skills and reframes (used by act() and the story) ----------
   const SKILL = {
-    fear: "Paced breathing: breathe out longer than in, five times, then name one thing you can see.",
-    sadness: "One small action: do one thing you used to enjoy, for ten minutes.",
-    anger: "Pause: step away for ten minutes, then name what matters to you here.",
-    shame: "Self-compassion: say to yourself what you'd say to a friend, and tell one safe person.",
-    rumination: "Worry window: give the replay ten minutes later today, then turn to one task now.",
-    avoidance: "Approach: do two minutes of the thing you've been putting off.",
-    calm: "Paced breathing: breathe out longer than in, five times.",
-    connection: "Reach out: send one short message to someone kind.",
-    hope: "One small plan: write down one thing for tomorrow.",
+    fear: Str.t("master.SKILL.fear"),
+    sadness: Str.t("master.SKILL.sadness"),
+    anger: Str.t("master.SKILL.anger"),
+    shame: Str.t("master.SKILL.shame"),
+    rumination: Str.t("master.SKILL.rumination"),
+    avoidance: Str.t("master.SKILL.avoidance"),
+    calm: Str.t("master.SKILL.calm"),
+    connection: Str.t("master.SKILL.connection"),
+    hope: Str.t("master.SKILL.hope"),
   };
   const REFRAME = {
-    fear: "A fear is a guess about the future, not a fact.",
-    sadness: "This heavy feeling is real, and it can change.",
-    anger: "My anger is telling me something matters; I can choose what to do with it.",
-    shame: "I am a person having a hard moment, not a bad person.",
-    rumination: "Replaying it again won't change it; one next step might.",
-    avoidance: "I don't have to feel ready to take one small step.",
-    none: "This is a feeling, not a fact.",
+    fear: Str.t("master.REFRAME.fear"),
+    sadness: Str.t("master.REFRAME.sadness"),
+    anger: Str.t("master.REFRAME.anger"),
+    shame: Str.t("master.REFRAME.shame"),
+    rumination: Str.t("master.REFRAME.rumination"),
+    avoidance: Str.t("master.REFRAME.avoidance"),
+    none: Str.t("master.REFRAME.none"),
   };
   // The weakest grounding mover (lowest vs. home), or the strongest hard/process mover.
   /** The strongest hard/process mover above home, else the grounding mover furthest below home. */
@@ -163,7 +148,7 @@ if (typeof module !== "undefined") {
   // ---------- Baseline, s(e), act() ----------
   // B_t = (1 − β)·B_{t−1} + β·e_t with β = 0.2, i.e. B_t = 0.8·B_{t−1} + 0.2·e_t.
   /** Baseline update B_t = 0.8·B_{t−1} + 0.2·e_t (B_{t−1} null means start at e_t). */
-  const ema = (B, e) => (B ? B.map((b, i) => (1 - FIXED.beta) * b + FIXED.beta * e[i]) : e.slice());
+  const ema = EQ.ema;
   /** Baseline after each recorded day. */
   function baselineSeries(days) {
     let B = null;
@@ -178,12 +163,7 @@ if (typeof module !== "undefined") {
   // s(e): grounding movers press on hard/process movers that sit above home.
   // s_j = e_j · Σ_{grounding i} min(0, W_ij)·h_i  (≤ 0), and 0 for grounding movers.
   /** s(e): how grounding movers press on hard/process movers that sit above home. */
-  function sVec(e, h, W) {
-    return NAMES.map((n, j) => {
-      if (isGround[j] || e[j] <= h[j]) return 0;
-      return e[j] * NAMES.reduce((acc, m, i) => acc + (isGround[i] ? Math.min(0, W[i][j]) * h[i] : 0), 0);
-    });
-  }
+  const sVec = (e, h, W) => EQ.sVec(e, h, W, isGround);
 
   // act(): the stepped vector becomes one small grounded action.
   // The action belongs to the mover that moves most toward home in this step.
@@ -194,7 +174,7 @@ if (typeof module !== "undefined") {
       const gain = Math.abs(e[j] - h[j]) - Math.abs(next[j] - h[j]);
       if (gain > best + 1e-9) { best = gain; mover = n; }
     });
-    return { mover, action: mover ? SKILL[mover] : "Keep going: notice one good thing and stay with it for a breath." };
+    return { mover, action: mover ? SKILL[mover] : Str.t("master.act.action.keep_going_notice_one_good") };
   }
 
   // ======================================================================
@@ -269,11 +249,9 @@ if (typeof module !== "undefined") {
     const lam = lambda(e, W, V.d);
     const unstable = lam !== null && lam > 0;
     const d = distance(e, h);
-    let a = Math.min(V.aMax, V.aBase + V.k * d);
-    if (unstable) a = Math.min(a, FIXED.aCap);
-    const b = unstable ? FIXED.bU : V.b;
+    const { a, b } = EQ.stepSize(V, d, unstable);                   // OE eq.(2)
     const s = sVec(e, h, W);
-    const next = e.map((x, j) => r2(clamp01(x + a * (h[j] - x) + b * s[j])));
+    const next = EQ.stepNext(e, h, a, b, s);
     const { mover, action } = act(e, next, h);
     // The top hard/process mover above home, and the grounding mover that presses on it most.
     const top = NAMES.map((n, j) => ({ n, j, gap: e[j] - h[j] })).filter(x => !isGround[x.j] && x.gap > 0).sort((p, q) => q.gap - p.gap)[0] || null;
@@ -304,10 +282,13 @@ if (typeof module !== "undefined") {
     // simulation) the lever, the gradient, and the solve for e* and n*.
     out.peace = PEACE.score(e, h, V, out.conflicts, tsize);
     if (opts.sim !== false) {
-      out.recovery = recovery({ ...state, e });
+      // The recovery count and the peace solve walk the same orbit of the master map from e;
+      // it is computed once and shared (push28; identical numbers, about half the master calls).
+      const orbit = orbitOf();
+      out.recovery = recovery({ ...state, e }, orbit);
       out.peace.lever = PEACE.lever(e, h, V, data.clashes || [], tsize);
       out.peace.grad = PEACE.gradient(e, h, V, data.clashes || [], tsize);
-      out.peace.solve = solvePeace({ ...state, e }, out.peace.P);
+      out.peace.solve = solvePeace({ ...state, e }, out.peace.P, orbit);
     }
     // Feature passes (for example forgiveness), same call: they read this
     // reading and add their own field. They never change e, next or peace.P.
@@ -331,13 +312,13 @@ if (typeof module !== "undefined") {
    * @param {number} P0 P of the reading
    * @returns {{n:number|null, steps:number, eStar:number[], PStar:number, dStar:number, converged:boolean}}
    */
-  function solvePeace(state, P0) {
+  function solvePeace(state, P0, orbit = orbitOf()) {
     const h = state.home, V = state.vars;
     let cur = state, n = P0 >= PEACE.P_STAR ? 0 : null, t = 0, converged = false;
     while (t < MAX_SIM) {
-      const m = master("", cur, { sim: false });
-      if (m.next.every((x, i) => x === cur.e[i])) { converged = true; break; }
-      cur = { ...cur, e: m.next };
+      const nx = orbit(cur);
+      if (nx.every((x, i) => x === cur.e[i])) { converged = true; break; }
+      cur = { ...cur, e: nx };
       t += 1;
       if (n === null && PEACE.score(cur.e, h, V, R.conflicts(cur.e, []), 0).P >= PEACE.P_STAR) n = t;
     }
@@ -345,22 +326,29 @@ if (typeof module !== "undefined") {
     return { n, steps: t, eStar: cur.e.slice(), PStar: sc.P, dStar: sc.d, converged };
   }
 
+  // ---------- One orbit of the master map, shared by the recovery count and the peace solve ----------
+  /** next(cur) = master("", cur).next, remembered by e for one reading (the rest of cur is the same state). */
+  function orbitOf() {
+    const seen = new Map();
+    return cur => { const k = cur.e.join(","); let nx = seen.get(k); if (!nx) { nx = master("", cur, { sim: false }).next; seen.set(k, nx); } return nx; };
+  }
+
   // ---------- Recovery: repeat the master step until d < 0.3 ----------
   /** Repeat the master step until d < 0.3 (at most MAX_SIM steps). */
-  function simulate(state) {
+  function simulate(state, orbit = orbitOf()) {
     let cur = state;
     for (let n = 0; n <= MAX_SIM; n++) {
       const D = distance(cur.e, cur.home);
       if (D < FIXED.eps) return { steps: n, reached: true, final: r2(D) };
       if (n === MAX_SIM) return { steps: n, reached: false, final: r2(D) };
-      const m = master("", cur, { sim: false });
-      if (m.next.every((x, i) => x === cur.e[i])) return { steps: n, reached: false, final: r2(D) };
-      cur = { ...cur, e: m.next };
+      const nx = orbit(cur);
+      if (nx.every((x, i) => x === cur.e[i])) return { steps: n, reached: false, final: r2(D) };
+      cur = { ...cur, e: nx };
     }
   }
   /** Recovery estimate: master steps until d < 0.3, and days at your pace of accepted steps. */
-  function recovery(state) {
-    const sim = simulate(state);
+  function recovery(state, orbit) {
+    const sim = simulate(state, orbit);
     const per = {};
     state.cps.filter(c => /^step-\d+$/.test(c.label)).forEach(c => { per[dayOf(c.t)] = (per[dayOf(c.t)] || 0) + 1; });
     const counts = Object.values(per);
@@ -368,7 +356,7 @@ if (typeof module !== "undefined") {
     return { ...sim, rate, days: sim.reached ? Math.ceil(sim.steps / rate) : null };
   }
   /** Recovery in short text (math view only). */
-  const recText = r => (r.reached ? `~${r.steps} step${r.steps === 1 ? "" : "s"} (~${r.days} day${r.days === 1 ? "" : "s"})` : `not reached in ${MAX_SIM} steps`);
+  const recText = r => (r.reached ? Str.t("master.recText.step_day", { steps: r.steps, v1: r.steps === 1 ? "" : "s", days: r.days, v3: r.days === 1 ? "" : "s" }) : Str.t("master.recText.not_reached_in_steps", { MAX_SIM: MAX_SIM }));
 
 
   // ---------- Step sizes kept on the state for the .mf code ----------
@@ -379,14 +367,9 @@ if (typeof module !== "undefined") {
   }
 
   /** The one-page form, as shown in Ada's panel. */
-  const ONE_PAGE = [
-    "(1) e = clip01(e\u208B \u2295 n(text) + X\u00B7(1 \u2212 S)\u00B7w)   the reading",
-    "(2) e' = clip01(e + a(e)\u00B7(h \u2212 e) + b\u00B7s(e))   the step",
-    "(3) P = P_d(e)\u00B7(1 \u2212 \u03B3C)\u00B7(1 \u2212 \u03B4G);  lever = argmax \u0394P_i;  step = practice(lever)",
-    "(4) words = compose(e, e', P, lever, passes)",
-  ];
+  const ONE_PAGE = Str.list("master.ONE_PAGE");
   /** How h is described with faith on (wording only). */
-  const FAITH_HOME = "rest and peace in Christ (Matthew 11:28\u201330; Philippians 4:7).";
+  const FAITH_HOME = Str.t("master.FAITH_HOME.rest_and_peace_in_christ");
   MF.Master = {
     ONE_PAGE, FAITH_HOME, SKILL, REFRAME, master, masterState, masterPick, addPass, calls, recovery, solvePeace, recText, refreshIdeal, focus, baselineSeries, baselineOf,
     // Building blocks master uses (exported for tests only; features call master).

@@ -19,8 +19,10 @@
 //    real release (worship / Christian and general uplifting), tagged by
 //    theme. Worship songs are offered only with faith on.
 
+if (typeof window === "undefined") require("../data/strings.js");
 (function (MF) {
   "use strict";
+  const Str = MF.Strings;   // every word lives in js/data/strings.js
 
   /** [title, artist, worship?, themes] */
   const SONGS = [
@@ -72,11 +74,10 @@
   ].map(([t, a, worship, themes]) => ({ t, a, worship, themes }));
 
   const S = () => MF.Scripture;
-  const idx = n => MF.Movers.NAMES.indexOf(n);
-  const FEEL = { fear: "a heavy bag of fear", sadness: "a heavy bag of sorrow", anger: "a hot coal of anger", shame: "a stone of shame", rumination: "a tangle of the same thoughts", avoidance: "a wish to turn back" };
-  const GRIP = { fear: "fear", loop: "the old loop of thoughts", vice: "a pull that kept tugging at the sleeve" };
-  const PAST = { self: "the traveler looked back at a mistake, spoke to it as kindly as to a friend, and set down the stone of self-blame", other: "the traveler thought of the one who had caused the hurt and, slowly, wished them well, without pretending the hurt was small", loop: "the traveler let the old memory walk behind, no longer turning around to replay it" };
-  const AHEAD = { bps: "then she pictured the road ahead going as well as it reasonably could, and one small thing to start today", future: "then she wrote a short note to the self who would arrive a year from now" };
+  const FEEL = { fear: Str.t("parable.FEEL.fear"), sadness: Str.t("parable.FEEL.sadness"), anger: Str.t("parable.FEEL.anger"), shame: Str.t("parable.FEEL.shame"), rumination: Str.t("parable.FEEL.rumination"), avoidance: Str.t("parable.FEEL.avoidance") };
+  const GRIP = { fear: "fear", loop: Str.t("parable.GRIP.loop"), vice: Str.t("parable.GRIP.vice") };
+  const PAST = { self: Str.t("parable.PAST.self"), other: Str.t("parable.PAST.other"), loop: Str.t("parable.PAST.loop") };
+  const AHEAD = { bps: Str.t("parable.AHEAD.bps"), future: Str.t("parable.AHEAD.future") };
 
   /**
    * The parable as beats [{id, text}] (5–8): open, grip?, crossroads?, bend, verses|remember,
@@ -90,21 +91,21 @@
     const out = [];
     // The cornerstone image opens the parable (faith on: Christ the cornerstone, 1 Peter 2:6; a tree by streams, Psalm 1:3).
     const open = ctx.faith
-      ? "Seeds rested in still water above a stone counter set on the cornerstone, the way Christ is called the chief cornerstone (1 Peter 2:6), and a tree planted by streams of water bears fruit in its season (Psalm 1:3)"
-      : "Seeds rested in still water above a stone counter set on a strong cornerstone, waiting for their season";
-    out.push({ id: "open", text: `${open}. Once, a traveler carried ${dom ? FEEL[dom] : "a quiet heart"} past that water along a winding road, and ${friend} the ${animal} walked beside her.` });
-    if (ctx.grip && ctx.grip.show) out.push({ id: "grip", text: `${GRIP[ctx.grip.top][0].toUpperCase() + GRIP[ctx.grip.top].slice(1)} tugged at her; she didn't fight it or run, she named it and let it walk alongside, and its hold loosened a little.` });
-    if (ctx.past && ctx.past.show) out.push({ id: "crossroads", text: `At a crossroads, ${PAST[ctx.past.tech]}; ${AHEAD[ctx.past.future]}.` });
+      ? Str.t("parable.beats.open.seeds_rested_in_still_water")
+      : Str.t("parable.beats.open.seeds_rested_in_still_water_2");
+    out.push({ id: "open", text: Str.t("parable.beats.text", { open: open, v1: dom ? FEEL[dom] : Str.t("parable.beats.text.a_quiet_heart"), friend: friend, animal: animal }) });
+    if (ctx.grip && ctx.grip.show) out.push({ id: "grip", text: Str.t("parable.beats.text_2", { v0: GRIP[ctx.grip.top][0].toUpperCase() + GRIP[ctx.grip.top].slice(1) }) });
+    if (ctx.past && ctx.past.show) out.push({ id: "crossroads", text: Str.t("parable.beats.text_3", { v0: PAST[ctx.past.tech], v1: AHEAD[ctx.past.future] }) });
     const pr = m.practice && MF.Practices && MF.Practices.LIBRARY[m.practice.id];
-    out.push({ id: "bend", text: `At a quiet bend, ${friend} showed her one small practice${pr ? `, ${pr.name.replace(/:.*$/, "").toLowerCase().replace(/^(\d)/, "the $1")}` : ""}, and she tried it, one breath at a time${ctx.about && MF.About && MF.About.metaphor(ctx.about) ? `, ${MF.About.metaphor(ctx.about)}` : ""}.` });
+    out.push({ id: "bend", text: Str.t("parable.beats.text_4", { friend: friend, v1: pr ? `, ${pr.name.replace(/:.*$/, "").toLowerCase().replace(/^(\d)/, "the $1")}` : "", v2: ctx.about && MF.About && MF.About.metaphor(ctx.about) ? `, ${MF.About.metaphor(ctx.about)}` : "" }) });
     const tog = ctx.faith && ctx.together;
-    if (tog) out.push({ id: "verses", text: `She remembered words about ${tog.themes.map(t => S().THEMES[t].label).join(" and ").replace(/ and (.*) and /, ", $1 and ")} (${tog.verses.map(v => v.ref).join("; ")}), and that ${S().THREAD[tog.thread].replace("you are", "she was")}.` });
-    else out.push({ id: "remember", text: `She remembered that ${S().THREAD[ctxThread(m, ctx)].replace("you are", "she was")}.` });
+    if (tog) out.push({ id: "verses", text: Str.t("parable.beats.text_5", { v0: tog.themes.map(t => S().THEMES[t].label).join(" and ").replace(/ and (.*) and /, ", $1 and "), v1: tog.verses.map(v => v.ref).join("; "), v2: S().THREAD[tog.thread].replace(Str.t("parable.beats.text.you_are"), Str.t("parable.beats.text.she_was")) }) });
+    else out.push({ id: "remember", text: Str.t("parable.beats.text_6", { v0: S().THREAD[ctxThread(m, ctx)].replace(Str.t("parable.beats.text.you_are"), Str.t("parable.beats.text.she_was")) }) });
     const band = m.peace && MF.Peace ? MF.Peace.band(m.peace.P) : "growing";
-    out.push({ id: "peace", text: `Nothing changed all at once; her peace, ${band} at first, grew a little with each step she took.` });
+    out.push({ id: "peace", text: Str.t("parable.beats.text_7", { band: band }) });
     const g = ctx.gov;
-    if (g && (g.s.Mn >= 0.4 || (g.s.G || 0) >= 0.4)) out.push({ id: "share", text: "Before evening she stopped at a long table and shared bread with her neighbors, and the ordinary day felt steady and good." });
-    out.push({ id: "evening", text: tog ? "By evening she sat by still water, and rest came, not because the road was gone, but because she was not walking it alone." : "By evening she sat by still water and rested, carrying the road more lightly than before." });
+    if (g && (g.s.Mn >= 0.4 || (g.s.G || 0) >= 0.4)) out.push({ id: "share", text: Str.t("parable.beats.text_8") });
+    out.push({ id: "evening", text: tog ? Str.t("parable.beats.text.by_evening_she_sat_by") : Str.t("parable.beats.text.by_evening_she_sat_by_2") });
     if (out.length > 8) out.splice(out.findIndex(b => b.id === "peace"), 1);
     return out.slice(0, 8);
   }
@@ -118,8 +119,8 @@
     return S().THEMES[t].tags[0];
   }
 
-  const FILM_LINE = "Watch it as the traveler's next evening by the fire: notice where someone in it carries something heavy and finds a small way forward.";
-  const SONG_LINE = { fear: "let it walk beside you like the friend on the road", sadness: "let it sit with you at the still water", anger: "let it cool the coal a little", shame: "let it remind you that the stone can be set down", calm: "breathe slowly with it, as the traveler rests", connection: "think of who walks beside you", hope: "picture the road ahead", rumination: "let it give your mind one place to rest", avoidance: "take one step forward while it plays", patience: "let it be slow; the road is long and that is all right", gentleness: "answer the day gently", selfcontrol: "breathe once before you answer anything", renewal: "let it be the first page of the next chapter" };
+  const FILM_LINE = Str.t("parable.FILM_LINE.watch_it_as_the_traveler");
+  const SONG_LINE = { fear: Str.t("parable.SONG_LINE.fear"), sadness: Str.t("parable.SONG_LINE.sadness"), anger: Str.t("parable.SONG_LINE.anger"), shame: Str.t("parable.SONG_LINE.shame"), calm: Str.t("parable.SONG_LINE.calm"), connection: Str.t("parable.SONG_LINE.connection"), hope: Str.t("parable.SONG_LINE.hope"), rumination: Str.t("parable.SONG_LINE.rumination"), avoidance: Str.t("parable.SONG_LINE.avoidance"), patience: Str.t("parable.SONG_LINE.patience"), gentleness: Str.t("parable.SONG_LINE.gentleness"), selfcontrol: Str.t("parable.SONG_LINE.selfcontrol"), renewal: Str.t("parable.SONG_LINE.renewal") };
 
   /** Two films and two or three songs, seeded; each with a one-line prompt. */
   function more(m, ctx = {}) {
