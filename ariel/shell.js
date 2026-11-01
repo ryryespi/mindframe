@@ -20,6 +20,9 @@
     #ribbon .g{position:relative;padding-top:14px}
     #ribbon button,#cmdrow button,#xport button,#dock-tools button,#help button{min-width:40px;min-height:32px;border:0;border-radius:8px;background:transparent;color:#5b6472;font:12px system-ui;padding:0 8px;cursor:pointer}
     #ribbon button.on,#ribbon button:active{background:#e6e1d8}
+    #ribbon button.primary{background:#5b6472;color:#f7f4ef;font-weight:600}
+    #cmp{position:fixed;z-index:7;right:8px;top:60px;width:240px;max-height:46vh;overflow:auto;background:#fffc;border-radius:12px;padding:8px;display:none;box-shadow:0 2px 12px #0001;font:12px/1.35 system-ui;color:#5b6472}
+    #cmp.on{display:block}
     body.cad #bar{position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
     body.cad #layers{position:fixed;z-index:6;left:8px;top:60px;bottom:70px;width:168px;transform:none;max-height:none;display:none;flex-direction:column;align-items:stretch;gap:6px;background:#fffc;border-radius:12px;box-shadow:0 2px 12px #0001;padding:8px;overflow:auto}
     body.cad.dock-open #layers{display:flex}
@@ -59,6 +62,7 @@
   const groups = [
     ["Draw", [["point", "Point"], ["line", "Line"], ["circle", "Circle"], ["doubt", "Doubt"]]],
     ["Modify", [["move", "Move"], ["select", "Select"], ["erase", "Delete"], ["undo", "Undo"], ["redo", "Redo"]]],
+    ["Purpose", [["collapse", "Collapse"]]],
     ["Anchors", [["snap", "Snap"], ["ortho", "Ortho"], ["view", "Side"]]],
     ["AI", [["ai", "Pause"], ["merge", "Merge"], ["clarify", "Clarify"]]],
     ["More", [["layers", "Layers"], ["text", "Text"], ["adv", "Advanced"], ["export", "Export"], ["canon", "Terms"], ["help", "?"]]]
@@ -107,6 +111,9 @@
   const gloss = document.createElement("div");
   gloss.id = "gloss";
   document.body.appendChild(gloss);
+  const cmp = document.createElement("div");
+  cmp.id = "cmp";
+  document.body.appendChild(cmp);
 
   const xport = document.createElement("div");
   xport.id = "xport";
@@ -133,13 +140,14 @@
     if (value) all[domain][key] = value; else delete all[domain][key];
     localStorage.setItem("ariel-terms", JSON.stringify(all));
   }
+  let collapsed = false;
   function note(msg) { echo.textContent = msg; }
 
   function snap() {
     return {
       layers: JSON.parse(JSON.stringify(layers)),
       active, VARS: JSON.parse(JSON.stringify(VARS)),
-      M: P.M, dRate: P.dRate, gamma: P.gamma, snap: P.snap, ortho
+      M: P.M, dRate: P.dRate, gamma: P.gamma, snap: P.snap, ortho, collapsed
     };
   }
   function restore(s) {
@@ -150,6 +158,7 @@
     Object.keys(VARS).forEach(k => delete VARS[k]);
     Object.assign(VARS, s.VARS);
     P.M = s.M; P.dRate = s.dRate; P.gamma = s.gamma; P.snap = s.snap; ortho = !!s.ortho;
+    collapsed = !!s.collapsed; showCollapse();
     if (typeof vel !== "undefined") vel.clear();
     prevSnap = []; ghosts = []; varGhosts = [];
     saveVars(); renderLayers();
@@ -321,6 +330,61 @@
     for (let i = 0; i < offset && el; i++) el = el.previousElementSibling;
     return el;
   }
+  function layerAxes() {
+    return layers.map((L, i) => {
+      if (L.vis === 2) return null;
+      const io = ioOf(L, i);
+      return { name: L.name || ("Layer " + (i + 1)), domain: L.domain || "custom", role: L.role || "", i, line: { a: { x: io.i.x / W, y: io.i.y / H_ }, b: { x: io.o.x / W, y: io.o.y / H_ } } };
+    }).filter(Boolean);
+  }
+  function gatherMap() {
+    const m = CAD.emptyModel();
+    const axis = layerAxes()[0];
+    if (!axis) return null;
+    m.anchors = { i: axis.line.a, o: axis.line.b };
+    layers.forEach(L => {
+      if (L.vis === 2) return;
+      const part = layerModel(L);
+      part.points.forEach(p => { if (!m.points.some(q => q.name === p.name)) m.points.push(p); });
+      (part.doubts || []).forEach(d => m.doubts.push(d));
+    });
+    return m;
+  }
+  function showCollapse() {
+    const btn = document.querySelector('#ribbon button[data-cad="collapse"]');
+    if (btn) { btn.textContent = collapsed ? "Expand" : "Collapse"; btn.classList.toggle("primary", true); }
+    if (!collapsed) { cmp.classList.remove("on"); return null; }
+    const map = gatherMap();
+    const line = map ? CAD.collapseToLine(map) : null;
+    const rows = CAD.compareLayerLines(layerAxes());
+    cmp.innerHTML = "";
+    const title = document.createElement("p");
+    title.innerHTML = "<strong>Collapsed I → O</strong>";
+    cmp.appendChild(title);
+    if (line && line.ok) {
+      const p = document.createElement("p");
+      p.textContent = line.text;
+      cmp.appendChild(p);
+      note(line.math);
+    }
+    rows.forEach(r => {
+      const p = document.createElement("p");
+      p.textContent = r.left + " " + (r.mark || "∠") + " " + r.right + " · angle " + r.angle + "° · offset " + r.offset + " · shared " + r.shared + ". " + r.english;
+      cmp.appendChild(p);
+    });
+    cmp.classList.add("on");
+    return line;
+  }
+  function toggleCollapse() {
+    const before = snap();
+    collapsed = !collapsed;
+    const after = snap();
+    Hist.push(before, after, collapsed ? "COLLAPSE" : "EXPAND");
+    log.push(collapsed ? "COLLAPSE" : "EXPAND");
+    const line = showCollapse();
+    if (!collapsed) note("Expanded. The map is back.");
+    else if (line && line.ok) note(line.text);
+  }
   function runCad(id) {
     if (id === "point" || id === "line" || id === "circle" || id === "doubt") { clickTool(id === "point" ? "dot" : id); note(id === "doubt" ? "DOUBT ρ" : id.toUpperCase()); return; }
     if (id === "move" || id === "select") { tool = id; mark(); note(id.toUpperCase()); return; }
@@ -338,6 +402,7 @@
     if (id === "adv") { document.body.classList.toggle("adv"); note(document.body.classList.contains("adv") ? "Advanced on" : "Advanced hidden"); return; }
     if (id === "export") { openExport(); return; }
     if (id === "canon") { localStorage.setItem("ariel-canon", canonOn() ? "0" : "1"); note(canonOn() ? "Canonical terms" : "Field terms"); if (tp.classList.contains("on")) setTab(tab); return; }
+    if (id === "collapse") { toggleCollapse(); return; }
     if (id === "help") { fillHelp(); help.classList.add("on"); return; }
   }
   function mark() {
@@ -596,9 +661,44 @@
       ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = "#9aa3ad"; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.9;
       ellipse(c, i); ctx.stroke(); ctx.restore();
     }));
+    if (collapsed) drawCollapsed();
+    if (tilt > 0.35) drawAlignedAxes();
     paintStatus();
     if (sel && layers[sel.layer]) highlight();
   };
+  function drawCollapsed() {
+    const axes = layerAxes();
+    if (!axes.length) return;
+    const axis = axes[0].line;
+    const A = proj({ x: axis.a.x * W, y: axis.a.y * H_ }, 0);
+    const B = proj({ x: axis.b.x * W, y: axis.b.y * H_ }, 0);
+    ctx.save();
+    ctx.strokeStyle = "#5b6472"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+    const map = gatherMap();
+    const line = map ? CAD.collapseToLine(map) : null;
+    if (line && line.ok) line.items.forEach(item => {
+      const x = axis.a.x + (axis.b.x - axis.a.x) * item.t;
+      const y = axis.a.y + (axis.b.y - axis.a.y) * item.t;
+      const p = proj({ x: x * W, y: y * H_ }, 0);
+      ctx.beginPath(); ctx.arc(p.x, p.y, item.kind === "anchor" ? 7 : 4, 0, 7); ctx.fillStyle = "#c9a23f"; ctx.fill();
+    });
+    ctx.restore();
+  }
+  function drawAlignedAxes() {
+    const axes = layerAxes();
+    const rows = CAD.compareLayerLines(axes);
+    const aligned = new Set();
+    rows.forEach(r => { if (r.parallel) { aligned.add(r.i); aligned.add(r.j); } });
+    axes.forEach(ax => {
+      const A = proj({ x: ax.line.a.x * W, y: ax.line.a.y * H_ }, ax.i);
+      const B = proj({ x: ax.line.b.x * W, y: ax.line.b.y * H_ }, ax.i);
+      ctx.save();
+      ctx.strokeStyle = aligned.has(ax.i) ? "#c9a23f" : (typeof col === "function" ? col(ax.i) : "#7a9cc6");
+      ctx.lineWidth = aligned.has(ax.i) ? 3 : 1.5;
+      ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+      ctx.restore();
+    });
+  }
   function highlight() {
     const L = layers[sel.layer]; if (!L) return;
     ensureIds(L);
@@ -624,7 +724,8 @@
       + "<h2>Quick start</h2><p>Layer 1 is the Nonsense Layer, a locked picture of the thought model (input, output, patience, momentum, entropy). Draw on any other layer. Name it and choose a field. The field only changes the words, never the shapes.</p>"
       + "<h2>Commands</h2><p>POINT LINE CIRCLE MOVE SELECT ERASE UNDO REDO LAYER n SNAP ORTHO MERGE CLARIFY LOCK EXPORT HELP MATH, or paste one math line.</p>"
       + "<h2>Math</h2><p>One line, for example A(0.2,0.5), B(0.8,0.5); AB̅; ∠ABC = 90°; AB ∥ CD; ⊙O(r=0.2); P ∈ AB; X = AB ∩ CD; h ∈ [0.2, 0.8]; I(0.14,0.42) → O(0.80,0.42). The Math tab copies it and exports LaTeX. Typing it edits the active layer and can be undone.</p>"
-      + "<p>Doubt is a resistance circle ◌. Its radius is ρ, and inside it damping is γ + ρ. Drag the rim to change it. Undo puts it back. Shapes inside stay.</p>"
+      + "<p>Doubt is a resistance circle ◌. Its radius is ρ, and inside it damping is γ + ρ. A smaller circle is less resistance. Drag the rim to change it. Undo puts it back. Shapes inside stay.</p>"
+      + "<p><strong>Collapse</strong> is the point of the screen. It lays every visible layer on one straight line from input I to output O, without deleting anything. Expand, or undo, brings the map back. After that, layers whose I→O lines are parallel or overlapping both count as parallel (∥). Overlap, offset 0, is the strongest agreement and can be marked ≡. In the side view those aligned lines share one color.</p>"
       + "<h2>This layer's words</h2>";
     const glossP = document.createElement("p");
     glossP.textContent = g;
@@ -666,4 +767,5 @@
   renderLayers();
   mark();
   note("Nonsense Layer is locked. Draw on " + layers[active].name + ".");
+  if (location.hash.includes("collapse")) toggleCollapse();
 })();

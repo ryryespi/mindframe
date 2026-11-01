@@ -258,4 +258,46 @@ test("doubt is resistance ρ: γ_eff = γ + ρ, and the circle is undoable", () 
   assert.equal(h.redo().doubts[0].rho, 0.25);
 });
 
+test("collapse lays the map on I→O without changing it, and overlap still counts as parallel", () => {
+  const model = CAD.emptyModel();
+  model.anchors = { i: { x: 0, y: 0.5 }, o: { x: 1, y: 0.5 } };
+  model.points = [{ name: "hope", x: 0.2, y: 0.6 }, { name: "peace", x: 0.8, y: 0.4 }];
+  model.doubts = [{ name: "doubt", x: 0.5, y: 0.5, rho: 0.2 }];
+  const snap = JSON.stringify(model);
+  const line = CAD.collapseToLine(model);
+  assert.equal(line.ok, true);
+  assert.equal(JSON.stringify(model), snap);
+  assert.ok(line.items.findIndex(s => s.name === "hope") < line.items.findIndex(s => s.name === "peace"));
+  assert.match(line.text, /From I to O: hope → peace, with resistance at doubt/);
+  assert.match(line.math, /I → hope → peace → O/);
+  assert.match(line.latex, /\\to/);
+  assert.ok(line.cost > line.length);
+  const small = CAD.collapseToLine(Object.assign(CAD.clone(model), { doubts: [{ name: "doubt", x: 0.5, y: 0.5, rho: 0.05 }] }));
+  assert.ok(small.cost < line.cost, "a smaller doubt circle adds less resistance");
+  const horiz = { a: { x: 0, y: 0 }, b: { x: 1, y: 0 } };
+  const overlap = { a: { x: 0.2, y: 0 }, b: { x: 0.8, y: 0 } };
+  const beside = { a: { x: 0, y: 0.4 }, b: { x: 1, y: 0.4 } };
+  const cross = { a: { x: 0.5, y: 0 }, b: { x: 0.5, y: 1 } };
+  const over = CAD.compareLines(horiz, overlap);
+  assert.equal(over.parallel, true, "an overlapping pair is parallel");
+  assert.equal(over.overlap, true);
+  assert.equal(over.aligned, true);
+  assert.equal(over.mark, "≡");
+  assert.ok(over.offset <= 0.02);
+  assert.ok(over.shared > 0.5);
+  const para = CAD.compareLines(horiz, beside);
+  assert.equal(para.parallel, true);
+  assert.equal(para.overlap, false);
+  assert.equal(para.mark, "∥");
+  const miss = CAD.compareLines(horiz, cross);
+  assert.equal(miss.parallel, false);
+  assert.equal(miss.shared, 0);
+  const rows = CAD.compareLayerLines([
+    { name: "Nonsense Layer", role: "nonsense", domain: "nonsense", line: horiz },
+    { name: "Sketch", domain: "physics", line: beside }
+  ]);
+  assert.match(rows[0].english, /Your physics layer runs parallel to the Nonsense Layer/);
+  assert.equal(rows[0].mark, "∥");
+});
+
 console.log(`\n${passed} passed`);

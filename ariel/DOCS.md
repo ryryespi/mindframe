@@ -44,7 +44,9 @@ Every other layer is freeform. You name it and set its field. Draw whatever that
 
 The status bar shows snap, ortho, Euclid, momentum \(M\) and damping \(\gamma\), patience \(P_t\), the layer name, and the field's word for a line.
 
-Doubt (◌) is a resistance circle: its radius is \(\rho\), and inside it the damping is \(\gamma+\rho\). Drag the rim to change \(\rho\). The shapes inside stay, and the edit undoes like any other.
+Doubt (◌) is a resistance circle: its radius is \(\rho\), and inside it the damping is \(\gamma+\rho\). A smaller circle is less resistance. Drag the rim to change \(\rho\). The shapes inside stay, and the edit undoes like any other.
+
+**Collapse** is the purpose of the screen. One button projects every visible layer onto the straight line from I to O. Points keep their order, doubt shows up as thicker, costlier stretches, and the readout is one line: `From I to O: hope → patience → peace, with resistance at doubt`. Nothing is deleted. Expand, or undo, restores the map. After the collapse, each pair of layers is compared: parallel and overlapping lines both count as parallel (∥). Overlap means offset 0 and can be marked ≡, and it is the strongest agreement. The side view draws those aligned I→O lines in one color. Plain English says, for example, "Your physics layer runs parallel to the Nonsense Layer."
 
 ## Undo and delete
 

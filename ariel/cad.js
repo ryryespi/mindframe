@@ -600,6 +600,92 @@
       userLast: environmentOf([{ by: "ai" }, { by: "human" }])
     };
   }
+  /**
+   * Project points and doubt onto the straight line from I to O.
+   * Does not change the model. Smaller ρ (smaller circle) adds less cost.
+   * Returns the ordered stops, path length, cost, and one-line readouts.
+   */
+  function collapseToLine(model) {
+    const m = model || {};
+    const before = JSON.stringify(m);
+    const I = m.anchors && m.anchors.i;
+    const O = m.anchors && m.anchors.o;
+    if (!I || !O) return { ok: false, reason: "Need an input I and an output O.", items: [], length: 0, cost: 0, text: "", math: "", latex: "" };
+    const dx = O.x - I.x, dy = O.y - I.y;
+    const len = Math.hypot(dx, dy);
+    const len2 = len * len || 1;
+    const stops = [{ name: "I", t: 0, kind: "anchor" }];
+    (m.points || []).forEach(p => {
+      if (!p || p.x == null || !p.name || p.name === "I" || p.name === "O") return;
+      const t = ((p.x - I.x) * dx + (p.y - I.y) * dy) / len2;
+      stops.push({ name: String(p.name), t, kind: "point" });
+    });
+    stops.push({ name: "O", t: 1, kind: "anchor" });
+    stops.sort((a, b) => a.t - b.t || a.name.localeCompare(b.name));
+    const doubts = (m.doubts || []).map(d => {
+      const t = d.x == null ? 0.5 : ((d.x - I.x) * dx + (d.y - I.y) * dy) / len2;
+      const rho = rhoOf(d.rho != null ? d.rho : d.r);
+      const span = len > 0 ? rho / len : 0;
+      return { name: d.name || "doubt", t, rho, span };
+    });
+    const segments = [];
+    for (let i = 0; i < stops.length - 1; i++) {
+      const a = stops[i], b = stops[i + 1];
+      const mid = (a.t + b.t) / 2;
+      let rho = 0;
+      doubts.forEach(d => { if (Math.abs(d.t - mid) <= d.span + 1e-9 || (d.t >= Math.min(a.t, b.t) && d.t <= Math.max(a.t, b.t))) rho = Math.max(rho, d.rho); });
+      const dist = Math.abs(b.t - a.t) * len;
+      segments.push({ from: a.name, to: b.name, rho, dist, cost: dist * (1 + rho) });
+    }
+    const length = +len.toFixed(3);
+    const cost = +segments.reduce((s, seg) => s + seg.cost, 0).toFixed(3);
+    const names = stops.filter(s => s.kind === "point").map(s => s.name);
+    const chain = ["I"].concat(names).concat(["O"]).join(" → ");
+    const resist = doubts.some(d => d.rho > 0);
+    const text = "From I to O: " + (names.length ? names.join(" → ") : "(nothing between)") + (resist ? ", with resistance at doubt" : "") + ". Length " + length + ", cost " + cost + ".";
+    const math = chain + "; length=" + length + "; cost=" + cost + (resist ? "; ρ=" + r3(Math.max(...doubts.map(d => d.rho))) : "");
+    const latex = chain.replace(/ → /g, " \\to ") + ",\\ \\mathrm{length}=" + length + ",\\ \\mathrm{cost}=" + cost + (resist ? ",\\ \\rho=" + r3(Math.max(...doubts.map(d => d.rho))) : "");
+    if (JSON.stringify(m) !== before) throw new Error("collapseToLine mutated the model");
+    return { ok: true, items: stops, segments, doubts, length, cost, text, math, latex };
+  }
+
+  /**
+   * Compare two I→O lines. Parallel and overlapping both count as parallel.
+   * Overlap (collinear, offset about 0) is the strongest agreement and still uses ∥, with ≡ as the mark.
+   */
+  function compareLines(a, b) {
+    const ang = (l) => { let t = Math.atan2(l.b.y - l.a.y, l.b.x - l.a.x); t %= Math.PI; return t < 0 ? t + Math.PI : t; };
+    const da = ang(a), db = ang(b);
+    const angle = +((Math.min(Math.abs(da - db), Math.PI - Math.abs(da - db)) * 180 / Math.PI).toFixed(2));
+    const dx = a.b.x - a.a.x, dy = a.b.y - a.a.y, L = Math.hypot(dx, dy) || 1;
+    const offset = +((Math.abs((b.a.x - a.a.x) * dy - (b.a.y - a.a.y) * dx) / L).toFixed(4));
+    const parallel = angle <= 1.25;
+    const overlap = parallel && offset <= 0.02;
+    let shared = 0;
+    if (parallel) {
+      const ux = dx / L, uy = dy / L;
+      const ts = (p) => p.x * ux + p.y * uy;
+      const span = (l) => [ts(l.a), ts(l.b)].sort((p, q) => p - q);
+      const A = span(a), B = span(b);
+      shared = +Math.max(0, Math.min(A[1], B[1]) - Math.max(A[0], B[0])).toFixed(3);
+    }
+    return { parallel, overlap, aligned: parallel, angle, offset, shared, mark: overlap ? "≡" : parallel ? "∥" : "" };
+  }
+  /** Pair every layer's collapsed I→O line. Overlap is reported as parallel. */
+  function compareLayerLines(list) {
+    const rows = [];
+    for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+      const cmp = compareLines(list[i].line, list[j].line);
+      const other = list[j].domain && list[j].domain !== "custom" && list[j].domain !== "nonsense" ? list[j].domain + " layer" : list[j].name;
+      const ref = list[i].role === "nonsense" || list[i].name === "Nonsense Layer" ? "Nonsense Layer" : list[i].name;
+      const english = cmp.parallel
+        ? "Your " + other + " runs parallel to the " + ref + (cmp.overlap ? " (they overlap, which still counts as parallel)" : "") + "."
+        : "Your " + other + " does not run parallel to the " + ref + ".";
+      rows.push(Object.assign({ i: list[i].i != null ? list[i].i : i, j: list[j].i != null ? list[j].i : j, left: list[i].name, right: list[j].name, english }, cmp));
+    }
+    return rows;
+  }
+
   /** The AI keeps its own structure and says it differs. It does not overwrite or agree. */
   function differsFrom(humanSig, aiSig) {
     if (humanSig == null || aiSig == null || humanSig === aiSig) return null;
@@ -610,6 +696,6 @@
     clone, History, deleteShape, buildPrompt, parseCommand, STYLES: Object.keys(STYLES),
     emptyModel, mathLine, mathLatex, deriveRelations, applyMath, rhoOf, effectiveGamma,
     CANON, DOMAINS, NONSENSE_NAME, domainWords, termsFor, glossary, explainModel, sealLayers, alignToNonsense,
-    establishSelf, environmentOf, demonstrateEnvironment, differsFrom
+    establishSelf, environmentOf, demonstrateEnvironment, differsFrom, collapseToLine, compareLines, compareLayerLines
   };
 });
