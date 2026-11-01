@@ -763,6 +763,10 @@ Every source below was checked in October 2026. Journal articles were checked ag
 * Speed, B. C., Goldstein, B. L., & Goldfried, M. R. (2018). Assertiveness training: A forgotten evidence-based treatment. *Clinical Psychology: Science and Practice, 25*(1), e12216. doi:10.1111/cpsp.12216
 * *World English Bible* (public domain), ebible.org: Isaiah 53:7; Matthew 11:28–30; Matthew 27:12–14; Luke 23:34; Galatians 5:22–23; Philippians 4:7; 1 Peter 2:23.
 
+## Project Ariel
+
+[Project Ariel](https://ryryespi.github.io/mindframe/ariel/) is a separate offline canvas in [`ariel/`](ariel/). Conceptual, not validated science.
+
 ## Privacy
 
 * Everything stays in this browser's localStorage: the .mf numbers, the faith toggle, your companion (name and growth points), and the journal (explicit saves only). The forgiveness note boxes are never stored unless you tap "Save these notes to the journal".

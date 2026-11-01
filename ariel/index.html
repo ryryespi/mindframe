@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#f4f1ec">
+<title>◯</title>
+<style>
+/* ===== STYLE: calm MindFrame palette ===== */
+:root{--bg:#f4f1ec;--ink:#5b6472;--hum:#7a9cc6;--ai:#c79a7a;--glow:#e8c76a;--soft:#e6e1d8}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;touch-action:none;font-family:system-ui,sans-serif}
+canvas{display:block;width:100vw;height:100vh}
+#bar{position:fixed;left:2vw;right:2vw;bottom:14px;justify-content:center;display:flex;gap:2px;padding:4px;max-width:96vw;border-radius:22px;background:#fffc;box-shadow:0 2px 12px #0001}
+#bar button{flex:0 1 31px;min-width:0;height:33px;padding:0;border:0;border-radius:50%;background:transparent;display:grid;place-items:center;cursor:pointer}
+#bar button.on{background:var(--soft)}
+#bar svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round}
+#layers{position:fixed;right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px}
+#layers div{width:18px;height:18px;border-radius:50%;border:2px solid var(--ink);opacity:.45;cursor:pointer}
+#layers div.on{opacity:1;transform:scale(1.2)}
+#help{position:fixed;inset:0;background:#f4f1ecf2;display:none;padding:24px;color:var(--ink);font-size:14px;line-height:1.5;overflow:auto}
+#help.on{display:block}
+#err{display:none}
+#side{position:fixed;left:0;top:0;bottom:70px;width:150px;background:#fffffaf0;box-shadow:2px 0 12px #0001;display:none;box-sizing:border-box;overflow:auto;padding:8px 6px;font:13px system-ui;color:#4d5562;z-index:5}
+#side.on{display:block}
+#side .it{display:flex;align-items:center;gap:6px;padding:5px 4px;border-radius:8px;cursor:grab;touch-action:none;user-select:none}
+#side .it:active{background:#e6e1d8}#side .mk{width:8px;height:8px;border-radius:50%;flex:none}
+#side .w{flex:1}#side .sh{opacity:.55;padding:0 3px;cursor:pointer}#side .used{opacity:.45}
+#lex{position:fixed;left:8px;top:112px;display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto}
+#lex canvas{width:30px;height:30px;border-radius:8px;background:#fffc;box-shadow:0 1px 4px #0001;cursor:pointer}
+#tp{position:fixed;left:8px;right:8px;bottom:96px;height:50vh;background:#fffffaee;border-radius:14px;box-shadow:0 2px 14px #0002;display:none;overflow:hidden}
+#tp.on{display:block}
+#tpt{position:absolute;left:0;right:0;top:0;height:28px;display:flex;align-items:center;gap:4px;padding:0 8px;border-bottom:1px solid #0001}
+#tpt span{width:26px;height:24px;display:grid;place-items:center;border-radius:8px;cursor:pointer;opacity:.6}#tpt span.on{background:#e6e1d8;opacity:1}
+#tpb,#tpa{position:absolute;inset:28px 0 0 0;margin:0;padding:10px;font:12px/1.5 ui-monospace,monospace;white-space:pre-wrap;word-break:break-all;box-sizing:border-box;overflow:auto}
+#tpb{color:transparent;pointer-events:none}#tpb .bad{background:#f2dcc0;border-bottom:2px dotted #c9925a}
+#tpa{background:transparent;border:0;outline:0;resize:none;color:#4d5562}
+.shake{animation:sh .4s}@keyframes sh{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="layers"></div>
+<div id="bar">
+ <button data-tool="dot" class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="#5b6472"/></svg></button>
+ <button data-tool="line"><svg viewBox="0 0 24 24"><path d="M5 19L19 5"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/></svg></button>
+ <button data-tool="circle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.5"/></svg></button>
+ <button id="bAdd"><svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M12 2v5"/></svg></button>
+ <button id="bView"><svg viewBox="0 0 24 24"><path d="M3 12c4-6 14-6 18 0c-4 6-14 6-18 0z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
+ <button id="bAI" class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M10 9v6M14 9v6"/></svg></button>
+ <button id="bClr"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+ <button id="bHelp"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3 2.4V14"/><circle cx="12" cy="17" r=".6"/></svg></button>
+</div>
+<div id="help"><b>?</b><br>
+● tap empty space: place a dot / line / circle (chosen tool) on the selected layer.<br>
+● drag any dot, line end, circle centre, or circle rim handle.<br>
+● double-tap a shape: remove it.<br>
+● long-press a glowing (matched) line or circle: name it later (saved only on this device).<br>
+● right dots: choose layer (top = you, second = AI, more with ≡+).<br>
+● eye: tilt to side view and back (drag sideways in side view to orbit).<br>
+● pause ring: start / pause the AI partner.  ✕: clear your layer.<br>
+● gold thread = equal angle across layers; gold ring = equal circle ratio.<br>
+● gold wedges joined by a curve = same crossing angle in two layers, at any place or size (shared structure).<br>
+● two rings near the top slide together as the two layers' structures become alike; a gold halo = shared thought.<br>
+● dots on different layers at the same spot snap together and glow with a thread.<br>
+● circles are domains: shapes inside get a soft halo; each circle's shadow is projected onto the other layers; where circles from different layers overlap is shared range (gold fill).<br>
+● hollow rings = crossing points: drag one up/down (or pinch) to scale everything meeting there; matching crossings on other layers scale with it.<br>
+● straight gold thread = local match (same direction); curved gold thread = non-local match (same structure anywhere).<br>
+● teal disc = input, rose disc = output (each layer). Fixed anchors; long-press to release (dashed ring) and drag; long-press again to fix. Lines touching them tint; a full input→output chain shows a teal→rose flow. The teal→rose bar at top grows as your and the AI's input→output paths take the same shape.<br>
+● dashed ghost lines = AI suggestions to ground a free idea (path back to an anchor, or a match to the AI layer); tap to accept, or ignore and they fade.<br>● ring bottom-left = grounding: how much of your structure connects to your anchors.<br>● magnet = Euclid snaps on/off. The AI never moves your shapes; it only arranges the layers.<br>● warm-white point at the base = patience anchor. Hold it to breathe (4 s in, 6 s out): free ideas soften, threads lead them home, the view returns to top. Its ring fills slowly with the time you've held it, and suggestions grow stronger. Nothing is changed or deleted.<br>● bottom ribbon = every gesture as notation (blue you, clay AI, gold shared).<br>● left tiles = living lexicon: shapes that recur or are shared become words. Tap to stamp one; long-press to name it (only on this device).<br>● ≡ lines = notation panel: edit text to move the geometry; move the geometry to rewrite the text. Unreadable lines are softly highlighted and ignored.<br>● small letters: every dot (x, y…), crossing point and circle (A, B… domains) is a variable. Hollow = undefined. Long-press one to give it a name and/or value (circles: a range like [0,1]); it fills in. Dashed ring on the AI side = share your definition (tap).<br>● right column: layers (long-press a layer dot: human ↔ AI) · + − ↑ ↓ · eye cycles visible → hidden lines → fully hidden (＋ = still counted).<br>● dial (top right): right = faster change, up = more momentum; drag the outer ring for damping. Trails show the AI's velocity.<br>● list icon (left of tools) = sidebar of candidate words (the one place with words): blue dot = from you, clay = from the AI. Tap an undefined dot or circle, then tap a word to name it — or tap • / ○ to drop a new named dot / circle, or drag a word onto the canvas.<br>● stacked ⊕ = AI synthesis: merges the selected layer and the layers below into a new AI layer (originals untouched).<br>● bulb = clarify: green-dashed suggestions for exact parallels, right angles and touching ends; tap one, or the green ✓ to accept all. Nothing changes until you accept.<br>● text panel tabs: notation · sentences · bag of words; the small bar = how alike your and the AI's bags are (cosine).<br>● ⤓ save (thought file + a primer any AI can read) / ⤒ load a saved thought or an AI's reply as a new layer.<br>
+● Euclid's five: line ends snap point-to-point · tap a line's middle (line tool) to extend it · centre + radius = circle · near-90° snaps square (corner mark) · green twin wedges = parallels proven by a crossing line.<br>
+● soft disc in each corner: area ∝ that layer's entropy. Entropy is over the structure (crossing angles, length ratios, incidence, containment). Centre disc: area ∝ structural difference — it shrinks as you converge.<br>
+<i>Model, not validated science. Everything stays on this device.</i><br><br>tap to close</div>
+<div id="err"></div>
+<div id="lex"></div>
+<div id="side"></div>
+<div id="tp"><div id="tpt"></div><div id="tpb"></div><textarea id="tpa" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>
+<script>
+"use strict";
+window.onerror=(m)=>{document.getElementById('err').textContent+='ERR:'+m+';'};
+
+/* ===================== PARAMS (all tunables) ===================== */
+const P={
+  layerGap:120,        // 3D distance between layers (px)
+  angleTol:4*Math.PI/180, // equal-angle tolerance (rad)
+  coincTol:18,         // perpendicular offset for "one line" in side view (px)
+  ratioTol:0.06,       // circle ratio tolerance
+  bins:18,             // entropy histogram bins over [0,π)
+  entropyArea:2200,    // px² of disc per bit of entropy (area ∝ H)
+  aiStepMs:60,         // AI tick
+  aiRate:0.06,         // fraction of angle gap closed per tick
+  aiNoise:0.035,       // exploration noise (rad)
+  aiExplore:0.04,      // chance per tick of a random jump
+  hitR:22,             // touch radius
+  sideTilt:1.35,       // side view tilt (rad)
+  tiltSpeed:0.08,
+  snapRight:5*Math.PI/180, // Postulate 4: snap to right angle within this
+  snapPoint:16,        // Postulate 1: line ends snap onto points (px)
+  extendBy:1.4,        // Postulate 2: one tap extends a line by this factor
+  invAngTol:5*Math.PI/180, // invariant (intersection) angle match tolerance
+  shareAt:0.85         // similarity at which two layers "share a thought"
+};
+
+/* ===================== EQUATIONS ===================== */
+const EQ={
+  // direction of a line, folded to [0,π) — orientation, not arrow
+  angle:(l)=>{let a=Math.atan2(l.b.y-l.a.y,l.b.x-l.a.x);a%=Math.PI;return a<0?a+Math.PI:a},
+  // smallest difference between two orientations
+  angDiff:(a,b)=>{let d=Math.abs(a-b)%Math.PI;return Math.min(d,Math.PI-d)},
+  // Euclid: parallel iff orientations equal (within tol)
+  parallel:(l1,l2)=>EQ.angDiff(EQ.angle(l1),EQ.angle(l2))<P.angleTol,
+  // perpendicular distance from midpoint of l2 to the infinite line of l1 (coincidence when ~0)
+  offset:(l1,l2)=>{const dx=l1.b.x-l1.a.x,dy=l1.b.y-l1.a.y,L=Math.hypot(dx,dy)||1,
+    mx=(l2.a.x+l2.b.x)/2-l1.a.x,my=(l2.a.y+l2.b.y)/2-l1.a.y;return Math.abs(mx*dy-my*dx)/L},
+  // angle histogram (lines + circle-pair bearings) -> probabilities
+  hist:(angles)=>{const h=new Array(P.bins).fill(0);angles.forEach(a=>h[Math.min(P.bins-1,Math.floor(a/Math.PI*P.bins))]++);
+    const n=angles.length||1;return h.map(v=>v/n)},
+  // Shannon entropy H = -Σ p log2 p  (bits)
+  H:(p)=>-p.reduce((s,v)=>s+(v>0?v*Math.log2(v):0),0),
+  // Jensen–Shannon divergence between two layers (0 = same thought shape)
+  JS:(p,q)=>{const m=p.map((v,i)=>(v+q[i])/2);return EQ.H(m)-(EQ.H(p)+EQ.H(q))/2},
+  // one-to-one entropy -> area: radius so that πr² = k·H
+  radius:(H)=>Math.sqrt(P.entropyArea*H/Math.PI),
+  // circle ratio relative to the largest circle in its layer
+  ratio:(c,L)=>c.r/Math.max(...L.circles.map(k=>k.r))
+};
+
+/* ===================== STATE ===================== */
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W,H_,DPR;
+const mkLayer=(ai)=>({ai,dots:[],lines:[],circles:[]});
+let layers=[mkLayer(false),mkLayer(true)],active=0,tool='dot',aiOn=true,tilt=0,tiltT=0,yaw=0;
+let names=JSON.parse(localStorage.getItem('ariel-names')||'{}');
+function seed(){ // gentle starting shapes so the page is never empty
+  const cx=W/2,cy=H_/2-30,s=Math.min(W,H_)*.22;
+  const h=layers[0];h.lines.push({a:{x:cx-s,y:cy+s*.6},b:{x:cx+s,y:cy-s*.2}},{a:{x:cx-s*.4,y:cy-s},b:{x:cx-s*.1,y:cy+s}});
+  h.circles.push({c:{x:cx+s*.6,y:cy+s*.5},r:s*.35},{c:{x:cx-s*.6,y:cy-s*.4},r:s*.2});h.dots.push({x:cx,y:cy});
+  const a=layers[1];for(let i=0;i<3;i++){const x=cx+(Math.random()-.5)*s*2,y=cy+(Math.random()-.5)*s*2,t=Math.random()*Math.PI,L=s*.7;
+    a.lines.push({a:{x:x-Math.cos(t)*L,y:y-Math.sin(t)*L},b:{x:x+Math.cos(t)*L,y:y+Math.sin(t)*L}})}
+  a.circles.push({c:{x:cx-s*.3,y:cy+s*.6},r:s*.4},{c:{x:cx+s*.5,y:cy-s*.6},r:s*.15});
+}
+
+/* ===================== 3D PROJECTION ===================== */
+// layer i sits at z = -(i)*gap ; rotate about x by tilt, about y by yaw, orthographic
+function proj(p,i){
+  const x=p.x-W/2,y=p.y-H_/2,z=-i*P.layerGap+(layers.length-1)*P.layerGap/2;
+  const x1=x*Math.cos(yaw)+z*Math.sin(yaw),z1=-x*Math.sin(yaw)+z*Math.cos(yaw);
+  const y2=y*Math.cos(tilt)-z1*Math.sin(tilt);
+  const sc=tilt>0.05?0.8:1;
+  return{x:W/2+x1*sc,y:H_/2-20+y2*sc};
+}
+
+/* ===================== MATCHING ===================== */
+function matches(){
+  const out={lines:[],circles:[]};
+  for(let i=0;i<layers.length;i++)for(let j=i+1;j<layers.length;j++){if(excluded(layers[i])||excluded(layers[j]))continue;
+    layers[i].lines.forEach(l1=>layers[j].lines.forEach(l2=>{
+      if(EQ.parallel(l1,l2))out.lines.push({i,j,l1,l2,one:EQ.offset(l1,l2)<P.coincTol})}));
+    if(layers[i].circles.length>1&&layers[j].circles.length>1)
+      layers[i].circles.forEach(c1=>layers[j].circles.forEach(c2=>{
+        const r1=EQ.ratio(c1,layers[i]),r2=EQ.ratio(c2,layers[j]);
+        if(r1<.999&&Math.abs(r1-r2)<P.ratioTol)out.circles.push({i,j,c1,c2})}));
+  }
+  return out;
+}
+function layerAngles(L){const a=L.lines.map(EQ.angle);
+  for(let k=1;k<L.circles.length;k++){let t=Math.atan2(L.circles[k].c.y-L.circles[0].c.y,L.circles[k].c.x-L.circles[0].c.x)%Math.PI;a.push(t<0?t+Math.PI:t)}
+  return a}
+
+/* ===================== AI PARTNER (local, no network) ===================== */
+function aiTickBase(){
+  if(!aiOn)return;
+  const me=layers[1],hu=layers[0];
+  if(me.lines.length<hu.lines.length&&Math.random()<.02){const c={x:W/2+(Math.random()-.5)*200,y:H_/2+(Math.random()-.5)*200};
+    me.lines.push({a:{x:c.x-60,y:c.y},b:{x:c.x+60,y:c.y}})}
+  me.lines.forEach((l,k)=>{
+    const a=EQ.angle(l);let target=null,best=9;
+    hu.lines.forEach(h=>{const d=EQ.angDiff(a,EQ.angle(h));if(d<best){best=d;target=h}});
+    let da=0;
+    if(Math.random()<P.aiExplore)da=(Math.random()-.5)*.8;
+    else if(target){let ta=EQ.angle(target),d=ta-a;if(d>Math.PI/2)d-=Math.PI;if(d<-Math.PI/2)d+=Math.PI;
+      da=d*P.aiRate+(best>P.angleTol?(Math.random()-.5)*P.aiNoise:0)}
+    const mx=(l.a.x+l.b.x)/2,my=(l.a.y+l.b.y)/2,L=Math.hypot(l.b.x-l.a.x,l.b.y-l.a.y)/2,na=Math.atan2(l.b.y-l.a.y,l.b.x-l.a.x)+da;
+    let nx=mx,ny=my; // drift slowly toward the human line's position (local ↔ non-local)
+    if(target&&best<P.angleTol*2){nx+=((target.a.x+target.b.x)/2-mx)*.01;ny+=((target.a.y+target.b.y)/2-my)*.01}
+    l.a={x:nx-Math.cos(na)*L,y:ny-Math.sin(na)*L};l.b={x:nx+Math.cos(na)*L,y:ny+Math.sin(na)*L};
+  });
+  if(hu.circles.length>1&&me.circles.length>1){
+    const hr=hu.circles.map(c=>EQ.ratio(c,hu)).sort();const big=Math.max(...me.circles.map(c=>c.r));
+    me.circles.forEach(c=>{if(c.r===big)return;const r=c.r/big;let t=hr.reduce((b,v)=>Math.abs(v-r)<Math.abs(b-r)?v:b,hr[0]);
+      if(t>.999)return;c.r+= (t*big-c.r)*P.aiRate+(Math.random()-.5)*1.2;c.r=Math.max(6,c.r);
+      c.c.x+=(Math.random()-.5)*1.5;c.c.y+=(Math.random()-.5)*1.5})}
+}
+
+/* ===================== DRAW ===================== */
+const col=(i)=>i===0?'#7a9cc6':i===1?'#c79a7a':['#8fb59a','#a99ac9','#c9a3b6'][i%3];
+function plane(i){const c=[{x:30,y:30},{x:W-30,y:30},{x:W-30,y:H_-90},{x:30,y:H_-90}].map(p=>proj(p,i));
+  ctx.beginPath();c.forEach((p,k)=>k?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();
+  ctx.fillStyle=col(i)+(tilt>.05?'14':'00');ctx.fill();ctx.strokeStyle=col(i)+'40';ctx.lineWidth=1;ctx.stroke()}
+function seg(p,q,i,w,c){const a=proj(p,i),b=proj(q,i);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineWidth=w;ctx.strokeStyle=c;ctx.stroke()}
+function ring(c,r,i,w,s){ctx.beginPath();for(let k=0;k<=40;k++){const t=k/40*2*Math.PI,p=proj({x:c.x+r*Math.cos(t),y:c.y+r*Math.sin(t)},i);k?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)}
+  ctx.lineWidth=w;ctx.strokeStyle=s;ctx.stroke()}
+function dot(p,i,r,f){const a=proj(p,i);ctx.beginPath();ctx.arc(a.x,a.y,r,0,7);ctx.fillStyle=f;ctx.fill()}
+function drawBase(t){
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H_);
+  const M=matches(),pulse=.6+.4*Math.sin(t/400);
+  // back-to-front
+  for(let i=layers.length-1;i>=0;i--){
+    const L=layers[i],al=(i===active||tilt>.05)?'ff':'66',c=col(i)+al;ctx.globalAlpha=L.vis===1?.35:1;ctx.setLineDash(L.vis===1?[4,5]:[]);plane(i);
+    L.circles.forEach(k=>{ring(k.c,k.r,i,2,c);dot(k.c,i,3,c);dot({x:k.c.x+k.r,y:k.c.y},i,i===active?5:2.5,c)});
+    L.lines.forEach(l=>{seg(l.a,l.b,i,2.5,c);dot(l.a,i,i===active?5:3,c);dot(l.b,i,i===active?5:3,c)});
+    L.dots.forEach(d=>dot(d,i,5,c));
+  }
+  ctx.globalAlpha=1;ctx.setLineDash([]);
+  // matches: glow + vertical threads
+  ctx.globalAlpha=pulse;
+  M.lines.forEach(m=>{const g='#e8c76a';seg(m.l1.a,m.l1.b,m.i,m.one?7:5,g+'90');seg(m.l2.a,m.l2.b,m.j,m.one?7:5,g+'90');
+    const p=proj({x:(m.l1.a.x+m.l1.b.x)/2,y:(m.l1.a.y+m.l1.b.y)/2},m.i),q=proj({x:(m.l2.a.x+m.l2.b.x)/2,y:(m.l2.a.y+m.l2.b.y)/2},m.j);
+    ctx.setLineDash([3,5]);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=g;ctx.lineWidth=1.5;ctx.stroke();ctx.setLineDash([]);
+    const n=names[key(m)];if(n){ctx.fillStyle='#5b6472';ctx.font='11px system-ui';ctx.fillText(n,p.x+6,p.y-6)}});
+  M.circles.forEach(m=>{ring(m.c1.c,m.c1.r,m.i,5,'#e8c76a90');ring(m.c2.c,m.c2.r,m.j,5,'#e8c76a90');
+    const p=proj(m.c1.c,m.i),q=proj(m.c2.c,m.j);ctx.setLineDash([2,6]);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='#e8c76a';ctx.lineWidth=1.5;ctx.stroke();ctx.setLineDash([])});
+  ctx.globalAlpha=1;
+  // entropy discs: area ∝ H (one-to-one)
+  const ps=layers.map(L=>EQ.hist(layerAngles(L)));
+  layers.forEach((L,i)=>{const r=EQ.radius(EQ.H(ps[i])),x=28+i*0+ (i%2?W-56:0)+ (i%2?0:0),y=40+Math.floor(i/2)*90+r*0;
+    const cx=i%2?W-56:56,cy=58+Math.floor(i/2)*110;ctx.beginPath();ctx.arc(cx,cy,Math.max(2,r),0,7);ctx.fillStyle=col(i)+'38';ctx.fill();ctx.strokeStyle=col(i)+'90';ctx.lineWidth=1;ctx.stroke()});
+  const js=EQ.JS(ps[0],ps[1]);const rj=EQ.radius(js*3);
+  ctx.beginPath();ctx.arc(W/2,52,Math.max(3,rj),0,7);ctx.fillStyle=js<.05?'#e8c76a88':'#5b647222';ctx.fill();
+  window.__state={js,matches:M.lines.length+M.circles.length,H:ps.map(EQ.H)};
+}
+
+/* ===================== INPUT (touch + mouse via pointer events) ===================== */
+let drag=null,downT=0,downP=null,lastTap=0,press=null,orbit=null;
+const key=(m)=>m.i+'-'+m.j+'-'+Math.round(EQ.angle(m.l1)*1e2);
+function hit(p){const L=layers[active],d=(a)=>Math.hypot(a.x-p.x,a.y-p.y);
+  for(const k of L.circles){if(d({x:k.c.x+k.r,y:k.c.y})<P.hitR)return{k,part:'r'};if(d(k.c)<P.hitR)return{k,part:'c'}}
+  for(const l of L.lines){if(d(l.a)<P.hitR)return{k:l,part:'a'};if(d(l.b)<P.hitR)return{k:l,part:'b'};
+    if(EQ.offset(l,{a:p,b:p})<10&&d({x:(l.a.x+l.b.x)/2,y:(l.a.y+l.b.y)/2})<Math.hypot(l.b.x-l.a.x,l.b.y-l.a.y)/2)return{k:l,part:'m'}}
+  for(const k of L.circles)if(Math.abs(d(k.c)-k.r)<10)return{k,part:'c'};
+  for(const k of L.dots)if(d(k)<P.hitR)return{k,part:'d'};return null}
+function remove(h){const L=layers[active];['dots','lines','circles'].forEach(n=>L[n]=L[n].filter(x=>x!==h.k))}
+cv.addEventListener('pointerdown',e=>{const p={x:e.clientX,y:e.clientY};downP=p;downT=performance.now();
+  if(tiltT>0){orbit=p.x;return}
+  const h=hit(p);
+  if(h&&downT-lastTap<300){remove(h);lastTap=0;return}lastTap=downT;
+  if(h){drag={...h,last:p};press=setTimeout(()=>nameIt(h),650);return}
+  const L=layers[active];
+  if(tool==='dot')L.dots.push(p);
+  else if(tool==='line'){const l={a:{...p},b:{x:p.x+1,y:p.y}};L.lines.push(l);drag={k:l,part:'b',last:p}}
+  else{const c={c:{...p},r:1};L.circles.push(c);drag={k:c,part:'r',last:p}}
+});
+cv.addEventListener('pointermove',e=>{const p={x:e.clientX,y:e.clientY};
+  if(orbit!==null){yaw+=(p.x-orbit)*.008;orbit=p.x;return}
+  if(!drag)return;if(Math.hypot(p.x-downP.x,p.y-downP.y)>6)clearTimeout(press);
+  const k=drag.k,dx=p.x-drag.last.x,dy=p.y-drag.last.y;drag.last=p;
+  if(drag.part==='a')k.a=p;else if(drag.part==='b')k.b=p;else if(drag.part==='d'){k.x=p.x;k.y=p.y}
+  else if(drag.part==='m'){k.a.x+=dx;k.a.y+=dy;k.b.x+=dx;k.b.y+=dy}
+  else if(drag.part==='c'){k.c.x+=dx;k.c.y+=dy}else if(drag.part==='r')k.r=Math.max(6,Math.hypot(p.x-k.c.x,p.y-k.c.y))});
+addEventListener('pointerup',()=>{clearTimeout(press);if(drag&&drag.part==='b'&&Math.hypot(drag.k.b.x-drag.k.a.x,drag.k.b.y-drag.k.a.y)<12){drag.k.b.x=drag.k.a.x+80}
+  if(drag&&drag.part==='r'&&drag.k.r<8)drag.k.r=40;drag=null;orbit=null});
+// optional "name later" — only for matched shapes, stored only in localStorage
+function nameIt(h){const m=matches().lines.find(m=>m.l1===h.k||m.l2===h.k);if(!m)return;drag=null;
+  const v=prompt('',names[key(m)]||'');if(v!==null){names[key(m)]=v;localStorage.setItem('ariel-names',JSON.stringify(names))}}
+
+/* ===================== TOOLBAR & LAYERS ===================== */
+document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{tool=b.dataset.tool;document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('on',x===b))});
+function renderLayers(){const d=document.getElementById('layers');d.innerHTML='';layers.forEach((L,i)=>{const e=document.createElement('div');
+  e.style.borderColor=col(i);e.style.background=L.ai?'transparent':col(i);e.className=i===active?'on':'';e.onclick=()=>{active=i;renderLayers()};d.appendChild(e)})}
+bAdd.onclick=()=>{if(layers.length<8){layers.push(mkLayer(false));active=layers.length-1;renderLayers()}};
+bView.onclick=()=>{tiltT=tiltT?0:P.sideTilt;if(!tiltT)yaw=0;bView.classList.toggle('on',!!tiltT)};
+bAI.onclick=()=>{aiOn=!aiOn;bAI.classList.toggle('on',aiOn);bAI.querySelector('path').setAttribute('d',aiOn?'M10 9v6M14 9v6':'M10 8l5 4-5 4z')};
+bClr.onclick=()=>{layers[active]=mkLayer(layers[active].ai);};
+bHelp.onclick=()=>help.classList.add('on');help.onclick=()=>help.classList.remove('on');
+
+
+/* =====================================================================
+   FUNDAMENTAL MAPPING — Euclid's 5 postulates as 5 gestures, and
+   structure (not position) matching via a similarity-invariant graph.
+   ===================================================================== */
+
+/* ---------- EQUATIONS (invariants) ---------- */
+// segment intersection point or null
+EQ.cross=(l1,l2)=>{const r={x:l1.b.x-l1.a.x,y:l1.b.y-l1.a.y},q={x:l2.b.x-l2.a.x,y:l2.b.y-l2.a.y},d=r.x*q.y-r.y*q.x;if(Math.abs(d)<1e-9)return null;
+  const wx=l2.a.x-l1.a.x,wy=l2.a.y-l1.a.y,t=(wx*q.y-wy*q.x)/d,u=(wx*r.y-wy*r.x)/d;return t>=0&&t<=1&&u>=0&&u<=1?{x:l1.a.x+t*r.x,y:l1.a.y+t*r.y}:null};
+EQ.len=(l)=>Math.hypot(l.b.x-l.a.x,l.b.y-l.a.y);
+// Graph of a layer: nodes = dots + intersections; edges = lines; plus incidence & containment.
+// Every feature is invariant to translation, rotation and scale.
+EQ.graph=(L)=>{
+  const X=[];L.lines.forEach((a,i)=>L.lines.forEach((b,j)=>{if(j>i){const p=EQ.cross(a,b);if(p)X.push({p,i,j,ang:EQ.angDiff(EQ.angle(a),EQ.angle(b))})}}));
+  const maxL=Math.max(1,...L.lines.map(EQ.len));
+  const ratios=L.lines.map(l=>EQ.len(l)/maxL);
+  const deg=L.lines.map((l,i)=>X.filter(x=>x.i===i||x.j===i).length+
+     L.dots.filter(d=>EQ.offset(l,{a:d,b:d})<6).length+
+     L.circles.filter(c=>{const o=EQ.offset(l,{a:c.c,b:c.c});return o<c.r}).length);   // incidence
+  const cont=L.circles.map(c=>L.dots.filter(d=>Math.hypot(d.x-c.c.x,d.y-c.c.y)<c.r).length+
+     L.circles.filter(k=>k!==c&&Math.hypot(k.c.x-c.c.x,k.c.y-c.c.y)+k.r<c.r).length);   // containment
+  return{X,ratios,deg,cont};
+};
+// tokens: each invariant becomes one of 18 symbols (6 angle, 5 ratio, 4 incidence, 3 containment)
+EQ.tokens=(g)=>[...g.X.map(x=>Math.min(5,Math.floor(x.ang/(Math.PI/2)*6))),
+  ...g.ratios.map(r=>6+Math.min(4,Math.floor(r*5))),
+  ...g.deg.map(d=>11+Math.min(3,d)),
+  ...g.cont.map(c=>15+Math.min(2,c))];
+// similarity of two layers' structures: 1 − Jensen–Shannon (bits), 1 = same thought
+EQ.share=(La,Lb)=>{const p=EQ.hist(layerAngles(La)),q=EQ.hist(layerAngles(Lb));
+  if(!layerAngles(La).length||!layerAngles(Lb).length)return 0;return Math.max(0,1-EQ.JS(p,q))};
+
+// entropy now over invariants (area ∝ H still one-to-one): tokens → slots in [0,π)
+function layerAngles(L){return EQ.tokens(EQ.graph(L)).map(k=>(k+.5)/P.bins*Math.PI)}
+
+/* ---------- AI: seeks invariant matches, not positions ---------- */
+function rotLine(l,da){const mx=(l.a.x+l.b.x)/2,my=(l.a.y+l.b.y)/2,L=EQ.len(l)/2,a=Math.atan2(l.b.y-l.a.y,l.b.x-l.a.x)+da;
+  l.a={x:mx-Math.cos(a)*L,y:my-Math.sin(a)*L};l.b={x:mx+Math.cos(a)*L,y:my+Math.sin(a)*L}}
+function scaleLine(l,f){const mx=(l.a.x+l.b.x)/2,my=(l.a.y+l.b.y)/2;l.a={x:mx+(l.a.x-mx)*f,y:my+(l.a.y-my)*f};l.b={x:mx+(l.b.x-mx)*f,y:my+(l.b.y-my)*f}}
+const aiCircles=aiTickBase;   // keep the circle-ratio behaviour from before
+function aiTickInvariant(){
+  if(!aiOn)return;const me=layers[1],hu=layers[0],gh=EQ.graph(hu),gm=EQ.graph(me);
+  if(me.lines.length<hu.lines.length&&Math.random()<.02){const c={x:W/2+(Math.random()-.5)*200,y:H_/2+(Math.random()-.5)*200};
+    me.lines.push({a:{x:c.x-60,y:c.y},b:{x:c.x+60,y:c.y}})}
+  if(me.lines.length>hu.lines.length+1&&Math.random()<.01)me.lines.pop();
+  // 1) intersection angles → nearest human intersection angle (try ± rotation, keep the better)
+  const targets=gh.X.map(x=>x.ang),used=new Set();
+  gm.X.forEach(x=>{if(!targets.length)return;const l=me.lines[x.j],o=me.lines[x.i];
+    let ti=-1,b=9;targets.forEach((t,k)=>{const d=Math.abs(t-x.ang);if(!used.has(k)&&d<b){b=d;ti=k}});if(ti<0)return;used.add(ti);
+    const t=targets[ti],step=Math.max(.002,b*P.aiRate)+(b>P.invAngTol?(Math.random()-.5)*P.aiNoise:0);
+    rotLine(l,step);const up=Math.abs(EQ.angDiff(EQ.angle(l),EQ.angle(o))-t);rotLine(l,-2*step);const dn=Math.abs(EQ.angDiff(EQ.angle(l),EQ.angle(o))-t);
+    if(up<dn)rotLine(l,2*step)});
+  // 2) too few crossings → pull a lonely line toward another so they meet
+  if(gm.X.length<gh.X.length&&me.lines.length>1){const lonely=me.lines.find((l,i)=>!gm.X.some(x=>x.i===i||x.j===i));
+    if(lonely){const o=me.lines.find(l=>l!==lonely),dx=((o.a.x+o.b.x)-(lonely.a.x+lonely.b.x))/2*.03,dy=((o.a.y+o.b.y)-(lonely.a.y+lonely.b.y))/2*.03;
+      lonely.a.x+=dx;lonely.b.x+=dx;lonely.a.y+=dy;lonely.b.y+=dy}}
+  // 3) length ratios → nearest human ratio
+  const maxM=Math.max(1,...me.lines.map(EQ.len));
+  me.lines.forEach(l=>{const r=EQ.len(l)/maxM;if(r>.999||!gh.ratios.length)return;const t=gh.ratios.reduce((b,v)=>Math.abs(v-r)<Math.abs(b-r)?v:b,gh.ratios[0]);
+    if(t<.999)scaleLine(l,1+(t-r)*P.aiRate)});
+  // 4) exploration
+  if(Math.random()<P.aiExplore&&me.lines.length)rotLine(me.lines[Math.floor(Math.random()*me.lines.length)],(Math.random()-.5)*.6);
+  // circles: same ratio seeking as before, but skip its old line logic
+  const saved=me.lines;me.lines=[];aiCircles();me.lines=saved;
+}
+
+/* ---------- GESTURES = POSTULATES ---------- */
+function nodesOf(L,skip){const g=EQ.graph(L),n=[...L.dots,...g.X.map(x=>x.p),...L.circles.map(c=>c.c)];
+  L.lines.forEach(l=>{if(l!==skip)n.push(l.a,l.b)});return n}
+let tapInfo=null;
+cv.addEventListener('pointerdown',e=>{tapInfo={t:performance.now(),x:e.clientX,y:e.clientY}});
+cv.addEventListener('pointermove',e=>{ if(!drag||tiltT||!P.snap)return;const L=layers[active],k=drag.k;
+  if(!(drag.part==='a'||drag.part==='b'))return;
+  const end=k[drag.part],fix=k[drag.part==='a'?'b':'a'];
+  // P1: point to point — the end snaps onto any existing point/node
+  for(const n of nodesOf(L,k))if(Math.hypot(n.x-end.x,n.y-end.y)<P.snapPoint){k[drag.part]={x:n.x,y:n.y};return}
+  // P4: all right angles are equal — snap to exact perpendicular
+  for(const o of L.lines){if(o===k)continue;const d=EQ.angDiff(EQ.angle(k),EQ.angle(o));
+    if(Math.abs(d-Math.PI/2)<P.snapRight){const a=EQ.angle(o)+Math.PI/2,len=EQ.len(k),s=Math.sign((end.x-fix.x)*Math.cos(a)+(end.y-fix.y)*Math.sin(a))||1;
+      k[drag.part]={x:fix.x+s*Math.cos(a)*len,y:fix.y+s*Math.sin(a)*len};Object.defineProperty(k,'right',{value:o,writable:true,configurable:true,enumerable:false});return}}
+  k.right=null});
+// P2: a line can be extended — with the line tool, a quick tap on a line's middle extends it
+cv.addEventListener('pointerup',e=>{if(!tapInfo||!drag||tool!=='line'||drag.part!=='m')return;
+  if(performance.now()-tapInfo.t<250&&Math.hypot(e.clientX-tapInfo.x,e.clientY-tapInfo.y)<6)scaleLine(drag.k,P.extendBy)});
+// P3 (centre + radius → circle) is the circle tool itself.
+// P5: parallels found through a transversal with equal alternate angles (drawn below).
+
+/* ---------- DRAW overlay ---------- */
+function wedge(p,i,l1,l2,r,c){const a=Math.atan2(l1.b.y-l1.a.y,l1.b.x-l1.a.x),b=Math.atan2(l2.b.y-l2.a.y,l2.b.x-l2.a.x);
+  let d=b-a;while(d>Math.PI/2)d-=Math.PI;while(d<-Math.PI/2)d+=Math.PI;ctx.beginPath();
+  for(let k=0;k<=12;k++){const t=a+d*k/12,q=proj({x:p.x+r*Math.cos(t),y:p.y+r*Math.sin(t)},i);k?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)}
+  ctx.strokeStyle=c;ctx.lineWidth=2.5;ctx.stroke()}
+function drawInvariant(t){
+  drawBase(t);const pulse=.6+.4*Math.sin(t/400),G=layers.map(EQ.graph);
+  // right-angle marks (P4)
+  layers.forEach((L,i)=>L.lines.forEach(l=>{if(!l.right)return;const p=EQ.cross(l,l.right);if(!p)return;
+    const u=Math.atan2(l.b.y-l.a.y,l.b.x-l.a.x),v=u+Math.PI/2,s=9,q=[{x:p.x+s*Math.cos(u),y:p.y+s*Math.sin(u)},{x:p.x+s*(Math.cos(u)+Math.cos(v)),y:p.y+s*(Math.sin(u)+Math.sin(v))},{x:p.x+s*Math.cos(v),y:p.y+s*Math.sin(v)}].map(z=>proj(z,i));
+    ctx.beginPath();q.forEach((z,k)=>k?ctx.lineTo(z.x,z.y):ctx.moveTo(z.x,z.y));ctx.strokeStyle=col(i);ctx.lineWidth=1.5;ctx.stroke()}));
+  // P5: transversal t crosses l1 and l2 with equal alternate angles ⇒ l1 ∥ l2 — twin wedges
+  layers.forEach((L,i)=>L.lines.forEach((a,x)=>L.lines.forEach((b,y)=>{if(y<=x||EQ.cross(a,b)||!EQ.parallel(a,b))return;
+    L.lines.forEach(tr=>{if(tr===a||tr===b)return;const p=EQ.cross(a,tr),q=EQ.cross(b,tr);if(p&&q){ctx.globalAlpha=pulse;wedge(p,i,tr,a,14,'#9bbf9a');wedge(q,i,tr,b,14,'#9bbf9a');ctx.globalAlpha=1}})})));
+  // invariant matches: same intersection angle in two layers, wherever it sits — gold wedges + thread
+  for(let i=0;i<layers.length;i++)for(let j=i+1;j<layers.length;j++)
+    G[i].X.forEach(x=>G[j].X.forEach(y=>{if(Math.abs(x.ang-y.ang)>P.invAngTol)return;ctx.globalAlpha=pulse;
+      wedge(x.p,i,layers[i].lines[x.i],layers[i].lines[x.j],18,'#e8c76a');wedge(y.p,j,layers[j].lines[y.i],layers[j].lines[y.j],18,'#e8c76a');
+      const a=proj(x.p,i),b=proj(y.p,j);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo((a.x+b.x)/2+30,(a.y+b.y)/2,b.x,b.y);
+      ctx.strokeStyle='#e8c76a';ctx.lineWidth=1;ctx.stroke();ctx.globalAlpha=1}));
+  // shared-thought glyph: two rings that slide together as structural similarity → 1
+  const s=EQ.share(layers[0],layers[1]),d=(1-s)*70,cx=W/2,cy=52;
+  [[cx-d/2,col(0)],[cx+d/2,col(1)]].forEach(([x,c])=>{ctx.beginPath();ctx.arc(x,cy+70,16,0,7);ctx.strokeStyle=c;ctx.lineWidth=2;ctx.stroke()});
+  if(s>=P.shareAt){ctx.globalAlpha=pulse;ctx.beginPath();ctx.arc(cx,cy+70,20,0,7);ctx.strokeStyle='#e8c76a';ctx.lineWidth=3;ctx.stroke();ctx.globalAlpha=1}
+  window.__state.share=s;window.__state.X=G.map(g=>g.X.length);
+}
+
+
+/* =====================================================================
+   GRAMMAR RULES — dots align, circles define domain/range, intersections scale.
+   Matching vocabulary: "local" = exact same direction/position across layers
+   (straight gold threads); "non-local" = same invariant structure anywhere
+   (gold wedges joined by curves, shared-thought rings).
+   ===================================================================== */
+P.dotTol=4;          // dots coincide when projected positions are this close (px)
+P.nodeHit=16;        // grab radius for an intersection node
+P.scaleDrag=150;     // px of vertical drag for ×e scaling
+
+/* ---------- EQUATIONS (grammar) ---------- */
+// line–circle intersection points
+EQ.lineCircle=(l,c)=>{const dx=l.b.x-l.a.x,dy=l.b.y-l.a.y,fx=l.a.x-c.c.x,fy=l.a.y-c.c.y,A=dx*dx+dy*dy,B=2*(fx*dx+fy*dy),C=fx*fx+fy*fy-c.r*c.r,D=B*B-4*A*C;
+  if(D<0||A<1e-9)return[];const s=Math.sqrt(D);return[(-B-s)/(2*A),(-B+s)/(2*A)].filter(t=>t>=0&&t<=1).map(t=>({x:l.a.x+t*dx,y:l.a.y+t*dy}))};
+// domain membership: inside a circle
+EQ.inside=(p,c)=>Math.hypot(p.x-c.c.x,p.y-c.c.y)<c.r;
+// all intersection nodes of a layer, with the shapes that meet there
+EQ.nodes=(L)=>{const n=[];L.lines.forEach((a,i)=>{L.lines.forEach((b,j)=>{if(j>i){const p=EQ.cross(a,b);if(p)n.push({p,shapes:[a,b],ang:EQ.angDiff(EQ.angle(a),EQ.angle(b))})}});
+  L.circles.forEach(c=>EQ.lineCircle(a,c).forEach(p=>n.push({p,shapes:[a,c]})))});
+  L.circles.forEach((a,i)=>L.circles.forEach((b,j)=>{if(j>i)EQ.circleCircle(a,b).forEach(p=>n.push({p,shapes:[a,b]}))}));return n};
+EQ.circleCircle=(A,B)=>{const dx=B.c.x-A.c.x,dy=B.c.y-A.c.y,d=Math.hypot(dx,dy);if(d<1e-9||d>A.r+B.r||d<Math.abs(A.r-B.r))return[];const a=(A.r*A.r-B.r*B.r+d*d)/(2*d),h=Math.sqrt(Math.max(0,A.r*A.r-a*a)),mx=A.c.x+a*dx/d,my=A.c.y+a*dy/d;return[{x:mx+h*dy/d,y:my-h*dx/d},{x:mx-h*dy/d,y:my+h*dx/d}]};
+// scale a shape about a point
+function scaleAbout(sh,o,f){const m=(p)=>({x:o.x+(p.x-o.x)*f,y:o.y+(p.y-o.y)*f});
+  if(sh.a){sh.a=m(sh.a);sh.b=m(sh.b)}else if(sh.c){sh.c=m(sh.c);sh.r=Math.max(6,sh.r*f)}}
+
+/* ---------- Rule 1: dots snap across layers ---------- */
+addEventListener('pointerup',()=>{ if(!drag||drag.part!=='d'||!P.snap)return;const d=drag.k;
+  layers.forEach((L,i)=>{if(i===active)return;L.dots.forEach(o=>{if(Math.hypot(o.x-d.x,o.y-d.y)<P.snapPoint){d.x=o.x;d.y=o.y}})})},true);
+
+/* ---------- Rule 3: intersection nodes scale their local structure ---------- */
+let sdrag=null;const ptrs=new Map();
+function applyScale(f){if(!isFinite(f)||f<=0)return;sdrag.groups.forEach(g=>g.shapes.forEach(sh=>scaleAbout(sh,g.p,f)))}
+cv.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(tiltT)return;
+  if(sdrag&&ptrs.size===2){const [a,b]=[...ptrs.values()];sdrag.pinch=Math.hypot(a.x-b.x,a.y-b.y);e.stopImmediatePropagation();return}
+  const p={x:e.clientX,y:e.clientY},n=EQ.nodes(layers[active]).find(n=>Math.hypot(n.p.x-p.x,n.p.y-p.y)<P.nodeHit);if(!n)return;
+  // the node plus every non-locally matched node on other layers (same crossing angle) scale together
+  const groups=[{p:n.p,shapes:n.shapes}];
+  if(n.ang!==undefined)layers.forEach((L,i)=>{if(i===active||!L.ai)return;EQ.nodes(L).forEach(m=>{if(m.ang!==undefined&&Math.abs(m.ang-n.ang)<P.invAngTol)groups.push({p:m.p,shapes:m.shapes})})});
+  sdrag={groups,y:p.y,pinch:0};e.stopImmediatePropagation()},true);
+cv.addEventListener('pointermove',e=>{const prev=ptrs.get(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(!sdrag)return;e.stopImmediatePropagation();
+  if(ptrs.size>=2&&sdrag.pinch){const [a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y);applyScale(d/sdrag.pinch);sdrag.pinch=d}
+  else if(prev){applyScale(Math.exp((prev.y-e.clientY)/P.scaleDrag))}},true);
+addEventListener('pointerup',e=>{ptrs.delete(e.pointerId);if(!ptrs.size)sdrag=null});
+addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);if(!ptrs.size)sdrag=null});
+
+/* ---------- DRAW (grammar overlay) ---------- */
+const drawStructure=drawInvariant;
+function ellipse(c,i){ctx.beginPath();for(let k=0;k<=40;k++){const t=k/40*2*Math.PI,q=proj({x:c.c.x+c.r*Math.cos(t),y:c.c.y+c.r*Math.sin(t)},i);k?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)}}
+function drawGrammar(t){
+  drawStructure(t);const pulse=.6+.4*Math.sin(t/400);
+  // Rule 2a: domain membership — small halo around shapes inside a circle
+  layers.forEach((L,i)=>L.circles.forEach(c=>{
+    [...L.dots,...L.lines.map(l=>({x:(l.a.x+l.b.x)/2,y:(l.a.y+l.b.y)/2}))].forEach(p=>{if(EQ.inside(p,c)){const q=proj(p,i);ctx.beginPath();ctx.arc(q.x,q.y,8,0,7);ctx.strokeStyle=col(i)+'70';ctx.lineWidth=1;ctx.stroke()}})}));
+  // Rule 2b: project each domain onto every other layer (dashed ghost + vertical rails visible in side view)
+  layers.forEach((L,i)=>L.circles.forEach(c=>layers.forEach((_,j)=>{if(j===i)return;
+    ctx.setLineDash([4,6]);ellipse(c,j);ctx.strokeStyle=col(i)+'55';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+    if(tilt>.05)[0,Math.PI].forEach(a=>{const p={x:c.c.x+c.r*Math.cos(a+yaw),y:c.c.y+c.r*Math.sin(a+yaw)},u=proj(p,i),v=proj(p,j);
+      ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(v.x,v.y);ctx.strokeStyle=col(i)+'30';ctx.stroke()})})));
+  // Rule 2c: shared range = overlap of circles from different layers (lens filled on both layers)
+  for(let i=0;i<layers.length;i++)for(let j=i+1;j<layers.length;j++)layers[i].circles.forEach(a=>layers[j].circles.forEach(b=>{
+    if(Math.hypot(a.c.x-b.c.x,a.c.y-b.c.y)>=a.r+b.r)return;
+    [i,j].forEach(k=>{ctx.save();ellipse(a,k);ctx.clip();ellipse(b,k);ctx.fillStyle='#e8c76a'+(tilt>.05?'40':'30');ctx.fill();ctx.restore()})}));
+  // Rule 1: coincident dots across layers glow + vertical thread
+  ctx.globalAlpha=pulse;
+  for(let i=0;i<layers.length;i++)for(let j=i+1;j<layers.length;j++)layers[i].dots.forEach(a=>layers[j].dots.forEach(b=>{
+    if(Math.hypot(a.x-b.x,a.y-b.y)>P.dotTol)return;const u=proj(a,i),v=proj(b,j);
+    [u,v].forEach(q=>{ctx.beginPath();ctx.arc(q.x,q.y,9,0,7);ctx.fillStyle='#e8c76a60';ctx.fill()});
+    ctx.beginPath();ctx.moveTo(u.x,u.y);ctx.lineTo(v.x,v.y);ctx.strokeStyle='#e8c76a';ctx.lineWidth=1.5;ctx.stroke()}));
+  ctx.globalAlpha=1;
+  // Rule 3: intersection nodes drawn as hollow grab-rings on the active layer
+  if(tilt<.05)EQ.nodes(layers[active]).forEach(n=>{ctx.beginPath();ctx.arc(n.p.x,n.p.y,6,0,7);ctx.strokeStyle=col(active);ctx.lineWidth=1.5;ctx.stroke()});
+}
+
+
+/* =====================================================================
+   INPUT / OUTPUT ANCHORS — C(Ic, Oc) from the paper.
+   Each layer has a fixed Input (teal) and Output (rose) anchor. Long-press
+   an anchor to consciously release it ("non-local"): it can then be dragged;
+   long-press again to re-fix it.
+   ===================================================================== */
+P.colIn='#3fae9e'; P.colOut='#c4578f';   // used nowhere else
+P.anchorR=11; P.pathTol=14;
+
+/* ---------- EQUATIONS (I/O path) ---------- */
+function ioOf(L,i){if(!L.io){const y=H_/2-20+(i-0.5)*30;L.io={i:{x:Math.max(30,W*.14),y},o:{x:Math.min(W-60,W*.80),y},free:false}}return L.io}
+const near=(p,q,t)=>Math.hypot(p.x-q.x,p.y-q.y)<t;
+// lines touch if they cross or share an endpoint
+const touch=(a,b)=>!!EQ.cross(a,b)||[a.a,a.b].some(p=>[b.a,b.b].some(q=>near(p,q,P.pathTol)));
+const touchPt=(l,p)=>near(l.a,p,P.pathTol)||near(l.b,p,P.pathTol)||(EQ.offset(l,{a:p,b:p})<6&&near({x:(l.a.x+l.b.x)/2,y:(l.a.y+l.b.y)/2},p,EQ.len(l)/2));
+// shortest line-path from Input to Output (BFS over the line graph)
+EQ.ioPath=(L,i)=>{const io=ioOf(L,i),ls=L.lines,prev=new Map(),q=ls.filter(l=>touchPt(l,io.i));q.forEach(l=>prev.set(l,null));
+  while(q.length){const l=q.shift();if(touchPt(l,io.o)){const p=[];for(let k=l;k;k=prev.get(k))p.unshift(k);return p}
+    ls.forEach(m=>{if(!prev.has(m)&&touch(l,m)){prev.set(m,l);q.push(m)}})}return null};
+// path invariant: number of steps + turn angles between consecutive lines
+EQ.pathSig=(p)=>p?p.slice(1).map((l,k)=>EQ.angDiff(EQ.angle(p[k]),EQ.angle(l))):null;
+EQ.pathShare=(a,b)=>{if(!a||!b)return 0;if(a.length!==b.length)return .3/(1+Math.abs(a.length-b.length));
+  if(!a.length)return 1;return 1-a.reduce((s,v,k)=>s+Math.abs(v-b[k]),0)/(a.length*Math.PI/2)};
+
+/* ---------- AI: build an I→O path shaped like the human's ---------- */
+const aiStructure=aiTickInvariant;   // NB: hoisting — see rename below
+function aiTickIO(){aiStructure();if(!aiOn)return;
+  const me=layers[1],hp=EQ.ioPath(layers[0],0),io=ioOf(me,1);if(!hp||!me.lines.length)return;
+  if(EQ.ioPath(me,1))return;   // already has a path: invariant seeking shapes its turns
+  const pull=(pt)=>{let best=null,bd=1e9,end;me.lines.forEach(l=>['a','b'].forEach(e=>{const d=Math.hypot(l[e].x-pt.x,l[e].y-pt.y);if(d<bd){bd=d;best=l;end=e}}));
+    best[end].x+=(pt.x-best[end].x)*.05;best[end].y+=(pt.y-best[end].y)*.05};
+  pull(io.i);pull(io.o);
+  // join touching chain: move a disconnected line's nearest end toward another line's far end
+  const ls=me.lines;for(const l of ls){if(!ls.some(m=>m!==l&&touch(l,m))){const m=ls.find(x=>x!==l);if(m){l.a.x+=(m.b.x-l.a.x)*.03;l.a.y+=(m.b.y-l.a.y)*.03}break}}
+}
+
+/* ---------- gestures on anchors ---------- */
+let adrag=null,apress=null;
+cv.addEventListener('pointerdown',e=>{if(tiltT)return;const p={x:e.clientX,y:e.clientY},io=ioOf(layers[active],active);
+  const which=near(p,io.i,P.hitR)?'i':near(p,io.o,P.hitR)?'o':null;if(!which)return;e.stopImmediatePropagation();
+  adrag={io,which,moved:false};apress=setTimeout(()=>{io.free=!io.free;adrag=null},600)},true);
+cv.addEventListener('pointermove',e=>{if(!adrag)return;e.stopImmediatePropagation();clearTimeout(apress);
+  if(adrag.io.free)adrag.io[adrag.which]={x:e.clientX,y:e.clientY}},true);
+addEventListener('pointerup',()=>{clearTimeout(apress);adrag=null});
+
+/* ---------- export / import (JSON + notation with →I and O→) ---------- */
+function notation(){return layers.map((L,i)=>{const p=EQ.ioPath(L,i),sig=EQ.pathSig(p);
+  return '→I '+(sig?sig.map(a=>Math.round(a*180/Math.PI)+'°').join(' ─ '):'·')+' O→'}).join('\n')}
+var exportAll=function(){const data={v:1,layers,notation:notation(),names};const b=new Blob([JSON.stringify(data,null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ariel-thought.json';a.click()};
+var importAll=function(f){f.text().then(t=>{const d=JSON.parse(t);if(d.layers){layers=d.layers;active=0;renderLayers()}if(d.names){names=d.names}})};
+const bar=document.getElementById('bar');
+[['M12 4v11M7 10l5 5 5-5M5 20h14',()=>exportAll()],['M12 20V9M7 14l5-5 5 5M5 4h14',()=>{const i=document.createElement('input');i.type='file';i.accept='.json,.md,.txt';i.onchange=()=>importAll(i.files[0]);i.click()}]]
+ .forEach(([d,fn])=>{const b=document.createElement('button');b.innerHTML='<svg viewBox="0 0 24 24"><path d="'+d+'"/></svg>';b.onclick=fn;bar.insertBefore(b,bHelp)});
+
+/* ---------- DRAW ---------- */
+function drawIO(t){
+  drawGrammar(t);const sigs=[];
+  layers.forEach((L,i)=>{const io=ioOf(L,i),path=EQ.ioPath(L,i);sigs.push(EQ.pathSig(path));
+    // tint lines touching an anchor; full teal→rose gradient along a complete I→O path
+    L.lines.forEach(l=>{const ti=touchPt(l,io.i),to=touchPt(l,io.o),k=path?path.indexOf(l):-1;if(!ti&&!to&&k<0)return;
+      const a=proj(l.a,i),b=proj(l.b,i),g=ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+      let f0,f1;if(k>=0){f0=k/path.length;f1=(k+1)/path.length;if(near(l.b,io.i,P.pathTol)||(k>0&&touch(path[k-1],l)&&Math.hypot(l.b.x-path[k-1].a.x,l.b.y-path[k-1].a.y)<Math.hypot(l.a.x-path[k-1].a.x,l.a.y-path[k-1].a.y)))[f0,f1]=[f1,f0]}
+      else{f0=f1=ti?0:1}
+      const mix=(f)=>{const A=[0x3f,0xae,0x9e],B=[0xc4,0x57,0x8f];return'rgba('+A.map((v,n)=>Math.round(v+(B[n]-v)*f)).join(',')+','+(k>=0?.9:.5)+')'};
+      g.addColorStop(0,mix(f0));g.addColorStop(1,mix(f1));ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=g;ctx.lineWidth=k>=0?4:3;ctx.stroke()});
+    // anchors: input = teal disc with inward notch, output = rose disc with outward notch; dashed = released
+    [['i',P.colIn,-1],['o',P.colOut,1]].forEach(([w,c,dir])=>{const q=proj(io[w],i),r=P.anchorR*(tilt>.05?.8:1);
+      ctx.beginPath();ctx.arc(q.x,q.y,r,0,7);ctx.fillStyle=c+(i===active||tilt>.05?'':'66');ctx.fill();
+      ctx.beginPath();ctx.moveTo(q.x+dir*r*.2-r*.45,q.y-r*.4);ctx.lineTo(q.x+dir*r*.2,q.y);ctx.lineTo(q.x+dir*r*.2-r*.45,q.y+r*.4);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+      if(io.free){ctx.setLineDash([3,4]);ctx.beginPath();ctx.arc(q.x,q.y,r+6,0,7);ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.stroke();ctx.setLineDash([])}});
+  });
+  // I→O similarity glyph: teal→rose bar under the shared-thought rings, length ∝ path similarity
+  const ps=EQ.pathShare(sigs[0],sigs[1]),y=52+100,g=ctx.createLinearGradient(W/2-40,y,W/2+40,y);g.addColorStop(0,P.colIn);g.addColorStop(1,P.colOut);
+  ctx.beginPath();ctx.moveTo(W/2-40*ps,y);ctx.lineTo(W/2+40*ps,y);ctx.strokeStyle=g;ctx.lineWidth=4;ctx.lineCap='round';ctx.stroke();ctx.lineCap='butt';
+  window.__state.ioShare=ps;window.__state.paths=sigs.map(s=>s&&s.length);window.__state.notation=notation();
+}
+
+
+/* =====================================================================
+   FREEDOM & GROUNDING — the human chooses freely; the AI manages
+   alignment and layout, grounding non-local ideas to local reality.
+   (1) AI never edits human layers (it only edits layers with L.ai).
+   (2) AI owns layout: order, spacing, side-view orbit.
+   (3) Ghost suggestions: faint, fading, tap to accept, never blocking.
+   (4) Grounding ring: how connected human structure is to its I/O anchors.
+   ===================================================================== */
+P.snap=true;            // Euclid assists (point/right-angle/dot snaps) — one toggle
+P.ghostLife=7000;       // ms a suggestion lives before fading out
+P.ghostEvery=2500;      // ms between suggestion checks
+P.farDist=150;          // px from any anchor-connected line = "far / non-local"
+let depth=layers.map((_,i)=>i),gapNow=P.layerGap,ghosts=[],ghostLog={accepted:0,declined:0},lastOrbit=0;
+
+/* ---------- EQUATIONS (grounding) ---------- */
+// lines connected (through touching lines) to the input or output anchor
+EQ.grounded=(L,i)=>{const io=ioOf(L,i),seen=new Set(L.lines.filter(l=>touchPt(l,io.i)||touchPt(l,io.o))),q=[...seen];
+  while(q.length){const l=q.shift();L.lines.forEach(m=>{if(!seen.has(m)&&touch(l,m)){seen.add(m);q.push(m)}})}return seen};
+// grounding g ∈ [0,1]: share of human lines connected to anchors; released anchors count half
+EQ.grounding=(L,i)=>{if(!L.lines.length)return 1;const io=ioOf(L,i);return EQ.grounded(L,i).size/L.lines.length*(io.free?.5:1)};
+
+/* ---------- LAYOUT (AI-owned) ---------- */
+// depth replaces raw index: layers are re-ordered so the most similar structures sit adjacent
+function proj(p,i){if(layers[i]&&layers[i].vis===2)return{x:-1e6,y:-1e6};
+  const n=layers.length,d=depth[i]??i,x=p.x-W/2,y=p.y-H_/2,z=-d*gapNow+(n-1)*gapNow/2;
+  const x1=x*Math.cos(yaw)+z*Math.sin(yaw),z1=-x*Math.sin(yaw)+z*Math.cos(yaw),y2=y*Math.cos(tilt)-z1*Math.sin(tilt),sc=tilt>0.05?0.8:1;
+  return{x:W/2+x1*sc,y:H_/2-20+y2*sc}}
+function layoutTick(){
+  while(depth.length<layers.length)depth.push(depth.length);depth.length=layers.length;
+  // greedy chain: human top layer first, then the most similar remaining layer each step
+  const order=[0],left=layers.map((_,i)=>i).slice(1);let sum=0;
+  while(left.length){const last=order[order.length-1];let b=0,bs=-1;left.forEach((k,n)=>{const v=EQ.share(layers[last],layers[k]);if(v>bs){bs=v;b=n}});sum+=Math.max(0,bs);order.push(left.splice(b,1)[0])}
+  order.forEach((k,r)=>depth[k]+=(r-depth[k])*P.layoutRate);
+  const avg=layers.length>1?sum/(layers.length-1):1;gapNow+=((70+90*(1-avg))-gapNow)*P.layoutRate*.6;   // related layers sit closer
+  if(tiltT&&performance.now()-lastOrbit>3000)yaw+=(0.35-yaw)*.02;                        // gentle default orbit
+}
+cv.addEventListener('pointermove',()=>{if(tiltT)lastOrbit=performance.now()});
+
+/* ---------- GHOST SUGGESTIONS ---------- */
+function suggest(){
+  const now=performance.now();ghosts=ghosts.filter(g=>{if(now-g.t>(g.life||P.ghostLife)){ghostLog.declined++;return false}return true});
+  if(ghosts.length>=2)return;
+  layers.forEach((L,i)=>{if(L.ai)return;const io=ioOf(L,i),G=EQ.grounded(L,i);
+    // non-local: a released anchor, or a line not connected and far from anything grounded
+    const far=L.lines.filter(l=>!G.has(l));if(!far.length&&!io.free)return;
+    const pts=[...G].flatMap(l=>[l.a,l.b]).concat(io.free?[]:[io.i,io.o]);if(!pts.length)pts.push(io.i,io.o);
+    let best=null,bd=1e9;far.forEach(l=>[l.a,l.b].forEach(e=>pts.forEach(p=>{const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<bd){bd=d;best={a:{...e},b:{...p}}}})));
+    if(!best&&io.free){const o=L.lines[0];if(o)best={a:{...o.a},b:{...io.i}}}
+    if(best&&bd>4&&!ghosts.some(g=>g.layer===i))ghosts.push({layer:i,line:best,t:now,kind:'path'});
+    // match to a local layer: a ghost parallel to the nearest AI line, through the far line's midpoint
+    const ai=layers.find(x=>x.ai);if(far[0]&&ai&&ai.lines.length&&ghosts.length<2){const f=far[0],m={x:(f.a.x+f.b.x)/2,y:(f.a.y+f.b.y)/2},a=EQ.angle(ai.lines[0]),r=EQ.len(f)/2;
+      if(!EQ.parallel(f,ai.lines[0]))ghosts.push({layer:i,line:{a:{x:m.x-Math.cos(a)*r,y:m.y-Math.sin(a)*r},b:{x:m.x+Math.cos(a)*r,y:m.y+Math.sin(a)*r}},t:now,kind:'match'})}
+  });
+}
+// tap a ghost to accept: it becomes the human's own line (their choice); otherwise it fades
+cv.addEventListener('pointerdown',e=>{if(tiltT)return;const p={x:e.clientX,y:e.clientY};
+  const g=ghosts.find(g=>g.layer===active&&EQ.offset(g.line,{a:p,b:p})<12&&near(p,{x:(g.line.a.x+g.line.b.x)/2,y:(g.line.a.y+g.line.b.y)/2},EQ.len(g.line)/2+10));
+  if(!g)return;e.stopImmediatePropagation();acceptGhost(g)},true);
+
+/* ---------- snap toggle (magnet) ---------- */
+{const b=document.createElement('button');b.className='on';b.innerHTML='<svg viewBox="0 0 24 24"><path d="M6 4v8a6 6 0 0 0 12 0V4M6 8h4M14 8h4"/></svg>';
+ b.onclick=()=>{P.snap=!P.snap;b.classList.toggle('on',P.snap)};document.getElementById('bar').insertBefore(b,bHelp)}
+
+/* ---------- notation / export additions ---------- */
+const notationIO=notation;
+var notationAll=function(){return notationIO().split('\n').map((l,i)=>l+'  ⏚'+EQ.grounding(layers[i],i).toFixed(2)).join('\n')+'\n✓'+ghostLog.accepted+' ✗'+ghostLog.declined};
+exportAll=function(){const data={v:2,layers,notation:notationAll(),names,suggestions:ghostLog,snap:P.snap};const b=new Blob([JSON.stringify(data,null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ariel-thought.json';a.click()};
+
+/* ---------- DRAW ---------- */
+function drawGround(t){
+  drawIO(t);const now=performance.now();
+  ghosts.forEach(g=>{const age=(now-g.t)/(g.life||P.ghostLife),al=Math.max(0,.55*(1-age)),a=proj(g.line.a,g.layer),b=proj(g.line.b,g.layer);
+    ctx.globalAlpha=al;ctx.setLineDash([5,6]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=g.kind==='path'?P.colIn:'#8a93a0';ctx.lineWidth=2.5;ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1});
+  // released anchors kept visible: if off-screen, a small marker at the edge
+  layers.forEach((L,i)=>{if(L.vis===2)return;const io=ioOf(L,i);[['i',P.colIn],['o',P.colOut]].forEach(([w,c])=>{const q=proj(io[w],i);
+    if(q.x<0||q.x>W||q.y<0||q.y>H_){const x=Math.min(W-10,Math.max(10,q.x)),y=Math.min(H_-80,Math.max(10,q.y));ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fillStyle=c;ctx.fill()}})});
+  // grounding ring (bottom-left): arc fraction = grounding of the active human layer
+  const L=layers[active].ai?layers[0]:layers[active],gi=layers.indexOf(L),g=EQ.grounding(L,gi),x=34,y=H_-100;
+  ctx.beginPath();ctx.arc(x,y,14,0,7);ctx.strokeStyle='#5b647222';ctx.lineWidth=4;ctx.stroke();
+  const gr=ctx.createLinearGradient(x-14,y,x+14,y);gr.addColorStop(0,P.colIn);gr.addColorStop(1,P.colOut);
+  ctx.beginPath();ctx.arc(x,y,14,-Math.PI/2,-Math.PI/2+2*Math.PI*g);ctx.strokeStyle=gr;ctx.stroke();
+  ctx.beginPath();ctx.arc(x,y,3,0,7);ctx.fillStyle=g>.99?P.colIn:'#5b647255';ctx.fill();
+  window.__state.grounding=g;window.__state.ghosts=ghosts.length;window.__state.notation=notationAll();
+}
+
+
+/* =====================================================================
+   PATIENCE ANCHOR — the paper's Patience Integral P_t.
+   One calm warm-white point at the grounded base of the stack. Hold it:
+   a slow breath (4 s in, 6 s out) washes non-local structure softly back,
+   threads every free/far structure to its I/O anchors, and returns the view
+   to top. Nothing is deleted; no human shape changes. Release ends it.
+   P_t = ∫ held time dt (persists on this device) → slowly filling ring,
+   and it strengthens grounding suggestions (they live longer, come more often).
+   ===================================================================== */
+P.colPatience='#fbf3e2'; P.colPatienceEdge='#cbbf9f';
+P.breathIn=4000; P.breathOut=6000; P.patienceHalf=120;  // s of P_t for a half-full ring
+let Pt=+localStorage.getItem('ariel-Pt')||0,holding=null,lastPt=0;
+const ghostLife0=P.ghostLife;
+
+/* ---------- EQUATIONS (patience) ---------- */
+// breath b(t) ∈ [0,1]: rises over 4 s (in), falls over 6 s (out)
+EQ.breath=(ms)=>{const c=ms%(P.breathIn+P.breathOut);return c<P.breathIn?.5-.5*Math.cos(Math.PI*c/P.breathIn):.5+.5*Math.cos(Math.PI*(c-P.breathIn)/P.breathOut)};
+// ring fill f = P_t/(P_t + half) — never quite full, always growing
+EQ.patienceFill=(pt)=>pt/(pt+P.patienceHalf);
+
+function patiencePos(){const top={x:W/2,y:H_-112};if(tilt<.05)return top;   // top view: calm spot above the tools
+  const base=layers.reduce((b,_,i)=>depth[i]>depth[b]?i:b,0);return proj({x:W/2,y:H_-140},base)} // side: base of the stack
+function patienceStart(){holding={t0:performance.now()};tiltT=0;bView.classList.remove('on')}
+function patienceEnd(){if(!holding)return;holding=null;localStorage.setItem('ariel-Pt',Pt.toFixed(1))}
+cv.addEventListener('pointerdown',e=>{const q=patiencePos();if(Math.hypot(e.clientX-q.x,e.clientY-q.y)>P.hitR+4)return;
+  e.stopImmediatePropagation();patienceStart()},true);
+addEventListener('pointerup',patienceEnd);addEventListener('pointercancel',patienceEnd);
+// integrate P_t and let it strengthen grounding suggestions
+setInterval(()=>{const now=performance.now();if(holding){Pt+=(now-(lastPt||now))/1000;yaw+=(0-yaw)*.1}lastPt=now;
+  const f=EQ.patienceFill(Pt);P.ghostLife=ghostLife0*(1+2*f)},100);
+setInterval(()=>{if(Pt>0&&EQ.patienceFill(Pt)>.2)suggest()},P.ghostEvery*1.5);  // extra suggestion checks once patient
+
+/* ---------- notation / export ---------- */
+const notationGround=notationAll;
+notationAll=function(){return notationGround()+' ⚓'+Pt.toFixed(0)+'s'};
+const exportGround=exportAll;
+exportAll=function(){const data={v:3,layers,notation:notationAll(),names,suggestions:ghostLog,snap:P.snap,patience:{Pt:+Pt.toFixed(1)}};
+  const b=new Blob([JSON.stringify(data,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ariel-thought.json';a.click()};
+const importGround=importAll;
+importAll=function(f){f.text().then(t=>{const d=JSON.parse(t);if(d.patience)Pt=d.patience.Pt||Pt});importGround(f)};
+
+/* ---------- DRAW ---------- */
+function drawPatience(t){
+  drawGround(t);const q=patiencePos();
+  if(holding){const b=EQ.breath(performance.now()-holding.t0);
+    // soft wash fades everything non-local …
+    ctx.fillStyle='rgba(244,241,236,'+(.25+.3*b)+')';ctx.fillRect(0,0,W,H_);
+    // … then the grounded structure and anchors are redrawn clearly, with threads home
+    layers.forEach((L,i)=>{if(L.ai)return;const io=ioOf(L,i),G=EQ.grounded(L,i);
+      G.forEach(l=>{const a=proj(l.a,i),c=proj(l.b,i);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(c.x,c.y);ctx.strokeStyle=col(i);ctx.lineWidth=2.5;ctx.stroke()});
+      const home=[io.i,io.o];
+      L.lines.filter(l=>!G.has(l)).map(l=>({x:(l.a.x+l.b.x)/2,y:(l.a.y+l.b.y)/2})).concat(io.free?[io.i,io.o]:[]).forEach(p=>{
+        const h=home.reduce((m,x)=>Math.hypot(x.x-p.x,x.y-p.y)<Math.hypot(m.x-p.x,m.y-p.y)?x:m),a=proj(p,i),c=proj(h,i);
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo((a.x+c.x)/2,Math.max(a.y,c.y)+30,c.x,c.y);ctx.strokeStyle='rgba(203,191,159,'+(.3+.5*b)+')';ctx.lineWidth=1.5;ctx.stroke()});
+      [[io.i,P.colIn],[io.o,P.colOut]].forEach(([p,c])=>{const a=proj(p,i);ctx.beginPath();ctx.arc(a.x,a.y,P.anchorR,0,7);ctx.fillStyle=c;ctx.fill()})});
+    // breathing halo
+    ctx.beginPath();ctx.arc(q.x,q.y,16+22*b,0,7);ctx.fillStyle='rgba(251,243,226,.55)';ctx.fill();ctx.strokeStyle=P.colPatienceEdge;ctx.lineWidth=1;ctx.stroke();
+  }
+  // the anchor itself (always visible) + P_t ring
+  ctx.beginPath();ctx.arc(q.x,q.y,10,0,7);ctx.fillStyle=P.colPatience;ctx.fill();ctx.strokeStyle=P.colPatienceEdge;ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.arc(q.x,q.y,15,-Math.PI/2,-Math.PI/2+2*Math.PI*EQ.patienceFill(Pt));ctx.strokeStyle=P.colPatienceEdge;ctx.lineWidth=3;ctx.stroke();
+  window.__state.Pt=Pt;window.__state.notation=notationAll();
+}
+
+
+/* =====================================================================
+   LIVING LANGUAGE — notation, glyph ribbon, lexicon, text panel,
+   LLM-readable export/import.
+   Notation (ratios, never pixels):
+     →I x,y / O→ x,y   input / output anchors (→I~ / O→~ = released)
+     P x,y             point          L x,y x,y        line
+     C x,y r           circle (r = ratio of the short side)
+     W#id x,y s θ      stamp a lexicon word (scale s, rotation θ°)
+     =#id L ..;C ..    a word's definition (unit coordinates)
+     · ∠θ ∥ ⊥ ∈ ×      derived relations (read-only; ignored on parse)
+   Ribbon tokens: P L C ∠θ ∥ ⊥ ∈ × ~ →I O→ ⚓ W#id
+   ===================================================================== */
+P.animMs=420; P.ribbonMax=40; P.lexMax=12;
+const R3=v=>(Math.round(v*1000)/1000).toFixed(3),S=()=>Math.min(W,H_);
+const fx=p=>R3(p.x/W)+','+R3(p.y/H_);
+let LEX=JSON.parse(localStorage.getItem('ariel-lex')||'{}'),LEXL=JSON.parse(localStorage.getItem('ariel-lexlabels')||'{}');
+let sentence=[],stampN=0;
+const saveLex=()=>localStorage.setItem('ariel-lex',JSON.stringify(LEX));
+
+/* ---------- fixed anchors follow the layout (fix: output anchor at the edge) ---------- */
+function placeAnchors(){layers.forEach((L,i)=>{if(!L.io||L.io.free)return;const y=H_/2-20+(i-0.5)*30;
+  L.io.i={x:Math.max(30,W*.14),y};L.io.o={x:Math.min(W-60,W*.80),y}})}
+addEventListener('resize',placeAnchors);let anchorW=0;setInterval(()=>{if(W!==anchorW){anchorW=W;placeAnchors()}},200);   // also catches viewport changes without a resize event
+
+/* ---------- EQUATIONS (language) ---------- */
+EQ.hash=(str)=>{let h=5381;for(const ch of str)h=((h<<5)+h+ch.charCodeAt(0))>>>0;return h.toString(36).padStart(5,'0').slice(-5)};
+// connected line components (≥2 lines) — candidate "phrases"
+EQ.components=(L)=>{const left=new Set(L.lines),out=[];while(left.size){const s0=left.values().next().value,c=[s0];left.delete(s0);
+  for(let k=0;k<c.length;k++)for(const m of [...left])if(touch(c[k],m)){c.push(m);left.delete(m)}if(c.length>1)out.push(c)}return out};
+// similarity-invariant signature of a component
+EQ.sig=(c)=>{const mx=Math.max(...c.map(EQ.len)),X=[];c.forEach((a,i)=>c.forEach((b,j)=>{if(j>i&&EQ.cross(a,b))X.push(Math.round(EQ.angDiff(EQ.angle(a),EQ.angle(b))*18/Math.PI))}));
+  return c.length+'|'+X.sort((a,b)=>a-b).join(',')+'|'+c.map(l=>Math.round(EQ.len(l)/mx*4)).sort().join(',')};
+// normalized prototype: centred, unit size, longest line horizontal
+EQ.proto=(c)=>{const pts=c.flatMap(l=>[l.a,l.b]),cx=pts.reduce((s,p)=>s+p.x,0)/pts.length,cy=pts.reduce((s,p)=>s+p.y,0)/pts.length;
+  const lg=c.reduce((m,l)=>EQ.len(l)>EQ.len(m)?l:m),th=-Math.atan2(lg.b.y-lg.a.y,lg.b.x-lg.a.x),k=Math.max(...pts.map(p=>Math.hypot(p.x-cx,p.y-cy)))||1;
+  const T=p=>{const x=(p.x-cx)/k,y=(p.y-cy)/k;return{x:+(x*Math.cos(th)-y*Math.sin(th)).toFixed(3),y:+(x*Math.sin(th)+y*Math.cos(th)).toFixed(3)}};
+  return c.map(l=>({a:T(l.a),b:T(l.b)}))};
+// invariants of a layer for comparison (export→import test, primer)
+EQ.inv=(L)=>{const g=EQ.graph(L);return{X:g.X.map(x=>x.ang*180/Math.PI).sort((a,b)=>a-b),R:g.ratios.slice().sort(),D:g.deg.slice().sort(),C:g.cont.slice().sort()}};
+EQ.invEq=(a,b)=>['X','R','D','C'].every(k=>a[k].length===b[k].length&&a[k].every((v,i)=>Math.abs(v-b[k][i])<(k==='X'?1.5:k==='R'?.02:.01)));
+
+/* ---------- stamps (lexicon instances) ---------- */
+function stampShapes(st){const w=LEX[st.id];if(!w)return[];const c=Math.cos(st.th*Math.PI/180),sn=Math.sin(st.th*Math.PI/180),k=st.s*S(),cx=st.x*W,cy=st.y*H_;
+  const T=p=>({x:cx+(p.x*c-p.y*sn)*k,y:cy+(p.x*sn+p.y*c)*k});return w.def.map(d=>d.c?{c:T(d.c),r:d.r*k,w:st.uid}:{a:T(d.a),b:T(d.b),w:st.uid})}
+function placeStamp(L,st){L.stamps=L.stamps||[];L.stamps.push(st);stampShapes(st).forEach(sh=>(sh.c?L.circles:L.lines).push(sh))}
+function unstamp(L,st){L.lines=L.lines.filter(l=>l.w!==st.uid);L.circles=L.circles.filter(c=>c.w!==st.uid)}
+function checkStamps(L){(L.stamps||[]).slice().forEach(st=>{const want=stampShapes(st),have=[...L.lines,...L.circles].filter(x=>x.w===st.uid);
+  const same=want.length===have.length&&want.every((w,k)=>{const h=have[k];return w.c?(h.c&&Math.hypot(w.c.x-h.c.x,w.c.y-h.c.y)<.6&&Math.abs(w.r-h.r)<.6):(h.a&&Math.hypot(w.a.x-h.a.x,w.a.y-h.a.y)<.6&&Math.hypot(w.b.x-h.b.x,w.b.y-h.b.y)<.6)});
+  if(!same){have.forEach(h=>delete h.w);L.stamps=L.stamps.filter(x=>x!==st)}})}   // edited by hand → becomes free geometry
+
+/* ---------- geometry → text ---------- */
+function orderedLines(L){return[...L.lines.filter(l=>!l.w),...L.lines.filter(l=>l.w)]}
+function derived(L0){   // computed on text-rounded geometry so text→geometry→text is exactly stable
+  const q=p=>({x:+R3(p.x/W)*W,y:+R3(p.y/H_)*H_}),L={dots:L0.dots.map(q),lines:L0.lines.map(l=>({a:q(l.a),b:q(l.b),w:l.w})),circles:L0.circles.map(c=>({c:q(c.c),r:+R3(c.r/S())*S()}))};
+  const ls=orderedLines(L),out=[];
+  ls.forEach((a,i)=>ls.forEach((b,j)=>{if(j<=i)return;const d=EQ.angDiff(EQ.angle(a),EQ.angle(b));
+    if(EQ.cross(a,b))out.push('∠'+Math.round(d*180/Math.PI)+' L'+(i+1)+'×L'+(j+1));
+    if(d<P.angleTol)out.push('∥ L'+(i+1)+' L'+(j+1));else if(Math.abs(d-Math.PI/2)<P.angleTol)out.push('⊥ L'+(i+1)+' L'+(j+1))}));
+  L.circles.forEach((c,k)=>{L.dots.forEach((d,m)=>{if(EQ.inside(d,c))out.push('∈ P'+(m+1)+' C'+(k+1))});
+    ls.forEach((l,m)=>{if(EQ.inside({x:(l.a.x+l.b.x)/2,y:(l.a.y+l.b.y)/2},c))out.push('∈ L'+(m+1)+' C'+(k+1))})});return out}
+function defText(id){return'=#'+id+' '+LEX[id].def.map(d=>d.c?'C '+R3(d.c.x)+','+R3(d.c.y)+' '+R3(d.r):'L '+R3(d.a.x)+','+R3(d.a.y)+' '+R3(d.b.x)+','+R3(d.b.y)).join(' ; ')}
+function genText0(L,i,withDefs){checkStamps(L);const io=ioOf(L,i),f=io.free?'~':'',o=['→I'+f+' '+fx(io.i),'O→'+f+' '+fx(io.o)];
+  L.dots.forEach(d=>o.push('P '+fx(d)));L.lines.filter(l=>!l.w).forEach(l=>o.push('L '+fx(l.a)+' '+fx(l.b)));
+  L.circles.filter(c=>!c.w).forEach(c=>o.push('C '+fx(c.c)+' '+R3(c.r/S())));
+  (L.stamps||[]).forEach(st=>o.push('W#'+st.id+' '+R3(st.x)+','+R3(st.y)+' '+R3(st.s)+' '+Math.round(st.th)));
+  derived(L).forEach(d=>o.push('· '+d));
+  if(withDefs){const ids=new Set((L.stamps||[]).map(s=>s.id));Object.keys(LEX).slice(0,P.lexMax).forEach(k=>ids.add(k));if(ids.size)o.push('');ids.forEach(id=>LEX[id]&&o.push(defText(id)))}
+  return o.join('\n')}
+
+/* ---------- text → geometry ---------- */
+const N='(-?\\d*\\.?\\d+)',RX={
+  I:new RegExp('^→I(~?)\\s+'+N+','+N+'$'),O:new RegExp('^O→(~?)\\s+'+N+','+N+'$'),P:new RegExp('^P\\s+'+N+','+N+'$'),
+  L:new RegExp('^L\\s+'+N+','+N+'\\s+'+N+','+N+'$'),C:new RegExp('^C\\s+'+N+','+N+'\\s+'+N+'$'),
+  W:new RegExp('^W#(\\w+)\\s+'+N+','+N+'\\s+'+N+'\\s+'+N+'$'),D:/^=#(\w+)\s+(.+)$/};
+function parseDef(body){const out=[];for(const part of body.split(';').map(x=>x.trim()).filter(Boolean)){let m;
+  if(m=part.match(RX.L))out.push({a:{x:+m[1],y:+m[2]},b:{x:+m[3],y:+m[4]}});else if(m=part.match(RX.C))out.push({c:{x:+m[1],y:+m[2]},r:+m[3]});else return null}return out.length?out:null}
+function parseText(text){const m={io:{},dots:[],lines:[],circles:[],stamps:[],defs:{}},bad=[];let ok=0;const ok01=v=>isFinite(v)&&v>-1&&v<2;
+  text.split('\n').forEach((raw,n)=>{const t=raw.trim();if(!t||t[0]==='·'||t[0]==='#')return;let r,good=true;
+    if(r=t.match(RX.I))m.io.i={x:+r[2]*W,y:+r[3]*H_},m.io.free=m.io.free||!!r[1],good=ok01(+r[2])&&ok01(+r[3]);
+    else if(r=t.match(RX.O))m.io.o={x:+r[2]*W,y:+r[3]*H_},m.io.free=m.io.free||!!r[1],good=ok01(+r[2])&&ok01(+r[3]);
+    else if(r=t.match(RX.P))m.dots.push({x:+r[1]*W,y:+r[2]*H_}),good=ok01(+r[1])&&ok01(+r[2]);
+    else if(r=t.match(RX.L))m.lines.push({a:{x:+r[1]*W,y:+r[2]*H_},b:{x:+r[3]*W,y:+r[4]*H_}}),good=[1,2,3,4].every(k=>ok01(+r[k]));
+    else if(r=t.match(RX.C))m.circles.push({c:{x:+r[1]*W,y:+r[2]*H_},r:+r[3]*S()}),good=+r[3]>0&&ok01(+r[1])&&ok01(+r[2]);
+    else if(r=t.match(RX.W))m.stamps.push({id:r[1],x:+r[2],y:+r[3],s:+r[4],th:+r[5]}),good=+r[4]>0;
+    else if(r=t.match(RX.D)){const d=parseDef(r[2]);if(d)m.defs[r[1]]=d;else good=false}
+    else if(t==='░'||t==='∅'||t==='∅+'){m.vis=t==='░'?1:2;m.count=t==='∅+'}
+    else if(r=t.match(/^ℳ(\d*\.?\d+)\s+Δ(\d*\.?\d+)\s+γ(\d*\.?\d+)$/))m.mom={M:+r[1],dRate:+r[2],gamma:+r[3]},good=[1,2,3].every(k=>+r[k]>=0&&+r[k]<=1);
+    else if(r=t.match(/^:(\w+)(?:\s+([^=]*?))?\s*(?:=\s*(.*))?$/))(m.vars=m.vars||[]).push({sym:r[1],name:(r[2]||'').trim(),value:(r[3]||'').trim()});
+    else if(r=t.match(/^⊕\s+(.+)$/))(m.ins=m.ins||[]).push(r[1].trim());
+    else good=false;
+    if(good)ok++;else bad.push(n)});
+  m.stamps=m.stamps.filter(st=>LEX[st.id]||m.defs[st.id]);   // unknown words are ignored (harmless)
+  text.split('\n').forEach((raw,n)=>{const r=raw.trim().match(RX.W);if(r&&!LEX[r[1]]&&!m.defs[r[1]])bad.push(n)});
+  return{m,bad,ok}}
+function applyDefs(defs){Object.entries(defs).forEach(([id,def])=>{const before=LEX[id]?defText(id):'';
+  LEX[id]=LEX[id]||{sig:'',uses:0,seen:0};LEX[id].def=def;if(defText(id)!==before){   // a definition changed → every instance follows
+    layers.forEach(L=>(L.stamps||[]).filter(s=>s.id===id).forEach(st=>{unstamp(L,st);stampShapes(st).forEach(sh=>(sh.c?L.circles:L.lines).push(sh))}))}});saveLex();renderLex()}
+function applyModel(L,i,m,animate){applyDefs(m.defs);const io=ioOf(L,i);if(m.io.i)io.i=m.io.i;if(m.io.o)io.o=m.io.o;io.free=!!m.io.free;
+  const stamps=m.stamps.map(s=>({...s,uid:'s'+(++stampN)})),inst=stamps.flatMap(stampShapes);
+  const to={dots:m.dots,lines:[...m.lines,...inst.filter(x=>x.a)],circles:[...m.circles,...inst.filter(x=>x.c)]};
+  const same=['dots','lines','circles'].every(k=>L[k].length===to[k].length);
+  L.stamps=stamps;
+  // ids follow shapes by order, so a definition follows its shape through text edits
+  ['dots','circles','lines'].forEach(k=>to[k].forEach((sh,n)=>{const old=L[k][n];if(old&&old.id&&!sh.id)sh.id=old.id}));
+  L.vis=m.vis||0;L.count=!!m.count;L.ins=m.ins||[];if(m.mom){P.M=m.mom.M;P.dRate=m.mom.dRate;P.gamma=m.mom.gamma}
+  if(m.vars){const sy=symbolsOf(to);m.vars.forEach(v=>{const t=[...sy.dots,...sy.circles].find(x=>x.sym===v.sym);if(t){if(v.name||v.value)VARS[t.id]={name:v.name,value:v.value};else delete VARS[t.id]}});saveVars()}
+  if(animate&&same){L.anim={from:JSON.parse(JSON.stringify({dots:L.dots,lines:L.lines,circles:L.circles})),to,t0:performance.now()};
+    to.lines.forEach((l,k)=>{if(l.w)L.lines[k].w=l.w;else delete L.lines[k].w});to.circles.forEach((c,k)=>{if(c.w)L.circles[k].w=c.w;else delete L.circles[k].w})}
+  else{L.dots=to.dots;L.lines=to.lines;L.circles=to.circles;delete L.anim}}
+function animTick(){const now=performance.now();layers.forEach(L=>{if(!L.anim)return;const{from,to,t0}=L.anim,k=Math.min(1,(now-t0)/P.animMs),e=k*k*(3-2*k),lp=(a,b)=>a+(b-a)*e;
+  L.dots.forEach((d,n)=>{d.x=lp(from.dots[n].x,to.dots[n].x);d.y=lp(from.dots[n].y,to.dots[n].y)});
+  L.lines.forEach((l,n)=>['a','b'].forEach(p=>{l[p]={x:lp(from.lines[n][p].x,to.lines[n][p].x),y:lp(from.lines[n][p].y,to.lines[n][p].y)}}));
+  L.circles.forEach((c,n)=>{c.c={x:lp(from.circles[n].c.x,to.circles[n].c.x),y:lp(from.circles[n].c.y,to.circles[n].c.y)};c.r=lp(from.circles[n].r,to.circles[n].r)});
+  if(k>=1)delete L.anim})}
+
+/* ---------- glyph ribbon: a sentence log of every gesture (diff-based, read-only) ---------- */
+function snapshot(L,i){const g=EQ.graph(L),ls=L.lines;let per=0,par=0;ls.forEach((a,x)=>ls.forEach((b,y)=>{if(y<=x)return;const d=EQ.angDiff(EQ.angle(a),EQ.angle(b));if(d<P.angleTol)par++;else if(Math.abs(d-Math.PI/2)<P.angleTol)per++}));
+  return{P:L.dots.length,L:L.lines.length,C:L.circles.length,X:g.X.length,per,par,inn:g.cont.reduce((s,v)=>s+v,0),free:ioOf(L,i).free,
+    path:!!EQ.ioPath(L,i),h:EQ.hash(JSON.stringify([L.dots,L.lines.map(l=>[l.a,l.b]),L.circles.map(c=>[c.c,c.r])]))}}
+let prevSnap=[],lastTilde={},prevNL=0,prevHold=null;
+function say(tok,who){sentence.push({t:tok,who,at:Date.now()});if(sentence.length>500)sentence.shift()}
+function logTick(){layers.forEach((L,i)=>{const s=snapshot(L,i),p=prevSnap[i],who=L.ai?'A':'H';prevSnap[i]=s;if(!p)return;let any=false;
+  const d=Math.hypot(W,H_);
+  if(s.P>p.P){say('P',who);any=true}
+  if(s.L>p.L){const l=L.lines[L.lines.length-1];say('L'+(EQ.len(l)/d).toFixed(2).slice(1),who);any=true}
+  if(s.C>p.C){say('C'+(L.circles[L.circles.length-1].r/S()).toFixed(2).slice(1),who);any=true}
+  if(s.X>p.X){say('×',who);any=true}if(s.per>p.per){say('⊥',who);any=true}if(s.par>p.par){say('∥',who);any=true}if(s.inn>p.inn){say('∈',who);any=true}
+  if(s.free!==p.free){say(s.free?'→I~':'→I',who);say(s.free?'O→~':'O→',who);any=true}
+  if(s.path&&!p.path){say('→I',who);say('O→',who);any=true}
+  if(!any&&s.h!==p.h&&Date.now()-(lastTilde[i]||0)>1500){say('~',who);lastTilde[i]=Date.now()}});
+  // shared (non-local) matches between layers
+  const G=layers.map(EQ.graph);let nl=0,ang=0;for(let i=0;i<layers.length;i++)for(let j=i+1;j<layers.length;j++)G[i].X.forEach(x=>G[j].X.forEach(y=>{if(Math.abs(x.ang-y.ang)<P.invAngTol){nl++;ang=x.ang}}));
+  if(nl>prevNL)say('∠'+Math.round(ang*180/Math.PI),'S');prevNL=nl;
+  if(holding&&!prevHold)say('⚓','H');prevHold=holding}
+
+/* ---------- living lexicon ---------- */
+function lexScan(){const seen={};
+  layers.forEach((L,i)=>EQ.components(L).forEach(c=>{const g=EQ.sig(c);(seen[g]=seen[g]||{n:0,h:0,a:0,c}).n++;seen[g][L.ai?'a':'h']++}));
+  // a shared thought also coins a word from the human's largest phrase
+  if(layers[1]&&EQ.share(layers[0],layers[1])>=P.shareAt){const c=EQ.components(layers[0]).sort((a,b)=>b.length-a.length)[0];if(c){const g=EQ.sig(c);seen[g]=seen[g]||{n:1,h:1,a:0,c};seen[g].shared=true}}
+  let changed=false;
+  Object.entries(seen).forEach(([g,v])=>{if(v.n<2&&!(v.h&&v.a)&&!v.shared)return;const id='w'+EQ.hash(g);
+    if(!LEX[id]){LEX[id]={sig:g,def:EQ.proto(v.c),uses:0,seen:0};changed=true;say('W#'+id,'S')}
+    const w=LEX[id];if(v.n>w.seen){w.uses+=v.n-w.seen;changed=true}w.seen=v.n});
+  if(changed){saveLex();renderLex()}}
+function glyph(cv2,def){const g=cv2.getContext('2d');cv2.width=cv2.height=60;g.clearRect(0,0,60,60);g.strokeStyle='#5b6472';g.lineWidth=3;g.lineCap='round';
+  def.forEach(d=>{g.beginPath();if(d.c)g.arc(30+d.c.x*24,30+d.c.y*24,d.r*24,0,7);else{g.moveTo(30+d.a.x*24,30+d.a.y*24);g.lineTo(30+d.b.x*24,30+d.b.y*24)}g.stroke()})}
+function renderLex(){const box=document.getElementById('lex');box.innerHTML='';
+  Object.entries(LEX).sort((a,b)=>b[1].uses-a[1].uses).slice(0,P.lexMax).forEach(([id,w])=>{const c=document.createElement('canvas');glyph(c,w.def);c.title='';
+    c.style.opacity=.55+.45*Math.min(1,w.uses/6);   // use count shown as presence
+    let lp=null;c.onpointerdown=()=>{lp=setTimeout(()=>{lp='done';const v=prompt('',LEXL[id]||'');if(v!==null){LEXL[id]=v;localStorage.setItem('ariel-lexlabels',JSON.stringify(LEXL))}},650)};
+    c.onpointerup=()=>{if(lp==='done')return;clearTimeout(lp);   // tap = re-stamp the word on the selected layer
+      const L=layers[active];placeStamp(L,{id,x:.5,y:.42,s:.16,th:0,uid:'s'+(++stampN)});w.uses++;saveLex();say('W#'+id,L.ai?'A':'H')};
+    box.appendChild(c)})}
+
+/* ---------- text panel ---------- */
+const tp=document.getElementById('tp'),tpa=document.getElementById('tpa'),tpb=document.getElementById('tpb');let lastEdit=0,editTimer=null;
+const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function paintBad(bad){tpb.innerHTML=tpa.value.split('\n').map((l,n)=>bad.includes(n)?'<span class="bad">'+esc(l||' ')+'</span>':esc(l)).join('\n')+'\n'}
+tpa.addEventListener('input',()=>{lastEdit=performance.now();clearTimeout(editTimer);editTimer=setTimeout(()=>{const r=parseText(tpa.value);paintBad(r.bad);
+  if(r.ok)applyModel(layers[active],active,r.m,true)},250)});
+tpa.addEventListener('scroll',()=>{tpb.scrollTop=tpa.scrollTop});
+setInterval(()=>{if(!tp.classList.contains('on')||tab!=='n'||performance.now()-lastEdit<1500||document.activeElement===tpa&&performance.now()-lastEdit<4000)return;
+  const t=genText(layers[active],active,true);if(t!==tpa.value){tpa.value=t;paintBad([])}},300);   // geometry → text
+{const b=document.createElement('button');b.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h10M5 17h12"/></svg>';
+ b.onclick=()=>{tp.classList.toggle('on');b.classList.toggle('on');if(tp.classList.contains('on'))setTab(tab)};
+ document.getElementById('bar').insertBefore(b,bHelp)}
+
+/* ---------- export: JSON + Markdown primer for any LLM ---------- */
+function primer(){const G=layers.map(EQ.graph),deg=r=>Math.round(r*180/Math.PI)+'°',md=[];
+  md.push('# Ariel — a language of lines (primer)','','All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.','',
+  '_Model, not validated science. A wordless thought-sketch shared between a human and an AI._','',
+  '## Notation','Coordinates are ratios of the canvas (0–1). Radii and scales are ratios of the short side. Angles are degrees.','',
+  '| token | meaning |','|---|---|','| `→I x,y` / `O→ x,y` | input / output anchor (`~` after the arrow = consciously released, non-local) |',
+  '| `P x,y` | point |','| `L x1,y1 x2,y2` | line |','| `C x,y r` | circle (its inside is a domain) |',
+  '| `W#id x,y s θ` | stamp a lexicon word at x,y with scale s and rotation θ |','| `=#id L ..; C ..` | definition of a word in unit coordinates |',
+  '| `· ∠θ La×Lb` | derived: two lines cross at angle θ |','| `· ∥` `· ⊥` | derived: parallel / right angle |','| `· ∈ X Ck` | derived: X lies inside circle k |',
+  '| `~` `⚓` | (log only) adjust / patience held |','','Lines beginning with `·` are derived and ignored when read back. Meaning lives in the invariants (angles, ratios, incidence, containment), not in position.','');
+  md.push('## Lexicon','','| word | definition | uses | label |','|---|---|---|---|');
+  Object.entries(LEX).forEach(([id,w])=>md.push('| `#'+id+'` | `'+defText(id).replace(/^=#\w+ /,'')+'` | '+w.uses+' | '+(LEXL[id]||'')+' |'));
+  md.push('','## Layers');
+  layers.forEach((L,i)=>{const g=G[i],p=EQ.pathSig(EQ.ioPath(L,i));
+    md.push('','### Layer '+(i+1)+' ('+(L.ai?'AI':'human')+')','','```ariel',genText(L,i,false),'```','',
+    '- invariant graph: '+L.dots.length+' points, '+L.lines.length+' lines, '+L.circles.length+' circles, '+g.X.length+' crossings',
+    '- crossing angles: '+(g.X.map(x=>deg(x.ang)).join(', ')||'none'),
+    '- length ratios: '+g.ratios.map(r=>r.toFixed(2)).join(', '),'- incidence per line: '+g.deg.join(', ')+'; containment per circle: '+(g.cont.join(', ')||'none'),
+    '- input→output path turns: '+(p?(p.map(deg).join(' → ')||'straight'):'no path')+'; grounding '+EQ.grounding(L,i).toFixed(2)+'; entropy '+EQ.H(EQ.hist(layerAngles(L))).toFixed(2)+' bits')});
+  const M=matches(),nl=[];for(let i=0;i<layers.length;i++)for(let j=i+1;j<layers.length;j++)G[i].X.forEach(x=>G[j].X.forEach(y=>{if(Math.abs(x.ang-y.ang)<P.invAngTol)nl.push('L'+(i+1)+'↔L'+(j+1)+' '+deg(x.ang))}));
+  md.push('','## Matches','- local (same direction): '+(M.lines.map(m=>'L'+(m.i+1)+'↔L'+(m.j+1)+(m.one?' one line':' parallel')).join('; ')||'none'),
+   '- non-local (same crossing angle anywhere): '+(nl.join('; ')||'none'),'- shared thought (layers 1–2): '+EQ.share(layers[0],layers[1]||layers[0]).toFixed(2),
+   '- I/O path similarity: '+EQ.pathShare(EQ.pathSig(EQ.ioPath(layers[0],0)),layers[1]?EQ.pathSig(EQ.ioPath(layers[1],1)):null).toFixed(2)+'; patience P_t '+Pt.toFixed(0)+' s; suggestions ✓'+ghostLog.accepted+' ✗'+ghostLog.declined,
+   '','## Sentence log','(H = human, A = AI, S = shared)','','```',sentence.slice(-200).map(x=>x.who+':'+x.t).join(' '),'```','',
+   '## Reply in this notation','Answer with one fenced ```ariel block containing a single layer (anchors, P/L/C lines, optional W# stamps and =# definitions). Aim to share invariants with Layer 1 — the same crossing angles, length ratios and input→output turns — even if your topic differs. Do not explain in words inside the block.');
+  return md.join('\n')}
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
+exportAll=function(){download('ariel-thought.json',JSON.stringify({v:4,layersText:layers.map((L,i)=>({ai:L.ai,text:genText(L,i,false)})),lexicon:LEX,labels:LEXL,
+  sentence,suggestions:ghostLog,patience:{Pt:+Pt.toFixed(1)},snap:P.snap},null,1),'application/json');download('ariel-primer.md',primer(),'text/markdown')};
+
+/* ---------- import: validate, rebuild as a new layer ---------- */
+function importText(raw){let text=null,defs={};
+  try{const d=JSON.parse(raw);if(d&&Array.isArray(d.layersText)){const h=d.layersText.find(x=>x&&!x.ai&&typeof x.text==='string')||d.layersText[0];text=h&&h.text}
+    if(d&&d.lexicon&&typeof d.lexicon==='object')Object.entries(d.lexicon).forEach(([k,w])=>{if(/^\w+$/.test(k)&&Array.isArray(w.def)&&w.def.every(x=>x&&(x.a||x.c)))defs[k]=w.def})}
+  catch(e){const m=raw.match(/```ariel\n([\s\S]*?)```/);text=m?m[1]:raw;
+    (raw.match(/\| `#(\w+)` \| `([^`]+)`/g)||[]).forEach(row=>{const r=row.match(/`#(\w+)` \| `([^`]+)`/),df=parseDef(r[2]);if(df)defs[r[1]]=df})}
+  if(typeof text!=='string')return false;applyDefs(defs);const r=parseText(text);if(!r.ok||r.bad.length>r.ok||layers.length>=8)return false;
+  const L=mkLayer(false);layers.push(L);const i=layers.length-1;applyModel(L,i,r.m,false);active=i;renderLayers();return true}
+importAll=function(f){f.text().then(t=>{if(!importText(t)){bar.classList.add('shake');setTimeout(()=>bar.classList.remove('shake'),450)}})};
+
+/* ---------- DRAW (ribbon) ---------- */
+function drawLang(t){if(innerWidth!==W||innerHeight!==H_)resize();if(W!==anchorW){anchorW=W;placeAnchors()}animTick();drawPatience(t);
+  const y=H_-78,toks=sentence.slice(-P.ribbonMax);ctx.font='12px ui-monospace,monospace';ctx.textBaseline='middle';
+  let x=W-10;for(let k=toks.length-1;k>=0&&x>60;k--){const tk=toks[k],w=ctx.measureText(tk.t).width;x-=w;
+    ctx.globalAlpha=.35+.65*(k/toks.length);ctx.fillStyle=tk.who==='H'?'#5f84b4':tk.who==='A'?'#b5825f':'#c9a23f';ctx.fillText(tk.t,x,y);x-=8}
+  ctx.globalAlpha=1;ctx.textBaseline='alphabetic'}
+
+
+/* =====================================================================
+   VARIABLES, INTERSECTION DOTS, LAYER CONTROLS, VISIBILITY,
+   MOMENTUM & CHANGE  (paper: M·d²E/dt² + γ·dE/dt = −∇U)
+   ===================================================================== */
+P.M=0.5;            // momentum (inertia): how much AI moves / layout carry through  [0,1]
+P.dRate=0.4;        // change rate: step size & exploration temperature             [0,1]
+P.gamma=0.4;        // damping γ                                                     [0,1]
+P.layoutRate=0.08;  // derived from P.M each tick
+P.vmax=40;          // px/tick velocity clamp (stability guard)
+let VARS=JSON.parse(localStorage.getItem('ariel-vars')||'{}'),varGhosts=[];
+const saveVars=()=>localStorage.setItem('ariel-vars',JSON.stringify(VARS));
+const excluded=(L)=>L.vis===2&&!L.count;   // fully hidden layers are excluded from matching unless counted
+{const g0=EQ.graph,c0=EQ.components;EQ.graph=(L)=>excluded(L)?{X:[],ratios:[],deg:[],cont:[]}:g0(L);EQ.components=(L)=>excluded(L)?[]:c0(L)}
+
+/* ---------- EQUATIONS (variables) ---------- */
+const uid=()=>Math.random().toString(36).slice(2,8);
+function ensureIds(L){L.dots.forEach(d=>d.id=d.id||'d'+uid());L.circles.forEach(c=>c.id=c.id||'c'+uid());L.lines.forEach(l=>l.id=l.id||'l'+uid())}
+const DOTSYM='xyzuvwpqrst',dotSym=n=>n<DOTSYM.length?DOTSYM[n]:'p'+(n-DOTSYM.length+1),cirSym=n=>n<26?String.fromCharCode(65+n):'D'+(n-25);
+// every dot and circle is a variable; every intersection is a derived dot (stable id from its parents)
+function symbolsOf(L){ensureIds(L);const ol=[...L.lines.filter(l=>!l.w),...L.lines.filter(l=>l.w)],lab=sh=>sh.a?'L'+(ol.indexOf(sh)+1):cirSym(L.circles.indexOf(sh));
+  const dots=L.dots.map((d,n)=>({p:d,id:d.id,kind:'P',def:'P'+(n+1)})),X=[];
+  const add=(A,B,pts)=>pts.slice().sort((p,q)=>p.x-q.x||p.y-q.y).forEach((p,k)=>X.push({p,id:'x:'+[A.id,B.id].sort().join('|')+':'+k,kind:'X',def:lab(A)+'×'+lab(B),parents:[A,B]}));
+  ol.forEach((a,i)=>{ol.forEach((b,j)=>{if(j>i){const p=EQ.cross(a,b);if(p)add(a,b,[p])}});L.circles.forEach(c=>{const ps=EQ.lineCircle(a,c);if(ps.length)add(a,c,ps)})});
+  L.circles.forEach((a,i)=>L.circles.forEach((b,j)=>{if(j>i){const ps=EQ.circleCircle(a,b);if(ps.length)add(a,b,ps)}}));
+  const all=[...dots,...X];all.forEach((d,n)=>d.sym=dotSym(n));
+  return{dots:all,circles:L.circles.map((c,n)=>({c,id:c.id,sym:cirSym(n)}))}}
+const nm=(v)=>VARS[v.id]&&VARS[v.id].name||v.sym;
+function relations(L){const sy=symbolsOf(L),out=[];   // x ∈ A, A ∩ B, line x→y
+  sy.dots.forEach(d=>sy.circles.forEach(c=>{if(EQ.inside(d.p,c.c)&&d.kind==='P')out.push({t:'∈',a:d,b:c})}));
+  sy.circles.forEach((a,i)=>sy.circles.forEach((b,j)=>{if(j>i&&Math.hypot(a.c.c.x-b.c.c.x,a.c.c.y-b.c.c.y)<a.c.r+b.c.r)out.push({t:'∩',a,b})}));
+  L.lines.forEach(l=>{const e=k=>sy.dots.find(d=>Math.hypot(d.p.x-l[k].x,d.p.y-l[k].y)<3);const x=e('a'),y=e('b');if(x&&y)out.push({t:'→',a:x,b:y})});return{sy,out}}
+function roundCopy(L){const q=p=>({x:+R3(p.x/W)*W,y:+R3(p.y/H_)*H_}),lines=L.lines.map(l=>({a:q(l.a),b:q(l.b),w:l.w,id:l.id})),
+  circles=L.circles.map(c=>({c:q(c.c),r:+R3(c.r/S())*S(),id:c.id}));return{dots:L.dots.map(d=>({...q(d),id:d.id})),lines,circles}}
+function momText(){return'ℳ'+P.M.toFixed(2)+' Δ'+P.dRate.toFixed(2)+' γ'+P.gamma.toFixed(2)}
+function genText(L,i,withDefs){ensureIds(L);const base=genText0(L,i,false),o=[];
+  if(L.vis)o.push(L.vis===1?'░':L.count?'∅+':'∅');o.push(base);
+  const{sy,out}=relations(roundCopy(L));
+  sy.dots.filter(d=>d.kind==='X').forEach(d=>o.push('· '+d.sym+' = '+d.def));
+  out.forEach(r=>o.push('· '+(r.t==='→'?'line '+r.a.sym+'→'+r.b.sym:r.a.sym+' '+r.t+' '+r.b.sym)));
+  (L.ins||[]).forEach(w=>o.push('⊕ '+w));
+  [...sy.dots,...sy.circles].forEach(v=>{const d=VARS[v.id];if(d)o.push(':'+v.sym+(d.name?' '+d.name:'')+(d.value?' = '+d.value:''))});
+  if(withDefs){o.push(momText());humanText(L,i).forEach(h=>o.push('# '+h));const extra=genText0(L,i,true).slice(base.length);if(extra)o.push(extra.replace(/^\n/,''))}
+  return o.join('\n')}
+
+/* ---------- human words & bag of words ---------- */
+function momWords(){const sp=P.dRate<.33?'slowly':P.dRate<.66?'steadily':'quickly',mo=P.M<.33?'light':P.M<.66?'steady':'heavy',da=P.gamma<.33?'drifting freely':P.gamma<.66?'settling gently':'coming quickly to rest';
+  return'moving '+sp+' with '+mo+' momentum, '+da}
+function humanText(L,i){const{sy,out}=relations(L),t=[];
+  out.forEach(r=>{if(r.t==='∈')t.push(nm(r.a)+' sits inside '+nm(r.b));else if(r.t==='∩')t.push(nm(r.a)+' and '+nm(r.b)+' share a range');else t.push(nm(r.a)+' leads to '+nm(r.b))});
+  sy.dots.filter(d=>d.kind==='X'&&VARS[d.id]).forEach(d=>t.push(nm(d)+' is where '+d.parents.map(p=>{const v=[...sy.dots,...sy.circles].find(x=>x.id===p.id);return v?nm(v):'line '+(L.lines.indexOf(p)+1)}).join(' and ')+' meet'));
+  [...sy.dots,...sy.circles].forEach(v=>{const d=VARS[v.id];if(d&&d.value)t.push(nm(v)+' is '+d.value)});
+  (L.ins||[]).forEach(w=>t.push(w+' was placed into this plane'));
+  if(L.ai||i===0)t.push(momWords());return t}
+function bagOfWords(){const bag={};const inc=k=>bag[k]=(bag[k]||0)+1;
+  layers.forEach((L,i)=>{if(excluded(L))return;const{sy,out}=relations(L);[...sy.dots,...sy.circles].forEach(v=>inc('var:'+(VARS[v.id]?'defined':'undefined')));
+    sy.dots.filter(d=>d.kind==='X').forEach(d=>inc('meets:'+d.def));
+    out.forEach(r=>inc(r.t==='∈'?'contains:'+nm(r.b)+'→'+nm(r.a):r.t==='∩'?'overlap:'+nm(r.a)+'∩'+nm(r.b):'line:'+nm(r.a)+'→'+nm(r.b)));
+    (L.ins||[]).forEach(w=>inc('insert:'+w));inc('layer:'+(L.ai?'ai':'human')+(L.vis===1?':░':L.vis===2?':∅':''))});
+  sentence.forEach(x=>inc('tok:'+x.t.replace(/[\d.]+$/,'')));inc('mom:'+momText());return bag}
+
+/* ---------- define a variable: long-press a dot, circle or intersection ---------- */
+let vpress=null;
+addEventListener('pointerdown',e=>{if(e.target!==cv||tiltT)return;const p={x:e.clientX,y:e.clientY};
+  // accept a shared-definition ghost?
+  const g=varGhosts.find(g=>{const q=proj(g.p,g.layer);return Math.hypot(q.x-p.x,q.y-p.y)<16});
+  if(g){e.stopImmediatePropagation();acceptVarGhost(g);return}
+  const L=layers[active],sy=symbolsOf(L),hit=sy.dots.find(d=>Math.hypot(d.p.x-p.x,d.p.y-p.y)<P.hitR)||sy.circles.find(c=>Math.hypot(c.c.c.x-p.x,c.c.c.y-p.y)<P.hitR||Math.abs(Math.hypot(c.c.c.x-p.x,c.c.c.y-p.y)-c.c.r)<10);
+  if(!hit)return;vpress={x:p.x,y:p.y,t:setTimeout(()=>{clearTimeout(press);drag=null;sdrag=null;vpress=null;defineVar(hit)},650)}},true);
+addEventListener('pointermove',e=>{if(vpress&&Math.hypot(e.clientX-vpress.x,e.clientY-vpress.y)>6){clearTimeout(vpress.t);vpress=null}},true);
+addEventListener('pointerup',()=>{if(vpress){clearTimeout(vpress.t);vpress=null}},true);
+function defineVar(v){const d=VARS[v.id]||{name:'',value:''},r=prompt('',(d.name||'')+(d.value?' = '+d.value:''));if(r===null)return;
+  const [n,...val]=r.split('=');const name=n.trim(),value=val.join('=').trim();if(name||value)VARS[v.id]={name,value};else delete VARS[v.id];saveVars();say(':'+v.sym,layers[active].ai?'A':'H')}
+
+/* ---------- shared-definition suggestions: human defines x → AI's matched dot gets a ghost ---------- */
+function varSuggest(){const now=performance.now();varGhosts=varGhosts.filter(g=>now-g.t<P.ghostLife&&!VARS[g.id]);
+  layers.forEach((H,hi)=>{if(H.ai||excluded(H))return;const hs=symbolsOf(H).dots.filter(d=>VARS[d.id]);if(!hs.length)return;
+    layers.forEach((A,ai)=>{if(!A.ai||excluded(A))return;const as=symbolsOf(A).dots.filter(d=>!VARS[d.id]);
+      hs.forEach(h=>{let m=as.find(a=>Math.hypot(a.p.x-h.p.x,a.p.y-h.p.y)<12);   // local: same place
+        if(!m&&h.kind==='X'&&h.parents.every(p=>p.a)){const ang=EQ.angDiff(EQ.angle(h.parents[0]),EQ.angle(h.parents[1]));   // non-local: same crossing angle
+          m=as.find(a=>a.kind==='X'&&a.parents.every(p=>p.a)&&Math.abs(EQ.angDiff(EQ.angle(a.parents[0]),EQ.angle(a.parents[1]))-ang)<P.invAngTol)}
+        if(m&&!varGhosts.some(g=>g.id===m.id))varGhosts.push({id:m.id,p:{...m.p},layer:ai,def:{...VARS[h.id]},t:now})})})});
+  if(varGhosts.length>4)varGhosts=varGhosts.slice(-4)}
+function acceptVarGhost(g){VARS[g.id]={...g.def};saveVars();varGhosts=varGhosts.filter(x=>x!==g);ghostLog.accepted++;say(':=','S')}
+
+/* ---------- AI on every AI layer, with momentum (semi-implicit, unconditionally stable) ---------- */
+const vel=new Map();
+function ptsOf(L){const a=[];L.lines.forEach(l=>a.push(l.a.x,l.a.y,l.b.x,l.b.y));L.circles.forEach(c=>a.push(c.c.x,c.c.y,c.r));return a}
+function setPts(L,a){let k=0;L.lines.forEach(l=>{l.a={x:a[k++],y:a[k++]};l.b={x:a[k++],y:a[k++]}});L.circles.forEach(c=>{c.c={x:a[k++],y:a[k++]};c.r=Math.max(6,a[k++])})}
+// discrete  M·Δv + γ·v·Δt = F·Δt  →  v ← r·v + (1−r)·F,  r = M/(M+γ)  (0 ≤ r < 1 always)
+EQ.momentum=(v,F)=>{const Me=.05+.95*P.M,ge=.05+1.95*P.gamma,r=Me/(Me+ge);const n=r*v+(1-r)*F;return isFinite(n)?Math.max(-P.vmax,Math.min(P.vmax,n)):0};
+function aiAll(){P.layoutRate=.02+.14*(1-P.M);if(holding)P.M=Math.max(0,P.M-.004);   // patience → toward rest
+  if(!aiOn)return;const hum=layers.map((_,i)=>i).filter(i=>!layers[i].ai&&!excluded(layers[i]));if(!hum.length)return;
+  P.aiNoise=.035*(.3+1.7*P.dRate);P.aiExplore=.04*(.3+1.7*P.dRate);const gain=.3+1.7*P.dRate,saved=layers;
+  saved.forEach((L,k)=>{if(!L.ai||excluded(L))return;const h=hum.reduce((b,i)=>Math.abs((depth[i]??i)-(depth[k]??k))<Math.abs((depth[b]??b)-(depth[k]??k))?i:b,hum[0]);
+    const before=ptsOf(L);layers=[saved[h],L];try{aiTickIO()}finally{layers=saved}
+    const after=ptsOf(L);if(after.length!==before.length){vel.delete(L);return}
+    let v=vel.get(L);if(!v||v.length!==after.length)v=new Array(after.length).fill(0);
+    v=v.map((x,n)=>EQ.momentum(holding?x*.6:x,(after[n]-before[n])*gain));
+    setPts(L,before.map((x,n)=>{const y=x+v[n];return isFinite(y)?Math.max(-W,Math.min(2*W+H_,y)):x}));vel.set(L,v)})}
+
+/* ---------- layer controls: add / remove / reorder / human↔AI / visibility / count ---------- */
+const ico=(d)=>'<svg viewBox="0 0 24 24" width="16" height="16" style="stroke:#5b6472;fill:none;stroke-width:2;stroke-linecap:round"><path d="'+d+'"/></svg>';
+function renderLayers(){const d=document.getElementById('layers');d.innerHTML='';
+  layers.forEach((L,i)=>{const e=document.createElement('div');e.style.borderColor=col(i);e.style.background=L.ai?'transparent':col(i);
+    e.style.borderStyle=L.vis===1?'dashed':L.vis===2?'dotted':'solid';if(L.vis===2)e.style.opacity=.25;e.className=i===active?'on':'';
+    let lp;e.onpointerdown=()=>{lp=setTimeout(()=>{lp='x';L.ai=!L.ai;vel.delete(L);renderLayers()},650)};   // long-press: human ↔ AI
+    e.onpointerup=()=>{if(lp!=='x'){clearTimeout(lp);active=i;renderLayers()}};d.appendChild(e)});
+  const btn=(path,fn,on)=>{const b=document.createElement('span');b.innerHTML=ico(path);b.style.cssText='width:18px;height:18px;cursor:pointer;opacity:'+(on===false?.35:.8);b.onclick=fn;d.appendChild(b)};
+  const L=layers[active];
+  btn('M12 5v14M5 12h14',()=>{if(layers.length<8){layers.push(mkLayer(false));active=layers.length-1;renderLayers()}});
+  btn('M5 12h14',()=>{if(layers.length>1&&layers.filter(x=>!x.ai&&x!==L).length){layers.splice(active,1);depth.splice(active,1);prevSnap=[];ghosts=[];varGhosts=[];active=0;renderLayers()}});
+  btn('M12 19V5M6 11l6-6 6 6',()=>{if(active>0){[layers[active-1],layers[active]]=[layers[active],layers[active-1]];[depth[active-1],depth[active]]=[depth[active],depth[active-1]];active--;prevSnap=[];renderLayers()}});
+  btn('M12 5v14M6 13l6 6 6-6',()=>{if(active<layers.length-1){[layers[active+1],layers[active]]=[layers[active],layers[active+1]];[depth[active+1],depth[active]]=[depth[active],depth[active+1]];active++;prevSnap=[];renderLayers()}});
+  btn(L.vis===2?'M3 12c4-6 14-6 18 0M4 4l16 16':L.vis===1?'M3 12c4-6 14-6 18 0c-4 6-14 6-18 0':'M3 12c4-6 14-6 18 0c-4 6-14 6-18 0zM12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4',
+      ()=>{L.vis=((L.vis||0)+1)%3;renderLayers()});   // visible → hidden lines → fully hidden
+  if(L.vis===2)btn('M8 12h8M12 8v8',()=>{L.count=!L.count;renderLayers()},!!L.count);   // fully hidden: count in matching?
+}
+document.getElementById('layers').style.alignItems='center';
+
+/* ---------- momentum & change dial ---------- */
+const dial=document.createElement('canvas');dial.width=dial.height=144;dial.style.cssText='position:fixed;right:8px;top:116px;width:72px;height:72px;touch-action:none;cursor:pointer';document.body.appendChild(dial);
+function drawDial(){const g=dial.getContext('2d');g.setTransform(2,0,0,2,0,0);g.clearRect(0,0,72,72);
+  g.beginPath();g.arc(36,36,32,0,7);g.strokeStyle='#5b647222';g.lineWidth=5;g.stroke();
+  g.beginPath();g.arc(36,36,32,-Math.PI/2,-Math.PI/2+2*Math.PI*P.gamma);g.strokeStyle='#8a93a0';g.stroke();       // γ ring
+  g.beginPath();g.arc(36,36,24,0,7);g.fillStyle='#fffc';g.fill();g.strokeStyle='#5b647233';g.lineWidth=1;g.stroke();
+  g.beginPath();g.moveTo(14,36);g.lineTo(58,36);g.moveTo(36,14);g.lineTo(36,58);g.strokeStyle='#5b647222';g.stroke();
+  const x=12+P.dRate*48,y=60-P.M*48;g.beginPath();g.arc(x,y,6,0,7);g.fillStyle=holding?'#cbbf9f':'#5b6472';g.fill()}   // knob: → change, ↑ momentum
+let dialMode=null;
+function dialAt(e){const r=dial.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,d=Math.hypot(x-36,y-36);
+  if(dialMode==='ring'||(!dialMode&&d>26)){dialMode='ring';let a=Math.atan2(y-36,x-36)+Math.PI/2;if(a<0)a+=2*Math.PI;P.gamma=Math.min(1,a/(2*Math.PI))}
+  else{dialMode='knob';P.dRate=Math.max(0,Math.min(1,(x-12)/48));P.M=Math.max(0,Math.min(1,(60-y)/48))}}
+dial.onpointerdown=e=>{dialMode=null;dial.setPointerCapture(e.pointerId);dialAt(e)};dial.onpointermove=e=>{if(dialMode)dialAt(e)};dial.onpointerup=()=>{dialMode=null;say(momText(),'H')};
+
+/* ---------- export additions ---------- */
+const exportLang=exportAll;
+exportAll=function(){download('ariel-thought.json',JSON.stringify({v:5,layersText:layers.map((L,i)=>({ai:L.ai,vis:L.vis||0,count:!!L.count,text:genText(L,i,false)})),
+  vars:VARS,bag:bagOfWords(),momentum:{M:P.M,dRate:P.dRate,gamma:P.gamma},human:layers.map((L,i)=>humanText(L,i)),
+  lexicon:LEX,labels:LEXL,sentence,suggestions:ghostLog,patience:{Pt:+Pt.toFixed(1)},snap:P.snap},null,1),'application/json');
+  download('ariel-primer.md',primer()+'\n\n## Variables, words and motion\nEvery dot (x, y, z…), intersection (x = L1×L2) and circle (A, B… = domains) is a variable; `:x name = value` defines one. `░` = hidden-line layer, `∅` = fully hidden (`∅+` = still counted). `ℳ Δ γ` = momentum, change rate, damping.\n\n'+
+   layers.map((L,i)=>'- Layer '+(i+1)+': '+humanText(L,i).join('; ')).join('\n')+'\n\nBag of words: '+Object.entries(bagOfWords()).map(([k,v])=>k+'×'+v).join(', '),'text/markdown')};
+
+/* ---------- DRAW ---------- */
+function drawVars(t){drawLang(t);drawDial();
+  layers.forEach((L,i)=>{if(L.vis===2)return;const{dots,circles}=symbolsOf(L),c=col(i),fade=i===active||tilt>.05?1:.45;ctx.globalAlpha=fade;
+    circles.forEach(v=>{if(VARS[v.id]){ctx.save();ellipse(v.c,i);ctx.fillStyle=c+'22';ctx.fill();ctx.restore()}const q=proj({x:v.c.c.x-v.c.r*.72,y:v.c.c.y-v.c.r*.72},i);
+      ctx.font='italic 10px Georgia,serif';ctx.fillStyle=c;ctx.fillText(v.sym,q.x-8,q.y)});
+    dots.forEach(v=>{const q=proj(v.p,i),def=!!VARS[v.id];ctx.beginPath();ctx.arc(q.x,q.y,v.kind==='X'?3.5:5,0,7);
+      if(def){ctx.fillStyle=c;ctx.fill()}else{ctx.fillStyle='#f4f1ec';ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.stroke()}   // hollow = undefined
+      ctx.font='italic 9px Georgia,serif';ctx.fillStyle=c;ctx.fillText(v.sym,q.x+5,q.y-5)});ctx.globalAlpha=1});
+  // velocity trails on AI layers (E-dot)
+  layers.forEach((L,i)=>{const v=vel.get(L);if(!v||L.vis===2)return;let k=0;ctx.strokeStyle=col(i)+'50';ctx.lineWidth=2;
+    L.lines.forEach(l=>{['a','b'].forEach(e=>{const p=l[e],vx=v[k++],vy=v[k++],a=proj(p,i),b=proj({x:p.x-vx*8,y:p.y-vy*8},i);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()})})});
+  // shared-definition ghosts
+  const now=performance.now();varGhosts.forEach(g=>{const q=proj(g.p,g.layer),al=Math.max(0,.8*(1-(now-g.t)/P.ghostLife));ctx.globalAlpha=al;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.arc(q.x,q.y,10,0,7);ctx.strokeStyle=col(0);ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1})}
+
+
+/* =====================================================================
+   VARIABLE SIDEBAR — candidate words from the bag of words, the human's
+   names and labels, and the AI's topics (+ seed vocabulary). Local only.
+   ===================================================================== */
+P.seedWords=['hope','peace','fear','patience','faith','connection','rumination','anger','sadness','shame','calm','grace','forgiveness','momentum','friction','input','output'];
+P.sideMax=24;
+let selVar=null;   // {layer,id} — a tapped undefined dot/circle waiting for a word
+
+/* ---------- ranking: relevance = (1 + bag frequency) × (1 + cross-layer presence) ---------- */
+function candidates(){const C={};const add=(w,who,f)=>{w=w.trim().toLowerCase();if(!/^[a-z][a-z \-]{1,24}$/.test(w))return;const c=C[w]=C[w]||{w,freq:0,H:0,A:0,layers:new Set()};c.freq+=f;c[who]++};
+  Object.entries(bagOfWords()).filter(([k])=>/^(contains|overlap|line|insert):/.test(k)).forEach(([k,n])=>k.split(/[:→∩×]/).slice(1).forEach(x=>add(x,'H',n*.5)));                // (a) bag
+  layers.forEach((L,i)=>{if(excluded(L))return;const sy=symbolsOf(L);[...sy.dots,...sy.circles].forEach(v=>{const d=VARS[v.id];if(d&&d.name){add(d.name,L.ai?'A':'H',1);C[d.name.toLowerCase()]&&C[d.name.toLowerCase()].layers.add(i)}});
+    (L.ins||[]).forEach(w=>{add(w,L.ai?'A':'H',1);C[w]&&C[w].layers.add(i)})});                                         // (b)+(c) names on shapes
+  Object.values(LEXL).forEach(l=>l&&add(l,'H',1));                                                                       // (b) lexicon labels
+  P.seedWords.forEach(w=>add(w,'A',.5));                                                                                  // (c) AI seed topics
+  const used=new Set(Object.values(VARS).map(d=>(d.name||'').toLowerCase()));
+  return Object.values(C).map(c=>({...c,used:used.has(c.w),who:c.H>=c.A?'H':'A',score:(1+c.freq)*(1+Math.max(0,c.layers.size-1)+(c.H&&c.A?1:0))}))
+    .sort((a,b)=>b.score-a.score||a.w.localeCompare(b.w)).slice(0,P.sideMax)}
+
+/* ---------- insert: assign to the selected undefined variable, or drop a new defined dot / circle ---------- */
+function insertWord(w,kind,at){const L=layers[selVar?selVar.layer:active],li=layers.indexOf(L);
+  if(selVar&&kind!=='circle'||(selVar&&kind==='circle')){const v=[...symbolsOf(L).dots,...symbolsOf(L).circles].find(x=>x.id===selVar.id);
+    if(v&&!VARS[v.id]){VARS[v.id]={name:w,value:''};saveVars();(L.ins=L.ins||[]).push(w);say('⊕'+w,L.ai?'A':'H');selVar=null;renderSide();return v}}
+  const p=at||{x:W/2+(Math.random()-.5)*W*.3,y:H_*.42+(Math.random()-.5)*H_*.2};let sh;
+  if(kind==='circle'){sh={c:p,r:S()*.08,id:'c'+uid()};L.circles.push(sh)}else{sh={x:p.x,y:p.y,id:'d'+uid()};L.dots.push(sh)}
+  VARS[sh.id]={name:w,value:''};saveVars();(L.ins=L.ins||[]).push(w);say('⊕'+w,L.ai?'A':'H');renderSide();return sh}
+
+/* ---------- sidebar UI ---------- */
+const side=document.getElementById('side');
+function renderSide(){if(!side.classList.contains('on'))return;side.innerHTML='';
+  candidates().forEach(c=>{const it=document.createElement('div');it.className='it'+(c.used?' used':'');
+    it.innerHTML='<span class="mk" style="background:'+(c.who==='H'?col(0):col(1))+'"></span><span class="w">'+c.w+'</span><span class="sh" data-k="dot">•</span><span class="sh" data-k="circle">○</span>';
+    let start=null,ghost=null;
+    it.onpointerdown=e=>{start={x:e.clientX,y:e.clientY,k:e.target.dataset.k||'dot'};it.setPointerCapture(e.pointerId)};
+    it.onpointermove=e=>{if(!start)return;if(!ghost&&Math.hypot(e.clientX-start.x,e.clientY-start.y)>10){ghost=document.createElement('div');ghost.textContent=c.w;
+        ghost.style.cssText='position:fixed;pointer-events:none;font:12px system-ui;color:#4d5562;background:#fffc;border-radius:8px;padding:2px 6px;z-index:9';document.body.appendChild(ghost)}
+      if(ghost){ghost.style.left=e.clientX+8+'px';ghost.style.top=e.clientY-10+'px'}};
+    it.onpointerup=e=>{if(!start)return;const k=start.k;start=null;
+      if(ghost){ghost.remove();ghost=null;if(e.clientX<160)return;const p={x:e.clientX,y:e.clientY},L=layers[active],sy=symbolsOf(L);   // drag-drop onto canvas
+        const v=[...sy.dots.filter(d=>Math.hypot(d.p.x-p.x,d.p.y-p.y)<P.hitR),...sy.circles.filter(c2=>Math.hypot(c2.c.c.x-p.x,c2.c.c.y-p.y)<c2.c.r)].find(v=>!VARS[v.id]);
+        if(v)selVar={layer:active,id:v.id};insertWord(c.w,k,p)}
+      else insertWord(c.w,k)};                                              // tap
+    side.appendChild(it)})}
+setInterval(renderSide,2000);
+{const b=document.createElement('button');b.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 6h3M4 12h3M4 18h3M10 6h10M10 12h10M10 18h10"/></svg>';
+ b.onclick=()=>{side.classList.toggle('on');b.classList.toggle('on');renderSide()};document.getElementById('bar').insertBefore(b,document.getElementById('bar').firstChild)}
+// a short tap on an undefined dot/circle selects it as the target for the next word
+let selDown=null;
+addEventListener('pointerdown',e=>{if(e.target!==cv||tiltT)return;selDown={x:e.clientX,y:e.clientY,t:performance.now()}},true);
+addEventListener('pointerup',e=>{if(!selDown||e.target!==cv)return;const d=selDown;selDown=null;if(performance.now()-d.t>400||Math.hypot(e.clientX-d.x,e.clientY-d.y)>6)return;
+  const L=layers[active],sy=symbolsOf(L),v=[...sy.dots.filter(x=>Math.hypot(x.p.x-d.x,x.p.y-d.y)<P.hitR),...sy.circles.filter(c=>Math.hypot(c.c.c.x-d.x,c.c.c.y-d.y)<P.hitR)].find(v=>!VARS[v.id]);
+  selVar=v?{layer:active,id:v.id}:null},true);
+
+/* ---------- export additions ---------- */
+const exportVars=exportAll;
+exportAll=function(){exportVars();download('ariel-candidates.json',JSON.stringify({inserted:layers.map(L=>L.ins||[]),candidates:candidates().map(c=>({word:c.w,score:+c.score.toFixed(2),who:c.who,used:c.used}))},null,1),'application/json')};
+
+function drawSide(t){drawVars(t);if(!selVar)return;const L=layers[selVar.layer];if(!L)return;const sy=symbolsOf(L),v=[...sy.dots.map(d=>({p:d.p,id:d.id})),...sy.circles.map(c=>({p:c.c.c,id:c.id}))].find(x=>x.id===selVar.id);
+  if(!v){selVar=null;return}const q=proj(v.p,selVar.layer);ctx.beginPath();ctx.arc(q.x,q.y,11+2*Math.sin(t/300),0,7);ctx.strokeStyle=col(selVar.layer);ctx.setLineDash([2,3]);ctx.lineWidth=1.5;ctx.stroke();ctx.setLineDash([])}
+
+
+/* =====================================================================
+   SYNTHESIS, CLARIFY, TEXT-PANEL TABS
+   ===================================================================== */
+P.clarifyTol=8*Math.PI/180;   // "almost" parallel / right — suggest exact
+P.clarifyLife=15000;          // clarify ghosts live longer
+let tab='n';
+
+/* ---------- ghost accept (shared by grounding + clarify) ---------- */
+function acceptGhost(g){const L=layers[g.layer];if(!L)return;
+  if(g.replace){const k=L.lines.indexOf(g.replace);if(k>=0){L.lines[k].a={...g.line.a};L.lines[k].b={...g.line.b}}}   // corrected line takes the original's place (id/vars kept)
+  else L.lines.push({a:{...g.line.a},b:{...g.line.b}});
+  ghosts=ghosts.filter(x=>x!==g);ghostLog.accepted++;say(g.kind==='clarify'?'✓':'⊕',L.ai?'A':'H')}
+function acceptAll(){ghosts.filter(g=>g.kind==='clarify'&&g.layer===active).slice().forEach(acceptGhost)}
+
+/* ---------- Clarify thought: suggest exact forms; nothing changes until accepted ---------- */
+function rotTo(l,ang){const mx=(l.a.x+l.b.x)/2,my=(l.a.y+l.b.y)/2,h=EQ.len(l)/2,s=Math.sign(Math.cos(Math.atan2(l.b.y-l.a.y,l.b.x-l.a.x)-ang))||1;
+  return{a:{x:mx-s*Math.cos(ang)*h,y:my-s*Math.sin(ang)*h},b:{x:mx+s*Math.cos(ang)*h,y:my+s*Math.sin(ang)*h}}}
+function clarify(){const L=layers[active],i=active,now=performance.now(),out=[];ghosts=ghosts.filter(g=>g.kind!=='clarify');
+  const done=new Set();
+  L.lines.forEach((a,x)=>L.lines.forEach((b,y)=>{if(y<=x||done.has(b)||done.has(a)&&false)return;const d=EQ.angDiff(EQ.angle(a),EQ.angle(b));
+    if(d>=P.angleTol*.25&&d<P.clarifyTol){out.push({replace:b,line:rotTo(b,EQ.angle(a))});done.add(b);done.add(a)}                         // almost parallel → exactly ∥
+    else if(Math.abs(d-Math.PI/2)>=P.angleTol*.25&&Math.abs(d-Math.PI/2)<P.clarifyTol){out.push({replace:b,line:rotTo(b,EQ.angle(a)+Math.PI/2)});done.add(b);done.add(a)}}));  // almost ⊥ → exactly ⊥
+  // a line that almost reaches a point or anchor → extend to touch it
+  const io=ioOf(L,i),pts=[...L.dots,io.i,io.o];L.lines.forEach(l=>{if(done.has(l))return;['a','b'].forEach(e=>{const p=pts.find(p=>{const d=Math.hypot(p.x-l[e].x,p.y-l[e].y);return d>3&&d<40});
+    if(p&&!done.has(l)){const nl={a:{...l.a},b:{...l.b}};nl[e]={x:p.x,y:p.y};out.push({replace:l,line:nl});done.add(l)}})});
+  out.forEach(o=>ghosts.push({...o,layer:i,t:now,life:P.clarifyLife,kind:'clarify'}));say('?'+out.length,'A');return out.length}
+
+/* ---------- AI synthesis: merge the lower layers into a new AI layer (sources untouched) ---------- */
+function synthesize(){const src=layers.map((L,i)=>i).filter(i=>i>=active&&!excluded(layers[i]));if(layers.length>=8||!src.length)return null;
+  const N=mkLayer(true),cp=p=>({x:p.x,y:p.y});const used=new Set();
+  // 1) local matches (same direction) → one averaged line
+  matches().lines.filter(m=>src.includes(m.i)&&src.includes(m.j)).forEach(m=>{if(used.has(m.l1)||used.has(m.l2))return;used.add(m.l1);used.add(m.l2);
+    const flip=Math.hypot(m.l1.a.x-m.l2.a.x,m.l1.a.y-m.l2.a.y)>Math.hypot(m.l1.a.x-m.l2.b.x,m.l1.a.y-m.l2.b.y),b=flip?{a:m.l2.b,b:m.l2.a}:m.l2;
+    N.lines.push({a:{x:(m.l1.a.x+b.a.x)/2,y:(m.l1.a.y+b.a.y)/2},b:{x:(m.l1.b.x+b.b.x)/2,y:(m.l1.b.y+b.b.y)/2}})});
+  // 2) non-local matches (same crossing angle) → keep the top source's crossing pair
+  const G=src.map(i=>({i,g:EQ.graph(layers[i])}));G.forEach(A=>G.forEach(B=>{if(B.i<=A.i)return;A.g.X.forEach(x=>{if(B.g.X.some(y=>Math.abs(x.ang-y.ang)<P.invAngTol))
+    [x.i,x.j].forEach(k=>{const l=layers[A.i].lines[k];if(!used.has(l)){used.add(l);N.lines.push({a:cp(l.a),b:cp(l.b)})}})})}));
+  // 3) circles with matching ratio → averaged; defined variables carried as named dots
+  matches().circles.filter(m=>src.includes(m.i)&&src.includes(m.j)).forEach(m=>N.circles.push({c:{x:(m.c1.c.x+m.c2.c.x)/2,y:(m.c1.c.y+m.c2.c.y)/2},r:(m.c1.r+m.c2.r)/2}));
+  src.forEach(i=>{const sy=symbolsOf(layers[i]);sy.dots.forEach(d=>{const v=VARS[d.id];if(v&&!N.dots.some(n=>VARS[n.id]&&VARS[n.id].name===v.name)){const n={x:d.p.x,y:d.p.y,id:'d'+uid()};N.dots.push(n);VARS[n.id]={...v}}})});
+  if(!N.lines.length)layers[src[0]].lines.forEach(l=>N.lines.push({a:cp(l.a),b:cp(l.b)}));   // nothing shared yet → start from the top source
+  saveVars();layers.push(N);depth.push(layers.length-1);N.ins=['synthesis'];active=layers.length-1;renderLayers();say('⊕⊕','S');return N}
+
+/* ---------- toolbar: synthesis + clarify, and a floating accept-all ---------- */
+{const bar=document.getElementById('bar'),mk=(d,fn)=>{const b=document.createElement('button');b.innerHTML='<svg viewBox="0 0 24 24"><path d="'+d+'"/></svg>';b.onclick=fn;bar.insertBefore(b,bHelp);return b};
+ mk('M4 15h16M4 19h16M12 3v8M8 7h8',()=>synthesize());                                    // ⊕ of lower layers
+ mk('M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z',()=>clarify())}     // clarify (bulb)
+const acc=document.createElement('button');acc.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" style="stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round"><path d="M5 12l4 4 10-10"/></svg>';
+acc.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:110px;width:44px;height:44px;border:0;border-radius:50%;background:#9bbf9a;box-shadow:0 2px 10px #0002;display:none;cursor:pointer;z-index:4';
+acc.onclick=acceptAll;document.body.appendChild(acc);
+
+/* ---------- text panel tabs: notation · human sentences · bag of words, + bag cosine cue ---------- */
+function bagOf(L,i){const b={},inc=k=>b[k]=(b[k]||0)+1,{sy,out}=relations(L);[...sy.dots,...sy.circles].forEach(v=>{const d=VARS[v.id];if(d&&d.name)inc('name:'+d.name.toLowerCase())});
+  out.forEach(r=>inc(r.t==='∈'?'contains':r.t==='∩'?'overlap':'line'));EQ.graph(L).X.forEach(x=>inc('∠'+Math.round(x.ang*18/Math.PI)*10));(L.ins||[]).forEach(w=>inc('insert:'+w));return b}
+// cosine similarity of two bags: Σab / (|a||b|)
+EQ.cos=(a,b)=>{let d=0,na=0,nb=0;Object.keys({...a,...b}).forEach(k=>{const x=a[k]||0,y=b[k]||0;d+=x*y;na+=x*x;nb+=y*y});return na&&nb?d/Math.sqrt(na*nb):0};
+function bagCos(){const h=layers.findIndex(L=>!L.ai),a=layers.findIndex(L=>L.ai);return h<0||a<0?0:EQ.cos(bagOf(layers[h],h),bagOf(layers[a],a))}
+const tpt=document.getElementById('tpt'),cue=document.createElement('canvas');cue.width=120;cue.height=24;cue.style.cssText='margin-left:auto;width:60px;height:12px';
+[['n','M5 7h14M5 12h10M5 17h12'],['h','M7 7h4v4H7zM7 11c0 3-1 5-3 6M15 7h4v4h-4zM15 11c0 3-1 5-3 6'],['b','M6 8h12l-1 12H7zM9 8a3 3 0 0 1 6 0']].forEach(([k,d])=>{const sp=document.createElement('span');sp.dataset.k=k;
+  sp.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" style="stroke:#5b6472;fill:none;stroke-width:2;stroke-linecap:round"><path d="'+d+'"/></svg>';sp.onclick=()=>setTab(k);tpt.appendChild(sp)});tpt.appendChild(cue);
+function setTab(k){tab=k;[...tpt.children].forEach(c=>c.dataset&&c.classList.toggle('on',c.dataset.k===k));tpa.readOnly=k!=='n';const L=layers[active];
+  tpa.value=k==='n'?genText(L,active,true):k==='h'?humanText(L,active).join('\n'):Object.entries(bagOf(L,active)).sort((a,b)=>b[1]-a[1]).map(([w,n])=>w+' ×'+n).join('\n');paintBad([])}
+function drawCue(){const g=cue.getContext('2d'),c=bagCos();g.clearRect(0,0,120,24);g.fillStyle='#5b647222';g.fillRect(0,9,120,6);
+  const gr=g.createLinearGradient(0,0,120,0);gr.addColorStop(0,col(0));gr.addColorStop(1,col(1));g.fillStyle=gr;g.fillRect(0,9,120*c,6);window.__state.cos=c}
+setTab('n');
+
+function draw(t){drawSide(t);drawCue();acc.style.display=ghosts.some(g=>g.kind==='clarify'&&g.layer===active)?'block':'none'}
+
+/* ===================== LOOP ===================== */
+function resize(){DPR=devicePixelRatio||1;W=innerWidth;H_=innerHeight;cv.width=W*DPR;cv.height=H_*DPR}
+addEventListener('resize',resize);resize();seed();renderLayers();
+setInterval(aiAll,P.aiStepMs);setInterval(varSuggest,1500);setInterval(logTick,300);setInterval(lexScan,1000);placeAnchors();renderLex();setInterval(layoutTick,60);setInterval(suggest,P.ghostEvery);
+(function loop(t){tilt+=(tiltT-tilt)*P.tiltSpeed;draw(t||0);requestAnimationFrame(loop)})();
+// test hook: #side tilts to side view and fast-forwards the AI
+if(location.hash.includes('ff')){const h=layers[0],io=ioOf(h,0),m={x:W/2,y:io.i.y-90};h.lines.push({a:{...io.i},b:{...m}},{a:{...m},b:{...io.o}});layers[1].dots.push({...layers[0].dots[0]});}
+if(location.hash.includes('ff')){for(let i=0;i<400;i++)aiTickIO()}
+if(location.hash.includes('t1'))setTimeout(()=>{const res=[];
+  // 1) text → geometry → text stable (incl. a word stamp + definition)
+  LEX.wtest={sig:'',def:[{a:{x:-1,y:0},b:{x:1,y:0}},{a:{x:0,y:-1},b:{x:0,y:1}}],uses:0,seen:0};
+  layers[0].stamps=[];placeStamp(layers[0],{id:'wtest',x:.3,y:.7,s:.1,th:30,uid:'s'+(++stampN)});
+  const T0=genText(layers[0],0,true),tmp=mkLayer(false);layers.push(tmp);applyModel(tmp,0,parseText(T0).m,false);
+  const T1=genText(tmp,0,true);layers.pop();res.push('roundtrip='+(T0.split('\n').filter(l=>l[0]!=='=').join('\n')===T1.split('\n').filter(l=>l[0]!=='=').join('\n')));
+  // 1b) invalid tokens harmless
+  const bad=parseText('P 0.5,0.5\nZZ 1\nL 0.1,0.1 0.2');res.push('invalid='+JSON.stringify(bad.bad)+'/ok'+bad.ok);
+  // 1c) definition edit updates every instance
+  placeStamp(layers[0],{id:'wtest',x:.6,y:.3,s:.1,th:0,uid:'s'+(++stampN)});applyDefs({wtest:[{a:{x:-1,y:-1},b:{x:1,y:1}}]});
+  res.push('defUpdate='+(layers[0].lines.filter(l=>l.w).length===2&&layers[0].stamps.length===2));
+  // 2) export → import preserves invariants
+  const inv0=EQ.inv(layers[0]),ok=importText(primer());res.push('import='+ok+',inv='+(ok&&EQ.invEq(inv0,EQ.inv(layers[layers.length-1]))));
+  const ok2=importText(JSON.stringify({v:4,layersText:[{ai:false,text:genText(layers[0],0,false)}],lexicon:LEX}));res.push('jsonImport='+ok2+',inv='+EQ.invEq(inv0,EQ.inv(layers[layers.length-1])));
+  res.push('rejectsJunk='+!importText('{"layersText":[{"text":"nonsense"}]}'));
+  // 3) AI never edits human layers (500 steps, with logger + lexicon running)
+  const before=JSON.stringify(layers.filter(L=>!L.ai).map(L=>[L.dots,L.lines,L.circles,L.io]));
+  for(let k=0;k<500;k++){aiTickIO();layoutTick();if(k%10===0){logTick();lexScan()}if(k%50===0)suggest()}
+  res.push('humanSame='+(before===JSON.stringify(layers.filter(L=>!L.ai).map(L=>[L.dots,L.lines,L.circles,L.io]))));
+  res.push('oX='+Math.round(ioOf(layers[0],0).o.x)+'/'+W+',words='+Object.keys(LEX).length+',tokens='+sentence.length);
+  delete LEX.wtest;saveLex();document.title='T:'+res.join(' ')},300);
+if(location.hash.includes('t3'))setTimeout(()=>{const res=[],geo=()=>JSON.stringify(layers.filter(L=>!L.ai).map(L=>[L.dots,L.lines.map(l=>[l.a,l.b]),L.circles.map(c=>[c.c,c.r]),L.io]));
+  const rt=(L)=>{const T0=genText(L,0,true),tmp=mkLayer(false);layers.push(tmp);applyModel(tmp,0,parseText(T0).m,false);const T1=genText(tmp,0,true);layers.pop();return T0===T1};
+  // A) visibility states round-trip byte-identically
+  const L0=layers[0];res.push('vis='+[[0,false],[1,false],[2,false],[2,true]].map(([v,c])=>{L0.vis=v;L0.count=c;return rt(L0)}).join(','));L0.vis=0;L0.count=false;
+  // B) dot variable: defined, notation, survives a text edit, round-trips
+  const sy=symbolsOf(L0),x=sy.dots.find(d=>d.kind==='P');VARS[x.id]={name:'hope',value:'0.7'};let T=genText(L0,0,false);
+  const edited=T.replace(/^P (\S+)/m,(m0,a)=>'P '+(+a.split(',')[0]+.01).toFixed(3)+','+a.split(',')[1]);applyModel(L0,0,parseText(edited).m,false);
+  res.push('dotVar='+(genText(L0,0,false).includes(':x hope = 0.7')&&VARS[L0.dots[0].id]&&L0.dots[0].id===x.id)+',rt='+rt(L0));
+  // C) circle domain
+  const A=symbolsOf(L0).circles[0];VARS[A.id]={name:'peace',value:'[0,1]'};res.push('circleVar='+genText(L0,0,false).includes(':A peace = [0,1]'));
+  // D) intersection dot: auto, definable, stable id, vanishes/returns with crossing
+  const tl=mkLayer(false);layers.push(tl);const ti=layers.length-1;applyModel(tl,ti,parseText('L 0.2,0.5 0.8,0.5\nL 0.5,0.3 0.5,0.7').m,false);
+  let X=symbolsOf(tl).dots.find(d=>d.kind==='X');VARS[X.id]={name:'meeting'};const t1=genText(tl,ti,false);
+  applyModel(tl,ti,parseText('L 0.2,0.5 0.8,0.5\nL 0.5,0.6 0.5,0.9').m,false);const gone=!symbolsOf(tl).dots.some(d=>d.kind==='X');
+  applyModel(tl,ti,parseText('L 0.2,0.5 0.8,0.5\nL 0.55,0.3 0.55,0.7').m,false);const back=symbolsOf(tl).dots.find(d=>d.kind==='X');
+  res.push('xDot='+(t1.includes('· x = L1×L2')&&t1.includes(':x meeting'))+',gone='+gone+',backDefined='+!!(back&&VARS[back.id]));layers.pop();
+  // E) shared-definition ghost on the AI's matched crossing
+  for(let k=0;k<300;k++)aiAll();const hx=symbolsOf(L0).dots.filter(d=>d.kind==='X'&&d.parents.every(p=>p.a));let ok=false;
+  for(const h of hx){VARS[h.id]={name:'joy'};varSuggest();if(varGhosts.length){const g=varGhosts[0];acceptVarGhost(g);ok=VARS[g.id]&&VARS[g.id].name==='joy';break}}res.push('varGhost='+ok);
+  // F) words
+  const bag=bagOfWords();res.push('bag='+!!(bag['var:defined']&&Object.keys(bag).some(k=>k.startsWith('contains:')||k.startsWith('meets:'))));res.push('human="'+humanText(L0,0).slice(0,2).join('; ')+'"');
+  // G) momentum extremes stable, human never moved; 8 layers with an extra AI layer
+  const before=geo();while(layers.length<8){const n=mkLayer(true);n.lines.push({a:{x:100,y:100},b:{x:200,y:180}},{a:{x:120,y:200},b:{x:220,y:90}});layers.push(n)}
+  let stable=true;for(const M of [0,1])for(const d of [0,1])for(const g of [0,1]){P.M=M;P.dRate=d;P.gamma=g;for(let k=0;k<200;k++){aiAll();layoutTick()}
+    layers.forEach(L=>{if(L.ai)ptsOf(L).forEach(v=>{if(!isFinite(v)||Math.abs(v)>4*W+4*H_)stable=false})})}
+  res.push('momentumStable='+stable+',layers='+layers.length+',humanSame='+(before===geo())+',mom="'+momText()+'"');
+  P.M=.5;P.dRate=.4;P.gamma=.4;layers.length=2;depth.length=2;renderLayers();document.title='T3:'+res.join(' ')},400);
+if(location.hash.includes('t4'))setTimeout(()=>{const res=[],L0=layers[0],geo=()=>JSON.stringify(layers.filter(L=>!L.ai).map(L=>[L.dots.map(d=>[d.x,d.y]),L.lines.map(l=>[l.a,l.b]),L.circles.map(c=>[c.c,c.r])]));
+  let c=candidates();res.push('seeds='+P.seedWords.every(w=>c.some(x=>x.w===w)));
+  // human and AI both name something "hope" → it ranks first
+  const hx=symbolsOf(L0).dots[0];VARS[hx.id]={name:'hope',value:''};const ax=symbolsOf(layers[1]).dots[0]||symbolsOf(layers[1]).circles[0];VARS[ax.id]={name:'hope',value:''};
+  c=candidates();res.push('top='+c[0].w+',who='+c[0].who);
+  // assign to selected undefined variable
+  const u=symbolsOf(L0).circles.find(v=>!VARS[v.id]);selVar={layer:0,id:u.id};insertWord('peace','dot');res.push('assign='+(VARS[u.id]&&VARS[u.id].name==='peace'));
+  // drop new dot and circle
+  const nd=insertWord('patience','dot'),nc=insertWord('grace','circle');res.push('new='+(L0.dots.includes(nd)&&L0.circles.includes(nc)));
+  const T=genText(L0,0,true);res.push('notation='+(T.includes('⊕ patience')&&T.includes('⊕ grace')&&/:\w+ grace/.test(T)));
+  const tmp=mkLayer(false);layers.push(tmp);applyModel(tmp,0,parseText(T).m,false);res.push('rt='+(genText(tmp,0,true)===T));layers.pop();
+  res.push('human='+humanText(L0,0).some(h=>h.includes('patience was placed'))+',bag='+!!bagOfWords()['insert:grace']);
+  const before=geo();for(let k=0;k<300;k++)aiAll();res.push('humanSame='+(before===geo()));
+  document.querySelector('#bar button').click();renderSide();res.push('sideItems='+side.children.length);document.title='T4:'+res.join(' ')},400);
+if(location.hash.includes('wordlist'))setTimeout(()=>{side.style.transition='none';document.querySelector('#bar button').click()},1200);
+if(location.hash.includes('t5'))setTimeout(()=>{const res=[],geo=()=>JSON.stringify(layers.map(L=>[L.dots.map(d=>[d.x,d.y]),L.lines.map(l=>[l.a,l.b]),L.circles.map(c=>[c.c,c.r])]));
+  for(let k=0;k<200;k++)aiAll();aiOn=false;
+  // 1) synthesis: sources unchanged, new AI layer
+  active=0;const before=geo(),n0=layers.length,N=synthesize();res.push('synth='+(!!N&&N.ai&&layers.length===n0+1&&N.lines.length>0)+',sourcesSame='+(geo().startsWith(before.slice(0,-1))));
+  // 2) clarify: suggestions only, then accept-all
+  const T=mkLayer(false);layers.push(T);active=layers.length-1;T.lines.push({a:{x:100,y:300},b:{x:300,y:300}},{a:{x:100,y:400},b:{x:300,y:412}},{a:{x:200,y:200},b:{x:212,y:500}});
+  const tb=JSON.stringify(T.lines),nG=clarify();res.push('clarify='+nG+',unchanged='+(tb===JSON.stringify(T.lines)));
+  acceptAll();const par=EQ.angDiff(EQ.angle(T.lines[0]),EQ.angle(T.lines[1]))<1e-6,perp=Math.abs(EQ.angDiff(EQ.angle(T.lines[0]),EQ.angle(T.lines[2]))-Math.PI/2)<1e-6;
+  res.push('acceptAll='+(par&&perp)+',left='+ghosts.filter(g=>g.kind==='clarify').length);layers.pop();active=0;
+  // 3) tabs + cosine
+  tp.classList.add('on');setTab('h');const hs=tpa.value;setTab('b');const bs=tpa.value;setTab('n');const c=bagCos();
+  res.push('tabs='+(hs.length>0&&bs.includes('×')&&tpa.value.startsWith('→I'))+',cos='+c.toFixed(2)+',inRange='+(c>=0&&c<=1));
+  // 4) half-height panel
+  res.push('panelH='+Math.round(tp.getBoundingClientRect().height/innerHeight*100)+'%');tp.classList.remove('on');aiOn=true;document.title='T5:'+res.join(' ')},400);
+if(location.hash.includes('synth'))setTimeout(()=>{for(let k=0;k<150;k++)aiAll();active=0;synthesize();tiltT=P.sideTilt},800);
+if(location.hash.includes('clar'))setTimeout(()=>{active=0;layers[0].lines.push({a:{x:W*.25,y:H_*.68},b:{x:W*.7,y:H_*.65}});clarify()},800);
+if(location.hash.includes('text'))setTimeout(()=>{document.querySelector('#bar button:nth-last-child(2)').click()},1500);
+if(location.hash.includes('pat')){ioOf(layers[0],0).free=true;layers[0].lines.push({a:{x:60,y:600},b:{x:160,y:640}});tiltT=tilt=P.sideTilt;
+  const before=JSON.stringify(layers.filter(L=>!L.ai));patienceStart();
+  setTimeout(()=>{const mid=JSON.stringify(layers.filter(L=>!L.ai))===before;window.__pat='held:tiltT='+tiltT+',same='+mid+',Pt='+Pt.toFixed(1);patienceEnd()},3000);}
+if(location.hash.includes('inv')){const before=JSON.stringify(layers.filter(L=>!L.ai));for(let k=0;k<500;k++){aiTickIO();layoutTick();if(k%50===0)suggest()}
+  document.title='INV:'+(before===JSON.stringify(layers.filter(L=>!L.ai))?'SAME':'CHANGED')}
+if(location.hash.includes('side')){tiltT=tilt=P.sideTilt;yaw=.35;bView.classList.add('on')}
+</script></body></html>

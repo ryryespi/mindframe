@@ -151,6 +151,7 @@
       "wi_title": "Where ideas come from", // #wi-title
       "wi_math": "Show the math", // #wi-math
       "p.a_model_built_from": "A model built from design assumptions and informed by research, not validated science and not a diagnosis.", // <p>
+      "a.project_ariel": "Project Ariel", // <a>
       "attr.aria_label.your_companion_open": "Your companion. Open", // aria-label
       "attr.aria_label.how_to_begin": "How to begin", // aria-label
       "attr.placeholder.what_s_on_your": "What's on your mind?", // placeholder
