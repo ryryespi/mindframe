@@ -235,4 +235,27 @@ test("environment: a blank layer is AI-dominant until the human takes the first 
   assert.equal(CAD.differsFrom("AB", "AB"), null);
 });
 
+test("doubt is resistance ρ: γ_eff = γ + ρ, and the circle is undoable", () => {
+  assert.equal(CAD.effectiveGamma(0.4, 0), 0.4);
+  assert.equal(CAD.effectiveGamma(0.4, 0.25), 0.65);
+  assert.equal(CAD.rhoOf(-1), 0);
+  assert.equal(CAD.rhoOf(2), 1);
+  const before = CAD.emptyModel();
+  const line = "◌O(0.500,0.500,ρ=0.250)";
+  const applied = CAD.applyMath(before, line);
+  assert.equal(applied.ok, true);
+  assert.equal(applied.model.doubts.length, 1);
+  assert.equal(applied.model.doubts[0].rho, 0.25);
+  const shown = CAD.mathLine(applied.model);
+  assert.match(shown, /◌O\(0\.500,0\.500,ρ=0\.250\)/);
+  assert.match(CAD.mathLatex(applied.model), /\\rho_\{O\}=0\.250/);
+  const words = CAD.explainModel(applied.model, { domain: "custom" }).join(" ");
+  assert.match(words, /γ \+ ρ/);
+  assert.match(words, /stay/);
+  const h = CAD.History();
+  assert.equal(h.push(before, applied.model, "doubt"), true);
+  assert.equal(h.undo().doubts.length, 0);
+  assert.equal(h.redo().doubts[0].rho, 0.25);
+});
+
 console.log(`\n${passed} passed`);

@@ -25,6 +25,7 @@ Ryan Espinosa\\[2pt]
 \begin{itemize}[leftmargin=1.2em]
 \item \textbf{v1.0 (November 2026).} First concept paper: layers, the master equation, Reanchoring, a pilot sketch, and the related literatures.
 \item \textbf{v1.1 (1 November 2026).} Drafting interface (ribbon, command line, undo, one-line math). The Nonsense Layer as a locked origin and freeform layers for any field. Domain language that renames and does not move shapes. Postulates P1--P4, stated as postulates. Citation check. Eureka Log, open questions, and a proposal for further study.
+\item \textbf{v1.2 (1 November 2026).} Circle of Doubt as a resistance variable \(\rho\): inside that circle, \(\gamma_{\mathrm{eff}}=\gamma+\rho\).
 \end{itemize}
 
 \section*{Abstract}
@@ -119,6 +120,12 @@ The screen is modelled on a simple CAD ribbon, not on a clinic form. Draw holds 
 \textbf{One math line.} Euclid's relations are also one line of ordinary Unicode: points $A(x,y)$; segment $AB$ with an overline; $\angle ABC = 37^\circ$; $AB \parallel CD$; $AB \perp CD$; circle $\odot O(r=0.2)$; $P \in AB$; $X = AB \cap CD$; $\odot O \subset \odot P$; a range $h \in [0.2,0.8]$; and the anchor flow $I \to O$. The Math tab copies that line and exports the same sentence in LaTeX (\texttt{\textbackslash overleftrightarrow}, \texttt{\textbackslash angle}, \texttt{\textbackslash parallel}, \texttt{\textbackslash perp}, \texttt{\textbackslash odot}, \texttt{\textbackslash in}, \texttt{\textbackslash cap}, \texttt{\textbackslash subset}). Typing the line on the command line creates or moves shapes where the line can be read, and that edit is undoable. The Nonsense Layer refuses the edit.
 
 \textbf{Field language, not a new geometry.} When a layer has a field, the plain-English tab, the glossary, the help text, and the prompt use that field's words. In physics a line is a vector or trajectory, a circle a field or range, an intersection an interaction. In music a line is a melodic line, parallel is parallel motion, a circle a key or tonal center. In psychology a line is a thought path and a circle a belief boundary. Theology, math, and a custom map work the same way. The person's own names and defined variables are included. A Terms toggle returns the canonical words. The marks on the canvas do not change. Relabeling is not acceptance of the person's absolute truth, and it is not an edit of their shapes.
+
+\textbf{Circle of Doubt.} A doubt mark is only a resistance variable, \(\rho\). It is a circle the person draws and resizes. The radius, as a fraction of the short side and capped at 1, \emph{is} \(\rho\). Ideas inside that circle meet extra damping. Shapes are not removed.
+\begin{equation}
+\gamma_{\mathrm{eff}}=\gamma+\rho
+\end{equation}
+Outside every doubt circle, \(\rho=0\) and the old damping stands. The math line writes a dashed circle with \(\rho\); the LaTeX export writes \(\rho_{O}\).
 
 \textbf{Alignment.} Gold matching still shows shared direction and shared crossings. The plain-English tab, the Math glossary, and the exported prompt each say how the active layer sits against the Nonsense Layer (how many parallels, how many right angles), in that field's words.
 

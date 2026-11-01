@@ -57,7 +57,7 @@
   const ribbon = document.createElement("header");
   ribbon.id = "ribbon";
   const groups = [
-    ["Draw", [["point", "Point"], ["line", "Line"], ["circle", "Circle"]]],
+    ["Draw", [["point", "Point"], ["line", "Line"], ["circle", "Circle"], ["doubt", "Doubt"]]],
     ["Modify", [["move", "Move"], ["select", "Select"], ["erase", "Delete"], ["undo", "Undo"], ["redo", "Redo"]]],
     ["Anchors", [["snap", "Snap"], ["ortho", "Ortho"], ["view", "Side"]]],
     ["AI", [["ai", "Pause"], ["merge", "Merge"], ["clarify", "Clarify"]]],
@@ -168,7 +168,11 @@
       const b = sy.dots.find(d => d.kind === "P" && nearP(d.p, l.b));
       if (a && b && nm(a) !== nm(b)) m.segments.push({ a: nm(a), b: nm(b) });
     });
-    sy.circles.forEach(c => m.circles.push({ name: nm(c), x: c.c.c.x / W, y: c.c.c.y / H_, r: c.c.r / S(), id: c.id }));
+    sy.circles.forEach(c => {
+      const item = { name: nm(c), x: c.c.c.x / W, y: c.c.c.y / H_, r: c.c.r / S(), id: c.id };
+      if (c.c.doubt) { item.rho = CAD.rhoOf(item.r); m.doubts.push(item); }
+      else m.circles.push(item);
+    });
     const io = ioOf(L, layers.indexOf(L));
     m.anchors = { i: { x: io.i.x / W, y: io.i.y / H_ }, o: { x: io.o.x / W, y: io.o.y / H_ } };
     [...sy.dots, ...sy.circles].forEach(v => {
@@ -257,6 +261,14 @@
       if (ex) { ex.c.c.x = c.x * W; ex.c.c.y = c.y * H_; ex.c.r = Math.max(8, c.r * S()); }
       else L.circles.push({ c: { x: c.x * W, y: c.y * H_ }, r: Math.max(8, c.r * S()), id: "c" + uid() });
     });
+    (m.doubts || []).forEach(c => {
+      if (c.x == null) return;
+      const sy = symbolsOf(L);
+      const ex = sy.circles.find(v => v.c.doubt && (v.sym === c.name || (VARS[v.id] && VARS[v.id].name) === c.name));
+      const rho = CAD.rhoOf(c.rho != null ? c.rho : c.r);
+      if (ex) { ex.c.c.x = c.x * W; ex.c.c.y = c.y * H_; ex.c.r = Math.max(8, rho * S()); ex.c.doubt = true; }
+      else L.circles.push({ c: { x: c.x * W, y: c.y * H_ }, r: Math.max(8, rho * S()), doubt: true, id: "c" + uid() });
+    });
     m.vars.forEach(v => { const d = dotByName(L, v.name); if (d) VARS[d.id] = { name: v.name, value: v.value }; });
     m.ranges.forEach(r => { const d = dotByName(L, r.name); if (d) VARS[d.id] = { name: r.name, value: "[" + r.lo + ", " + r.hi + "]" }; });
     saveVars();
@@ -310,7 +322,7 @@
     return el;
   }
   function runCad(id) {
-    if (id === "point" || id === "line" || id === "circle") { clickTool(id === "point" ? "dot" : id); note(id.toUpperCase()); return; }
+    if (id === "point" || id === "line" || id === "circle" || id === "doubt") { clickTool(id === "point" ? "dot" : id); note(id === "doubt" ? "DOUBT ρ" : id.toUpperCase()); return; }
     if (id === "move" || id === "select") { tool = id; mark(); note(id.toUpperCase()); return; }
     if (id === "erase") { cadErase(); return; }
     if (id === "undo") { doUndo(); return; }
@@ -577,7 +589,16 @@
     if (!echo.textContent) echo.textContent = tail;
   }
   const drawCore = draw;
-  draw = function (t) { drawCore(t); paintStatus(); if (sel && layers[sel.layer]) highlight(); };
+  draw = function (t) {
+    drawCore(t);
+    layers.forEach((L, i) => (L.circles || []).forEach(c => {
+      if (!c.doubt || typeof ellipse !== "function") return;
+      ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = "#9aa3ad"; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.9;
+      ellipse(c, i); ctx.stroke(); ctx.restore();
+    }));
+    paintStatus();
+    if (sel && layers[sel.layer]) highlight();
+  };
   function highlight() {
     const L = layers[sel.layer]; if (!L) return;
     ensureIds(L);
@@ -603,6 +624,7 @@
       + "<h2>Quick start</h2><p>Layer 1 is the Nonsense Layer, a locked picture of the thought model (input, output, patience, momentum, entropy). Draw on any other layer. Name it and choose a field. The field only changes the words, never the shapes.</p>"
       + "<h2>Commands</h2><p>POINT LINE CIRCLE MOVE SELECT ERASE UNDO REDO LAYER n SNAP ORTHO MERGE CLARIFY LOCK EXPORT HELP MATH, or paste one math line.</p>"
       + "<h2>Math</h2><p>One line, for example A(0.2,0.5), B(0.8,0.5); AB̅; ∠ABC = 90°; AB ∥ CD; ⊙O(r=0.2); P ∈ AB; X = AB ∩ CD; h ∈ [0.2, 0.8]; I(0.14,0.42) → O(0.80,0.42). The Math tab copies it and exports LaTeX. Typing it edits the active layer and can be undone.</p>"
+      + "<p>Doubt is a resistance circle ◌. Its radius is ρ, and inside it damping is γ + ρ. Drag the rim to change it. Undo puts it back. Shapes inside stay.</p>"
       + "<h2>This layer's words</h2>";
     const glossP = document.createElement("p");
     glossP.textContent = g;

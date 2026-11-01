@@ -139,7 +139,18 @@
   const LINECH = "\u2194";
   function r3(n) { return (Math.round(Number(n) * 1000) / 1000).toFixed(3); }
   function emptyModel() {
-    return { anchors: null, points: [], segments: [], lines: [], circles: [], angles: [], parallels: [], perps: [], members: [], cuts: [], subsets: [], ranges: [], vars: [] };
+    return { anchors: null, points: [], segments: [], lines: [], circles: [], doubts: [], angles: [], parallels: [], perps: [], members: [], cuts: [], subsets: [], ranges: [], vars: [] };
+  }
+  /** Resistance ρ from a radius ratio. 0 is no extra damping; 1 is the full short side. */
+  function rhoOf(r) {
+    const n = Number(r);
+    if (!isFinite(n) || n <= 0) return 0;
+    return Math.min(1, n);
+  }
+  /** Inside a doubt circle, γ_eff = γ + ρ. */
+  function effectiveGamma(gamma, rho) {
+    const g = Math.max(0, Number(gamma) || 0);
+    return g + rhoOf(rho);
   }
   function byName(list, name) { return (list || []).find(p => p.name === name); }
   function pairTok(a, b, infinite) {
@@ -166,6 +177,7 @@
     (m.parallels || []).forEach(p => bits.push(p[0].a + p[0].b + " ∥ " + p[1].a + p[1].b));
     (m.perps || []).forEach(p => bits.push(p[0].a + p[0].b + " ⊥ " + p[1].a + p[1].b));
     (m.circles || []).forEach(c => bits.push("⊙" + c.name + "(" + (c.x == null ? "" : r3(c.x) + "," + r3(c.y) + ",") + "r=" + r3(c.r) + ")"));
+    (m.doubts || []).forEach(c => bits.push("◌" + c.name + "(" + (c.x == null ? "" : r3(c.x) + "," + r3(c.y) + ",") + "ρ=" + r3(c.rho != null ? c.rho : rhoOf(c.r)) + ")"));
     (m.members || []).forEach(x => bits.push(x.p + " ∈ " + x.a + x.b));
     (m.cuts || []).forEach(x => bits.push(x.name + " = " + x.a + x.b + " ∩ " + x.c + x.d));
     (m.subsets || []).forEach(x => bits.push("⊙" + x.inner + " ⊂ ⊙" + x.outer));
@@ -189,6 +201,7 @@
     (m.parallels || []).forEach(p => bits.push(p[0].a + p[0].b + " \\parallel " + p[1].a + p[1].b));
     (m.perps || []).forEach(p => bits.push(p[0].a + p[0].b + " \\perp " + p[1].a + p[1].b));
     (m.circles || []).forEach(c => bits.push("\\odot " + c.name + "(" + (c.x == null ? "" : r3(c.x) + "," + r3(c.y) + ",") + "r=" + r3(c.r) + ")"));
+    (m.doubts || []).forEach(c => bits.push("\\rho_{" + c.name + "}=" + r3(c.rho != null ? c.rho : rhoOf(c.r))));
     (m.members || []).forEach(x => bits.push(x.p + " \\in " + x.a + x.b));
     (m.cuts || []).forEach(x => bits.push(x.name + " = " + x.a + x.b + " \\cap " + x.c + x.d));
     (m.subsets || []).forEach(x => bits.push("\\odot " + x.inner + " \\subset \\odot " + x.outer));
@@ -317,7 +330,7 @@
    */
   function applyMath(model, text) {
     const m = clone(model || emptyModel());
-    ["points", "segments", "lines", "circles", "angles", "parallels", "perps", "members", "cuts", "subsets", "ranges", "vars"].forEach(k => { if (!m[k]) m[k] = []; });
+    ["points", "segments", "lines", "circles", "doubts", "angles", "parallels", "perps", "members", "cuts", "subsets", "ranges", "vars"].forEach(k => { if (!m[k]) m[k] = []; });
     const src = String(text || "").replace(/\s+/g, " ").trim();
     if (!src) return { ok: false, model: m, applied: 0 };
     let applied = 0;
@@ -330,6 +343,7 @@
     const parRe = new RegExp("^([A-Za-z])([A-Za-z])\\s*(?:∥|\\|\\|)\\s*([A-Za-z])([A-Za-z])$");
     const perRe = new RegExp("^([A-Za-z])([A-Za-z])\\s*(?:⊥|perp)\\s*([A-Za-z])([A-Za-z])$");
     const cirRe = new RegExp("^⊙\\s*([A-Za-z][\\w]*)\\s*\\(\\s*(?:(" + NUM + ")\\s*,\\s*(" + NUM + ")\\s*,\\s*)?r\\s*=\\s*(" + NUM + ")\\s*\\)$");
+    const doubtRe = new RegExp("^◌\\s*([A-Za-z][\\w]*)\\s*\\(\\s*(?:(" + NUM + ")\\s*,\\s*(" + NUM + ")\\s*,\\s*)?ρ\\s*=\\s*(" + NUM + ")\\s*\\)$");
     const memRe = /^([A-Za-z][\w]*)\s*(?:∈|in)\s*([A-Za-z])([A-Za-z])$/;
     const cutRe = /^([A-Za-z][\w]*)\s*=\s*([A-Za-z])([A-Za-z])\s*(?:∩|cap)\s*([A-Za-z])([A-Za-z])$/;
     const subRe = /^⊙\s*([A-Za-z][\w]*)\s*(?:⊂|subset)\s*⊙\s*([A-Za-z][\w]*)$/;
@@ -355,6 +369,13 @@
           applied++;
         }
         return;
+      }
+      if (mm = clause.match(doubtRe)) {
+        const name = mm[1], x = mm[2] == null ? null : +mm[2], y = mm[3] == null ? null : +mm[3], rho = rhoOf(mm[4]);
+        let c = (m.doubts || []).find(d => d.name === name);
+        if (!c) { c = { name, x, y, r: rho, rho }; m.doubts.push(c); }
+        else { if (x != null) { c.x = x; c.y = y; } c.r = rho; c.rho = rho; }
+        applied++; return;
       }
       if (mm = clause.match(cirRe)) {
         const name = mm[1], x = mm[2] == null ? null : +mm[2], y = mm[3] == null ? null : +mm[3], r = +mm[4];
@@ -485,6 +506,7 @@
     else lines.push("In " + label + ", a line is a " + t.line + ", a circle is a " + t.circle + ", and an intersection is a " + t.intersection + ".");
     const names = (o.names || []).filter(Boolean);
     if (names.length) lines.push("Your words here: " + names.join(", ") + ".");
+    if ((model && model.doubts || []).length) lines.push("Inside a doubt circle, damping is γ + ρ. A larger radius is more resistance. The shapes inside stay.");
     if (o.alignment) lines.push(o.alignment);
     lines.push("The drawing itself is unchanged.");
     if (JSON.stringify(model || {}) !== before) throw new Error("explainModel mutated the model");
@@ -586,7 +608,7 @@
 
   return {
     clone, History, deleteShape, buildPrompt, parseCommand, STYLES: Object.keys(STYLES),
-    emptyModel, mathLine, mathLatex, deriveRelations, applyMath,
+    emptyModel, mathLine, mathLatex, deriveRelations, applyMath, rhoOf, effectiveGamma,
     CANON, DOMAINS, NONSENSE_NAME, domainWords, termsFor, glossary, explainModel, sealLayers, alignToNonsense,
     establishSelf, environmentOf, demonstrateEnvironment, differsFrom
   };

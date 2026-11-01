@@ -245,6 +245,7 @@ cv.addEventListener('pointerdown',e=>{const p={x:e.clientX,y:e.clientY};downP=p;
   if(tool==='dot')L.dots.push(p);
   else if(tool==='line'){const l={a:{...p},b:{x:p.x+1,y:p.y}};L.lines.push(l);drag={k:l,part:'b',last:p}}
   else if(tool==='circle'){const c={c:{...p},r:1};L.circles.push(c);drag={k:c,part:'r',last:p}}
+  else if(tool==='doubt'){const c={c:{...p},r:1,doubt:true};L.circles.push(c);drag={k:c,part:'r',last:p}}
 });
 cv.addEventListener('pointermove',e=>{const p={x:e.clientX,y:e.clientY};
   if(orbit!==null){yaw+=(p.x-orbit)*.008;orbit=p.x;return}
@@ -753,7 +754,7 @@ function derived(L0){   // computed on text-rounded geometry so text→geometry�
 function defText(id){return'=#'+id+' '+LEX[id].def.map(d=>d.c?'C '+R3(d.c.x)+','+R3(d.c.y)+' '+R3(d.r):'L '+R3(d.a.x)+','+R3(d.a.y)+' '+R3(d.b.x)+','+R3(d.b.y)).join(' ; ')}
 function genText0(L,i,withDefs){checkStamps(L);const io=ioOf(L,i),f=io.free?'~':'',o=['→I'+f+' '+fx(io.i),'O→'+f+' '+fx(io.o)];
   L.dots.forEach(d=>o.push('P '+fx(d)));L.lines.filter(l=>!l.w).forEach(l=>o.push('L '+fx(l.a)+' '+fx(l.b)));
-  L.circles.filter(c=>!c.w).forEach(c=>o.push('C '+fx(c.c)+' '+R3(c.r/S())));
+  L.circles.filter(c=>!c.w&&!c.doubt).forEach(c=>o.push('C '+fx(c.c)+' '+R3(c.r/S())));
   (L.stamps||[]).forEach(st=>o.push('W#'+st.id+' '+R3(st.x)+','+R3(st.y)+' '+R3(st.s)+' '+Math.round(st.th)));
   derived(L).forEach(d=>o.push('· '+d));
   if(withDefs){const ids=new Set((L.stamps||[]).map(s=>s.id));Object.keys(LEX).slice(0,P.lexMax).forEach(k=>ids.add(k));if(ids.size)o.push('');ids.forEach(id=>LEX[id]&&o.push(defText(id)))}
@@ -773,6 +774,7 @@ function parseText(text){const m={io:{},dots:[],lines:[],circles:[],stamps:[],de
     else if(r=t.match(RX.P))m.dots.push({x:+r[1]*W,y:+r[2]*H_}),good=ok01(+r[1])&&ok01(+r[2]);
     else if(r=t.match(RX.L))m.lines.push({a:{x:+r[1]*W,y:+r[2]*H_},b:{x:+r[3]*W,y:+r[4]*H_}}),good=[1,2,3,4].every(k=>ok01(+r[k]));
     else if(r=t.match(RX.C))m.circles.push({c:{x:+r[1]*W,y:+r[2]*H_},r:+r[3]*S()}),good=+r[3]>0&&ok01(+r[1])&&ok01(+r[2]);
+    else if(r=t.match(/^◌(\w+)\s+ρ=(\d*\.?\d+)$/)){const rho=Math.max(0,Math.min(1,+r[2]));m.circles.push({c:{x:W/2,y:H_/2},r:rho*S(),doubt:true,sym:r[1]}),good=rho>=0;}
     else if(r=t.match(RX.W))m.stamps.push({id:r[1],x:+r[2],y:+r[3],s:+r[4],th:+r[5]}),good=+r[4]>0;
     else if(r=t.match(RX.D)){const d=parseDef(r[2]);if(d)m.defs[r[1]]=d;else good=false}
     else if(t==='░'||t==='∅'||t==='∅+'){m.vis=t==='░'?1:2;m.count=t==='∅+'}
@@ -948,6 +950,7 @@ function genText(L,i,withDefs){ensureIds(L);const base=genText0(L,i,false),o=[];
   sy.dots.filter(d=>d.kind==='X').forEach(d=>o.push('· '+d.sym+' = '+d.def));
   out.forEach(r=>o.push('· '+(r.t==='→'?'line '+r.a.sym+'→'+r.b.sym:r.a.sym+' '+r.t+' '+r.b.sym)));
   (L.ins||[]).forEach(w=>o.push('⊕ '+w));
+  (L.circles||[]).filter(c=>c.doubt).forEach(c=>{const v=symbolsOf(L).circles.find(x=>x.c===c);o.push('◌'+(v?v.sym:'O')+' ρ='+R3(Math.max(0,Math.min(1,c.r/S()))))});
   [...sy.dots,...sy.circles].forEach(v=>{const d=VARS[v.id];if(d)o.push(':'+v.sym+(d.name?' '+d.name:'')+(d.value?' = '+d.value:''))});
   if(withDefs){o.push(momText());humanText(L,i).forEach(h=>o.push('# '+h));const extra=genText0(L,i,true).slice(base.length);if(extra)o.push(extra.replace(/^\n/,''))}
   return o.join('\n')}
@@ -960,12 +963,15 @@ function humanText(L,i){const{sy,out}=relations(L),t=[];
   sy.dots.filter(d=>d.kind==='X'&&VARS[d.id]).forEach(d=>t.push(nm(d)+' is where '+d.parents.map(p=>{const v=[...sy.dots,...sy.circles].find(x=>x.id===p.id);return v?nm(v):'line '+(L.lines.indexOf(p)+1)}).join(' and ')+' meet'));
   [...sy.dots,...sy.circles].forEach(v=>{const d=VARS[v.id];if(d&&d.value)t.push(nm(v)+' is '+d.value)});
   (L.ins||[]).forEach(w=>t.push(w+' was placed into this plane'));
+  if((L.circles||[]).some(c=>c.doubt))t.push('Inside a doubt circle, damping is γ + ρ. A larger radius meets more resistance. The shapes inside stay.');
   if(L.ai||i===0)t.push(momWords());return t}
 function bagOfWords(){const bag={};const inc=k=>bag[k]=(bag[k]||0)+1;
   layers.forEach((L,i)=>{if(excluded(L))return;const{sy,out}=relations(L);[...sy.dots,...sy.circles].forEach(v=>inc('var:'+(VARS[v.id]?'defined':'undefined')));
     sy.dots.filter(d=>d.kind==='X').forEach(d=>inc('meets:'+d.def));
     out.forEach(r=>inc(r.t==='∈'?'contains:'+nm(r.b)+'→'+nm(r.a):r.t==='∩'?'overlap:'+nm(r.a)+'∩'+nm(r.b):'line:'+nm(r.a)+'→'+nm(r.b)));
-    (L.ins||[]).forEach(w=>inc('insert:'+w));inc('layer:'+(L.ai?'ai':'human')+(L.vis===1?':░':L.vis===2?':∅':''))});
+    (L.ins||[]).forEach(w=>inc('insert:'+w));
+    (L.circles||[]).forEach(c=>{if(c.doubt)inc('rho:'+Math.max(0,Math.min(1,c.r/S())).toFixed(2))});
+    inc('layer:'+(L.ai?'ai':'human')+(L.vis===1?':░':L.vis===2?':∅':''))});
   sentence.forEach(x=>inc('tok:'+x.t.replace(/[\d.]+$/,'')));inc('mom:'+momText());return bag}
 
 /* ---------- define a variable: long-press a dot, circle or intersection ---------- */
@@ -997,15 +1003,17 @@ const vel=new Map();
 function ptsOf(L){const a=[];L.lines.forEach(l=>a.push(l.a.x,l.a.y,l.b.x,l.b.y));L.circles.forEach(c=>a.push(c.c.x,c.c.y,c.r));return a}
 function setPts(L,a){let k=0;L.lines.forEach(l=>{l.a={x:a[k++],y:a[k++]};l.b={x:a[k++],y:a[k++]}});L.circles.forEach(c=>{c.c={x:a[k++],y:a[k++]};c.r=Math.max(6,a[k++])})}
 // discrete  M·Δv + γ·v·Δt = F·Δt  →  v ← r·v + (1−r)·F,  r = M/(M+γ)  (0 ≤ r < 1 always)
-EQ.momentum=(v,F)=>{const Me=.05+.95*P.M,ge=.05+1.95*P.gamma,r=Me/(Me+ge);const n=r*v+(1-r)*F;return isFinite(n)?Math.max(-P.vmax,Math.min(P.vmax,n)):0};
+EQ.momentum=(v,F,g)=>{const Me=.05+.95*P.M,ge=.05+1.95*(g==null?P.gamma:g),r=Me/(Me+ge);const n=r*v+(1-r)*F;return isFinite(n)?Math.max(-P.vmax,Math.min(P.vmax,n)):0};
+function doubtRhoAt(x,y){let rho=0;const S0=Math.min(W,H_)||1;layers.forEach(L=>(L.circles||[]).forEach(c=>{if(!c.doubt)return;if(Math.hypot(x-c.c.x,y-c.c.y)<=c.r)rho=Math.max(rho,Math.max(0,Math.min(1,c.r/S0)))}));return rho}
+function gammaForPts(L){const g=[];L.lines.forEach(l=>{const ga=P.gamma+doubtRhoAt(l.a.x,l.a.y),gb=P.gamma+doubtRhoAt(l.b.x,l.b.y);g.push(ga,ga,gb,gb)});L.circles.forEach(c=>{const ge=P.gamma+doubtRhoAt(c.c.x,c.c.y);g.push(ge,ge,ge)});return g}
 function aiAll(){P.layoutRate=.02+.14*(1-P.M);if(holding)P.M=Math.max(0,P.M-.004);   // patience → toward rest
   if(!aiOn)return;const hum=layers.map((_,i)=>i).filter(i=>!layers[i].ai&&!excluded(layers[i]));if(!hum.length)return;
   P.aiNoise=.035*(.3+1.7*P.dRate);P.aiExplore=.04*(.3+1.7*P.dRate);const gain=.3+1.7*P.dRate,saved=layers;
   saved.forEach((L,k)=>{if(!L.ai||excluded(L))return;const h=hum.reduce((b,i)=>Math.abs((depth[i]??i)-(depth[k]??k))<Math.abs((depth[b]??b)-(depth[k]??k))?i:b,hum[0]);
-    const before=ptsOf(L);layers=[saved[h],L];try{aiTickIO()}finally{layers=saved}
+    const before=ptsOf(L),gAt=gammaForPts(L);layers=[saved[h],L];try{aiTickIO()}finally{layers=saved}
     const after=ptsOf(L);if(after.length!==before.length){vel.delete(L);return}
     let v=vel.get(L);if(!v||v.length!==after.length)v=new Array(after.length).fill(0);
-    v=v.map((x,n)=>EQ.momentum(holding?x*.6:x,(after[n]-before[n])*gain));
+    v=v.map((x,n)=>EQ.momentum(holding?x*.6:x,(after[n]-before[n])*gain,gAt[n]));
     setPts(L,before.map((x,n)=>{const y=x+v[n];return isFinite(y)?Math.max(-W,Math.min(2*W+H_,y)):x}));vel.set(L,v)})}
 
 /* ---------- layer controls: add / remove / reorder / human↔AI / visibility / count ---------- */

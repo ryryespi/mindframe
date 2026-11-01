@@ -44,6 +44,8 @@ Every other layer is freeform. You name it and set its field. Draw whatever that
 
 The status bar shows snap, ortho, Euclid, momentum \(M\) and damping \(\gamma\), patience \(P_t\), the layer name, and the field's word for a line.
 
+Doubt (◌) is a resistance circle: its radius is \(\rho\), and inside it the damping is \(\gamma+\rho\). Drag the rim to change \(\rho\). The shapes inside stay, and the edit undoes like any other.
+
 ## Undo and delete
 
 Every edit is one step: a stroke, an accepted suggestion, a merge, a math line, an erase. Undo returns the previous whole state. Redo walks forward again until you draw something new. The AI's continuous motion is not a step. Accepting a suggestion is.
