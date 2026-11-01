@@ -33,7 +33,7 @@ canvas{display:block;width:100vw;height:100vh}
 #tpb{color:transparent;pointer-events:none}#tpb .bad{background:#f2dcc0;border-bottom:2px dotted #c9925a}
 #tpa{background:transparent;border:0;outline:0;resize:none;color:#4d5562}
 .shake{animation:sh .4s}@keyframes sh{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-</style></head><body>
+</style></head><body class="cad">
 <canvas id="c"></canvas>
 <div id="layers"></div>
 <div id="bar">
@@ -70,6 +70,7 @@ canvas{display:block;width:100vw;height:100vh}
 <div id="lex"></div>
 <div id="side"></div>
 <div id="tp"><div id="tpt"></div><div id="tpb"></div><textarea id="tpa" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>
+<script src="cad.js"></script>
 <script>
 "use strict";
 window.onerror=(m)=>{document.getElementById('err').textContent+='ERR:'+m+';'};
@@ -243,7 +244,7 @@ cv.addEventListener('pointerdown',e=>{const p={x:e.clientX,y:e.clientY};downP=p;
   const L=layers[active];
   if(tool==='dot')L.dots.push(p);
   else if(tool==='line'){const l={a:{...p},b:{x:p.x+1,y:p.y}};L.lines.push(l);drag={k:l,part:'b',last:p}}
-  else{const c={c:{...p},r:1};L.circles.push(c);drag={k:c,part:'r',last:p}}
+  else if(tool==='circle'){const c={c:{...p},r:1};L.circles.push(c);drag={k:c,part:'r',last:p}}
 });
 cv.addEventListener('pointermove',e=>{const p={x:e.clientX,y:e.clientY};
   if(orbit!==null){yaw+=(p.x-orbit)*.008;orbit=p.x;return}
@@ -848,7 +849,9 @@ function renderLex(){const box=document.getElementById('lex');box.innerHTML='';
 const tp=document.getElementById('tp'),tpa=document.getElementById('tpa'),tpb=document.getElementById('tpb');let lastEdit=0,editTimer=null;
 const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function paintBad(bad){tpb.innerHTML=tpa.value.split('\n').map((l,n)=>bad.includes(n)?'<span class="bad">'+esc(l||' ')+'</span>':esc(l)).join('\n')+'\n'}
-tpa.addEventListener('input',()=>{lastEdit=performance.now();clearTimeout(editTimer);editTimer=setTimeout(()=>{const r=parseText(tpa.value);paintBad(r.bad);
+tpa.addEventListener('input',()=>{lastEdit=performance.now();clearTimeout(editTimer);editTimer=setTimeout(()=>{
+  if(tab==='m'){if(typeof applyMathFromLine==='function')applyMathFromLine(tpa.value);return}
+  const r=parseText(tpa.value);paintBad(r.bad);
   if(r.ok)applyModel(layers[active],active,r.m,true)},250)});
 tpa.addEventListener('scroll',()=>{tpb.scrollTop=tpa.scrollTop});
 setInterval(()=>{if(!tp.classList.contains('on')||tab!=='n'||performance.now()-lastEdit<1500||document.activeElement===tpa&&performance.now()-lastEdit<4000)return;
@@ -1181,10 +1184,11 @@ function bagOf(L,i){const b={},inc=k=>b[k]=(b[k]||0)+1,{sy,out}=relations(L);[..
 EQ.cos=(a,b)=>{let d=0,na=0,nb=0;Object.keys({...a,...b}).forEach(k=>{const x=a[k]||0,y=b[k]||0;d+=x*y;na+=x*x;nb+=y*y});return na&&nb?d/Math.sqrt(na*nb):0};
 function bagCos(){const h=layers.findIndex(L=>!L.ai),a=layers.findIndex(L=>L.ai);return h<0||a<0?0:EQ.cos(bagOf(layers[h],h),bagOf(layers[a],a))}
 const tpt=document.getElementById('tpt'),cue=document.createElement('canvas');cue.width=120;cue.height=24;cue.style.cssText='margin-left:auto;width:60px;height:12px';
-[['n','M5 7h14M5 12h10M5 17h12'],['h','M7 7h4v4H7zM7 11c0 3-1 5-3 6M15 7h4v4h-4zM15 11c0 3-1 5-3 6'],['b','M6 8h12l-1 12H7zM9 8a3 3 0 0 1 6 0']].forEach(([k,d])=>{const sp=document.createElement('span');sp.dataset.k=k;
+[['n','M5 7h14M5 12h10M5 17h12'],['h','M7 7h4v4H7zM7 11c0 3-1 5-3 6M15 7h4v4h-4zM15 11c0 3-1 5-3 6'],['b','M6 8h12l-1 12H7zM9 8a3 3 0 0 1 6 0'],['m','M4 17l6-10 4 6 2-3 4 7']].forEach(([k,d])=>{const sp=document.createElement('span');sp.dataset.k=k;sp.title=k==='m'?'Math':'';
   sp.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" style="stroke:#5b6472;fill:none;stroke-width:2;stroke-linecap:round"><path d="'+d+'"/></svg>';sp.onclick=()=>setTab(k);tpt.appendChild(sp)});tpt.appendChild(cue);
-function setTab(k){tab=k;[...tpt.children].forEach(c=>c.dataset&&c.classList.toggle('on',c.dataset.k===k));tpa.readOnly=k!=='n';const L=layers[active];
-  tpa.value=k==='n'?genText(L,active,true):k==='h'?humanText(L,active).join('\n'):Object.entries(bagOf(L,active)).sort((a,b)=>b[1]-a[1]).map(([w,n])=>w+' ×'+n).join('\n');paintBad([])}
+function setTab(k){tab=k;[...tpt.children].forEach(c=>c.dataset&&c.classList.toggle('on',c.dataset.k===k));tpa.readOnly=k!=='n'&&k!=='m';const L=layers[active];
+  tpa.value=k==='n'?genText(L,active,true):k==='m'&&typeof mathLineOf==='function'?mathLineOf(L,active):k==='h'?humanText(L,active).join('\n'):Object.entries(bagOf(L,active)).sort((a,b)=>b[1]-a[1]).map(([w,n])=>w+' ×'+n).join('\n');paintBad([]);
+  if(typeof showGloss==='function')showGloss(L,active)}
 function drawCue(){const g=cue.getContext('2d'),c=bagCos();g.clearRect(0,0,120,24);g.fillStyle='#5b647222';g.fillRect(0,9,120,6);
   const gr=g.createLinearGradient(0,0,120,0);gr.addColorStop(0,col(0));gr.addColorStop(1,col(1));g.fillStyle=gr;g.fillRect(0,9,120*c,6);window.__state.cos=c}
 setTab('n');
@@ -1285,4 +1289,6 @@ if(location.hash.includes('pat')){ioOf(layers[0],0).free=true;layers[0].lines.pu
 if(location.hash.includes('inv')){const before=JSON.stringify(layers.filter(L=>!L.ai));for(let k=0;k<500;k++){aiTickIO();layoutTick();if(k%50===0)suggest()}
   document.title='INV:'+(before===JSON.stringify(layers.filter(L=>!L.ai))?'SAME':'CHANGED')}
 if(location.hash.includes('side')){tiltT=tilt=P.sideTilt;yaw=.35;bView.classList.add('on')}
-</script></body></html>
+</script>
+<script src="shell.js"></script>
+</body></html>

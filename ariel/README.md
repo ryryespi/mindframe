@@ -8,4 +8,4 @@ All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.
 
 Live demo: [https://ryryespi.github.io/mindframe/ariel/](https://ryryespi.github.io/mindframe/ariel/)
 
-The paper is [Project Ariel](Project-Ariel-Paper.pdf).
+[Download the paper (PDF)](Project-Ariel-Paper.pdf).
