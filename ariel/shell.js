@@ -23,6 +23,13 @@
     #ribbon button.primary{background:#5b6472;color:#f7f4ef;font-weight:600}
     #cmp{position:fixed;z-index:7;right:8px;top:60px;width:240px;max-height:46vh;overflow:auto;background:#fffc;border-radius:12px;padding:8px;display:none;box-shadow:0 2px 12px #0001;font:12px/1.35 system-ui;color:#5b6472}
     #cmp.on{display:block}
+    #signal{position:fixed;z-index:7;left:184px;bottom:64px;width:min(420px,calc(100vw - 200px));max-height:42vh;overflow:auto;background:#fffc;border-radius:12px;padding:8px 10px;display:none;box-shadow:0 2px 12px #0001;font:12px/1.35 system-ui;color:#5b6472}
+    #signal.on{display:block}
+    #signal label{display:flex;align-items:center;gap:6px;margin:2px 0}
+    #signal input[type=range]{flex:1}
+    #signal button{min-height:28px;border:0;border-radius:8px;background:#e6e1d8;color:#5b6472;padding:0 8px}
+    #sig-eq{font:11px ui-monospace,monospace;margin:4px 0}
+    #sig-plot{width:100%;height:36px;display:block;background:#f4f1ec;border-radius:6px}
     body.cad #bar{position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
     body.cad #layers{position:fixed;z-index:6;left:8px;top:60px;bottom:70px;width:168px;transform:none;max-height:none;display:none;flex-direction:column;align-items:stretch;gap:6px;background:#fffc;border-radius:12px;box-shadow:0 2px 12px #0001;padding:8px;overflow:auto}
     body.cad.dock-open #layers{display:flex}
@@ -65,7 +72,7 @@
     ["Purpose", [["collapse", "Collapse"]]],
     ["Anchors", [["snap", "Snap"], ["ortho", "Ortho"], ["view", "Side"]]],
     ["AI", [["ai", "Pause"], ["merge", "Merge"], ["clarify", "Clarify"]]],
-    ["More", [["layers", "Layers"], ["text", "Text"], ["adv", "Advanced"], ["export", "Export"], ["canon", "Terms"], ["help", "?"]]]
+    ["More", [["layers", "Layers"], ["text", "Text"], ["signal", "Signal"], ["adv", "Advanced"], ["export", "Export"], ["canon", "Terms"], ["help", "?"]]]
   ];
   groups.forEach(([name, buttons]) => {
     const g = document.createElement("div");
@@ -403,6 +410,7 @@
     if (id === "export") { openExport(); return; }
     if (id === "canon") { localStorage.setItem("ariel-canon", canonOn() ? "0" : "1"); note(canonOn() ? "Canonical terms" : "Field terms"); if (tp.classList.contains("on")) setTab(tab); return; }
     if (id === "collapse") { toggleCollapse(); return; }
+    if (id === "signal") { if (typeof toggleSignal === "function") toggleSignal(); return; }
     if (id === "help") { fillHelp(); help.classList.add("on"); return; }
   }
   function mark() {
@@ -662,6 +670,7 @@
       ellipse(c, i); ctx.stroke(); ctx.restore();
     }));
     if (collapsed) drawCollapsed();
+    if (typeof paintSignal === "function") paintSignal();
     if (tilt > 0.35) drawAlignedAxes();
     paintStatus();
     if (sel && layers[sel.layer]) highlight();
@@ -726,6 +735,7 @@
       + "<h2>Math</h2><p>One line, for example A(0.2,0.5), B(0.8,0.5); AB̅; ∠ABC = 90°; AB ∥ CD; ⊙O(r=0.2); P ∈ AB; X = AB ∩ CD; h ∈ [0.2, 0.8]; I(0.14,0.42) → O(0.80,0.42). The Math tab copies it and exports LaTeX. Typing it edits the active layer and can be undone.</p>"
       + "<p>Doubt is a resistance circle ◌. Its radius is ρ, and inside it damping is γ + ρ. A smaller circle is less resistance. Drag the rim to change it. Undo puts it back. Shapes inside stay.</p>"
       + "<p><strong>Collapse</strong> is the point of the screen. It lays every visible layer on one straight line from input I to output O, without deleting anything. Expand, or undo, brings the map back. After that, layers whose I→O lines are parallel or overlapping both count as parallel (∥). Overlap, offset 0, is the strongest agreement and can be marked ≡. In the side view those aligned lines share one color.</p>"
+      + "<p><strong>Signal</strong> is a scalar field. " + (window.ArielSignal ? ArielSignal.EQ : "") + " It is a user-contributed model, conceptual and not validated.</p>"
       + "<h2>This layer's words</h2>";
     const glossP = document.createElement("p");
     glossP.textContent = g;
@@ -767,5 +777,108 @@
   renderLayers();
   mark();
   note("Nonsense Layer is locked. Draw on " + layers[active].name + ".");
+  // ===== Signal panel: the corrected scalar transmission model =====
+  const Sig = window.ArielSignal;
+  let sig = null, sigOn = false, sigPlay = null, sigOpt = null;
+  function doubtCircles() {
+    const out = [];
+    layers.forEach(L => (L.circles || []).forEach(c => { if (c.doubt) out.push({ x: c.c.x / W, y: c.c.y / H_, r: c.r / S() }); }));
+    return out;
+  }
+  function readSigOpt() {
+    const g = id => +document.getElementById(id).value;
+    const io = ioOf(layers[0], 0);
+    return { Ki: g("sig-ki"), alpha: g("sig-a"), beta: g("sig-b"), gamma: g("sig-g"), rho: g("sig-r"), u: g("sig-u"), ox: io.o.x / W, oy: io.o.y / H_, circles: doubtCircles() };
+  }
+  function paintPlot() {
+    const cv = document.getElementById("sig-plot");
+    if (!cv || !sig) return;
+    const g = cv.getContext("2d");
+    const w = cv.width = cv.clientWidth * 2, h = cv.height = 72;
+    g.clearRect(0, 0, w, h);
+    g.strokeStyle = "#c79a7a"; g.lineWidth = 2;
+    const hist = sig.hist;
+    if (hist.length < 2) return;
+    g.beginPath();
+    hist.forEach((v, i) => {
+      const x = i / (hist.length - 1) * w;
+      const y = h / 2 - (v / Sig.PARAMS.Smax) * (h * 0.45);
+      i ? g.lineTo(x, y) : g.moveTo(x, y);
+    });
+    g.stroke();
+  }
+  function paintSignalRead() {
+    if (!sig || !sigOpt) return;
+    const plain = document.getElementById("sig-plain");
+    if (plain) plain.textContent = Sig.readout(sig, sigOpt);
+    const vals = document.getElementById("sig-vals");
+    if (vals) vals.textContent = "Kᵢ " + sigOpt.Ki.toFixed(2) + "  α " + sigOpt.alpha.toFixed(2) + "  β " + sigOpt.beta.toFixed(2) + "  γ " + sigOpt.gamma.toFixed(3) + "  ρ " + sigOpt.rho.toFixed(2) + "  u " + sigOpt.u.toFixed(2);
+    paintPlot();
+  }
+  function stepSignal() {
+    if (!sig) return;
+    sigOpt = readSigOpt();
+    Sig.step(sig, sigOpt);
+    paintSignalRead();
+  }
+  window.paintSignal = function () {
+    if (!sigOn || !sig) return;
+    const n = sig.n, cellW = W / n, cellH = H_ / n;
+    ctx.save();
+    ctx.globalAlpha = 0.42;
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      const v = sig.S[j * n + i] / Sig.PARAMS.Smax;
+      const t = Math.max(-1, Math.min(1, v));
+      ctx.fillStyle = t >= 0 ? "rgba(199,154,122," + t + ")" : "rgba(122,156,198," + (-t) + ")";
+      ctx.fillRect(i * cellW, j * cellH, cellW + 0.5, cellH + 0.5);
+    }
+    const io = ioOf(layers[0], 0);
+    const x = io.i.x + (io.o.x - io.i.x) * sig.p;
+    const y = io.i.y + (io.o.y - io.i.y) * sig.p;
+    ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fillStyle = "#c9a23f"; ctx.fill();
+    ctx.restore();
+  };
+  function toggleSignal() {
+    const panel = document.getElementById("signal");
+    sigOn = !sigOn;
+    panel.classList.toggle("on", sigOn);
+    if (sigOn && !sig) sig = Sig.create(Sig.PARAMS.n);
+    if (sigOn) sigOpt = readSigOpt();
+    if (!sigOn && sigPlay) { clearInterval(sigPlay); sigPlay = null; }
+    paintSignalRead();
+  }
+  function buildSignal() {
+    if (!Sig) return;
+    const panel = document.createElement("section");
+    panel.id = "signal";
+    panel.innerHTML = "<strong>Signal</strong><p id='sig-eq'></p><p id='sig-tex'></p><p id='sig-plain'></p>"
+      + "<label>Kᵢ gain <input id='sig-ki' type='range' min='0' max='1' step='0.01'></label>"
+      + "<label>α input weight <input id='sig-a' type='range' min='0' max='1.5' step='0.01'></label>"
+      + "<label>β momentum <input id='sig-b' type='range' min='0' max='1' step='0.01'></label>"
+      + "<label>γ diffusion <input id='sig-g' type='range' min='0' max='0.2' step='0.001'></label>"
+      + "<label>ρ doubt <input id='sig-r' type='range' min='0' max='1.5' step='0.01'></label>"
+      + "<label>u your level <input id='sig-u' type='range' min='0' max='1' step='0.01'></label>"
+      + "<p><button type='button' id='sig-play'>Play</button> <button type='button' id='sig-pause'>Pause</button> <button type='button' id='sig-reset'>Reset</button></p>"
+      + "<canvas id='sig-plot'></canvas><p id='sig-vals'></p>"
+      + "<p>Kᵢ gain on the integral. α weight on your level u. Ψ goal peak at O. I integral of e, clamped. β gain on v·n̂, the tracer speed along I→O. γ diffusion of S. ρ doubt weight. χ_doubt is 1 inside a doubt circle.</p>";
+    document.body.appendChild(panel);
+    document.getElementById("sig-eq").textContent = Sig.EQ;
+    document.getElementById("sig-tex").textContent = Sig.TEX;
+    const set = (id, v) => { document.getElementById(id).value = v; };
+    set("sig-ki", Sig.PARAMS.Ki); set("sig-a", Sig.PARAMS.alpha); set("sig-b", Sig.PARAMS.beta);
+    set("sig-g", Sig.PARAMS.gamma); set("sig-r", Sig.PARAMS.rho); set("sig-u", Sig.PARAMS.u);
+    document.getElementById("sig-play").onclick = () => { if (sigPlay) return; if (!sig) sig = Sig.create(Sig.PARAMS.n); sigPlay = setInterval(stepSignal, 50); };
+    document.getElementById("sig-pause").onclick = () => { clearInterval(sigPlay); sigPlay = null; };
+    document.getElementById("sig-reset").onclick = () => { sig = Sig.create(Sig.PARAMS.n); paintSignalRead(); };
+    ["sig-ki", "sig-a", "sig-b", "sig-g", "sig-r", "sig-u"].forEach(id => document.getElementById(id).oninput = paintSignalRead);
+  }
+  buildSignal();
+  window.toggleSignal = toggleSignal;
+  const setTabSig = setTab;
+  setTab = function (k) {
+    setTabSig(k);
+    if (k === "m" && sigOn && tpa && Sig) tpa.value = (tpa.value ? tpa.value + "\n" : "") + Sig.EQ;
+  };
   if (location.hash.includes("collapse")) toggleCollapse();
+  if (location.hash.includes("signal")) { toggleSignal(); for (let i = 0; i < 14; i++) stepSignal(); }
 })();

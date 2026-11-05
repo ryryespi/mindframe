@@ -27,6 +27,7 @@ Ryan Espinosa\\[2pt]
 \item \textbf{v1.1 (1 November 2026).} Drafting interface (ribbon, command line, undo, one-line math). The Nonsense Layer as a locked origin and freeform layers for any field. Domain language that renames and does not move shapes. Postulates P1--P4, stated as postulates. Citation check. Eureka Log, open questions, and a proposal for further study.
 \item \textbf{v1.2 (1 November 2026).} Circle of Doubt as a resistance variable \(\rho\): inside that circle, \(\gamma_{\mathrm{eff}}=\gamma+\rho\). A smaller circle is less resistance.
 \item \textbf{v1.3 (1 November 2026).} Collapse is the purpose of the UI: every visible layer projects onto one line from \(I\) to \(O\). Parallel and overlapping collapsed lines both count as parallel.
+\item \textbf{v1.4 (5 November 2026).} Signal Transmission Model, corrected and credited as user-contributed. Conceptual, not validated.
 \end{itemize}
 
 \section*{Abstract}
@@ -224,6 +225,17 @@ If Project Ariel is supported by evidence, its trajectory over the next decade c
 \item \textbf{Overlap is still parallel.} After the collapse, two \(I\to O\) lines that lie on top of each other are not a different relation from two lines that run the same way apart. Both are \(\parallel\). Overlap is only the strongest form of that agreement. The side view paints them in one color.
 \item \textbf{First or last move holds the room.} A blank layer reads AI-dominant. The person's first or last move flips the meter. A panel repeats the four cases so anyone can see the rule. If the pictures differ, the note says so and neither side is overwritten. Connects to P2 and P4 as a model inside the app.
 \end{enumerate}
+
+\subsection*{Signal Transmission Model (corrected)}
+\textit{In plain words.} A contributor sent \(S_{\mathrm{out}} = K_i \int_0^t [\Psi - \alpha u]\,d\tau + \beta\,dp/dt + \gamma\nabla^2 M\). As written it cannot be stepped: \(dp/dt\) is a vector (or at least not the same kind of object as the integral), the Laplacian acts on an undefined \(M\) that never changes, and several symbols are not given a home. This subsection is the consistent version used in the Signal panel. It is user-contributed. It is conceptual, not validated science, and not a measurement of a person.
+
+\(S\) is a scalar field on a grid over the canvas. The error is the scalar field \(e(x,y,t)=\Psi(x,y)-\alpha\,u(t)\), where \(\Psi\) is a Gaussian peak at the output anchor and \(u\) is one slider. The accumulator \(I=\mathrm{clamp}(\int e\,d\tau)\) lives on the same grid and cannot wind up without bound. A tracer \(p(t)\) walks from the input anchor toward the output; \(v=dp/dt\) and the momentum term keeps only the speed along that line, \(\beta(v\cdot\hat{n})\). Diffusion acts on \(S\) itself, \(\gamma\nabla^2 S\), with a five-point stencil. Inside a Circle of Doubt the field is reduced by \(\rho\,\chi_{\mathrm{doubt}}\,S\). One step is
+\begin{equation}
+S_{n+1}=S_n+\Delta t\big[K_i I+\beta(v\cdot\hat{n})+\gamma\nabla^2 S-\rho\,\chi_{\mathrm{doubt}}\,S\big],
+\end{equation}
+with \(e=\Psi-\alpha u\) and \(I\) clamped. The step is refused a time increment that would break \(\gamma\Delta t/h^2\le 0.25\), and \(S\) is clamped. The panel shows a heatmap, the sliders, play, pause, reset, and \(S\) at the output over time.
+
+The same skeleton is a toy of several jobs, none of them claimed as solved here: a robotics controller (error, integral, a velocity along a path), HVAC across a floor plan (a scalar comfort field and diffusion between cells), image processing (diffusion on a grid), game motion (a tracer and a damped field), spread modeling (diffusion minus a local sink), and Ariel itself (the goal sits at \(O\), doubt is a sink, the person supplies \(u\)).
 
 \section{Open Questions and Undefined Areas}
 \textit{In plain words.} This list is an invitation. Undefined is not a failure. It is room for the next person, in a field we have not named yet.

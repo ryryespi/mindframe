@@ -9,3 +9,5 @@ All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.
 Live demo: [https://ryryespi.github.io/mindframe/ariel/](https://ryryespi.github.io/mindframe/ariel/)
 
 [Download the paper (PDF)](Project-Ariel-Paper.pdf).
+
+**Signal** is a scalar field on the canvas, a corrected form of a user-submitted transmission model. It is conceptual, not validated. The line it uses is `Sₙ₊₁ = Sₙ + Δt·[Kᵢ·I + β(v·n̂) + γ∇²S − ρ·χ_doubt·S]`, with `e = Ψ − α·u` and `I` clamped. Open it from the Signal button.
