@@ -1,0 +1,102 @@
+{
+  "metrics": {
+    "n_fragments": 48,
+    "n_fields": 7,
+    "A_peak": 0.7251992105578333,
+    "t_A_peak": 29.25,
+    "g_min": 0.599194382107952,
+    "g_final": 0.7459157517512545,
+    "dream_hold_start": 0.9,
+    "dream_hold_final": 0.36408761888817437,
+    "support_final": 1.0,
+    "load_offloaded_final": 1.0,
+    "load_remaining_final": 0.0,
+    "lights_shown_total": 92,
+    "notation_events": 2,
+    "listen_time": 12.75,
+    "gentle_time": 38.0,
+    "expansive_time": 39.5,
+    "B_final": 1.0,
+    "top_fields": [
+      "theology",
+      "narrative",
+      "engineering",
+      "astronomy",
+      "geometry"
+    ],
+    "top_supports": [
+      0.7113,
+      0.7101,
+      0.6702,
+      0.6702,
+      0.6555
+    ],
+    "human_load_proxy_start": 12.0,
+    "max_abs_dt_halving": 2.674685911741026e-05
+  },
+  "fields": [
+    {
+      "field": "theology",
+      "n_frags": 8,
+      "support": 0.7113,
+      "examples": [
+        "mercy grace wow prayer",
+        "remember prayer wow light glory"
+      ]
+    },
+    {
+      "field": "narrative",
+      "n_frags": 10,
+      "support": 0.7101,
+      "examples": [
+        "ending remember vision",
+        "wait story myth character beginning"
+      ]
+    },
+    {
+      "field": "engineering",
+      "n_frags": 8,
+      "support": 0.6702,
+      "examples": [
+        "tool to build a myth of lightyear travel",
+        "what if not sure load tool"
+      ]
+    },
+    {
+      "field": "astronomy",
+      "n_frags": 6,
+      "support": 0.6702,
+      "examples": [
+        "orbit of a dream that never corners",
+        "solar wow blur lightyear"
+      ]
+    },
+    {
+      "field": "geometry",
+      "n_frags": 5,
+      "support": 0.6555,
+      "examples": [
+        "geodesic path home across the sphere",
+        "the circle wants to be a line forever"
+      ]
+    },
+    {
+      "field": "ecology",
+      "n_frags": 9,
+      "support": 0.6236,
+      "examples": [
+        "habitat cycle for the journey home",
+        "species not sure forest wait ecosystem cycle"
+      ]
+    },
+    {
+      "field": "music",
+      "n_frags": 2,
+      "support": 0.2329,
+      "examples": [
+        "melody of silence under star light",
+        "song somehow note i feel"
+      ]
+    }
+  ]
+}

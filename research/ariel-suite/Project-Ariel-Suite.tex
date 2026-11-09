@@ -1,0 +1,64 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\setmainfont{NotoSans}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic
+]
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\title{Project Ariel: Gated Engine, Drawing Canvas, and Automated Journal Mapping for State-Dependent Meaning Transfer}
+\author{Ryan Espinosa \\ \textit{With research and computational assistance from Grok Bot}}
+\date{November 9, 2026}
+
+\begin{document}
+
+\maketitle
+
+\noindent\textbf{Status.} Conceptual framework, not validated science. This note proposes a model, an interface sketch, and a way to test dissociations; it is not a diagnostic instrument and not a substitute for professional care. In the U.S., call or text 988 for crisis support; for immediate danger or a medical emergency, call 911.
+
+\begin{abstract}
+How can an individual retain an endorsed core value yet lose the ability to translate it into action during episodes of emptiness or cognitive overwhelm? This paper formalizes the Project Ariel framework, uniting anchored reaction-diffusion with a five-system regulatory gate. We introduce an interactive visual and journal mapping architecture where abstract user sketches and journal entries are automatically parsed into retention, transfer, execution, support, and grace nodes. Through differential simulation and real-time Chart.js analytics, we demonstrate how regulatory availability ($P$) and threat appraisal ($A$) gate signal transport ($g$) and executed output ($y$). We outline a nonclinical factorial pilot to test these state-dependent dissociations without conflating momentary neural proxies with verified diagnostic instruments.
+\end{abstract}
+
+\section{Introduction and Theoretical Foundation}
+Traditional psychological models often conflate value retention (knowing what matters) with behavioral execution (acting on it). Building upon \textit{After the Line} and the \textit{Void-State Framework}, Project Ariel introduces a state-dependent transfer hypothesis: an anchor can remain fully preserved in memory while contextual transport is restricted by regulatory bottlenecks.
+
+The void is modeled not as a total biological shutdown, but as an elevated threat appraisal ($A$) that suppresses available regulation ($P$) and closes the regulatory gate ($g$).
+
+\section{The Gated Line Equations}
+Let $s_i$ represent the value-access signal on a periodic ring, where $a=1$ is the chosen reference. The gated transport and execution proxy are governed by:
+\begin{align}
+g(t) &= 0.05 + 0.95P(t)[1 - G(t)] \\
+y(t) &= g(t) s_5(t)
+\end{align}
+Five functional systems---threat appraisal ($A$), stress coordination ($H$), sympathetic mobilization ($S$), control ($P$), and immobility ($G$)---interact dynamically with output feedback.
+
+\section{Interactive Drawing and Automated Journal Mapping}
+To bridge computational theory with qualitative lived experience, the Project Ariel web suite incorporates two novel interactive components:
+\begin{enumerate}
+    \item \textbf{Freehand Drawing Canvas:} Users sketch abstract lines or friction loops. Stroke density and spatial flow are translated via heuristic AI into estimated threat ($A$), control ($P$), gate ($g$), and output ($y$) parameters.
+    \item \textbf{Automated Journal Node Mapping:} Free-text reflections are parsed and automatically categorized into Retention, Transfer, Execution, Support, and Grace nodes, creating a live graph that feeds real-time Chart.js analytics.
+\end{enumerate}
+
+\section{Conclusion}
+Project Ariel provides a transparent, reproducible framework for examining how psychological support and value-to-action bridges reopen closed pathways. By separating relief, access, and action, researchers and individuals can track momentum without relying on ungrounded diagnostic assumptions.
+
+\section*{References}
+\noindent [1] Espinosa, R. (2026). \textit{The Gated Line: From Void to Values-Directed Action---A Coupled Model of Regulatory Availability and Meaning Transfer} (v1.1). Project Ariel monograph.
+
+\noindent [2] Hayes, S. C., Strosahl, K. D., \& Wilson, K. G. (1999). \textit{Acceptance and Commitment Therapy: An Experiential Approach to Behavior Change}. Guilford Press.
+
+\noindent [3] Arnsten, A. F. T. (2009). Stress signalling pathways that impair prefrontal cortex structure and function. \textit{Nature Reviews Neuroscience}, 10, 410--422.
+
+\vspace{1.5em}
+\noindent\textit{All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.}
+
+\end{document}

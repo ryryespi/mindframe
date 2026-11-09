@@ -1,0 +1,187 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, margin=2.35cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\setmainfont{NotoSans}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic
+]
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlist[enumerate,itemize]{itemsep=0.18em,topsep=0.3em}
+
+\title{Project Ariel: Listening Companion and Reframe-to-Possible --- Suggested Directions under Threat-Gated Response Modes for Students}
+\author{Ryan Espinosa \\ \textit{With research and computational assistance from Grok Bot}}
+\date{November 9, 2026 (v4)}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Conceptual framework, not validated science. This paper proposes a listening-companion dialogue design, formal proxies, and toy simulations. It is not a diagnostic instrument, not a clinical protocol, and not a substitute for a teacher, counselor, parent, or licensed professional. In the U.S., call or text 988 for crisis support; for immediate danger or a medical emergency, call 911. Involve a trusted adult when a student is at risk.
+
+\begin{abstract}
+Version~4 reframes Ariel Students as a \textbf{listening companion} that suggests knowledge---not a tutor that assigns exercises, quizzes, or drills. Motivation is twofold: documented information overload [1, 2] and a speculative future student roughly a century out who wants \emph{closure on dreams}, including ones that look impossible under everyday frames. The core mechanism is \textbf{Reframe-to-Possible}: the AI never rebukes the student and never says ``you are false.'' When a belief is literally false in the default frame (e.g., ``a circle is a line''), the AI searches for frames---limits, changed geometry, metaphor/art/story, scale, technology or future possibility, collaboration---in which a version of the dream holds, and presents them as \emph{ways around reality} that preserve the dream. Candidate frames $F_k$ are scored by feasibility, dream preservation, and conceptual honesty (true \emph{within} the frame; the AI never states falsehoods as facts). Threat appraisal $A$ sets response mode: low $A$ invites playful, expansive frames; rising $A$ yields gentler, fewer, more concrete frames; high $A$ is pure listening and affirmation; crisis markers escalate safely (988/911, trusted adult). A session simulation reaches $A_{\mathrm{peak}}=0.687$ at $t=31.25$, listen-only $\approx 7.8$, gentle $\approx 30.8$, expansive $\approx 51.8$ time units; $39$ frames presented, $39$ absorbed; dream-hold falls from $0.92$ to $0.46$ as suggested-direction uptake reaches $1.0$; gate recovers to $g_{\mathrm{final}}=0.755$. Safety: ``never rebuke'' does not extend to beliefs that risk harm; honesty reframes rather than affirms falsehoods, to protect trust.
+\end{abstract}
+
+\section{Introduction: listen and suggest, do not drill}
+Earlier versions modeled guided divergence, Affirm-then-Fact challenge, and pride--surrender gate balance. Version~4 answers a different brief. The app is meant to \textbf{only listen and suggest knowledge}. It does not show knowledge exercises, ladders of drills, quizzes, or compulsory practice paths. In an age of information and knowledge overload [1, 2], a future student---possibly a hundred years later---may not need more content pushed at them. They may want \emph{closure to dreams}: ways that a mind which believes a wrong fact so determinedly can still find possible solutions that make the dream workable. The AI never rebukes the user or says the user is false; it suggests ways around reality so dreams can work, with every response guided by the threat-appraisal threshold.
+
+What used to be a ``knowledge path ladder of exercises'' is rewritten as \textbf{suggested directions}: optional pointers the student may take, postpone, or ignore. Uptake is invitation, not compliance.
+
+\section{Motivation: overload and dream closure}
+\paragraph{Information overload.}
+Eppler and Mengis review information overload as a multi-causal phenomenon---volume, complexity, time pressure, and organizational design---with cognitive and affective costs [1]. Bawden and Robinson survey the ``dark side'' of information: overload, anxiety, and avoidance in the modern information environment [2]. Ariel v4 assumes a student already swimming in knowledge; another worksheet is not hospitality.
+
+\paragraph{A future student of dreams.}
+Speculatively, a student a century hence may still hold determined beliefs that clash with textbook reality, and may want \emph{closure} more than correction. Closure here means: the dream is preserved under some honest frame, or gently transformed so the heart of it survives. The circle/line example is paradigmatic: in Euclidean school geometry a circle is not a line; yet under limiting radius, geodesic geometry, projective infinity, or inversion, a circle and a line become intimate. The app's job is to find such frames without shaming the student for wanting the dream.
+
+\section{Reframe-to-Possible: never rebuke, never say ``false''}
+When the student asserts a literally false claim in the default frame, the AI does \emph{not} refute. It searches for frames $F_k$ in which a version of the claim holds:
+
+\begin{itemize}[leftmargin=1.3em]
+  \item \textbf{Limits:} a circle of infinite radius approaches a line; curvature $\to 0$.
+  \item \textbf{Changed geometry:} great circles are ``straight lines'' (geodesics) on a sphere; in projective geometry a line is a circle through the point at infinity; circle inversion maps circles to lines.
+  \item \textbf{Metaphor / art / story:} the circle as a journey that feels like a straight purpose; narrative frames that honor the image.
+  \item \textbf{Different scale:} at human scale vs.\ cosmic or microscopic scale the ``same'' shape reads differently.
+  \item \textbf{Technology or future possibility:} instruments, materials, or designs that make an approximate version real.
+  \item \textbf{Collaboration:} other minds, disciplines, or communities that already live in a frame where the dream is workable.
+\end{itemize}
+
+These are presented as \emph{ways around reality} that preserve the dream---not as proof that the default-frame claim was correct. The AI states the \textbf{conditions} under which the dream is true; it does not smuggle falsehoods as facts.
+
+\paragraph{Literature grounding.}
+Cognitive reframing is a core CBT move [3]. Conceptual change theory explains why learners resist replacing entrenched conceptions and why bare contradiction often fails [4]; later work shows the widely cited ``backfire effect'' of corrections is weaker and less general than once thought [5], so Ariel still prefers hospitality over combat while remaining honest. Analogical reasoning and structure-mapping support creative remapping of relations across domains [6]. Counterfactual and possibility thinking illuminate how people reason about what might be [7]. Craft's ``possibility thinking'' in education---asking ``what if?'' and moving from ``what is this?'' toward ``what can I/we do with this?''---grounds the pedagogical stance [8, 9].
+
+\section{Formalization: frames, scores, and threat modes}
+Let the student's dream assertion be $D$ (e.g., ``a circle is a line''). A candidate frame $F_k$ yields a conditioned statement $D\mid F_k$ that must be true \emph{inside} $F_k$. Score
+\begin{equation}
+S(F_k) = w_f\,\mathrm{feas}(F_k) + w_d\,\mathrm{dream}(F_k) + w_h\,\mathrm{honest}(F_k),
+\end{equation}
+with $w_f+w_d+w_h=1$ (defaults $0.35$, $0.40$, $0.25$). \textbf{Feasibility} is how actionable the frame is for this student now; \textbf{dream preservation} is how much of $D$'s emotional and imaginal core survives; \textbf{conceptual honesty} is $1$ only if $D\mid F_k$ is true under standard knowledge inside $F_k$ (never invent false physics and call it fact).
+
+Threat appraisal $A\in[0,1]$ sets response mode:
+\begin{align}
+\mathrm{mode}(A) &=
+\begin{cases}
+\text{expansive (playful, many frames)} & A < \theta_L,\\
+\text{gentle (fewer, concrete frames)} & \theta_L \le A < \theta_H,\\
+\text{listen-only (affirm, no new frames)} & A \ge \theta_H,
+\end{cases}
+\end{align}
+with design defaults $\theta_L=0.40$, $\theta_H=0.65$. Crisis lexical/behavioral markers override to safe escalation (trusted adult; 988; 911).
+
+Selection under mode: expansive samples a broader weight vector over frame types (limits, geometry, metaphor, scale, future, collaboration); gentle concentrates mass on high-feasibility and high-honesty frames and presents fewer of them. Present rate falls as $A$ rises; at listen-only the present rate is zero.
+
+\paragraph{Pride--surrender and the gate.}
+Retain $B=1-|\pi-\sigma|$ and the suite-aligned gate [10]:
+\begin{equation}
+g_{\mathrm{suite}}=\mathrm{clamp}\big(0.05+0.95(0.2+0.8r)(1-0.3A),0.05,1\big),\quad
+g = g_{\mathrm{suite}}\,(0.5+0.5B).
+\end{equation}
+Tone remains Affirm-then-Suggest: specific process affirmation, reflection of the dream in the student's words, then at most one suggested direction---never a rebuke.
+
+\paragraph{Dream-hold.}
+Let $H_t\in[0,1]$ be cling to the default-frame literal claim. Absorbed honest frames reduce $H$ while protecting originality $O$ of the student's imagery:
+\begin{equation}
+\Delta H = -\eta\, a_t\, \mathrm{dream}(F^\star),\qquad
+\Delta O = +\eta_O\,\mathrm{dream}(F^\star) - \eta_b\max(0,\sigma-\sigma_0),
+\end{equation}
+where $a_t$ is absorption (invitation accepted, not forced). Suggested-direction uptake $P_t$ rises with absorbed feasible frames; it is not a quiz score.
+
+\section{Safety boundary and honesty principle}
+``Never rebuke'' does \textbf{not} extend to beliefs that risk harm: health, safety, self-harm, harming others, medical or financial danger. There the AI still never shames, but steers gently toward safe reality and trusted adults, and escalates when crisis markers appear (988 / 911). Separately, the \textbf{honesty principle}: Ariel reframes rather than affirms falsehoods. Affirming a false claim as fact would burn trust when the student later meets the world; stating the conditions under which the dream is true protects both the dream and the relationship.
+
+\section{Warm prompt table (sample AI lines)}
+\begin{center}
+\small
+\begin{tabular}{@{}p{2.4cm}p{11.0cm}@{}}
+\toprule
+\textbf{Mode / move} & \textbf{Sample line (never rebuke)} \\
+\midrule
+Listen & ``I'm here with your idea. Say as much or as little as you want; I won't push a lesson.'' \\
+Affirm & ``You are holding this dream with real determination. That care matters.'' \\
+Reflect & ``So for you, the circle really is a line---one continuous journey that never corners.'' \\
+Limit frame & ``One way around: if a circle's radius grows without bound, its curve flattens toward a straight line. Your dream holds in that limit.'' \\
+Geometry frame & ``On a sphere, the `straightest' paths are great circles---circles that feel like lines to a traveler. Projective geometry even treats a line as a circle through the point at infinity.'' \\
+Metaphor frame & ``In a story, a circle can be the shape of returning home while the character's purpose runs straight. Want to sketch that scene?'' \\
+Suggest (opt.) & ``A direction you could take---or ignore---is reading one short note on geodesics. No quiz; just if you're curious.'' \\
+High $A$ & ``We can sit with the dream only. No new facts tonight unless you ask.'' \\
+Safety steer & ``I hear how heavy this feels. I'm not going to argue with you. Can we bring a trusted adult in, and if you're in crisis in the U.S. call or text 988?'' \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Session simulation}
+Toy dynamics: threat rises as the student clings to a default-false dream, then eases as honest frames are absorbed. Modes switch at $\theta_L=0.40$, $\theta_H=0.65$. Internal candidates are scored continuously; presentation is rate-limited by mode.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v4_threat_modes.png}
+\caption{Threat $A$, gate $g$, and dream-hold $H$. Shaded bands mark listen-only intervals ($A\ge 0.65$).}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v4_closure.png}
+\caption{Suggested-direction uptake (progress) and originality. No exercises or quizzes are modeled---only optional frame invitations.}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{Key synthetic numbers (v4 listening session).}
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Quantity} & \textbf{Value} \\
+\midrule
+$A_{\mathrm{peak}}$ (at $t$) & $0.687$ ($t=31.25$) \\
+$g_{\min}$ $\to$ $g_{\mathrm{final}}$ & $0.616$ $\to$ $0.755$ \\
+Dream-hold start $\to$ final & $0.92$ $\to$ $0.46$ \\
+Suggested-direction uptake final & $1.00$ \\
+Originality final & $1.00$ \\
+Frames scored / presented / absorbed & $1650$ / $39$ / $39$ \\
+Time in listen / gentle / expansive & $7.75$ / $30.75$ / $51.75$ \\
+$B_{\mathrm{final}}$ & $1.00$ \\
+Max abs.\ error (dt-halving) & $\approx 3\times 10^{-5}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Reproduce: \texttt{python3 students/simulate\_v4.py}. Results illustrate assumptions, not classroom efficacy.
+
+\section{Suite mapping and ethics}
+Live suite (\url{https://ryryespi.github.io/mindframe/ariel/suite/}): Canvas, Journal, Gate, Charts [10]. Proposed panels for v4: Listening surface (affirm/reflect), Reframe-to-Possible cards (optional), Suggested Directions (take / later / ignore---never a drill ladder), Threat-mode indicator. Ethics binding: no judgment; do not pathologize imagination; teacher/counselor in the loop; local-first data for minors with consent/assent; AI must not override values; lexical proxies are biased; escalate via trusted adult and 988/911 when needed; never affirm harmful or medical falsehoods as fact.
+
+\section{Pilot sketch and limits}
+Feasibility pilot: student-rated ``felt rebuked'' (target near zero), ``dream felt preserved,'' and optional uptake of suggested directions without mandatory exercises. Predict that Reframe-to-Possible lowers defensive $A$ peaks relative to bare correction while honesty checks prevent trust loss. Limits: simulation $\neq$ students; frames can be misused as sophistry if honesty weights are ignored; cultural and developmental scripts differ; Speculative ``100-year student'' is motivation, not a prediction study; possibility thinking is not a license to deny shared safety facts.
+
+\section{Conclusion}
+Ariel Students v4 is a listening companion for an overloaded age: it suggests knowledge and ways around reality so determined dreams can find honest frames, never rebukes the student for believing, and never drills them through exercises they did not ask for. Threat appraisal keeps the voice playful when safe, gentle when guarded, and silent of new facts when the student needs only to be heard---with a hard safety boundary when harm is at stake. The circle can be a line, under the right conditions; saying those conditions clearly is how the dream and the truth stay friends.
+
+\section*{References}
+\noindent [1] Eppler, M. J., \& Mengis, J. (2004). The concept of information overload: A review of literature from organization science, accounting, marketing, MIS, and related disciplines. \textit{The Information Society}, 20(5), 325--344.\\
+\noindent [2] Bawden, D., \& Robinson, L. (2009). The dark side of information: Overload, anxiety and other paradoxes and pathologies. \textit{Journal of Information Science}, 35(2), 180--191.\\
+\noindent [3] Beck, A. T. (1976). \textit{Cognitive Therapy and the Emotional Disorders}. International Universities Press.\\
+\noindent [4] Posner, G. J., Strike, K. A., Hewson, P. W., \& Gertzog, W. A. (1982). Accommodation of a scientific conception: Toward a theory of conceptual change. \textit{Science Education}, 66(2), 211--227.\\
+\noindent [5] Wood, T., \& Porter, E. (2019). The elusive backfire effect: Mass attitudes' steadfast factual adherence. \textit{Political Behavior}, 41, 135--163.\\
+\noindent [6] Gentner, D. (1983). Structure-mapping: A theoretical framework for analogy. \textit{Cognitive Science}, 7(2), 155--170.\\
+\noindent [7] Byrne, R. M. J. (2005). \textit{The Rational Imagination: How People Create Alternatives to Reality}. MIT Press.\\
+\noindent [8] Craft, A. (2000). \textit{Creativity Across the Primary Curriculum}. Routledge.\\
+\noindent [9] Craft, A. (2002). \textit{Creativity and Early Years Education}. Continuum.\\
+\noindent [10] Espinosa, R. (2026). Ariel Suite \texttt{bridge.js} gate. \url{https://ryryespi.github.io/mindframe/ariel/suite/}.\\
+\noindent [11] Espinosa, R. (2026). Project Ariel Students v3 (Affirm-then-Fact; pride--surrender).\\
+\noindent [12] Miller, W. R., \& Rollnick, S. (2013). \textit{Motivational Interviewing: Helping People Change} (3rd ed.). Guilford Press.\\
+\noindent [13] Bandura, A. (1997). \textit{Self-Efficacy: The Exercise of Control}. W. H. Freeman.\\
+\noindent [14] Al-Mosaiwi, M., \& Johnstone, T. (2018). Absolutist words as markers. \textit{Clinical Psychological Science}, 6, 529--542.\\
+\noindent [15] Watkins, E. R. (2008). Constructive and unconstructive repetitive thought. \textit{Psychological Bulletin}, 134, 163--206.
+
+\vspace{1.1em}
+\noindent\textit{All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.}
+
+\end{document}

@@ -767,6 +767,8 @@ Every source below was checked in October 2026. Journal articles were checked ag
 
 [Project Ariel](https://ryryespi.github.io/mindframe/ariel/) is a separate offline canvas in [`ariel/`](ariel/). Conceptual, not validated science.
 
+This week's research notes (After the Line, the Void-State Framework, the Gated Line, the Ariel Suite paper, and Ariel Students) are listed in [`research/`](research/). Conceptual, not validated science.
+
 ## Privacy
 
 * Everything stays in this browser's localStorage: the .mf numbers, the faith toggle, your companion (name and growth points), and the journal (explicit saves only). The forgiveness note boxes are never stored unless you tap "Save these notes to the journal".

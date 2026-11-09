@@ -1,0 +1,37 @@
+[
+  {
+    "condition": "Anchor only",
+    "mean_output_22_60": 0.0,
+    "output_at40": 0.0,
+    "gate_at40": 0.3347911419320369,
+    "first_sustained_015_after22": null
+  },
+  {
+    "condition": "Bridge only",
+    "mean_output_22_60": 0.06479178210906593,
+    "output_at40": 0.05467866726524741,
+    "gate_at40": 0.36251644329357874,
+    "first_sustained_015_after22": 71.0
+  },
+  {
+    "condition": "Regulation only",
+    "mean_output_22_60": 0.0,
+    "output_at40": 0.0,
+    "gate_at40": 0.9326814459615338,
+    "first_sustained_015_after22": null
+  },
+  {
+    "condition": "Combined",
+    "mean_output_22_60": 0.22006398236903635,
+    "output_at40": 0.2360937404112313,
+    "gate_at40": 0.9556003222527539,
+    "first_sustained_015_after22": 27.400000000000002
+  },
+  {
+    "condition": "Combined, no feedback",
+    "mean_output_22_60": 0.21212227503709777,
+    "output_at40": 0.22471780946111236,
+    "gate_at40": 0.9326814459615338,
+    "first_sustained_015_after22": 28.400000000000002
+  }
+]

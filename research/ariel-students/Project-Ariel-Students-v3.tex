@@ -1,0 +1,185 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, margin=2.35cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\setmainfont{NotoSans}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic
+]
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlist[enumerate,itemize]{itemsep=0.18em,topsep=0.3em}
+
+\title{Project Ariel: Guided Divergence and Grounded Return --- Affirm-then-Fact Challenge, Concept Extraction, and Pride--Surrender Gate Balance for Students}
+\author{Ryan Espinosa \\ \textit{With research and computational assistance from Grok Bot}}
+\date{November 9, 2026 (v3)}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Conceptual framework, not validated science. This paper proposes an educational dialogue design, formal proxies, and toy simulations. It is not a diagnostic instrument, not a clinical protocol, and not a substitute for a teacher, counselor, parent, or licensed professional. In the U.S., call or text 988 for crisis support; for immediate danger or a medical emergency, call 911. Involve a trusted adult when a student is at risk.
+
+\begin{abstract}
+Students deserve radical imagination \emph{and} a respectful route back to shared facts. Version~3 of Guided Divergence and Grounded Return centers the Challenge stage on non-judgmental techniques: Motivational Interviewing affirmations and reflections, process praise for curiosity, wise feedback (high standards with assurance), intellectual humility, self-affirmation against defensiveness, and autonomy-supportive scaffolding. We formalize an \textbf{Affirm-then-Fact} cycle that praises specific curiosity, mirrors the fantasy in its own terms, asks one grounding question, doses a single fact slowly when threat is high, and invites the student to weave that fact into their original vision. A tunable affirm-to-fact heuristic (about $3{:}1$) is a design choice---not the debunked Losada ``positivity ratio.'' Fantasies are decomposed into base concepts; struggle signals route the knowledge path while an originality-preservation metric protects the student's mark on the idea. The gate is modulated by a pride--surrender balance $B=1-|\pi-\sigma|$: excess pride bounces facts; excess surrender bleeds originality. A three-profile simulation shows the balanced student with the highest gate ($g_{\min}=0.70$, $g_{\mathrm{final}}=0.85$) and knowledge progress ($0.39$); the proud profile keeps originality but stalls progress ($0.16$); the over-surrendered profile loses originality ($0.90$) despite mid progress. Imagination is not pathology; challenge must never become judgment.
+\end{abstract}
+
+\section{Introduction}
+Version~2 asked how artful divergence can return to reality. Version~3 answers \emph{how to challenge without crushing}: guide a ``crazy mind''---a phrase we reclaim as affectionate for bold originality---so that curiosity is praised, facts arrive humbly and slowly, fundamental concepts are named, and the gate balances healthy pride (agency, self-efficacy) with surrender (openness, intellectual humility), including a gentle nod to resting rather than forcing the route open.
+
+\section{Non-judgmental challenge: evidence base}
+\paragraph{Motivational Interviewing (MI).}
+MI is a collaborative conversation style that strengthens a person's own motivation; core skills include Open questions, Affirmations, Reflections, and Summaries (OARS) [1]. Affirmations notice strengths without flattery; reflections show the fantasy was heard.
+
+\paragraph{Guided discovery.}
+Socratic questioning in CBT aims to guide discovery rather than argue someone out of a belief [2]. Challenge cards ask what the student already knows, what a friend might notice, and what one observable next check could be.
+
+\paragraph{Process praise for curiosity, not person praise.}
+Praising intelligence or the whole person can foster contingent worth and helplessness after setbacks; process and effort praise support coping [3, 4]. Ariel affirms \emph{curiosity moves} (``You kept asking what the dome walls are made of'') rather than fixed genius.
+
+\paragraph{Wise feedback.}
+Critical feedback paired with high standards \emph{and} assurance that the student can meet them---wise feedback---can increase trust and revision, especially where mistrust is high [5]. Facts are framed as standards the student's vision can meet, not as proof they were foolish.
+
+\paragraph{Epistemic curiosity and intellectual humility.}
+Interest in knowing and recognizing that one's beliefs might be wrong support open learning [6--8]. Challenge aims to raise curiosity about a missing concept without demanding surrender of identity.
+
+\paragraph{Self-affirmation and autonomy support.}
+Affirming valued aspects of self can reduce defensiveness to threatening information [9]. Autonomy-supportive teaching offers rationale and choice rather than control [10]. Scaffolding temporarily reduces degrees of freedom, then fades [11].
+
+\paragraph{What we do \emph{not} claim.}
+A popular ``positivity ratio'' ($\approx 2.9$) was shown to rest on unjustified mathematics [12]. Any affirm-to-challenge ratio here is a \textbf{tunable classroom heuristic}, not a universal law.
+
+\section{Affirm-then-Fact dialogue cycle}
+When threat appraisal $A$ is elevated, the AI (and ideally a teacher) runs:
+\begin{enumerate}[leftmargin=1.3em]
+  \item \textbf{Affirm curiosity} (specific, process-focused).
+  \item \textbf{Reflect the fantasy} in the student's own images and words.
+  \item \textbf{Ask one grounding question} (sensory, evidence, friend-advice, or next observation).
+  \item \textbf{Present ONE fact}, dosed slowly when $A$ is high.
+  \item \textbf{Invite integration:} ``How could this fact live inside your vision without erasing what is yours?''
+\end{enumerate}
+\paragraph{Dosing.}
+Let $\lambda_{\mathrm{aff}}(A)$ rise with threat and $\lambda_{\mathrm{fact}}(A,R,B)$ fall with threat and rise with receptivity $R$ and balance $B$:
+\begin{align}
+\lambda_{\mathrm{aff}} &= \alpha_0 + \alpha_1 A,\\
+\lambda_{\mathrm{fact}} &= \beta_0\, R\, (1-\gamma A)\, (\delta_0+\delta_1 B).
+\end{align}
+A fact is attempted only after an affirm ``bank'' covers a design ratio $\rho^\star$ (default $\rho^\star=3$). Observed ratio in the toy run $\approx 3.2$. This paces humility: facts arrive after being seen.
+
+\section{Fundamental concepts and originality}
+A radical fantasy is parsed into base concepts. Illustrative Mars-city map: closed-loop life support, energy, structures/materials, thermal control, governance/ethics, psychology of isolation. A \emph{struggle signal} flags which concept the narrative circles without concrete handles (e.g., endless dome poetry with no air/water talk $\Rightarrow$ life-support gap). The knowledge path routes to that concept first.
+
+\paragraph{Originality preservation.}
+Let $O_t\in[0,1]$ track retention of student-unique elements (images, metaphors, moral stakes). Updates reward affirmations and penalize over-compliance:
+\begin{equation}
+\Delta O = +\eta_{\mathrm{aff}}\big(1-\tfrac{1}{2}\pi\big) - \eta_{\mathrm{bleed}}\max(0,\sigma-\sigma_0).
+\end{equation}
+Guidance adds feasibility; it must not sand the voice off the idea.
+
+\section{Pride--surrender balance and the gate}
+Let $\pi$ be healthy pride / ownership / self-efficacy [13] and $\sigma$ be surrender / receptivity / humility (psychologically; theologically adjacent to resting rather than forcing, without claiming a test of grace). Define
+\begin{equation}
+B = 1 - |\pi - \sigma|.
+\end{equation}
+Suite-aligned gate [14] modulated by balance:
+\begin{equation}
+g_{\mathrm{suite}}=\mathrm{clamp}\big(0.05+0.95(0.2+0.8r)(1-0.3A),0.05,1\big),\quad
+g = g_{\mathrm{suite}}\,(0.5+0.5B).
+\end{equation}
+\textbf{Too much pride:} facts bounce (defensiveness). \textbf{Too much surrender:} imagination collapses into dependence; originality bleeds. Balance keeps the gate workable.
+
+\section{Warm prompt table (sample AI lines)}
+\begin{center}
+\small
+\begin{tabular}{@{}p{2.2cm}p{11.2cm}@{}}
+\toprule
+\textbf{Stage} & \textbf{Sample line (non-judgmental)} \\
+\midrule
+Explore & ``Your red-dome sketch is vivid---what feeling made you draw the airlock that large?'' \\
+Affirm & ``I notice how carefully you keep asking who gets to live in the city. That curiosity is doing real work.'' \\
+Reflect & ``So in your story, Earth never listened, and Mars is where the design finally cares for people.'' \\
+Ground Q & ``If a friend stood in your room right now, what one object would you show them first?'' \\
+One fact & ``Here is one slow fact: humans need a continuous way to recycle air and water in a closed habitat.'' \\
+Integrate & ``Keeping your `city that finally cares,' where could recycled air become part of the architecture---not a lecture, but a shape you invent?'' \\
+Intent & ``It sounds like mastery and contribution matter most; does recognition also matter, or should we park that?'' \\
+Path & ``A first concrete step many builders take is algebra graphs of rates---shall we try a 20-minute rate sketch for oxygen use?'' \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Three-profile simulation}
+Identical narrative threat schedule; profiles differ in initial $(\pi,\sigma,R)$. Affirm-then-Fact uses $\rho^\star=3$. Challenge window $t\approx19.4$--$45.1$; $A_{\mathrm{peak}}=0.610$.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v3_gate.png}
+\caption{Gate $g(t)$ for Proud, Balanced, and Over-surrendered profiles.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.49\linewidth]{students/v3_progress.png}
+\includegraphics[width=0.49\linewidth]{students/v3_originality.png}
+\caption{Left: knowledge-path progress. Right: originality preserved. Balanced advances farthest; Proud stalls with originality intact; Over-surrendered loses originality.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v3_balance.png}
+\caption{Balance $B=1-|\pi-\sigma|$. Balanced stays near $1$; extremes recover only partially.}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{Key synthetic numbers (affirm{:}fact $\approx 3.2$ in all runs).}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Profile & $g_{\min}$ & $g_{\mathrm{final}}$ & Progress & Originality final & $B$ mean \\
+\midrule
+Proud & 0.448 & 0.628 & 0.155 & 1.00 & 0.46 \\
+Balanced & 0.700 & 0.853 & 0.391 & 1.00 & 1.00 \\
+Over-surrendered & 0.436 & 0.622 & 0.252 & 0.90 & 0.43 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Reproduce: \texttt{python3 students/simulate\_v3.py}. Results illustrate assumptions, not classroom efficacy.
+
+\section{Suite mapping and ethics}
+Live suite (\url{https://ryryespi.github.io/mindframe/ariel/suite/}): Canvas, Journal, Gate, Charts [14]. Proposed panels: Challenge (Affirm-then-Fact cards), Intent, Knowledge-Path ladder with concept tags and originality notes. Ethics unchanged and binding: no judgment; do not pathologize imagination; teacher/counselor in the loop; local-first data for minors with consent/assent; AI must not override values; lexical proxies are biased; escalate via trusted adult and 988/911 when needed.
+
+\section{Pilot sketch and limits}
+Classroom feasibility pilot as in v2, plus coding of affirmation specificity and student-rated ``felt judged'' (should stay low). Predict balanced scaffolding raises concrete steps without lowering Alternative Uses fluency. Limits: simulation $\neq$ students; $3{:}1$ is not a law [12]; pride/surrender are metaphors for agency/openness; cultural scripts differ.
+
+\section{Conclusion}
+Challenge, done well, is hospitality: praise the curious move, mirror the wild vision, ask one honest question, offer one fact at a time, and protect the student's original mark while naming the base concepts the world requires. Managing the gate is less about shutting a crazy mind than about balancing pride and surrender so imagination can land.
+
+\section*{References}
+\noindent [1] Miller, W. R., \& Rollnick, S. (2013). \textit{Motivational Interviewing: Helping People Change} (3rd ed.). Guilford Press.\\
+\noindent [2] Padesky, C. A. (1993). Socratic questioning: Changing minds or guiding discovery? Keynote, European Congress of Behavioural and Cognitive Therapies, London.\\
+\noindent [3] Mueller, C. M., \& Dweck, C. S. (1998). Praise for intelligence can undermine children's motivation and performance. \textit{Journal of Personality and Social Psychology}, 75, 33--52.\\
+\noindent [4] Kamins, M. L., \& Dweck, C. S. (1999). Person versus process praise and criticism. \textit{Developmental Psychology}, 35, 835--847.\\
+\noindent [5] Yeager, D. S., et al. (2014). Breaking the cycle of mistrust: Wise interventions to provide critical feedback across the racial divide. \textit{Journal of Experimental Psychology: General}, 143, 804--824.\\
+\noindent [6] Litman, J. A. (2005). Curiosity and the pleasures of learning: Wanting and liking new information. \textit{Cognition and Emotion}, 19, 793--814.\\
+\noindent [7] Leary, M. R., et al. (2017). Cognitive and interpersonal features of intellectual humility. \textit{Personality and Social Psychology Bulletin}, 43, 793--813.\\
+\noindent [8] Porter, T., \& Schumann, K. (2018). Intellectual humility and openness to the opposing view. \textit{Self and Identity}, 17, 139--162.\\
+\noindent [9] Sherman, D. K., \& Cohen, G. L. (2006). The psychology of self-defense: Self-affirmation theory. \textit{Advances in Experimental Social Psychology}, 38, 183--242.\\
+\noindent [10] Reeve, J. (2009). Why teachers adopt a controlling motivating style toward students and how they can become more autonomy supportive. \textit{Educational Psychologist}, 44, 159--175.\\
+\noindent [11] Wood, D., Bruner, J. S., \& Ross, G. (1976). The role of tutoring in problem solving. \textit{Journal of Child Psychology and Psychiatry}, 17, 89--100.\\
+\noindent [12] Brown, N. J. L., Sokal, A. D., \& Friedman, H. L. (2013). The complex dynamics of wishful thinking: The critical positivity ratio. \textit{American Psychologist}, 68, 801--813.\\
+\noindent [13] Bandura, A. (1997). \textit{Self-Efficacy: The Exercise of Control}. W. H. Freeman.\\
+\noindent [14] Espinosa, R. (2026). Ariel Suite \texttt{bridge.js} gate. \url{https://ryryespi.github.io/mindframe/ariel/suite/}.\\
+\noindent [15] Espinosa, R. (2026). Project Ariel Students v2 monograph (Guided Divergence).\\
+\noindent [16] Al-Mosaiwi, M., \& Johnstone, T. (2018). Absolutist words as markers. \textit{Clinical Psychological Science}, 6, 529--542.\\
+\noindent [17] Watkins, E. R. (2008). Constructive and unconstructive repetitive thought. \textit{Psychological Bulletin}, 134, 163--206.
+
+\vspace{1.1em}
+\noindent\textit{All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.}
+
+\end{document}

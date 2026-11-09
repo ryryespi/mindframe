@@ -1,0 +1,204 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, margin=2.4cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\setmainfont{NotoSans}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic
+]
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlist[enumerate]{itemsep=0.25em,topsep=0.4em}
+\setlist[itemize]{itemsep=0.2em,topsep=0.35em}
+
+\title{Project Ariel: Guided Divergence and Grounded Return --- Art-Based Canvas Storytelling with AI Threat-Appraisal Gating for Students}
+\author{Ryan Espinosa \\ \textit{With research and computational assistance from Grok Bot}}
+\date{November 9, 2026 (v2)}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Conceptual framework, not validated science. This paper proposes an educational design, a formal loop, and a toy simulation. It is not a diagnostic instrument, not a clinical protocol, and not a substitute for a teacher, counselor, parent, or licensed professional. In the U.S., call or text 988 for crisis support; for immediate danger or a medical emergency, call 911. Involve a trusted adult when a student is at risk.
+
+\begin{abstract}
+Students need room for abstract, unguided, divergent thinking---and a reliable route back to the shared world of evidence, skills, and next steps. Building on the Project Ariel gated-line model, we propose \emph{Guided Divergence and Grounded Return}: learners explore freely through canvas art and narrative storytelling; an AI monitors noisy lexical proxies of threat appraisal ($A$); if a story tips into unconstructive rumination and the gate narrows, the system issues graded Socratic grounding challenges until $A$ falls below a hysteretic threshold; it then identifies the learner's intent and offers a factual knowledge path that bridges grandiose goals to the first concrete step. A deterministic session simulation shows threat rising under a ruminative narrative ($A_{\mathrm{peak}}=0.604$), a challenge window ($t\approx19.4$--$44.4$), gate recovery, and knowledge-path progress reaching $1.0$ as distance-to-reality falls to $0.06$. We map the loop onto the live Ariel Suite UI, propose Challenge / Intent / Knowledge-Path panels, and outline an ethics-bound classroom pilot. Lexical threat estimates are proxies, not diagnoses; imagination is not pathology.
+\end{abstract}
+
+\section{Introduction: Leave---and return}
+Education that only drills convergent answers can starve curiosity. Education that only celebrates fantasy can strand a student in unfinishable grandeur. The design question is narrower: \textbf{How can a learning environment invite open, abstract, unguided exploration while still offering a respectful, evidence-seeking path back to reality?}
+
+Project Ariel previously formalized state-dependent meaning transfer: a retained value or goal can coexist with a narrowed route to action when threat rises and regulation falls. This paper re-aims that machinery at students. The canvas and journal become instruments of \emph{guided divergence}; the gated engine becomes a \emph{return mechanism} that does not shame imagination, but challenges rumination and then scaffolds a factual ladder from a grand goal to a first step.
+
+\section{Theoretical foundations}
+\paragraph{Divergent and convergent thinking.}
+Guilford's mid-century call for creativity research distinguished production of many alternatives from single-answer convergence [1]. His later Structure-of-Intellect work elaborated divergent production as a family of abilities [2]. Ariel treats the canvas as a divergence space and the knowledge path as a convergence scaffold---not as a hierarchy of worth.
+
+\paragraph{Repetitive thought is not all one thing.}
+Watkins reviews constructive and unconstructive repetitive thought, emphasizing valence, context, and abstract versus concrete construal [3]. Depressive rumination---passive, repetitive focus on distress and its implications---is associated with maintained depression and impaired problem solving [4]. Ariel therefore tries to protect exploratory narrative while detecting when a story becomes stuck, self-attacking, or hopeless in tone.
+
+\paragraph{From free fantasy to binding goals.}
+Oettingen and colleagues show that freely fantasizing a desired future without confronting obstacles can leave commitment weak; mental contrasting of future and reality can create expectancy-dependent goals [5]. Implementation intentions---``if situation $Y$, then I will do $Z$''---further support enactment [6]. The Ground and Direct phases of Ariel echo Wish/Outcome/Obstacle/Plan (WOOP/MCII) without claiming to deliver a clinical protocol.
+
+\paragraph{Guided discovery, not argument.}
+In CBT practice, Socratic questioning aims at guided discovery: questions the learner can answer, attention to overlooked evidence, and movement from concrete to abstract so the learner rebuilds a conclusion [7]. Ariel’s Challenge panel is modeled on that spirit---graded prompts about evidence, present sensory detail, and what one would tell a friend---not on lecturing a student out of a dream.
+
+\paragraph{Expression, autonomy, and scaffolding.}
+Expressive writing about emotional experience has been linked, under boundary conditions, to health-relevant outcomes [8]; art-making is treated here cautiously as a related expressive medium, not as proven art therapy. Self-determination theory highlights autonomy, competence, and relatedness as supports for engagement [9]. Scaffolding temporarily reduces degrees of freedom while preserving the learner's agency [10]. Vygotsky’s zone of proximal development supplies the educational metaphor: the AI may assist just beyond independent reach, then withdraw.
+
+\paragraph{Lexical proxies are noisy.}
+Absolutist words (e.g., \emph{always}, \emph{never}, \emph{completely}) appear elevated in some online language samples associated with anxiety, depression, and suicidal ideation forums [11]. LIWC-style word-category methods, used widely in expressive-writing research, quantify attention and emotion in text but do not read minds [8]. Ariel treats such features as \emph{hypothesis generators} for threat appraisal, never as diagnoses.
+
+\section{The Guided Divergence loop}
+Five phases form a cycle that can repeat within a session:
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item \textbf{Explore.} Canvas art and storytelling with the gate relatively open. Divergent prompts are allowed; no premature convergence.
+  \item \textbf{Appraise.} An AI estimates threat $A$ from narrative and (optionally) canvas features: absolutist density, self-focus, repetitive theme recurrence, hopelessness markers. All are noisy.
+  \item \textbf{Challenge (conditional).} If $A$ exceeds an upper threshold and a rumination loop is suspected, issue graded Socratic grounding prompts until $A$ falls below a lower threshold (hysteresis).
+  \item \textbf{Ground.} Identify intent behind the fantasy (mastery, recognition, belonging, escape, contribution, justice, play, \ldots).
+  \item \textbf{Direct.} Offer a factual knowledge path: prerequisites, milestones, first concrete step, obstacle contrast, and an if--then plan.
+\end{enumerate}
+
+\subsection{Threat estimate}
+Let $f_{\mathrm{abs}}, f_{\mathrm{rep}}, f_{\mathrm{self}}, f_{\mathrm{hope}}\in[0,1]$ be normalized feature intensities from text (and optionally stroke entropy on the canvas). A simple proxy is
+\begin{equation}
+\hat{A}_t = \mathrm{clip}_{[0,1]}\!\Big(a_0 + w_1 f_{\mathrm{abs}} + w_2 f_{\mathrm{rep}} + w_3 f_{\mathrm{self}} + w_4 f_{\mathrm{hope}}\Big),
+\end{equation}
+with illustrative weights $(a_0,w_1,w_2,w_3,w_4)=(0.12,0.35,0.30,0.20,0.25)$. The displayed threat state relaxes toward the estimate:
+\begin{equation}
+\tau_A \dot{A} = \hat{A}_t - A.
+\end{equation}
+During Challenge, prompts pull the target downward (graded support), so $\hat{A}$ is mixed with a lower set-point. These coefficients are design choices, not fitted clinical parameters.
+
+\subsection{Hysteretic gate and suite alignment}
+Available control $r$ rises when grounding succeeds and falls when threat dominates. The \emph{paper} form of the gated line was $g=0.05+0.95\,P(1-G)$. The \textbf{live Ariel Suite} implements a UI simplification using threat $v$ and control $r$ [14]:
+\begin{equation}
+g=\mathrm{clamp}\!\big(0.05 + 0.95\,(0.2+0.8\,r)\,(1-0.3\,v),\;0.05,\;1\big).
+\end{equation}
+In this student model we set $v\approx A$. Challenge mode engages when $A\ge\theta_{\mathrm{hi}}$ and releases only when $A\le\theta_{\mathrm{lo}}$ with $\theta_{\mathrm{hi}}>\theta_{\mathrm{lo}}$ (hysteresis), preventing flicker.
+
+\subsection{Challenge intensity}
+Let $c_t\in[0,1]$ be challenge intensity. While Challenge is active, $c$ rises; otherwise it decays:
+\begin{equation}
+\dot{c} =
+\begin{cases}
+\kappa_{+}\, (1-c) & \text{in Challenge},\\
+-\kappa_{-}\, c & \text{otherwise}.
+\end{cases}
+\end{equation}
+Prompt difficulty is scheduled by $c$: sensory/present-moment first; then concrete evidence; then friend-advice and next observable step. The AI must not override the student's values; it may only request specificity.
+
+\subsection{Distance-to-reality and knowledge progress}
+Let $G^\star$ be a grandiose goal embedding (or a structured skill graph node) and $P_k$ the current knowledge-path node. Define a distance-to-reality
+\begin{equation}
+d_t = \delta(G^\star, P_k)\in[0,1],
+\end{equation}
+high when the fantasy is far from any first concrete step. Knowledge-path progress $p_t$ increases when the gate is open enough and Challenge has cooled:
+\begin{equation}
+\dot{p} = \eta\, g\, (1-A)\, \mathbf{1}_{\{\text{Ground/Direct}\}},\qquad
+\dot{d} = -\zeta\, g\, (1-A)\, \mathbf{1}_{\{\text{Ground/Direct}\}}.
+\end{equation}
+Progress is educational scaffolding, not a grade and not a moral score.
+
+\section{Simulation of one session}
+We integrate the loop with forward Euler ($\Delta t=0.05$) over $T=80$ arbitrary time units. A synthetic narrative feature schedule rises through a ruminative middle segment, then falls under Challenge. Thresholds: $\theta_{\mathrm{hi}}=0.52$, $\theta_{\mathrm{lo}}=0.34$. Halving $\Delta t$ changes the final state by $<10^{-6}$.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/fig_threat_gate.png}
+\caption{Threat $A$, control $r$, suite-aligned gate $g$, and challenge intensity. Shaded band marks the Challenge window ($t\approx19.4$--$44.4$).}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/fig_path.png}
+\caption{Knowledge-path progress rises after grounding; distance-to-reality falls. Values are synthetic, not student data.}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{Key synthetic session numbers.}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Quantity & Value \\
+\midrule
+$A$ peak / time & $0.604$ / $t=27$ \\
+Challenge enter / exit & $t=19.35$ / $t=44.4$ \\
+$A$ at Challenge exit & $0.346$ \\
+$g$ at peak $A$ / final $g$ & $0.619$ / $0.788$ \\
+Final progress / distance & $1.00$ / $0.06$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Reproduce with \texttt{python3 students/simulate\_session.py}. The run illustrates the designed loop; it does not prove learning gains.
+
+\section{Worked example: ``Design a city on Mars''}
+\paragraph{Explore.} A student paints red domes and writes a story of being the architect who finally ``gets it right when Earth never listened.''
+\paragraph{Appraise.} Absolutist and hopeless markers rise (``never,'' ``always alone,'' ``completely impossible unless I\ldots''); $A$ crosses $\theta_{\mathrm{hi}}$.
+\paragraph{Challenge.} Graded prompts: What color is the desk in front of you? What is one sentence a friend would say? What is one fact about Mars you could check in a reliable source today?
+\paragraph{Ground (intent).} Classification (illustrative, editable by the student): primary intent = \emph{mastery + contribution}; secondary = recognition; escape is present but not endorsed as the goal.
+\paragraph{Direct (factual path).} An ordered ladder---labeled \textbf{illustrative}, not a career prescription:
+\begin{enumerate}[leftmargin=1.6em]
+  \item Pre-algebra fluency $\rightarrow$ Algebra I (equations, graphs).
+  \item Conceptual physics (forces, energy) with lab notebooks.
+  \item Chemistry foundations (matter, reactions) for life-support literacy.
+  \item Intro engineering / design thinking: constraints, trade-offs, prototypes.
+  \item A small CAD or physical model of \emph{one} habitat module (not a city).
+  \item Join a mentor, club, or maker space; write one if--then study plan for the next week.
+\end{enumerate}
+Mental contrasting names a real obstacle (e.g., ``I lose Fridays to scrolling''); an implementation intention pairs it with a cue (``If it is Friday 4pm, then I open the algebra set for 25 minutes'').
+
+\section{Mapping to the live Ariel Suite}
+The public suite at \url{https://ryryespi.github.io/mindframe/ariel/suite/} already joins four panes: Drawing Canvas, Journal Mapping, Gate engine, and Charts [14]. Bridge code exposes
+\[
+g=\mathrm{clamp}(0.05+0.95(0.2+0.8r)(1-0.3v),0.05,1)
+\]
+and a transfer readout along I$\rightarrow$O. Proposed additions for Guided Divergence:
+\begin{itemize}[leftmargin=1.4em]
+  \item \textbf{Challenge panel:} timed, graded Socratic cards; student can skip, edit, or call a human.
+  \item \textbf{Intent card:} multi-label intent chips the student confirms or rejects.
+  \item \textbf{Knowledge Path ladder:} ordered milestones with ``first concrete step'' highlighted; exports to a teacher view.
+\end{itemize}
+Journal nodes (Retention, Transfer, Execution, Support, Grace) remain available; for classrooms, Grace is optional and never coerced.
+
+\section{Ethics and safety}
+Imagination is not a disorder. Challenge must not pathologize play, grief, culture, or neurodiversity. Teachers or counselors remain in the loop for minors; obtain consent/assent; prefer local-first storage; minimize data leaving the device. Lexical proxies inherit cultural and linguistic bias---absolutist words in one dialect are not pathology. The AI must not override student values or religious commitments. If self-harm, hopelessness about living, or acute panic appears, stop the loop and escalate: trusted adult, school protocol, and in the U.S.\ 988 / 911 as appropriate. This system is not crisis care.
+
+\section{Proposed classroom pilot}
+\paragraph{Design.} Feasibility pilot in 2--4 classrooms ($N\approx48$ consenting students with guardian consent/assent as required), randomized by class period to Ariel Guided Divergence versus time-matched creative journaling without threat gating. Ethics review required. No provocation of distress; skip anytime.
+\paragraph{Measures (age-appropriate forms).} Alternative Uses Task (divergent production) [1, 2]; a brief repetitive-negative-thinking measure such as an age-appropriate RRS brooding subset or PTQ items where validated for the age band [4, 12]; goal-attainment scaling for the first concrete step [13]; engagement and autonomy-support ratings [9]. Primary: completion of one teacher-visible concrete step within two weeks. Secondary: change in repetitive-thought scores without loss of Alternative Uses fluency.
+\paragraph{Predictions.} (1)~Divergence fluency need not fall when gating is present. (2)~Students with rising lexical-$A$ who receive Challenge will show more concrete next-step language than matched journaling alone. (3)~A null result on step completion would challenge the Direct phase more than the value of art itself.
+\paragraph{Limitations.} Simulation $\neq$ classroom. Lexical $A$ is biased and gameable. Grand goals are culturally shaped. Teachers need training so ``challenge'' does not become humiliation.
+
+\section{Conclusion}
+Guided Divergence and Grounded Return reframes Project Ariel for students: protect the freedom to think sideways, notice when a narrative closes the gate through rumination, challenge gently until threat proxies fall, name the intent beneath a fantasy, and lay a factual path toward a first real step. The live suite already carries canvas, journal, gate, and charts; Challenge, Intent, and Knowledge-Path panels are the natural next build. The honest claim today is a reproducible design hypothesis---not a finished pedagogy and not a clinical tool.
+
+\section*{References}
+\noindent [1] Guilford, J. P. (1950). Creativity. \textit{American Psychologist}, 5, 444--454.\\
+\noindent [2] Guilford, J. P. (1967). \textit{The Nature of Human Intelligence}. McGraw-Hill.\\
+\noindent [3] Watkins, E. R. (2008). Constructive and unconstructive repetitive thought. \textit{Psychological Bulletin}, 134, 163--206.\\
+\noindent [4] Nolen-Hoeksema, S., Wisco, B. E., \& Lyubomirsky, S. (2008). Rethinking rumination. \textit{Perspectives on Psychological Science}, 3, 400--424.\\
+\noindent [5] Oettingen, G., Pak, H., \& Schnetter, K. (2001). Self-regulation of goal setting: Turning free fantasies about the future into binding goals. \textit{Journal of Personality and Social Psychology}, 80, 736--748.\\
+\noindent [6] Gollwitzer, P. M. (1999). Implementation intentions: Strong effects of simple plans. \textit{American Psychologist}, 54, 493--503.\\
+\noindent [7] Padesky, C. A. (1993). Socratic questioning: Changing minds or guiding discovery? Invited keynote, European Congress of Behavioural and Cognitive Therapies, London.\\
+\noindent [8] Pennebaker, J. W. (1997). Writing about emotional experiences as a therapeutic process. \textit{Psychological Science}, 8, 162--166.\\
+\noindent [9] Ryan, R. M., \& Deci, E. L. (2000). Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being. \textit{American Psychologist}, 55, 68--78.\\
+\noindent [10] Wood, D., Bruner, J. S., \& Ross, G. (1976). The role of tutoring in problem solving. \textit{Journal of Child Psychology and Psychiatry}, 17, 89--100.\\
+\noindent [11] Al-Mosaiwi, M., \& Johnstone, T. (2018). In an absolute state: Elevated use of absolutist words is a marker specific to anxiety, depression, and suicidal ideation. \textit{Clinical Psychological Science}, 6, 529--542.\\
+\noindent [12] Ehring, T., et al. (2011). The Perseverative Thinking Questionnaire (PTQ): Validation of a content-independent measure of repetitive negative thinking. \textit{Journal of Behavior Therapy and Experimental Psychiatry}, 42, 225--232.\\
+\noindent [13] Kiresuk, T. J., \& Sherman, R. E. (1968). Goal attainment scaling: A general method for evaluating comprehensive community mental health programs. \textit{Community Mental Health Journal}, 4, 443--453.\\
+\noindent [14] Espinosa, R. (2026). Ariel Suite bridge engine (\texttt{bridge.js}): $g=\mathrm{clamp}(0.05+0.95(0.2+0.8r)(1-0.3v),0.05,1)$. \url{https://ryryespi.github.io/mindframe/ariel/suite/}.\\
+\noindent [15] Espinosa, R. (2026). \textit{The Gated Line: From Void to Values-Directed Action---A Coupled Model of Regulatory Availability and Meaning Transfer} (v1.1). Project Ariel monograph.
+
+\vspace{1.2em}
+\noindent\textit{All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.}
+
+\end{document}

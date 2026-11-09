@@ -4,6 +4,8 @@ Project Ariel is an offline canvas for looking at a thought as geometry. The sha
 
 This is conceptual, not validated science. It is not therapy and not a diagnosis. In crisis in the U.S., call or text **988**. In an emergency, call **911**.
 
+Related papers from this week are listed in the [research index](../research/).
+
 All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.
 
 ## Quick start

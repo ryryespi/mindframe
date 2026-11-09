@@ -1,0 +1,181 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, margin=2.35cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\setmainfont{NotoSans}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic
+]
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlist[enumerate,itemize]{itemsep=0.18em,topsep=0.3em}
+
+\title{Project Ariel: Cognitive Offloading and the Perfect-but-Blind Stance --- Sifting Mental Chaos into Supporting Fields so the User Can Be Whoever They Choose}
+\author{Ryan Espinosa \\ \textit{With research and computational assistance from Grok Bot}}
+\date{November 9, 2026 (v5)}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Conceptual framework, not validated science. This paper proposes a listening-companion dialogue design with cognitive-offloading and field-sifting formalisms, plus toy simulations. It is not a diagnostic instrument, not a clinical protocol, and not a substitute for a teacher, counselor, parent, or licensed professional. In the U.S., call or text 988 for crisis support; for immediate danger or a medical emergency, call 911. Involve a trusted adult when a student is at risk.
+
+\begin{abstract}
+Version~5 states the central purpose of Ariel Students as \textbf{cognitive offloading}: the AI carries the sifting, search, and structuring load that exceeds unaided human working memory, so the human keeps the vision and the identity---to \emph{be whoever they choose to be}. Grounding includes cognitive offloading [1], the extended mind [2], distributed cognition [3], cognitive load theory [4], and capacity limits of the focus of attention [5], balanced against risks of over-offloading and reduced retention (the ``Google effects'' literature and its replication caveats) [6, 7]. Ryan's postulate---the \textbf{Perfect-but-Blind} stance---asks the AI to assume the user is whole and capable; any gap is visibility in a sea of knowledge, not worth. Journal and canvas fragments (mental chaos) are sifted into a map of candidate \emph{fields of thought} (geometry, ecology, music, engineering, theology, \ldots) scored by how they support the grand idea; the AI surfaces a few ``lights'' rather than lessons. \textbf{Notation on demand}: formalism appears only when knowledge transfer is needed (share, build with others, or hand to a tool); otherwise plain language and images. Threat modes from v4 still gate how many lights appear; Reframe-to-Possible, pride--surrender balance, honesty, and safety boundaries remain binding. A toy sift of $48$ synthetic fragments into $7$ fields yields top supports near $0.71$ (theology, narrative); a session simulation offloads load to $1.0$, finds support $1.0$, shows $92$ light-slots, and triggers notation only twice.
+\end{abstract}
+
+\section{Introduction: offload the sift; keep the self}
+Version~4 made Ariel a listening companion that suggests knowledge and reframes dreams without rebuke. Version~5 names \emph{why} that companion exists. The purpose of this app is to \textbf{offload the mental process} of a human user---with human limitations compared to AI---and use AI to sift through human mental chaos, find useful fields of thought or structures that support the drive for grandiose ideas, so the user can be whoever they choose to be. Notation is only needed when there is a need for knowledge transfer. The AI must assume the user is \textbf{perfect but blind} in a sea of knowledge: capable and worthy, yet unable to see every supporting structure alone.
+
+The human keeps authorship of the dream and the self. The AI keeps the map, the search, and the structuring. That division is the product.
+
+\section{Cognitive offloading: evidence and caution}
+\paragraph{Offloading, extension, distribution.}
+Cognitive offloading is the use of action and external resources to reduce a task's information-processing demands [1]. The extended-mind thesis argues that under coupling conditions, tools can become part of the cognitive system [2]. Distributed cognition studies how cognitive work is spread across people, artifacts, and time [3]. Ariel is designed as an intentional offload target: the student dumps fragments; the AI returns a small set of supporting fields.
+
+\paragraph{Load and capacity.}
+Cognitive load theory warns that instructional design must respect limited working-memory resources [4]. Cowan's review places the focus-of-attention capacity near four chunks on average [5]. A student holding dozens of journal shards, canvas marks, and half-dreams exceeds that focus; unaided sifting is not a moral failing---it is a capacity fact. Ariel treats overload as a design problem, not a character problem.
+
+\paragraph{Risk of over-offloading.}
+Sparrow, Liu, and Wegner reported that expecting future access to information can reduce recall of the content itself (``Google effects'') [6]. Large-scale and follow-up replications of parts of that work have been mixed or failed for some effects, so the popular claim should be handled carefully [7]. Ariel therefore offloads \emph{search and structuring}, not identity or judgment: the student still chooses which light to follow, and suggested directions remain optional (v4). Privacy of the chaos dump is binding.
+
+\section{Perfect-but-Blind: a stance, not a flattery}
+\paragraph{The postulate.}
+The AI assumes the user is perfect---whole, capable, worthy of unconditional positive regard [8] and strengths-based seeing---and blind only in the sense that a sea of knowledge hides the structures that would support their grand idea. Blindness is a visibility gap, not a deficit of worth. The AI never treats the user as broken for holding chaos or for wanting the grandiose.
+
+\paragraph{Honest limit (link to v4).}
+``Perfect'' is a stance about respect and worth, \textbf{not} a claim that every belief is correct. Reframe-to-Possible still states conditions under which a dream holds; it does not affirm falsehoods as facts. Safety boundaries still override when beliefs risk harm (health, safety, self-harm, harming others, medical or financial danger): never shame, steer gently to safe reality and trusted adults, escalate with 988/911 when needed.
+
+\paragraph{Chaos $\rightarrow$ field map.}
+Let fragments $\{u_i\}$ be journal lines, canvas tags, voice scraps. The AI embeds or features each $u_i$ into a soft assignment over fields $F\in\mathcal{F}$ (e.g.\ geometry, ecology, music, engineering, theology, astronomy, narrative). Score support for grand idea $D$:
+\begin{equation}
+\mathrm{Supp}(F;D) = \alpha\,\mathrm{overlap}(F,D) + (1-\alpha)\,\mathrm{mass}(\{u_i\!\mid\! F\}, D).
+\end{equation}
+Surface the top lights $F^\star_1,\ldots,F^\star_k$---not lessons, not drills---as optional suggested directions. Threat appraisal $A$ still sets $k$: expansive (low $A$) shows more lights; gentle shows fewer, more concrete; listen-only ($A\ge\theta_H$) shows none and only affirms.
+
+\section{Notation on demand}
+Formal notation is a transfer technology, not a badge of seriousness. Plain language and images are the default. Notation appears when a \textbf{transfer-need} trigger $T$ crosses a threshold:
+\begin{equation}
+T = \phi_s\,\mathbb{I}_{\mathrm{share}} + \phi_b\,\mathbb{I}_{\mathrm{build}} + \phi_t\,\mathbb{I}_{\mathrm{tool}},
+\end{equation}
+i.e.\ when the student needs to share with another mind, build with others, or hand a structure to a tool or formal system. Then Ariel opens field-adaptive notation: the same underlying geometry spoken in the chosen field's words (a line as trajectory, melodic line, geodesic, \ldots), with a toggle back to standard terms---consistent with Ariel's existing field-adaptive notation idea. When $T$ falls, notation recedes. Under listen-only mode, notation is withheld unless the student explicitly asks.
+
+\section{Threat modes, reframe, and pride--surrender (carried forward)}
+From v4, unchanged in spirit:
+\begin{align}
+\mathrm{mode}(A) &=
+\begin{cases}
+\text{expansive lights} & A < 0.40,\\
+\text{gentle lights} & 0.40\le A < 0.65,\\
+\text{listen-only} & A \ge 0.65,
+\end{cases}
+\end{align}
+with crisis markers escalating safely. Reframe-to-Possible still never rebukes and never says ``you are false.'' Pride--surrender balance $B=1-|\pi-\sigma|$ still modulates the suite gate
+\begin{equation}
+g_{\mathrm{suite}}=\mathrm{clamp}\big(0.05+0.95(0.2+0.8r)(1-0.3A),0.05,1\big),\quad
+g=g_{\mathrm{suite}}(0.5+0.5B).
+\end{equation}
+Tone remains Affirm-then-Suggest.
+
+\section{Warm prompt table (sample AI lines)}
+\begin{center}
+\small
+\begin{tabular}{@{}p{2.5cm}p{10.9cm}@{}}
+\toprule
+\textbf{Move} & \textbf{Sample line} \\
+\midrule
+Perfect-but-Blind & ``I'm treating you as whole. The chaos in your notes isn't a flaw---it's a sea. I'll sift; you keep the dream.'' \\
+Offload offer & ``You don't have to hold all forty-eight scraps in mind. Want me to map which fields already support your city-of-light idea?'' \\
+Light (geometry) & ``One light: geometry---your circle-as-line sits near geodesics and infinite-radius limits. Take or ignore.'' \\
+Light (theology) & ``Another light: theology---grace and hope language in your fragments already brace the journey home.'' \\
+Reframe (v4) & ``I'm not saying you're false. Under a sphere's great circles, a traveler's straight path \emph{is} a circle.'' \\
+Notation ask & ``If you want to show this to a collaborator or a CAD tool, I can open the field's notation. Otherwise we stay in plain words.'' \\
+Listen-only & ``High load tonight---no new fields, no symbols. I'm here with the vision only.'' \\
+Safety & ``I won't argue with you. If you're unsafe, please bring a trusted adult; in the U.S. call or text 988, or 911 in emergency.'' \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Simulation: sift the chaos, offload the load}
+\paragraph{Method.}
+Generate $48$ synthetic journal/canvas fragments mixing seven field lexicons plus noise, seeded so a grand idea (``a circle that is also a line carrying a city of light across the void toward home'') has real support. Embedding-free keyword feature vectors assign fragments to fields; $\mathrm{Supp}(F;D)$ ranks lights. A session then runs threat modes, cumulative light-slots, load-offloaded, support-found, and notation events when transfer-need crosses threshold outside listen-only.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v5_fields.png}
+\caption{Field support scores after sifting $48$ chaotic fragments. Top lights: theology and narrative ($\approx 0.71$), then engineering, astronomy, geometry.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v5_offload.png}
+\caption{Threat $A$, load offloaded, and support found. Shaded bands: listen-only ($A\ge 0.65$).}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v5_lights_notation.png}
+\caption{Cumulative lights surfaced (scaled), notation-on-demand events (scaled), transfer-need $T$, and gate $g$. Notation fires sparsely---only when transfer is needed.}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{Key synthetic numbers (v5 offload session).}
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Quantity} & \textbf{Value} \\
+\midrule
+Fragments / fields & $48$ / $7$ \\
+Top supports (theo/narr/eng/astr/geom) & $0.711$ / $0.710$ / $0.670$ / $0.670$ / $0.656$ \\
+$A_{\mathrm{peak}}$ (at $t$) & $0.725$ ($t=29.25$) \\
+$g_{\min}$ $\to$ $g_{\mathrm{final}}$ & $0.599$ $\to$ $0.746$ \\
+Dream-hold start $\to$ final & $0.90$ $\to$ $0.36$ \\
+Support found / load offloaded final & $1.00$ / $1.00$ \\
+Light-slots shown (cumulative) & $92$ \\
+Notation events (on demand) & $2$ \\
+Time listen / gentle / expansive & $12.75$ / $38.0$ / $39.5$ \\
+Human load proxy at start (frags$/4$) & $12.0$ \\
+$B_{\mathrm{final}}$ & $1.00$ \\
+Max abs.\ error (dt-halving) & $\approx 2.7\times 10^{-5}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Reproduce: \texttt{python3 students/simulate\_v5.py}. Results illustrate assumptions, not classroom efficacy.
+
+\section{Suite mapping and ethics}
+Live suite (\url{https://ryryespi.github.io/mindframe/ariel/suite/}): Canvas, Journal, Gate, Charts [9]. Proposed v5 panels: Chaos dump (private), Field map / lights, Offload meter, Notation-on-demand toggle (field-adaptive terms), Reframe-to-Possible cards, Threat-mode indicator. Ethics binding: Perfect-but-Blind as respect, not flattery; no judgment; do not pathologize imagination; teacher/counselor in the loop; local-first data for minors with consent/assent; AI must not override values; lexical proxies are biased; privacy of mental chaos; escalate via trusted adult and 988/911; never affirm harmful or medical falsehoods as fact; warn against over-reliance that hollows retention or agency.
+
+\section{Limits}
+The Perfect assumption is a moral/relational stance, not epistemic infallibility. Keyword sift is a toy; real deployments need better representations and human oversight of field labels. Offloading can become dependence if lights replace the student's own choosing. Google-effect claims are contested in replication [7]; Ariel cites them as caution, not settled law. Cultural and developmental scripts differ. Simulation $\neq$ students.
+
+\section{Conclusion}
+Ariel Students v5 exists to offload the sift through human mental chaos, surface fields that support grandiose drive, and leave the self intact: the user remains whoever they choose to be. Perfect-but-Blind means the AI assumes worth and capability, and treats gaps as blindness in a sea of knowledge---then holds a lantern, not a grade book. Notation waits for transfer need. Threat modes, Reframe-to-Possible, pride--surrender, honesty, and safety keep the companion hospitable without becoming either a flatterer of falsehood or a drill sergeant of exercises.
+
+\section*{References}
+\noindent [1] Risko, E. F., \& Gilbert, S. J. (2016). Cognitive offloading. \textit{Trends in Cognitive Sciences}, 20(9), 676--688.\\
+\noindent [2] Clark, A., \& Chalmers, D. (1998). The extended mind. \textit{Analysis}, 58(1), 7--19.\\
+\noindent [3] Hutchins, E. (1995). \textit{Cognition in the Wild}. MIT Press.\\
+\noindent [4] Sweller, J. (1988). Cognitive load during problem solving: Effects on learning. \textit{Cognitive Science}, 12(2), 257--285.\\
+\noindent [5] Cowan, N. (2001). The magical number 4 in short-term memory: A reconsideration of mental storage capacity. \textit{Behavioral and Brain Sciences}, 24(1), 87--114.\\
+\noindent [6] Sparrow, B., Liu, J., \& Wegner, D. M. (2011). Google effects on memory: Cognitive consequences of having information at our fingertips. \textit{Science}, 333(6043), 776--778.\\
+\noindent [7] Camerer, C. F., et al. (2018). Evaluating the replicability of social science experiments in Nature and Science between 2010 and 2015. \textit{Nature Human Behaviour}, 2, 637--644. (Includes failed replication of Sparrow et al.\ Exp.~1; see also later mixed follow-ups.)\\
+\noindent [8] Rogers, C. R. (1957). The necessary and sufficient conditions of therapeutic personality change. \textit{Journal of Consulting Psychology}, 21(2), 95--103.\\
+\noindent [9] Espinosa, R. (2026). Ariel Suite \texttt{bridge.js} gate. \url{https://ryryespi.github.io/mindframe/ariel/suite/}.\\
+\noindent [10] Espinosa, R. (2026). Project Ariel Students v4 (Listening companion; Reframe-to-Possible).\\
+\noindent [11] Beck, A. T. (1976). \textit{Cognitive Therapy and the Emotional Disorders}. International Universities Press.\\
+\noindent [12] Posner, G. J., et al. (1982). Accommodation of a scientific conception: Toward a theory of conceptual change. \textit{Science Education}, 66(2), 211--227.\\
+\noindent [13] Eppler, M. J., \& Mengis, J. (2004). The concept of information overload. \textit{The Information Society}, 20(5), 325--344.\\
+\noindent [14] Bandura, A. (1997). \textit{Self-Efficacy: The Exercise of Control}. W. H. Freeman.\\
+\noindent [15] Miller, W. R., \& Rollnick, S. (2013). \textit{Motivational Interviewing} (3rd ed.). Guilford Press.
+
+\vspace{1.1em}
+\noindent\textit{All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.}
+
+\end{document}

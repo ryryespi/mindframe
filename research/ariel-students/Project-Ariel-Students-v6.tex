@@ -1,0 +1,169 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, margin=2.35cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\setmainfont{NotoSans}[
+  Path=fonts/,
+  Extension=.ttf,
+  UprightFont=*-Regular,
+  BoldFont=*-Bold,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-BoldItalic
+]
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlist[enumerate,itemize]{itemsep=0.18em,topsep=0.3em}
+
+\title{Project Ariel: Clear Expression, Kindred Minds, and Peace --- A Listening Companion that Helps Students Say Their Idea, Find Guides Across Time, and Close Loops Toward Joy}
+\author{Ryan Espinosa \\ \textit{With research and computational assistance from Grok Bot}}
+\date{November 9, 2026 (v6)}
+
+\begin{document}
+\maketitle
+
+\noindent\textbf{Status.} Conceptual framework, not validated science. This paper proposes a listening-companion design for clear expression, kindred-mind matching, and peace-oriented loop closing, with formal proxies and toy simulations. It is not a diagnostic instrument, not a clinical protocol, and not a substitute for a teacher, counselor, parent, or licensed professional. In the U.S., call or text 988 for crisis support; for immediate danger or a medical emergency, call 911. Involve a trusted adult when a student is at risk.
+
+\begin{abstract}
+Version~6 extends the listening companion so that students can \textbf{communicate their ideas clearly}, discover that they are \textbf{not alone} in their thinking, and move toward \textbf{mental peace}: the stance that their ultimate legacy of knowledge already exists, with open loops closed even on determined, unchangeable ideals that are factually incorrect---honoring the ideal's meaning within an honest frame (v4)---while shifting outlook from insecurity-dwelling toward the joys of life. Clear Communication uses reflective restatement, one-sentence say-backs, and medium choice (words, sketch, story), grounded in self-explanation [1] and the prot\'{e}g\'{e} effect [2]. Kindred Minds map narrative/art features to guides among historical thinkers and modern teachers (e.g., circle-as-line $\rightarrow$ Desargues, Kepler, Riemann, Escher; dreamer-engineers $\rightarrow$ Tsiolkovsky; faith-and-reason $\rightarrow$ Augustine, Pascal), drawing on belonging [3] and scientists' struggle stories [4]. Legacy \& Peace formalizes loop closing via plan-making against Zeigarnik-style open goals [5] and Ryan's postulate that the legacy already exists in the human conversation. Positive outlook draws on savoring [6], broaden-and-build [7], gratitude [8], and self-compassion [9] without overclaiming effect sizes. A session model tracks peace $P_z$ and insecurity-dwelling $D$: $P_z: 0.28\rightarrow 1.0$, $D: 0.62\rightarrow 0.0$, $19$ loops closed, $18$ kindred cards, with $A_{\mathrm{peak}}=0.695$ and brief listen-only time.
+\end{abstract}
+
+\section{Introduction}
+Versions~4--5 made Ariel a listening, offloading companion that reframes dreams without rebuke and sifts chaos into supporting fields. Version~6 adds what Ryan asks next: help users \textbf{communicate clearly}; help them realize they are \textbf{not alone}, by finding guides among modern teachers and people who already gave their knowledge to society; \textbf{comfort} ways of thinking seen in narratives or art; push toward \textbf{mental peace}---that the ultimate legacy of knowledge already exists---by closing loops on determined unchangeable ideals even when factually incorrect; and maintain a \textbf{positive outlook}, focusing on the joys of life rather than dwelling on insecurities.
+
+\section{Clear Communication}
+The AI helps the student express the idea in their own voice:
+\begin{enumerate}[leftmargin=1.3em]
+  \item Reflective restatement (``Here is what I hear\ldots'').
+  \item Say-it-back in one sentence (student revises until it fits).
+  \item Medium choice: words, sketch, or story---notation only when transfer is needed (v5).
+\end{enumerate}
+Prompting learners to explain to themselves improves understanding [1]. Teaching another (even a virtual prot\'{e}g\'{e}) can increase learning effort [2]. Ariel uses these as \emph{expression} supports, not as graded exercises: the goal is clarity the student recognizes as theirs. (Popular ``Feynman Technique'' labels are informal pedagogy; we rely on the citable self-explanation and prot\'{e}g\'{e} literatures rather than attributing a formal method to Feynman.)
+
+\section{Kindred Minds: you are not alone}
+From narrative and art features the AI builds a soft style vector $s$ (geometry-infinity, dream-build, faith-reason, \ldots) and scores guides $G_j$ by similarity
+\begin{equation}
+\mathrm{sim}(s,G_j)=\frac{1}{|T_j|}\sum_{t\in T_j} s(t),
+\end{equation}
+then presents a few ``you are not alone'' cards---historical thinkers and living teachers---never as proof the student is ``correct,'' but as companions who already walked nearby.
+
+\paragraph{Accurate examples (circle-as-line student).}
+Desargues's projective geometry treats parallels as meeting at a point at infinity (a line as a circle through infinity). Kepler used an infinitely distant focus for the parabola in optical/astronomical geometry. Riemann's curved-space geometry makes geodesics the straightest paths. Escher's art plays with circles, infinity, and spatial logics that feel impossible under school Euclid. Dreamer-engineers find a kindred in Tsiolkovsky's structured spaceflight visions. Faith-and-reason seekers find Augustine and Pascal already in the conversation.
+
+\paragraph{Theory.}
+Brief belonging interventions can improve outcomes by framing adversity as shared and temporary [3]. Stories of scientists' intellectual and personal struggles can improve science motivation and grades relative to achievement-only stories, especially for lower performers [4]. Kindred cards aim at that loneliness-reducing, struggle-honoring function---standing on shoulders---without claiming identical effect sizes in an AI product.
+
+\section{Legacy \& Peace: the legacy already exists}
+\paragraph{Ryan's postulate.}
+The student's ultimate legacy of knowledge \emph{already exists} in the human conversation: what they seek has been approached, named, or prepared by others. The AI's job is to help the student find that inheritance and close open loops---not to invent a false uniqueness contest.
+
+\paragraph{Closing loops.}
+Unfulfilled goals persist in mind (Zeigarnik-style activation); making a specific plan can reduce intrusive activation [5]. Ariel closes loops in two ways: (i) a concrete next step the student chooses (optional suggested direction), and (ii) for determined unchangeable ideals that are factually incorrect, \textbf{honoring the why} inside a frame where a version holds (Reframe-to-Possible, v4)---never stating the falsehood as fact, never rebuking. Safety boundary unchanged: beliefs that risk harm still steer gently to safe reality and adults (988/911).
+
+\paragraph{States.}
+Let $P_z\in[0,1]$ be peace and $D\in[0,1]$ insecurity-dwelling:
+\begin{align}
+\Delta P_z &= +\eta_L L + \eta_K K + \eta_S S - \eta_A A - \eta_D D,\\
+\Delta D &= +\eta_R R - \eta_P P_z - \eta_B B_{\mathrm{elong}} - \eta_G G_{\mathrm{rat}},
+\end{align}
+where $L$ are loop closures, $K$ kindred matches, $S$ savoring moments, $R$ rumination, $B_{\mathrm{elong}}$ belonging, $G_{\mathrm{rat}}$ gratitude/joy focus. Threat modes still gate how many cards and clarifications appear.
+
+\section{Positive outlook: joys over insecurity}
+Savoring attends to and enhances positive experience [6]. Broaden-and-build proposes that positive emotions widen thought--action repertoires and build resources [7]. Gratitude practices can increase well-being in controlled studies [8]. Self-compassion offers a kinder stance toward personal failure than harsh self-judgment [9]. Ariel invites brief joy-focus prompts (``What in this dream already feels alive?'') and self-compassionate language when $D$ is high. We cite these as design warrants, not as guaranteed clinical effect sizes for this app.
+
+\section{Warm prompt table}
+\begin{center}
+\small
+\begin{tabular}{@{}p{2.6cm}p{10.8cm}@{}}
+\toprule
+\textbf{Move} & \textbf{Sample line} \\
+\midrule
+Clarify & ``Say it back in one sentence in your voice---I'll wait. Words, a sketch, or a story: your choice.'' \\
+Kindred & ``You are not alone. Desargues already treated a line as meeting infinity the way a circle does. Want his story of struggle, or a living geometry teacher's version?'' \\
+Legacy & ``The legacy you are reaching for already lives in the human conversation. We can close this loop by naming who carried a piece of it.'' \\
+Loop (ideal) & ``I won't say you're false. The \emph{why} of your circle-line---continuous journey without corners---holds on a geodesic. Shall we rest the ideal there?'' \\
+Savor & ``Before the next thought, what one joy is already in this vision---color, homecoming, light?'' \\
+Self-compassion & ``Dwelling on insecurity is human. You are allowed to be kind to the part that is scared and still keep the dream.'' \\
+Listen-only & ``No new guides or facts. I'm here. The peace can wait until you're ready.'' \\
+Safety & ``I won't shame you. If you're unsafe, please bring a trusted adult; U.S.\ 988 or 911 in emergency.'' \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Session simulation}
+Toy student style favors geometry/infinity/circle-line with art and dream tags. Kindred ranking places Desargues first ($\mathrm{sim}=0.84$), then a modern geometry teacher, Escher, a STEAM mentor, and Riemann. Dynamics couple threat modes with clarify, kindred, loop, and savor events.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v6_kindred.png}
+\caption{Kindred-mind similarity scores for a circle-as-line student style.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v6_peace.png}
+\caption{Peace $P_z$, insecurity-dwelling $D$, and threat $A$. Shaded: listen-only.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{students/v6_belonging.png}
+\caption{Belonging and legacy-felt rise as kindred cards and loop closures accumulate; gate recovers.}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{Key synthetic numbers (v6 peace session).}
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Quantity} & \textbf{Value} \\
+\midrule
+$A_{\mathrm{peak}}$ (at $t$) & $0.695$ ($t=31.0$) \\
+$g_{\min}$ $\to$ $g_{\mathrm{final}}$ & $0.668$ $\to$ $0.830$ \\
+$P_z$ start $\to$ final (peak) & $0.28$ $\to$ $1.00$ ($1.00$) \\
+$D$ start $\to$ final & $0.62$ $\to$ $0.00$ \\
+Belonging / legacy-felt final & $0.69$ / $1.00$ \\
+Loops closed / kindred cards & $19$ / $18$ \\
+Clarify / savor events & $28$ / $17$ \\
+Top kindred (sim) & Desargues $0.84$; mod.\ geom.\ $0.54$; Escher $0.47$ \\
+Time listen / gentle / expansive & $8.0$ / $40.5$ / $41.75$ \\
+$B_{\mathrm{final}}$ & $1.00$ \\
+Max abs.\ error (dt-halving) & $\approx 9.7\times 10^{-5}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Reproduce: \texttt{python3 students/simulate\_v6.py}. Results illustrate assumptions, not efficacy.
+
+\section{Carried forward}
+Threat-gated modes, Reframe-to-Possible, Perfect-but-Blind, cognitive offloading, notation on demand, pride--surrender balance, Affirm-then-Suggest tone, suite mapping, and ethics from v4--v5 remain binding: no judgment; local-first data for minors; AI must not override values; lexical proxies biased; privacy of mental chaos; never affirm harmful or medical falsehoods; escalate via trusted adult and 988/911.
+
+\section{Limits}
+Kindred matching can romanticize history or erase context; cards must include struggle, not only glory [4]. ``Legacy already exists'' is a comfort stance, not a claim that every idea is unoriginal or that the student should stop creating. Peace proxies are not clinical measures. Positive-psychology citations warrant design choices; they do not license overclaiming. Simulation $\neq$ students. Cultural scripts differ.
+
+\section{Conclusion}
+Ariel Students v6 helps a student say the dream clearly, meet kindred minds across centuries and classrooms, close loops so the determined ideal can rest inside an honest frame, and turn the face toward joy rather than insecurity---while the AI keeps listening, never rebuking, and never alone-making. The legacy is already in the world; the companion's work is to help the student find it, name it, and be at peace enough to live.
+
+\section*{References}
+\noindent [1] Chi, M. T. H., de Leeuw, N., Chiu, M.-H., \& LaVancher, C. (1994). Eliciting self-explanations improves understanding. \textit{Cognitive Science}, 18(3), 439--477.\\
+\noindent [2] Chase, C. C., Chin, D. B., Oppezzo, M. A., \& Schwartz, D. L. (2009). Teachable agents and the prot\'{e}g\'{e} effect: Increasing the effort towards learning. \textit{Journal of Science Education and Technology}, 18(4), 334--352.\\
+\noindent [3] Walton, G. M., \& Cohen, G. L. (2011). A brief social-belonging intervention improves academic and health outcomes of minority students. \textit{Science}, 331(6023), 1447--1451.\\
+\noindent [4] Lin-Siegler, X., Ahn, J. N., Chen, J., Fang, F.-F. A., \& Luna-Lucero, M. (2016). Even Einstein struggled: Effects of learning about great scientists' struggles on high school students' motivation to learn science. \textit{Journal of Educational Psychology}, 108(3), 314--328.\\
+\noindent [5] Masicampo, E. J., \& Baumeister, R. F. (2011). Consider it done! Plan making can eliminate the cognitive effects of unfulfilled goals. \textit{Journal of Personality and Social Psychology}, 101(4), 667--683.\\
+\noindent [6] Bryant, F. B., \& Veroff, J. (2007). \textit{Savoring: A New Model of Positive Experience}. Lawrence Erlbaum.\\
+\noindent [7] Fredrickson, B. L. (2001). The role of positive emotions in positive psychology: The broaden-and-build theory of positive emotions. \textit{American Psychologist}, 56(3), 218--226.\\
+\noindent [8] Emmons, R. A., \& McCullough, M. E. (2003). Counting blessings versus burdens: An experimental investigation of gratitude and subjective well-being in daily life. \textit{Journal of Personality and Social Psychology}, 84(2), 377--389.\\
+\noindent [9] Neff, K. D. (2003). The development and validation of a scale to measure self-compassion. \textit{Self and Identity}, 2(3), 223--250.\\
+\noindent [10] Espinosa, R. (2026). Ariel Suite \texttt{bridge.js} gate. \url{https://ryryespi.github.io/mindframe/ariel/suite/}.\\
+\noindent [11] Espinosa, R. (2026). Project Ariel Students v5 (Cognitive offloading; Perfect-but-Blind).\\
+\noindent [12] Espinosa, R. (2026). Project Ariel Students v4 (Reframe-to-Possible).\\
+\noindent [13] Risko, E. F., \& Gilbert, S. J. (2016). Cognitive offloading. \textit{Trends in Cognitive Sciences}, 20(9), 676--688.\\
+\noindent [14] Rogers, C. R. (1957). The necessary and sufficient conditions of therapeutic personality change. \textit{Journal of Consulting Psychology}, 21(2), 95--103.\\
+\noindent [15] Beck, A. T. (1976). \textit{Cognitive Therapy and the Emotional Disorders}. International Universities Press.
+
+\vspace{1.1em}
+\noindent\textit{All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.}
+
+\end{document}

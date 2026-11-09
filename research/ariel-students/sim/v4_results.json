@@ -1,0 +1,18 @@
+{
+  "A_peak": 0.6869418624639441,
+  "t_A_peak": 31.25,
+  "g_min": 0.6155640495946292,
+  "g_final": 0.7553739459957798,
+  "progress_final": 1.0,
+  "originality_final": 1.0,
+  "dream_hold_start": 0.92,
+  "dream_hold_final": 0.4584359823655969,
+  "frames_scored": 1650,
+  "frames_presented": 39,
+  "frames_absorbed": 39,
+  "listen_time": 7.75,
+  "gentle_time": 30.75,
+  "expansive_time": 51.75,
+  "B_final": 1.0,
+  "max_abs_dt_halving": 3.070280388423052e-05
+}

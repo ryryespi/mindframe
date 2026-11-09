@@ -1,0 +1,30 @@
+[
+  {
+    "condition": "No anchor",
+    "anchor": 0.0,
+    "output": 0.0,
+    "mean": 0.0,
+    "time_to_02": null
+  },
+  {
+    "condition": "Anchor only",
+    "anchor": 0.9375000000000029,
+    "output": 0.0,
+    "mean": 0.04464285714285728,
+    "time_to_02": null
+  },
+  {
+    "condition": "Anchor + diffusion",
+    "anchor": 0.6717964343351905,
+    "output": 0.1790362076944486,
+    "mean": 0.23386866499750647,
+    "time_to_02": null
+  },
+  {
+    "condition": "Anchor + fast diffusion",
+    "anchor": 0.5341331970562901,
+    "output": 0.3115299791147026,
+    "mean": 0.33237808106837086,
+    "time_to_02": 12.5
+  }
+]

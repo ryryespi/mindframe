@@ -1,0 +1,50 @@
+{
+  "A_peak": 0.6950577583148957,
+  "t_A_peak": 31.0,
+  "g_min": 0.6684261329983339,
+  "g_final": 0.8304979631121683,
+  "Pz_start": 0.28,
+  "Pz_final": 1.0,
+  "Pz_peak": 1.0,
+  "D_start": 0.62,
+  "D_final": 0.0,
+  "belonging_final": 0.6926047527160487,
+  "legacy_felt_final": 1.0,
+  "dream_hold_final": 0.25,
+  "loops_closed": 19,
+  "kindred_cards": 18,
+  "savor_events": 17,
+  "clarify_events": 28,
+  "listen_time": 8.0,
+  "gentle_time": 40.5,
+  "expansive_time": 41.75,
+  "B_final": 1.0,
+  "top_kindred": [
+    {
+      "name": "Girard Desargues",
+      "sim": 0.84,
+      "era": "historical"
+    },
+    {
+      "name": "Modern geometry teacher (composite)",
+      "sim": 0.54,
+      "era": "modern"
+    },
+    {
+      "name": "M. C. Escher",
+      "sim": 0.47,
+      "era": "historical"
+    },
+    {
+      "name": "Modern STEAM mentor (composite)",
+      "sim": 0.46,
+      "era": "modern"
+    },
+    {
+      "name": "Bernhard Riemann",
+      "sim": 0.41,
+      "era": "historical"
+    }
+  ],
+  "max_abs_dt_halving": 9.692794992077758e-05
+}

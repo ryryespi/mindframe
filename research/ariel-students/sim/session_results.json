@@ -1,0 +1,13 @@
+{
+  "A_peak": 0.6036767808267199,
+  "t_A_peak": 27.0,
+  "t_enter_challenge": 19.35,
+  "t_exit_challenge": 44.400000000000006,
+  "A_at_exit": 0.34554811564488314,
+  "g_min": 0.6093184951087067,
+  "g_at_peakA": 0.6191497235025198,
+  "g_final": 0.7879403545312308,
+  "progress_final": 1.0,
+  "distance_final": 0.06,
+  "max_abs_dt_halving": 3.629302569585491e-07
+}

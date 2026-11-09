@@ -12,4 +12,6 @@ The suite (dark tabs: canvas, journal, gate, analytics) is [ariel/suite/](suite/
 
 [Download the paper (PDF)](Project-Ariel-Paper.pdf).
 
+This week's related papers are in the [research index](../research/). Conceptual, not validated science.
+
 **Signal** is a scalar field on the canvas, a corrected form of a user-submitted transmission model. It is conceptual, not validated. The line it uses is `Sₙ₊₁ = Sₙ + Δt·[Kᵢ·I + β(v·n̂) + γ∇²S − ρ·χ_doubt·S]`, with `e = Ψ − α·u` and `I` clamped. Open it from the Signal button.
