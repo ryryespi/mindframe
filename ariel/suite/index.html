@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Ariel Suite</title>
+  <style>
+    :root { --bg:#090d16; --card:#0f172a; --line:#1e293b; --ink:#f8fafc; --muted:#94a3b8; --em:#10b981; --teal:#2dd4bf; --rose:#f43f5e; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font:14px/1.45 system-ui, sans-serif; }
+    header { position:sticky; top:0; z-index:5; background:#0f172acc; border-bottom:1px solid var(--line); }
+    .bar { max-width:1100px; margin:0 auto; padding:10px 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .mark { width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#059669,#2dd4bf); }
+    h1 { margin:0; font-size:16px; }
+    .sub { margin:0; color:var(--muted); font-size:12px; }
+    nav { display:flex; gap:4px; flex-wrap:wrap; }
+    nav button, .ghost { border:0; border-radius:10px; background:transparent; color:var(--muted); padding:8px 10px; min-height:40px; }
+    nav button.on { background:var(--em); color:#fff; }
+    main { max-width:1100px; margin:0 auto; padding:12px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px; }
+    .grid { display:grid; grid-template-columns:1.6fr 0.8fr; gap:12px; }
+    .frame { position:relative; min-height:70vh; background:#090d16; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    iframe { width:100%; height:70vh; border:0; background:#f4f1ec; }
+    .hidden { display:none; }
+    label { display:block; margin:8px 0; color:var(--muted); font-size:12px; }
+    input[type=range] { width:100%; accent-color:var(--em); }
+    textarea, button.go { width:100%; }
+    textarea { background:#090d16; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:8px; min-height:140px; }
+    button.go { margin-top:8px; background:var(--em); color:#fff; border:0; border-radius:10px; min-height:40px; }
+    .node { background:#090d16; border:1px solid var(--line); border-radius:10px; padding:8px; margin:6px 0; }
+    .k { color:var(--teal); font-size:11px; letter-spacing:.04em; }
+    canvas.chart { width:100%; height:160px; background:#090d16; border-radius:10px; }
+    a { color:var(--teal); }
+    @media (max-width:700px) {
+      .grid { grid-template-columns:1fr; }
+      iframe, .frame { height:78vh; min-height:78vh; }
+      nav button { font-size:12px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <div class="mark" aria-hidden="true"></div>
+      <div>
+        <h1>Project Ariel Suite</h1>
+        <p class="sub">One canvas, shared with the journal, the gate, and the charts. <a href="../index.html">Classic view</a></p>
+      </div>
+      <nav>
+        <button type="button" class="on" data-tab="draw">Drawing</button>
+        <button type="button" data-tab="journal">Journal</button>
+        <button type="button" data-tab="gate">Gate</button>
+        <button type="button" data-tab="charts">Analytics</button>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section id="draw" class="card">
+      <p class="k">DRAWING CANVAS</p>
+      <h2>Ariel canvas</h2>
+      <p class="sub">The AutoCAD layout replaces the freehand sketch. Freehand is a tool on that canvas. Analyze reads the live shapes.</p>
+      <div class="grid">
+        <div class="frame"><iframe id="ariel" title="Ariel canvas" src="../index.html?embed=1"></iframe></div>
+        <div>
+          <p class="k">FROM THE CANVAS</p>
+          <p id="density">Waiting for the canvas.</p>
+          <p>Threat v <b id="da-v">–</b> · Control r <b id="da-r">–</b><br>Gate g <b id="da-g">–</b> · Output y <b id="da-y">–</b></p>
+          <button type="button" class="go" id="analyze">Analyze drawing</button>
+        </div>
+      </div>
+    </section>
+    <section id="journal" class="card hidden">
+      <p class="k">JOURNAL MAPPING</p>
+      <h2>Nodes from the canvas</h2>
+      <textarea id="journal" placeholder="Optional note. The nodes update from the canvas layers."></textarea>
+      <p id="words" class="sub">0 words</p>
+      <div id="nodes"></div>
+    </section>
+    <section id="gate" class="card hidden">
+      <p class="k">GATED ENGINE</p>
+      <h2>Gate g scales transfer along I → O</h2>
+      <p class="sub">Doubt raises threat v and lowers control r. The I→O span sets the bridge y. Follow the canvas, or move a slider to hold it.</p>
+      <label>Threat v <b id="lbl-v">0.35</b><input id="slider-v" type="range" min="0" max="1" step="0.01" value="0.35"></label>
+      <label>Control r <b id="lbl-r">0.75</b><input id="slider-r" type="range" min="0" max="1" step="0.01" value="0.75"></label>
+      <label>Bridge y <b id="lbl-y">0.00</b><input id="slider-y" type="range" min="0" max="6.4" step="0.05" value="0"></label>
+      <p>Gate g <b id="eng-g">–</b> · Transfer y <b id="eng-y">–</b></p>
+      <button type="button" class="go" id="follow">Follow the canvas</button>
+      <div class="frame" style="min-height:180px"><canvas id="engine" class="chart"></canvas></div>
+    </section>
+    <section id="charts" class="card hidden">
+      <p class="k">ANALYTICS</p>
+      <h2>Live values, kept on this device</h2>
+      <canvas id="curves" class="chart"></canvas>
+      <canvas id="radar" class="chart"></canvas>
+      <p id="feedback"></p>
+    </section>
+  </main>
+  <script src="bridge.js"></script>
+  <script>
+    // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
+    "use strict";
+    const B = window.ArielBridge;
+    let follow = true, last = null;
+    const hist = [];
+    document.querySelectorAll("nav button").forEach(btn => btn.onclick = () => {
+      document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b === btn));
+      ["draw", "journal", "gate", "charts"].forEach(id => document.getElementById(id).classList.toggle("hidden", id !== btn.dataset.tab));
+      if (btn.dataset.tab === "charts") paintCharts();
+      if (btn.dataset.tab === "gate") paintEngine();
+    });
+    document.getElementById("journal").oninput = () => {
+      const n = document.getElementById("journal").value.trim().split(/\s+/).filter(Boolean).length;
+      document.getElementById("words").textContent = n + " words";
+    };
+    function apply(read, fromCanvas) {
+      last = read;
+      hist.push({ v: read.v, r: read.r, g: read.g, y: read.yOut });
+      if (hist.length > 40) hist.shift();
+      document.getElementById("da-v").textContent = read.v.toFixed(2);
+      document.getElementById("da-r").textContent = read.r.toFixed(2);
+      document.getElementById("da-g").textContent = read.g.toFixed(3);
+      document.getElementById("da-y").textContent = read.yOut.toFixed(3);
+      if (follow && fromCanvas) {
+        document.getElementById("slider-v").value = read.v;
+        document.getElementById("slider-r").value = read.r;
+        document.getElementById("slider-y").value = read.y;
+      }
+      document.getElementById("lbl-v").textContent = (+document.getElementById("slider-v").value).toFixed(2);
+      document.getElementById("lbl-r").textContent = (+document.getElementById("slider-r").value).toFixed(2);
+      document.getElementById("lbl-y").textContent = (+document.getElementById("slider-y").value).toFixed(2);
+      const v = +document.getElementById("slider-v").value, r = +document.getElementById("slider-r").value, y = +document.getElementById("slider-y").value;
+      const g = B.gate(v, r), yOut = B.transfer(y, g, v);
+      document.getElementById("eng-g").textContent = g.toFixed(3);
+      document.getElementById("eng-y").textContent = yOut.toFixed(3);
+      const frame = document.getElementById("ariel");
+      if (frame.contentWindow) frame.contentWindow.postMessage({ type: "ariel-gate", g }, "*");
+      const box = document.getElementById("nodes");
+      box.innerHTML = "";
+      read.nodes.forEach(n => {
+        const d = document.createElement("div");
+        d.className = "node";
+        d.innerHTML = "<div class='k'>" + n.kind + "</div><b>" + n.label + "</b><div>" + n.detail + "</div>";
+        box.appendChild(d);
+      });
+      document.getElementById("feedback").textContent = read.v > 0.6
+        ? "Threat is high because doubt is up. The gate narrows transfer along I→O. One small move on the canvas lowers ρ."
+        : "Control is holding. The gate is open enough for transfer along I→O.";
+      try { localStorage.setItem("ariel-suite", JSON.stringify(hist.slice(-20))); } catch (e) {}
+    }
+    function fromSliders() {
+      const v = +document.getElementById("slider-v").value;
+      const r = +document.getElementById("slider-r").value;
+      const y = +document.getElementById("slider-y").value;
+      const g = B.gate(v, r);
+      apply({ v, r, y, g, yOut: B.transfer(y, g, v), signalScale: g, nodes: last ? last.nodes : [] }, false);
+    }
+    ["slider-v", "slider-r", "slider-y"].forEach(id => document.getElementById(id).oninput = () => { follow = false; fromSliders(); paintEngine(); });
+    document.getElementById("follow").onclick = () => { follow = true; };
+    document.getElementById("analyze").onclick = () => {
+      document.getElementById("density").textContent = last
+        ? last.nodes.length + " nodes from the canvas. Gate g is " + last.g.toFixed(3) + "."
+        : "The canvas has not reported yet.";
+    };
+    window.addEventListener("message", (e) => {
+      const d = e.data;
+      if (!d || d.type !== "ariel-state") return;
+      const shapes = d.shapes || 0;
+      document.getElementById("density").textContent = shapes + " marks · " + (d.doubts || 0) + " doubt circles · ρ " + (d.doubtRho || 0).toFixed(2);
+      apply(B.fromAriel(d), true);
+    });
+    function paintEngine() {
+      const c = document.getElementById("engine");
+      const w = c.width = c.clientWidth * 2, h = c.height = 280;
+      const g = c.getContext("2d");
+      g.clearRect(0, 0, w, h);
+      const v = +document.getElementById("slider-v").value, r = +document.getElementById("slider-r").value, y = +document.getElementById("slider-y").value;
+      const gv = B.gate(v, r), yv = B.transfer(y, gv, v);
+      [["#f43f5e", v], ["#10b981", gv], ["#2dd4bf", yv]].forEach(([color, val], k) => {
+        g.strokeStyle = color; g.lineWidth = 2; g.beginPath();
+        for (let i = 0; i <= 40; i++) {
+          const x = i / 40 * w, wobble = 0.85 + 0.15 * Math.sin(i / 6 + k);
+          const yy = h - 16 - val * wobble * (h - 32);
+          i ? g.lineTo(x, yy) : g.moveTo(x, yy);
+        }
+        g.stroke();
+      });
+    }
+    function paintCharts() {
+      const line = (id, keys, colors) => {
+        const c = document.getElementById(id); const w = c.width = c.clientWidth * 2, h = c.height = 280;
+        const g = c.getContext("2d"); g.clearRect(0, 0, w, h);
+        keys.forEach((key, ki) => {
+          g.strokeStyle = colors[ki]; g.beginPath();
+          hist.forEach((row, i) => {
+            const x = hist.length < 2 ? w / 2 : i / (hist.length - 1) * w;
+            const yy = h - 10 - row[key] * (h - 20);
+            i ? g.lineTo(x, yy) : g.moveTo(x, yy);
+          });
+          g.stroke();
+        });
+      };
+      line("curves", ["v", "r", "g"], ["#f43f5e", "#10b981", "#2dd4bf"]);
+      line("radar", ["y"], ["#f59e0b"]);
+    }
+    paintEngine();
+  </script>
+</body>
+</html>

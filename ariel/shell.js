@@ -67,7 +67,7 @@
   const ribbon = document.createElement("header");
   ribbon.id = "ribbon";
   const groups = [
-    ["Draw", [["point", "Point"], ["line", "Line"], ["circle", "Circle"], ["doubt", "Doubt"]]],
+    ["Draw", [["point", "Point"], ["line", "Line"], ["freehand", "Freehand"], ["circle", "Circle"], ["doubt", "Doubt"]]],
     ["Modify", [["move", "Move"], ["select", "Select"], ["erase", "Delete"], ["undo", "Undo"], ["redo", "Redo"]]],
     ["Purpose", [["collapse", "Collapse"]]],
     ["Anchors", [["snap", "Snap"], ["ortho", "Ortho"], ["view", "Side"]]],
@@ -393,7 +393,7 @@
     else if (line && line.ok) note(line.text);
   }
   function runCad(id) {
-    if (id === "point" || id === "line" || id === "circle" || id === "doubt") { clickTool(id === "point" ? "dot" : id); note(id === "doubt" ? "DOUBT ρ" : id.toUpperCase()); return; }
+    if (id === "point" || id === "line" || id === "circle" || id === "doubt" || id === "freehand") { clickTool(id === "point" ? "dot" : id); note(id === "doubt" ? "DOUBT ρ" : id.toUpperCase()); return; }
     if (id === "move" || id === "select") { tool = id; mark(); note(id.toUpperCase()); return; }
     if (id === "erase") { cadErase(); return; }
     if (id === "undo") { doUndo(); return; }
@@ -669,6 +669,12 @@
       ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = "#9aa3ad"; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.9;
       ellipse(c, i); ctx.stroke(); ctx.restore();
     }));
+    layers.forEach((L, i) => (L.ink || []).forEach(stroke => {
+      if (!stroke.length) return;
+      ctx.save(); ctx.strokeStyle = "#7a9cc6"; ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.beginPath();
+      stroke.forEach((pt, k) => { const q = proj(pt, i); k ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y); });
+      ctx.stroke(); ctx.restore();
+    }));
     if (collapsed) drawCollapsed();
     if (typeof paintSignal === "function") paintSignal();
     if (tilt > 0.35) drawAlignedAxes();
@@ -818,6 +824,7 @@
   function stepSignal() {
     if (!sig) return;
     sigOpt = readSigOpt();
+    if (window.__arielGate != null) sigOpt = Object.assign({}, sigOpt, { Ki: sigOpt.Ki * window.__arielGate });
     Sig.step(sig, sigOpt);
     paintSignalRead();
   }
@@ -879,6 +886,30 @@
     setTabSig(k);
     if (k === "m" && sigOn && tpa && Sig) tpa.value = (tpa.value ? tpa.value + "\n" : "") + Sig.EQ;
   };
+  function publishSuite() {
+    if (window.parent === window) return;
+    let rho = 0, doubts = 0, shapes = 0;
+    layers.forEach(L => {
+      shapes += (L.dots || []).length + (L.lines || []).length + (L.circles || []).length + (L.ink || []).length;
+      (L.circles || []).forEach(c => { if (c.doubt) { doubts++; rho = Math.max(rho, Math.max(0, Math.min(1, c.r / S()))); } });
+    });
+    const io = ioOf(layers[0], 0);
+    const span = Math.hypot(io.o.x - io.i.x, io.o.y - io.i.y) / Math.max(W, 1);
+    window.parent.postMessage({
+      type: "ariel-state",
+      doubtRho: rho,
+      doubts, shapes,
+      bridge: Math.max(0, Math.min(1, span)),
+      layers: layers.map(L => ({ name: L.name || "", role: L.role || "", domain: L.domain || "custom", dots: (L.dots || []).length, lines: (L.lines || []).length, circles: (L.circles || []).length, doubts: (L.circles || []).filter(c => c.doubt).length, ink: (L.ink || []).length })),
+      signal: sig ? { p: sig.p, sAtO: sig.hist.length ? sig.hist[sig.hist.length - 1] : 0 } : null
+    }, "*");
+  }
+  setInterval(publishSuite, 500);
+  window.addEventListener("message", (e) => {
+    const d = e.data;
+    if (!d || d.type !== "ariel-gate" || typeof d.g !== "number") return;
+    window.__arielGate = Math.max(0, Math.min(1, d.g));
+  });
   if (location.hash.includes("collapse")) toggleCollapse();
   if (location.hash.includes("signal")) { toggleSignal(); for (let i = 0; i < 14; i++) stepSignal(); }
 })();

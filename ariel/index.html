@@ -247,9 +247,11 @@ cv.addEventListener('pointerdown',e=>{const p={x:e.clientX,y:e.clientY};downP=p;
   else if(tool==='line'){const l={a:{...p},b:{x:p.x+1,y:p.y}};L.lines.push(l);drag={k:l,part:'b',last:p}}
   else if(tool==='circle'){const c={c:{...p},r:1};L.circles.push(c);drag={k:c,part:'r',last:p}}
   else if(tool==='doubt'){const c={c:{...p},r:1,doubt:true};L.circles.push(c);drag={k:c,part:'r',last:p}}
+  else if(tool==='freehand'){const s=[{x:p.x,y:p.y}]; L.ink=L.ink||[]; L.ink.push(s); drag={part:'ink',ink:s,last:p}}
 });
 cv.addEventListener('pointermove',e=>{const p={x:e.clientX,y:e.clientY};
   if(orbit!==null){yaw+=(p.x-orbit)*.008;orbit=p.x;return}
+  if(drag&&drag.part==='ink'){drag.ink.push({x:p.x,y:p.y});drag.last=p;return}
   if(!drag)return;if(Math.hypot(p.x-downP.x,p.y-downP.y)>6)clearTimeout(press);
   const k=drag.k,dx=p.x-drag.last.x,dy=p.y-drag.last.y;drag.last=p;
   if(drag.part==='a')k.a=p;else if(drag.part==='b')k.b=p;else if(drag.part==='d'){k.x=p.x;k.y=p.y}
