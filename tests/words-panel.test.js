@@ -52,10 +52,10 @@ test("the canvas page keeps the game in a panel and ignores drawing while it is 
   assert.match(words, /embed=1/);
   assert.match(words, /Dedication/);
   assert.match(words, /AI assistant: Grok Bot/);
-  assert.match(suite, /id="suite-words"/);
-  assert.match(suite, /id="ariel-words"/);
-  assert.doesNotMatch(suite, /id="ariel-words"[^>]*href=/);
+  assert.match(suite, /id="create-tab-words"/);
+  assert.match(suite, /role="tablist"/);
   assert.match(suite, /WordsPanel\.PARAMS\.suiteSrc/);
+  assert.match(page, /id="words-panel"/);
 });
 
 console.log(`\n${passed} passed`);
