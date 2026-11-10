@@ -16,6 +16,7 @@
 // explore   a fundamental looked at for the joy of it
 // story     a story kept from the canvas
 // courage   a reach-out the user chose to keep
+// gift      a welcome gift the user chose to receive
 "use strict";
 (function (root, factory) {
   const api = factory();
@@ -36,7 +37,8 @@
     enough: "Enough",
     explore: "Explore",
     story: "Story",
-    courage: "Courage"
+    courage: "Courage",
+    gift: "Gift"
   };
 
   function blank() { return { entries: [] }; }

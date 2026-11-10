@@ -72,6 +72,20 @@
   </header>
   <main>
     <p id="enough" class="node hidden"></p>
+    <section id="welcome" class="card hidden">
+      <p class="k">SIX GIFTS</p>
+      <div id="welcome-body"></div>
+      <div id="welcome-actions" class="rec-actions">
+        <button type="button" class="go inline" id="welcome-next">Next</button>
+        <button type="button" class="ghost btn hidden" id="welcome-receive">I receive this</button>
+        <button type="button" class="ghost btn" id="welcome-skip">Skip</button>
+      </div>
+      <div id="welcome-end" class="rec-actions hidden">
+        <button type="button" class="go inline" id="welcome-look">Look around</button>
+        <button type="button" class="ghost btn" id="welcome-stay">Rest here</button>
+      </div>
+      <p class="crisis">In crisis, call or text <strong>988</strong> (US). In an emergency, call <strong>911</strong>.</p>
+    </section>
     <section id="grace" class="card hidden">
       <p class="k">A PAUSE</p>
       <div id="grace-lines"></div>
@@ -145,6 +159,7 @@
       <button type="button" class="ghost btn" id="afraid-open-rest">I'm afraid to stop</button>
       <button type="button" class="ghost btn" id="reach-open">Reach out</button>
       <button type="button" class="ghost btn" id="reel-open">What we've made</button>
+      <button type="button" class="ghost btn" id="gifts-open">Six gifts</button>
       <p id="rest-forgive">You can let yourself off the hook for this.</p>
       <label>The drive you want to keep
         <textarea id="rest-dream" placeholder="Your dream, in your words."></textarea>
@@ -278,6 +293,7 @@
   <script src="grace.js"></script>
   <script src="paths.js"></script>
   <script src="reach.js"></script>
+  <script src="welcome.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
@@ -287,6 +303,7 @@
     const Grace = window.ArielGrace;
     const Paths = window.ArielPaths;
     const Reach = window.ArielReach;
+    const Welcome = window.ArielWelcome;
     let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
     const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
@@ -1379,6 +1396,57 @@
       reelSeen = true;
       document.getElementById("reel").classList.add("hidden");
     };
+    // ===== SIX GIFTS =====
+    // Ryan's welcome. Receive first. A local flag only. Never graded.
+    let giftState = null;
+    function markGiftsSeen() {
+      try { localStorage.setItem("ariel-gifts", "1"); } catch (err) {}
+    }
+    function paintGifts() {
+      const box = document.getElementById("welcome");
+      const body = document.getElementById("welcome-body");
+      const card = Welcome.view(giftState);
+      box.classList.remove("hidden");
+      body.replaceChildren();
+      card.lines.forEach(line => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        body.appendChild(p);
+      });
+      if (card.scripture) {
+        const p = document.createElement("p");
+        p.textContent = card.scripture.ref + " — " + card.scripture.verse;
+        body.appendChild(p);
+      }
+      document.getElementById("welcome-next").classList.toggle("hidden", !!card.end);
+      document.getElementById("welcome-receive").classList.toggle("hidden", !card.receive);
+      document.getElementById("welcome-end").classList.toggle("hidden", !card.end);
+    }
+    function openGifts() {
+      const faith = localStorage.getItem("ariel-faith") === "1";
+      giftState = Welcome.start({ faith: faith, mode: graceMode() });
+      paintGifts();
+    }
+    function closeGifts(tab) {
+      markGiftsSeen();
+      document.getElementById("welcome").classList.add("hidden");
+      if (tab) showTab(tab);
+    }
+    document.getElementById("welcome-next").onclick = () => {
+      giftState = Welcome.next(giftState);
+      paintGifts();
+    };
+    document.getElementById("welcome-receive").onclick = () => {
+      const got = Welcome.receive(giftState);
+      if (got.entry) commitRecord(Rec.add(record, got.entry, new Date().toISOString()));
+      giftState = got.state;
+      paintGifts();
+    };
+    document.getElementById("welcome-skip").onclick = () => closeGifts();
+    document.getElementById("welcome-look").onclick = () => closeGifts("discover");
+    document.getElementById("welcome-stay").onclick = () => closeGifts("rest");
+    document.getElementById("gifts-open").onclick = () => openGifts();
+    if (Welcome.shouldOpen(localStorage.getItem("ariel-gifts"))) openGifts();
     window.addEventListener("message", (e) => {
       const d = e.data;
       if (!d || d.type !== "ariel-state") return;
