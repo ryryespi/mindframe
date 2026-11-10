@@ -70,6 +70,7 @@
     }`;
   document.head.appendChild(style);
   if (/[?&]embed=1/.test(location.search)) document.body.classList.add("embed");
+  if (/[?&]full=1/.test(location.search)) document.body.classList.add("more-tools");
 
   const ribbon = document.createElement("header");
   ribbon.id = "ribbon";
