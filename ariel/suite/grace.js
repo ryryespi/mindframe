@@ -54,7 +54,26 @@
     pause: "Pause here. Nothing has to move for a moment.",
     keepGoing: "That's okay. I'm here if you want me.",
     safety: "This sounds really heavy. You don't have to hold it alone. If you might hurt yourself or someone else, please reach out now: call or text 988, or call 911.",
-    trusted: "You can also talk with someone you trust."
+    trusted: "You can also talk with someone you trust.",
+    idleMs: 3 * 60 * 1000,
+    loopRecentMs: 30 * 60 * 1000,
+    // Check-in questions, in Ryan's words. One at a time. Never graded.
+    questions: [
+      "Am I actually lazy right now, or is my nervous system locked in a silent freeze because it perceives an invisible threat?",
+      "Am I actually in an emergency, or is my threat radar just reacting to an internal vacuum or sudden shift?",
+      "What ledger am I trying to balance right now?",
+      "Am I trying to force my way through this with sheer friction?",
+      "Can I move forward from a place of calm clarity rather than panic?"
+    ],
+    affirmations: [
+      "I'm not lazy; I'm in a freeze response. My system has locked its doors because it feels overwhelmed.",
+      "My worth and energy are not transactions I have to pay back."
+    ],
+    freeze: ["lazy", "can't start", "cant start", "stuck"],
+    trap: {
+      belief: "If I can just win this argument, prove this point, or destroy this scapegoat, my internal peace will be restored.",
+      reply: "That peace can't be won. It's already given. Nothing more to prove."
+    }
   };
 
   const HARM = /\b(kill|killing|hurt them|hurt him|hurt her|hurt myself|make them pay|no point|want to die|wanna die|end my life|suicide)\b/i;
@@ -248,5 +267,76 @@
     return { simplified: false, deleted: false, before: (view && view.before) || [], focus: null };
   }
 
-  return { PARAMS, assess, begin, advance, harm, simplify, restore };
+  function isFrozen(text) {
+    const raw = String(text || "").toLowerCase();
+    return PARAMS.freeze.some(phrase => raw.indexOf(phrase) >= 0);
+  }
+
+  /** Loop recent leads with questions 3 and 4. Freeze, or a long quiet, leads with question 1. */
+  function checkInOrder(ctx) {
+    const c = ctx || {};
+    if (c.loopRecent) return [2, 3, 4, 0, 1];
+    return [0, 1, 2, 3, 4];
+  }
+
+  function startCheckIn(ctx) {
+    const c = ctx || {};
+    const order = checkInOrder(c);
+    const listening = c.mode === "listen";
+    return {
+      order: order,
+      index: 0,
+      question: PARAMS.questions[order[0]],
+      done: false,
+      listening: listening,
+      prompt: !listening,
+      affirmations: [],
+      graded: false,
+      frozen: isFrozen(c.text) || Number(c.idleMs) >= PARAMS.idleMs
+    };
+  }
+
+  function nextQuestion(state) {
+    const current = state || startCheckIn({});
+    if (current.done) return current;
+    const index = current.index + 1;
+    if (index >= current.order.length) {
+      return {
+        order: current.order, index: index, question: "", done: true,
+        listening: current.listening, prompt: current.prompt, graded: false,
+        affirmations: current.listening ? [] : PARAMS.affirmations.slice(),
+        frozen: current.frozen
+      };
+    }
+    return {
+      order: current.order, index: index, question: PARAMS.questions[current.order[index]],
+      done: false, listening: current.listening, prompt: current.prompt,
+      affirmations: [], graded: false, frozen: current.frozen
+    };
+  }
+
+  function resonate(state) {
+    const current = state || startCheckIn({});
+    if (current.listening || !current.prompt) {
+      return {
+        order: current.order, index: current.index, question: current.question,
+        done: current.done, listening: true, prompt: false, affirmations: [],
+        graded: false, frozen: current.frozen
+      };
+    }
+    return {
+      order: current.order, index: current.index, question: current.question,
+      done: current.done, listening: false, prompt: true, graded: false,
+      affirmations: PARAMS.affirmations.slice(), frozen: current.frozen
+    };
+  }
+
+  /** A note is kept only when the user writes one. The question itself is not stored. */
+  function checkInNote(text) {
+    const note = String(text || "").trim();
+    if (!note) return null;
+    return { type: "note", text: "Kept a check-in note", note: note, source: "manual", href: "#rest" };
+  }
+
+  return { PARAMS, assess, begin, advance, harm, simplify, restore, isFrozen, checkInOrder, startCheckIn, nextQuestion, resonate, checkInNote };
 });

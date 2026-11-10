@@ -150,6 +150,24 @@
         <p id="rest-wonder-line">This sounds like it might be about proving. Want to come back to wonder?</p>
         <button type="button" class="ghost btn" id="rest-wonder-dismiss">Dismiss</button>
       </div>
+      <div class="node" id="checkin">
+        <p class="k">CHECK IN</p>
+        <p id="checkin-q"></p>
+        <div class="rec-actions">
+          <button type="button" class="go inline" id="checkin-next">Next</button>
+          <button type="button" class="ghost btn" id="checkin-me">This is me</button>
+        </div>
+        <div id="checkin-affirm"></div>
+        <label>A note, only if you want one
+          <textarea id="checkin-note" placeholder="Optional. Nothing is saved until you keep it."></textarea>
+        </label>
+        <button type="button" class="ghost btn" id="checkin-save">Keep this note</button>
+      </div>
+      <div class="node" id="checkin-trap">
+        <p class="k">NAME THE TRAP</p>
+        <p id="trap-belief"></p>
+        <p id="trap-reply"></p>
+      </div>
       <button type="button" class="ghost btn" id="rest-check">Reality check</button>
       <div id="rest-reality" class="node hidden"></div>
       <p class="crisis">In crisis, call or text <strong>988</strong> (US). In an emergency, call <strong>911</strong>.</p>
@@ -474,6 +492,7 @@
       document.getElementById("rest-drive").textContent = offer.drive;
       if (offer.reality.flagged || realityOpen) fillReality(offer.reality);
       else document.getElementById("rest-reality").classList.add("hidden");
+      paintCheckIn();
       const wonder = G.wonderCard(journalText.value, wonderDismissedKey);
       const card = document.getElementById("rest-wonder");
       card.classList.toggle("hidden", !wonder.show);
@@ -502,6 +521,57 @@
     };
     document.getElementById("rest-pause-btn").onclick = () => paintRest();
     document.getElementById("rest-check").onclick = () => { realityOpen = true; paintRest(); };
+    let checkState = null;
+    let graceFiredAt = 0;
+    let lastInputAt = Date.now();
+    function paintCheckIn() {
+      const listening = graceMode() === "listen";
+      const fresh = Grace.startCheckIn({
+        loopRecent: graceFiredAt > 0 && Date.now() - graceFiredAt < Grace.PARAMS.loopRecentMs,
+        idleMs: Date.now() - lastInputAt,
+        text: graceText(),
+        mode: listening ? "listen" : "open"
+      });
+      if (!checkState || (checkState.index === 0 && !(checkState.affirmations || []).length && !checkState.done)) checkState = fresh;
+      else if (checkState.listening !== listening) {
+        checkState = {
+          order: checkState.order, index: checkState.index, question: checkState.question,
+          done: checkState.done, listening: listening, prompt: !listening, graded: false,
+          affirmations: listening ? [] : (checkState.affirmations || []), frozen: checkState.frozen
+        };
+      }
+      document.getElementById("checkin-q").textContent = checkState.question || "";
+      document.getElementById("checkin-next").classList.toggle("hidden", !!checkState.done);
+      document.getElementById("checkin-me").classList.toggle("hidden", !checkState.prompt || !!checkState.done);
+      const affirm = document.getElementById("checkin-affirm");
+      affirm.replaceChildren();
+      (checkState.affirmations || []).forEach(line => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        affirm.appendChild(p);
+      });
+      document.getElementById("trap-belief").textContent = Grace.PARAMS.trap.belief;
+      document.getElementById("trap-reply").textContent = Grace.PARAMS.trap.reply;
+    }
+    document.getElementById("checkin-next").onclick = () => {
+      lastInputAt = Date.now();
+      checkState = Grace.nextQuestion(checkState);
+      paintCheckIn();
+    };
+    document.getElementById("checkin-me").onclick = () => {
+      lastInputAt = Date.now();
+      checkState = Grace.resonate(checkState);
+      paintCheckIn();
+    };
+    document.getElementById("checkin-save").onclick = () => {
+      const field = document.getElementById("checkin-note");
+      const entry = Grace.checkInNote(field.value);
+      if (!entry) return;
+      lastInputAt = Date.now();
+      commitRecord(Rec.add(record, entry, new Date().toISOString()));
+      field.value = "";
+    };
+    journalText.addEventListener("input", () => { lastInputAt = Date.now(); });
     try { document.getElementById("rest-dream").value = localStorage.getItem("ariel-dream") || ""; } catch (err) {}
     document.getElementById("rest-dream").oninput = () => {
       try { localStorage.setItem("ariel-dream", document.getElementById("rest-dream").value); } catch (err) {}
@@ -835,6 +905,7 @@
       }
       if (!graceState.active) {
         if (!reading.trigger) return;
+        graceFiredAt = Date.now();
         graceState = Grace.begin(reading, graceMode());
         graceEnoughSent = false;
         paintGrace();
