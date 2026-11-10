@@ -104,6 +104,37 @@ TAU_I = 80.0             # identity changes more slowly than an episode
 K_DEC = 0.55             # decoupling rate when a given-identity intervention is on
 RELAPSE_THRESH = 0.10    # f_c above this during an intervention counts as relapse
 
+# --- Effective clock and valence  (NEW, all labeled assumptions; downstream
+#     readout only: these terms do not feed back into A, H, S, P, G, Q, I, or y.
+#     When I = 0 the original Table 1 states are therefore unchanged.)
+# Calendar time t still runs the existing ODEs. Subjective / effective time
+# tau accumulates at rate phi = d tau/dt. Position x in [-1, 1] starts
+# negative ("negativity at time zero") and moves with phi * drift.
+# Time itself is not a healer: direction comes from drift, not from t.
+PHI0 = 0.70              # baseline felt-time rate
+PHI_HOME = 1.00          # the rate "word" steadies toward
+K_REST_PHI = 0.45        # true rest (not rest-as-void) raises phi
+K_GRAND_PHI = 0.55       # fusion * compulsive fight speeds phi (wrong direction)
+K_DEP_PHI = 0.50         # depression composite slows felt time
+K_WORD_PHI = 0.40        # fraction of (PHI_HOME - phi_raw) closed by "word"
+K_WILL_PHI = 0.00        # default: sheer will does NOT steady the clock
+                         # sensitivity may raise this to K_WORD_PHI
+TAU_X = 10.0             # x moves on a slower scale than A
+X0_X = -0.55             # start in negativity
+# Buffer ("stopping power" metaphor, not physics)
+K_STOP = 1.20
+B_M, B_CON, B_WORD, B_G = 0.35, 0.25, 0.20, 0.25
+# Drift toward positive
+K_GX, K_RX, K_MX, K_CX = 0.28, 0.22, 0.18, 0.20
+K_EX, K_SX, K_WX = 0.12, 0.15, 0.12
+# Drift toward negative
+K_RUM, K_ISO, K_IX, K_FCX = 0.35, 0.22, 0.20, 0.18
+# Assessment thresholds (a priori)
+X_VOID, X_OUT = -0.10, 0.20
+RUM_HIGH, RUM_LOW = 0.40, 0.35
+ISO_HIGH, ISO_LOW = 0.40, 0.35
+W_WIDE = 0.40
+
 # Reset-flow damping targets (original)
 RESET = dict(r=1.00, uA=0.25, uH=0.20, uS=0.25, uG=0.15)
 
@@ -211,6 +242,64 @@ def output(P, Q, f, G) -> float:
     return Q * P * (Y_BASE + Y_EFFORT * f) * (1.0 - G)
 
 
+def gate_width(P: float, A: float) -> float:
+    """Derived earlier: w = C(P (1 - 0.6 A))."""
+    return C(P * (1.0 - 0.6 * A))
+
+
+def schedule_guides(name: str, r: float, g_grace: float,
+                    uA: float, uH: float, uS: float, uG: float):
+    """Labeled map from a schedule to 'word', connection, and skill.
+
+    Word (scripture or an affirmation used as an anchor) is available on
+    the grace schedules, matching the suite's optional faith-aware lines.
+    It is not claimed for Fighting Through or Unassisted. Connection is
+    stronger when support is ledger-free. Skill is Reset Flow's
+    down-regulation plus a smaller grace term.
+    """
+    if name in ("Zero-Debt Grace", "Grace + Chosen Burst"):
+        word = 1.0
+    else:
+        word = 0.0
+    connect = C(0.45 * r + 0.55 * g_grace)
+    skill = C(0.25 * (uA + uH + uS + uG) + 0.35 * g_grace)
+    return word, connect, skill
+
+
+def clock_and_valence(A, P, G, I, f, f_c, f_sched, r, g_grace, M, gap, y,
+                      word, connect, skill, will_steadiest=0.0):
+    """Downstream phi, drift, and helpers. No feedback into the ODEs."""
+    dep = C(0.40 * A + 0.30 * G + 0.30 * (1.0 - P))
+    rest_eff = r * (1.0 - f) * (1.0 - I * gap)
+    rum = C(A * (1.0 - P))
+    iso = C((1.0 - r) * (0.5 * G + 0.5 * (1.0 - M)))
+    enough = C(y / max(Y_REF, 1e-9)) * (1.0 - I) * (1.0 - f_c)
+    phi_raw = PHI0 + K_REST_PHI * rest_eff + K_GRAND_PHI * I * f_c - K_DEP_PHI * dep
+    # Word steadies the rate toward PHI_HOME. Sheer will does so only if
+    # a sensitivity run raises K_WILL_PHI; the default is 0.
+    will_term = will_steadiest * f_sched * (1.0 if g_grace <= 1e-12 else 0.0)
+    phi = C(phi_raw + K_WORD_PHI * word * (PHI_HOME - phi_raw)
+            + will_term * (PHI_HOME - phi_raw))
+    B = C(B_M * M + B_CON * connect + B_WORD * word + B_G * g_grace)
+    rum_eff = rum / (1.0 + K_STOP * B)
+    drift = (K_GX * g_grace + K_RX * rest_eff + K_MX * M + K_CX * connect
+             + K_EX * enough + K_SX * skill + K_WX * word
+             - K_RUM * rum_eff - K_ISO * iso - K_IX * I - K_FCX * f_c)
+    return {
+        "dep": dep, "rest_eff": rest_eff, "rum": rum, "iso": iso,
+        "enough": enough, "phi": phi, "B": B, "drift": drift,
+    }
+
+
+def classify_zone(x: float, rum: float, iso: float, w: float) -> str:
+    """Toy in-void / edge / out guide. Not a diagnosis."""
+    if (x > X_OUT and rum < RUM_LOW and iso < ISO_LOW and w > W_WIDE):
+        return "out"
+    if x < X_VOID and (rum > RUM_HIGH or iso > ISO_HIGH):
+        return "void"
+    return "edge"
+
+
 def identity_gap(y_prev: float, f_prev: float) -> float:
     """ASSUMPTION (a)+(c) signal: how much 'rest feels like the void'.
 
@@ -227,7 +316,8 @@ def identity_gap(y_prev: float, f_prev: float) -> float:
 
 def simulate(name: str, T: float = T_LONG, dt: float = DT,
              I0: float = 0.0, M: float = 0.0, decouple: bool = False,
-             display_name: str | None = None):
+             display_name: str | None = None,
+             will_steadiest: float = None):
     """Forward Euler. I0 = 0 recovers the original model exactly, because
     identity_drive and f_c are then identically zero.
     """
@@ -247,6 +337,14 @@ def simulate(name: str, T: float = T_LONG, dt: float = DT,
     n_relapse = 0
     y_prev = output(P, Q, 0.0, G)
     f_prev = 0.0
+    x_pos = X0_X
+    tau = 0.0
+    will_k = K_WILL_PHI if will_steadiest is None else will_steadiest
+    sum_phi = sum_x = sum_w = sum_rum = sum_dep = sum_B = sum_drift = 0.0
+    n_void = n_edge = n_out = 0
+    min_x = 1.0
+    max_x = -1.0
+    min_w = 1.0
 
     for n in range(n_steps + 1):
         t = n * dt
@@ -277,9 +375,33 @@ def simulate(name: str, T: float = T_LONG, dt: float = DT,
             sum_fc += f_c
             if f_c > RELAPSE_THRESH:
                 n_relapse += 1
+        word, connect, skill = schedule_guides(name, r, g_grace, uA, uH, uS, uG)
+        cv = clock_and_valence(A, P, G, I, f, f_c, f_sched, r, g_grace, M, gap, y,
+                               word, connect, skill, will_steadiest=will_k)
+        w = gate_width(P, A)
+        zone = classify_zone(x_pos, cv["rum"], cv["iso"], w)
+        sum_phi += cv["phi"]
+        sum_x += x_pos
+        sum_w += w
+        sum_rum += cv["rum"]
+        sum_dep += cv["dep"]
+        sum_B += cv["B"]
+        sum_drift += cv["drift"]
+        min_x = min(min_x, x_pos)
+        max_x = max(max_x, x_pos)
+        min_w = min(min_w, w)
+        if zone == "void":
+            n_void += 1
+        elif zone == "out":
+            n_out += 1
+        else:
+            n_edge += 1
         if n % rec_every == 0:
             rows.append((t, A, H, S, P, G, Q, L, y, Y, f, r, g_grace, v,
-                         I, f_c, f_sched, gap))
+                         I, f_c, f_sched, gap,
+                         cv["phi"], tau, x_pos, w, cv["rum"], cv["dep"],
+                         cv["rest_eff"], cv["B"], cv["drift"], cv["iso"],
+                         {"void": 0.0, "edge": 1.0, "out": 2.0}[zone]))
         if n == n_steps:
             break
         A = C(A + dt * dA)
@@ -290,6 +412,8 @@ def simulate(name: str, T: float = T_LONG, dt: float = DT,
         Q = C(Q + dt * dQ)
         I = C(I + dt * dI)
         Y += y * dt
+        tau += cv["phi"] * dt
+        x_pos = float(np.clip(x_pos + dt * cv["phi"] * cv["drift"] / TAU_X, -1.0, 1.0))
         y_prev = y
         f_prev = f
 
@@ -317,12 +441,28 @@ def simulate(name: str, T: float = T_LONG, dt: float = DT,
         "max_state": float(rec[:, 1:7].max()),
         "min_L": float(rec[:, 7].min()),
         "max_L": float(rec[:, 7].max()),
+        "mean_phi": float(sum_phi / n_int),
+        "final_tau": float(tau),
+        "final_x": float(x_pos),
+        "mean_x": float(sum_x / n_int),
+        "min_x": float(min_x),
+        "max_x": float(max_x),
+        "mean_w": float(sum_w / n_int),
+        "min_w": float(min_w),
+        "mean_rum": float(sum_rum / n_int),
+        "mean_dep": float(sum_dep / n_int),
+        "mean_B": float(sum_B / n_int),
+        "mean_drift": float(sum_drift / n_int),
+        "frac_void": float(n_void / n_int),
+        "frac_edge": float(n_edge / n_int),
+        "frac_out": float(n_out / n_int),
     }
     return rec, metrics
 
 
 COLS = ["t", "A", "H", "S", "P", "G", "Q", "L", "y", "Y", "f", "r", "g_grace", "v",
-        "I", "f_c", "f_sched", "identity_gap"]
+        "I", "f_c", "f_sched", "identity_gap",
+        "phi", "tau", "x", "w", "rum", "dep", "rest_eff", "B", "drift", "iso", "zone"]
 
 
 def save_csv(path: Path, rec: np.ndarray) -> None:
@@ -711,6 +851,141 @@ def ki_sensitivity():
                     "final_capacity": met["final_capacity"],
                 })
     return out
+
+
+def valence_summary(met):
+    keys = ["schedule", "I0", "M", "decouple",
+            "mean_load", "cumulative_output", "final_capacity",
+            "mean_phi", "final_tau", "mean_x", "final_x", "min_x", "max_x",
+            "mean_w", "min_w", "mean_rum", "mean_dep", "mean_B", "mean_drift",
+            "frac_void", "frac_edge", "frac_out", "peak_A", "mean_f_c", "final_I"]
+    return {k: met[k] for k in keys if k in met}
+
+
+def fig_valence(runs, names, colors, title, path, col="x", ymin=-1.0, ymax=1.0):
+    W, H, x0, y0, pw, ph = 920, 380, 58, 48, 840, 250
+    s = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}">',
+         '<rect width="100%" height="100%" fill="white"/>',
+         f'<text x="20" y="24" font-size="14" fill="#126e73">{title}</text>']
+    for k in range(int(T_LONG // CYCLE) + 1):
+        xa = x0 + pw * (k * CYCLE + VOID_ON) / T_LONG
+        xb = x0 + pw * min(T_LONG, k * CYCLE + VOID_OFF) / T_LONG
+        s.append(f'<rect x="{xa:.1f}" y="{y0}" width="{max(0, xb-xa):.1f}" height="{ph}" fill="#f4e6e2"/>')
+    # zero line
+    z = y0 + ph * (1 - (0 - ymin) / (ymax - ymin))
+    s.append(f'<path d="M{x0},{z:.1f}h{pw}" stroke="#bbb" stroke-dasharray="4 4"/>')
+    ticks = np.linspace(ymin, ymax, 5)
+    for yy in ticks:
+        y = y0 + ph * (1 - (yy - ymin) / (ymax - ymin))
+        s.append(f'<path d="M{x0},{y:.1f}h{pw}" stroke="#eee"/>')
+        s.append(f'<text x="{x0-8}" y="{y+4:.1f}" font-size="11" text-anchor="end" fill="#52636b">{yy:g}</text>')
+    for xt in (0, 80, 160, 240, 300):
+        x = x0 + pw * xt / T_LONG
+        s.append(f'<text x="{x:.1f}" y="{y0+ph+16:.1f}" font-size="11" text-anchor="middle" fill="#52636b">{xt:g}</text>')
+    s.append(f'<rect x="{x0}" y="{y0}" width="{pw}" height="{ph}" fill="none" stroke="#d8e1e3"/>')
+    for name in names:
+        rec = runs[name]
+        pts = _polyline(rec[:, 0], rec[:, COLS.index(col)],
+                        x0, y0, pw, ph, 0, T_LONG, ymin, ymax)
+        s.append(f'<polyline points="{pts}" fill="none" stroke="{colors[name]}" stroke-width="2"/>')
+    lx, ly = 20, 336
+    for name in names:
+        s.append(f'<rect x="{lx}" y="{ly}" width="12" height="4" fill="{colors[name]}"/>')
+        s.append(f'<text x="{lx+16}" y="{ly+6}" font-size="10" fill="{colors[name]}">{name}</text>')
+        lx += 175
+        if lx > 860:
+            lx = 20
+            ly += 16
+    s.append('</svg>')
+    path.write_text("".join(s))
+
+
+def run_valence():
+    """I=0 and high-I readouts, plus a small a priori sensitivity."""
+    i0_runs, i0_mets = {}, []
+    for name in SCHEDULES:
+        rec, met = simulate(name, T=T_LONG, dt=DT)
+        i0_runs[name] = rec
+        i0_mets.append(met)
+    hi_runs, hi_mets = run_high_i()
+
+    # Sensitivity: vary one clock/valence coefficient at a time on
+    # Fighting Through vs Zero-Debt Grace vs Combined (high-I).
+    sweep = []
+    params = {
+        "K_DEP_PHI": [0.00, 0.50, 1.00],
+        "K_GRAND_PHI": [0.00, 0.55, 1.10],
+        "K_STOP": [0.00, 1.20, 2.40],
+        "K_WILL_PHI": [0.00, 0.40],
+    }
+    saved = {k: globals()[k] for k in params}
+    try:
+        for pname, values in params.items():
+            for k, v in saved.items():
+                globals()[k] = v
+            for val in values:
+                globals()[pname] = val
+                fight = simulate("Fighting Through", T=T_LONG, dt=DT,
+                                 will_steadiest=(val if pname == "K_WILL_PHI" else 0.0))[1]
+                grace = simulate("Zero-Debt Grace", T=T_LONG, dt=DT)[1]
+                comb = simulate("Zero-Debt Grace", T=T_LONG, dt=DT,
+                                 I0=I0_HIGH, M=M_HIGH, decouple=True,
+                                 display_name="Combined")[1]
+                hi_fight = simulate("Fighting Through", T=T_LONG, dt=DT,
+                                    I0=I0_HIGH, M=M_LOW, decouple=False,
+                                    display_name="Fighting Through",
+                                    will_steadiest=(val if pname == "K_WILL_PHI" else 0.0))[1]
+                sweep.append({
+                    "param": pname,
+                    "value": val,
+                    "I0_fight_final_x": fight["final_x"],
+                    "I0_fight_mean_phi": fight["mean_phi"],
+                    "I0_fight_frac_out": fight["frac_out"],
+                    "I0_grace_final_x": grace["final_x"],
+                    "I0_grace_mean_phi": grace["mean_phi"],
+                    "I0_grace_frac_out": grace["frac_out"],
+                    "hi_fight_final_x": hi_fight["final_x"],
+                    "hi_fight_mean_phi": hi_fight["mean_phi"],
+                    "hi_fight_frac_void": hi_fight["frac_void"],
+                    "hi_comb_final_x": comb["final_x"],
+                    "hi_comb_mean_phi": comb["mean_phi"],
+                    "hi_comb_frac_out": comb["frac_out"],
+                    "hi_comb_frac_void": comb["frac_void"],
+                })
+    finally:
+        for k, v in saved.items():
+            globals()[k] = v
+
+    fig_valence(i0_runs, SCHEDULES, COLORS,
+                "Valence x over four episodes (I = 0). Warm band = void. Dashed line = 0.",
+                OUT / "fig_valence_x.svg", col="x")
+    fig_valence(i0_runs, SCHEDULES, COLORS,
+                "Felt-time rate phi (I = 0). Above 1 is faster than the home rate.",
+                OUT / "fig_valence_phi.svg", col="phi", ymin=0.0, ymax=1.5)
+    hi_names = [c[0] for c in HI_CONFIGS]
+    fig_valence(hi_runs, hi_names, HI_COLORS,
+                "High-I valence x. Combined should climb if grace, record, and decoupling work.",
+                OUT / "fig_hi_x.svg", col="x")
+    fig_valence(hi_runs, hi_names, HI_COLORS,
+                "High-I felt-time rate phi. Grandiosity can raise phi without raising x.",
+                OUT / "fig_hi_phi.svg", col="phi", ymin=0.0, ymax=1.5)
+
+    payload = {
+        "note": "Conceptual readout. phi, tau, and x do not feed back into A,H,S,P,G,Q,I,y.",
+        "I0": [valence_summary(m) for m in i0_mets],
+        "high_I": [valence_summary(m) for m in hi_mets],
+        "sensitivity": sweep,
+        "defaults": {
+            "PHI0": PHI0, "PHI_HOME": PHI_HOME, "K_REST_PHI": K_REST_PHI,
+            "K_GRAND_PHI": K_GRAND_PHI, "K_DEP_PHI": K_DEP_PHI,
+            "K_WORD_PHI": K_WORD_PHI, "K_WILL_PHI": K_WILL_PHI,
+            "TAU_X": TAU_X, "X0_X": X0_X, "K_STOP": K_STOP,
+        },
+    }
+    (OUT / "valence_results.json").write_text(json.dumps(payload, indent=2))
+    return payload
+
+
 
 
 def main():
