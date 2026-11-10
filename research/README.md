@@ -1,6 +1,6 @@
 # Research notes
 
-Papers and toy simulations from the week of 8–9 November 2026. **All of them are conceptual, not validated science.** They are not diagnoses, measurements, or treatments.
+Papers and toy simulations from the week of 8–10 November 2026. **All of them are conceptual, not validated science.** They are not diagnoses, measurements, or treatments.
 
 | Paper | Date | Summary | PDF |
 |---|---|---|---|
@@ -14,5 +14,6 @@ Papers and toy simulations from the week of 8–9 November 2026. **All of them a
 | Project Ariel Students v4 | 9 November 2026 | A listening companion that suggests directions under threat-gated response modes. | [PDF](ariel-students/Project-Ariel-Students-v4.pdf) |
 | Project Ariel Students v5 | 9 November 2026 | Cognitive offloading: sift mental chaos into supporting fields. | [PDF](ariel-students/Project-Ariel-Students-v5.pdf) |
 | Project Ariel Students v6 | 9 November 2026 | Clear expression, kindred minds, and peace. | [PDF](ariel-students/Project-Ariel-Students-v6.pdf) |
+| Novelty Must Gain Novelty | 10 November 2026 | Entropy, rumination, and why an app that never ends cannot close a loop. | [PDF](novelty-must-gain-novelty/Novelty-Must-Gain-Novelty.pdf) |
 
 Simulation code and result files sit next to each paper (`simulate.py`, `sim/`, CSV, SVG, JSON).
