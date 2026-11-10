@@ -48,6 +48,10 @@ The status bar shows snap, ortho, Euclid, momentum \(M\) and damping \(\gamma\),
 
 Doubt (◌) is a resistance circle: its radius is \(\rho\), and inside it the damping is \(\gamma+\rho\). A smaller circle is less resistance. Drag the rim to change \(\rho\). The shapes inside stay, and the edit undoes like any other.
 
+## Vision
+
+Ariel helps the student walk a tightrope by framing the pursuit of knowledge not as an attempt to master God, but as a way to uncover His legacy through the mechanics of the world. The student learns math, geometry, and art not to build a Tower of Babel to reach heaven, but to appreciate the architecture already placed before them. The quest for knowledge doesn't end because God is the ultimate answer; it becomes joyful, peaceful, and endless precisely because that answer is so vast.
+
 The [suite](suite/) opens on five tabs: Discover, Create, Learn, Rest, and Record. Discover is a listening journal. Create is this canvas; More tools reveals snap, the command line, layers, and the signal. Learn suggests two to four fundamentals and one kindred mind, and it does not assign exercises. Rest is for the voids: a pause, "You can let yourself off the hook for this.", the dream you wrote quoted back, and a reality check that shows what is true beside where the dream can still hold. In crisis, call or text **988**. In an emergency, call **911**. "This is enough" logs a settled idea. Under Advanced, the gate and the charts are still there: doubt ρ raises threat v and lowers control r, the I→O span sets bridge y, and gate g = clamp(0.05 + 0.95·(0.2+0.8·r)·(1−0.3·v)) scales transfer and the signal gain Kᵢ. Classic URL stays [../index.html](index.html).
 
 **Accomplishment Record** (the Record tab) is a factual timeline of what you did: a saved journal note, a layer or drawing on the canvas, an I→O line, a closed loop, a finished session, and a kindred mind or knowledge-path step when the canvas reports one. You can add, edit, or delete entries. Remember shows one past entry. Counts are simple totals, not grades. It is stored on this device (`ariel-record`), and the tab can export or import that file.

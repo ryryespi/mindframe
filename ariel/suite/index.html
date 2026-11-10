@@ -100,6 +100,8 @@
       <textarea id="learn-idea" placeholder="The idea, in your words."></textarea>
       <button type="button" class="go" id="learn-suggest">Suggest</button>
       <div id="learn-out"></div>
+      <p class="sub" id="learn-footer">Not a tower to climb, a world to discover.</p>
+      <p class="sub" id="learn-verse">It is the glory of God to conceal a thing: but the honour of kings is to search out a matter. (Proverbs 25:2)</p>
       <button type="button" class="ghost btn" id="learn-enough">This is enough</button>
     </section>
     <section id="rest" class="card hidden">
@@ -112,6 +114,10 @@
         <textarea id="rest-dream" placeholder="Your dream, in your words."></textarea>
       </label>
       <p id="rest-drive"></p>
+      <div id="rest-wonder" class="node hidden">
+        <p id="rest-wonder-line">This sounds like it might be about proving. Want to come back to wonder?</p>
+        <button type="button" class="ghost btn" id="rest-wonder-dismiss">Dismiss</button>
+      </div>
       <button type="button" class="ghost btn" id="rest-check">Reality check</button>
       <div id="rest-reality" class="node hidden"></div>
       <p class="crisis">In crisis, call or text <strong>988</strong> (US). In an emergency, call <strong>911</strong>.</p>
@@ -173,7 +179,7 @@
     "use strict";
     const B = window.ArielBridge;
     const G = window.ArielGuide;
-    let follow = true, last = null, moreTools = false, realityOpen = false;
+    let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
     const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
     function setAdvanced(on) {
@@ -277,7 +283,13 @@
       const pack = G.enough(title);
       const box = document.getElementById("enough");
       box.classList.remove("hidden");
-      box.textContent = pack.text;
+      box.replaceChildren();
+      const first = document.createElement("p");
+      first.textContent = pack.text;
+      const second = document.createElement("p");
+      second.textContent = pack.more;
+      box.appendChild(first);
+      box.appendChild(second);
       const next = Rec.add(record, pack.entry, new Date().toISOString());
       if (next.entries.length !== record.entries.length) commitRecord(next);
     }
@@ -301,11 +313,26 @@
         const list = document.createElement("ul");
         pack.concepts.forEach(item => {
           const li = document.createElement("li");
-          li.textContent = item;
+          const name = document.createElement("b");
+          name.textContent = item.name;
+          li.appendChild(name);
+          const line = document.createElement("div");
+          line.textContent = item.line;
+          li.appendChild(line);
+          if (item.woven) {
+            const woven = document.createElement("div");
+            woven.textContent = "Already woven in: " + item.woven;
+            li.appendChild(woven);
+          }
           list.appendChild(li);
         });
         box.appendChild(list);
       }
+      (pack.woven || []).forEach(example => {
+        const woven = document.createElement("p");
+        woven.textContent = "Already woven in: " + example;
+        box.appendChild(woven);
+      });
       if (pack.mind) {
         const card = document.createElement("div");
         card.className = "node";
@@ -358,7 +385,15 @@
       document.getElementById("rest-drive").textContent = offer.drive;
       if (offer.reality.flagged || realityOpen) fillReality(offer.reality);
       else document.getElementById("rest-reality").classList.add("hidden");
+      const wonder = G.wonderCard(journalText.value, wonderDismissedKey);
+      const card = document.getElementById("rest-wonder");
+      card.classList.toggle("hidden", !wonder.show);
+      document.getElementById("rest-wonder-line").textContent = wonder.line;
     }
+    document.getElementById("rest-wonder-dismiss").onclick = () => {
+      wonderDismissedKey = G.wonderCard(journalText.value, "").key;
+      paintRest();
+    };
     document.getElementById("discover-listen").onclick = () => {
       const heard = paintListen();
       const item = Rec.journalEntry(journalText.value, new Date().toISOString());

@@ -14,6 +14,10 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   const FORGIVENESS = "You can let yourself off the hook for this.";
   const ENOUGH = "You've learned what you needed here. Nothing more to prove.";
+  const ENOUGH_MORE = "And there is always more to enjoy.";
+  const FOOTER = "Not a tower to climb, a world to discover.";
+  const VERSE = "It is the glory of God to conceal a thing: but the honour of kings is to search out a matter. (Proverbs 25:2)";
+  const WONDER_LINE = "This sounds like it might be about proving. Want to come back to wonder?";
   const STOP = {
     a: 1, an: 1, the: 1, and: 1, or: 1, to: 1, of: 1, in: 1, on: 1, for: 1, with: 1,
     my: 1, i: 1, me: 1, it: 1, is: 1, am: 1, are: 1, was: 1, be: 1, this: 1, that: 1,
@@ -56,6 +60,12 @@
     }
   ];
   const VANITY = /\b(perfect|flawless|everyone|no one else|the best|better than|prove myself|prove them|famous|impressive|never wrong|always right|have to be|need to be)\b/i;
+  const PROVING = /\b(prove|be known|show them|better than|remembered forever|make us a name|make a name)\b/i;
+  const WOVEN = [
+    { keys: ["geometry", "geometric", "fibonacci", "spiral"], example: "the Fibonacci spiral in a sunflower" },
+    { keys: ["symmetry", "symmetric", "snowflake", "snowflakes"], example: "snowflakes" },
+    { keys: ["ratio", "ratios", "proportion", "harmony", "music", "musical"], example: "musical harmony" }
+  ];
 
   function tone(v) {
     const x = Number(v);
@@ -102,14 +112,41 @@
     return { heard, core, tone: toneUsed, lines };
   }
 
+  function wovenExamples(text) {
+    const raw = String(text || "");
+    const found = [];
+    WOVEN.forEach(row => {
+      if (row.keys.some(k => new RegExp("\\b" + k + "\\b", "i").test(raw)) && found.indexOf(row.example) < 0) found.push(row.example);
+    });
+    return found;
+  }
+
+  function asConcept(name) {
+    const own = wovenExamples(name);
+    return {
+      name: name,
+      line: "Already in the architecture of the world.",
+      woven: own.length ? own[0] : ""
+    };
+  }
+
+  function frameConcepts(names, source) {
+    const concepts = names.slice(0, 4).map(asConcept);
+    const used = {};
+    concepts.forEach(c => { if (c.woven) used[c.woven] = 1; });
+    const woven = wovenExamples(source).filter(ex => !used[ex]);
+    return { concepts, woven };
+  }
+
   function learn(text) {
     const raw = String(text || "").trim();
     const words = contentWords(raw);
+    const foot = { footer: FOOTER, verse: VERSE };
     if (!words.length) {
-      return {
-        concepts: [], mind: null,
+      return Object.assign({
+        concepts: [], woven: [], mind: null,
         note: "Write an idea first. Suggestions only. No exercises and no tests."
-      };
+      }, foot);
     }
     let best = null;
     let bestHits = 0;
@@ -118,19 +155,40 @@
       if (hits > bestHits) { best = theme; bestHits = hits; }
     });
     if (best) {
-      return {
-        concepts: best.concepts.slice(0, 4),
+      const framed = frameConcepts(best.concepts, raw);
+      return Object.assign({
+        concepts: framed.concepts,
+        woven: framed.woven,
         mind: { name: best.mind.name, line: best.mind.line },
         note: "A suggestion. Not an exercise and not a test."
-      };
+      }, foot);
     }
-    const concepts = [];
-    words.forEach(w => { if (concepts.indexOf(w) < 0 && concepts.length < 4) concepts.push(w); });
-    while (concepts.length < 2) concepts.push(concepts.length === 0 ? "the question you asked" : "what you can see from here");
-    return {
-      concepts: concepts.slice(0, 4),
+    const names = [];
+    words.forEach(w => { if (names.indexOf(w) < 0 && names.length < 4) names.push(w); });
+    while (names.length < 2) names.push(names.length === 0 ? "the question you asked" : "what you can see from here");
+    const framed = frameConcepts(names, raw);
+    return Object.assign({
+      concepts: framed.concepts,
+      woven: framed.woven,
       mind: null,
       note: "A suggestion from your own words. I don't have a kindred mind for this yet. Not an exercise and not a test."
+    }, foot);
+  }
+
+  function wonderKey(text) {
+    return String(text || "").trim().toLowerCase().replace(/\s+/g, " ");
+  }
+
+  /** Motive check. Dismissal is a key the caller keeps. No judgment of the person. */
+  function wonderCard(text, dismissedKey) {
+    const raw = String(text || "");
+    const key = wonderKey(raw);
+    const flagged = PROVING.test(raw);
+    return {
+      flagged: flagged,
+      show: flagged && key !== String(dismissedKey || ""),
+      key: key,
+      line: WONDER_LINE
     };
   }
 
@@ -179,13 +237,15 @@
 
   function enough(title) {
     const name = String(title || "").trim();
+    const settled = name ? "Settled: " + name : "";
     return {
       text: ENOUGH,
+      more: ENOUGH_MORE,
       note: name,
       entry: {
         type: "enough",
         text: ENOUGH,
-        note: name ? "Settled: " + name : "",
+        note: settled ? settled + ". " + ENOUGH_MORE : ENOUGH_MORE,
         source: "auto",
         key: "enough:" + (name || "idea"),
         href: ""
@@ -193,5 +253,8 @@
     };
   }
 
-  return { FORGIVENESS, ENOUGH, tone, toneLine, reflect, learn, reality, restOffer, enough };
+  return {
+    FORGIVENESS, ENOUGH, ENOUGH_MORE, FOOTER, VERSE, WONDER_LINE,
+    tone, toneLine, reflect, learn, reality, restOffer, enough, wonderCard
+  };
 });

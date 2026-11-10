@@ -85,7 +85,8 @@ test("Enough is a closing line and a record entry, written once", () => {
   const pack = G.enough("patience");
   assert.equal(pack.text, "You've learned what you needed here. Nothing more to prove.");
   assert.equal(pack.entry.type, "enough");
-  assert.equal(pack.entry.note, "Settled: patience");
+  assert.equal(pack.more, "And there is always more to enjoy.");
+  assert.equal(pack.entry.note, "Settled: patience. And there is always more to enjoy.");
   let rec = R.add(R.blank(), pack.entry, "2026-11-10T12:00:00.000Z");
   rec = R.add(rec, pack.entry, "2026-11-10T12:05:00.000Z");
   assert.equal(rec.entries.length, 1);
@@ -93,10 +94,47 @@ test("Enough is a closing line and a record entry, written once", () => {
   assert.equal(rec.entries[0].text, G.ENOUGH);
 });
 
+test("Learn frames fundamentals as architecture already in the world", () => {
+  const pack = G.learn("I want to study geometry");
+  assert.ok(pack.concepts.length >= 2 && pack.concepts.length <= 4);
+  pack.concepts.forEach(item => {
+    assert.equal(item.line, "Already in the architecture of the world.");
+    assert.equal(typeof item.name, "string");
+  });
+  assert.ok(pack.woven.indexOf("the Fibonacci spiral in a sunflower") >= 0);
+  assert.equal(pack.footer, "Not a tower to climb, a world to discover.");
+  assert.match(pack.verse, /Proverbs 25:2/);
+  assert.match(pack.note, /Not an exercise and not a test/);
+  const snow = G.learn("Look at the symmetry");
+  const snowLine = snow.concepts.map(c => c.woven).concat(snow.woven);
+  assert.ok(snowLine.indexOf("snowflakes") >= 0);
+  const music = G.learn("a ratio you can hear");
+  const musicLine = music.concepts.map(c => c.woven).concat(music.woven);
+  assert.ok(musicLine.indexOf("musical harmony") >= 0);
+  assert.doesNotMatch(JSON.stringify(pack), /exercise 1|quiz|score/i);
+});
+
+test("the wonder card appears for proving language and stays dismissed", () => {
+  const prove = G.wonderCard("I need to prove I should be known and show them", "");
+  assert.equal(prove.flagged, true);
+  assert.equal(prove.show, true);
+  assert.equal(prove.line, "This sounds like it might be about proving. Want to come back to wonder?");
+  assert.equal(G.wonderCard("I want to be better than them and remembered forever", "").show, true);
+  const quiet = G.wonderCard("I like the quiet geometry of a leaf", "");
+  assert.equal(quiet.show, false);
+  assert.equal(quiet.flagged, false);
+  const dismissed = G.wonderCard("I need to prove I should be known and show them", prove.key);
+  assert.equal(dismissed.flagged, true);
+  assert.equal(dismissed.show, false);
+  assert.doesNotMatch(prove.line, /shame|vain|stupid|you failed/i);
+});
+
 test("the suite keeps five plain tabs, hides the gate behind Advanced, and leaves the engine in place", () => {
   const suite = fs.readFileSync(path.join(__dirname, "../ariel/suite/index.html"), "utf8");
   const shell = fs.readFileSync(path.join(__dirname, "../ariel/shell.js"), "utf8");
   const bridge = fs.readFileSync(path.join(__dirname, "../ariel/suite/bridge.js"), "utf8");
+  const readme = fs.readFileSync(path.join(__dirname, "../ariel/README.md"), "utf8");
+  const docs = fs.readFileSync(path.join(__dirname, "../ariel/DOCS.md"), "utf8");
   ["discover", "create", "learn", "rest", "record"].forEach(id => {
     assert.match(suite, new RegExp('data-tab="' + id + '"'));
   });
@@ -111,6 +149,14 @@ test("the suite keeps five plain tabs, hides the gate behind Advanced, and leave
   assert.match(suite, /id="slider-v"/);
   assert.match(suite, /advanced-tab hidden/);
   assert.match(suite, /No exercises and no tests/);
+  assert.match(suite, /Not a tower to climb, a world to discover\./);
+  assert.match(suite, /Proverbs 25:2/);
+  assert.match(suite, /id="rest-wonder-dismiss"/);
+  assert.match(suite, /Want to come back to wonder\?/);
+  assert.match(readme, /## Vision/);
+  assert.match(docs, /## Vision/);
+  assert.match(readme, /Tower of Babel/);
+  assert.match(docs, /architecture already placed before them/);
   assert.doesNotMatch(suite, /streak|great job|you broke/i);
   assert.match(shell, /ariel-tools/);
   assert.match(shell, /embed:not\(\.more-tools\)/);
