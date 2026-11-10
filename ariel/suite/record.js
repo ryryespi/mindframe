@@ -15,6 +15,7 @@
 // enough    an idea the user marked as settled
 // explore   a fundamental looked at for the joy of it
 // story     a story kept from the canvas
+// courage   a reach-out the user chose to keep
 "use strict";
 (function (root, factory) {
   const api = factory();
@@ -34,7 +35,8 @@
     note: "Note",
     enough: "Enough",
     explore: "Explore",
-    story: "Story"
+    story: "Story",
+    courage: "Courage"
   };
 
   function blank() { return { entries: [] }; }

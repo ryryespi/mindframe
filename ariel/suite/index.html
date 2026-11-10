@@ -143,6 +143,8 @@
       <p id="rest-pause" class="sub">You can pause here, even if the hour is quiet.</p>
       <button type="button" class="go" id="rest-pause-btn">Pause</button>
       <button type="button" class="ghost btn" id="afraid-open-rest">I'm afraid to stop</button>
+      <button type="button" class="ghost btn" id="reach-open">Reach out</button>
+      <button type="button" class="ghost btn" id="reel-open">What we've made</button>
       <p id="rest-forgive">You can let yourself off the hook for this.</p>
       <label>The drive you want to keep
         <textarea id="rest-dream" placeholder="Your dream, in your words."></textarea>
@@ -194,6 +196,26 @@
         <button type="button" class="ghost btn" id="spiral-skip">Not this one</button>
       </div>
       <div id="spiral-practice"></div>
+      <button type="button" class="ghost btn" id="spiral-reach">Reach out</button>
+    </section>
+    <section id="reach" class="card hidden">
+      <p class="k">REACH OUT</p>
+      <div id="reach-body"></div>
+      <div id="reach-actions" class="rec-actions"></div>
+      <label id="reach-edit" class="hidden">Your words. Nothing is sent.
+        <textarea id="reach-draft" aria-label="Message you can copy"></textarea>
+      </label>
+      <p id="reach-courage" class="hidden">Courage <b id="reach-size">small</b>
+        <input id="reach-slider" type="range" min="0" max="2" step="1" value="1" aria-label="Courage size">
+      </p>
+    </section>
+    <section id="reel" class="card hidden">
+      <p class="k">WHAT WE'VE MADE</p>
+      <div id="reel-body"></div>
+      <div class="rec-actions">
+        <button type="button" class="go inline" id="reel-next">Next</button>
+        <button type="button" class="ghost btn" id="reel-not">Not now</button>
+      </div>
     </section>
     <section id="gate" class="card hidden">
       <p class="k">GATED ENGINE</p>
@@ -255,6 +277,7 @@
   <script src="story.js"></script>
   <script src="grace.js"></script>
   <script src="paths.js"></script>
+  <script src="reach.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
@@ -263,6 +286,7 @@
     const Story = window.ArielStory;
     const Grace = window.ArielGrace;
     const Paths = window.ArielPaths;
+    const Reach = window.ArielReach;
     let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
     const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
@@ -1041,6 +1065,8 @@
     }
     function paintDoor(blocked) {
       document.getElementById("afraid").classList.add("hidden");
+      document.getElementById("reach").classList.add("hidden");
+      document.getElementById("reel").classList.add("hidden");
       const box = document.getElementById("spiral");
       box.classList.remove("hidden");
       const safety = document.getElementById("spiral-safety");
@@ -1068,6 +1094,7 @@
         spiralState = sp;
         spiralIndex = 0;
         paintSpiral();
+        offerReel(false);
       }
     }
     function fillPractice(offer) {
@@ -1222,6 +1249,136 @@
       renderKindness();
     };
     renderKindness();
+    // ===== REACH OUT / WHAT WE'VE MADE =====
+    // Ryan's paths. One screen at a time. Ariel never sends a message.
+    let reachState = null;
+    let reelSeen = false;
+    let reelDismissed = false;
+    let reelIndex = 0;
+    let reelState = null;
+    function paintReach() {
+      const box = document.getElementById("reach");
+      const body = document.getElementById("reach-body");
+      const actions = document.getElementById("reach-actions");
+      if (!reachState) { box.classList.add("hidden"); return; }
+      box.classList.remove("hidden");
+      body.replaceChildren();
+      reachState.lines.forEach(line => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        body.appendChild(p);
+      });
+      (reachState.scripture || []).forEach(verse => {
+        const p = document.createElement("p");
+        p.textContent = verse.ref + " — " + verse.line;
+        body.appendChild(p);
+      });
+      actions.replaceChildren();
+      const choiceFor = {
+        "Continue": "continue",
+        "Safe to contact": "safe",
+        "Not safe": "not-safe",
+        "They asked for space": "space",
+        "Another tip": "next-tip",
+        "I sent it myself": "continue",
+        "No reply came": "no-reply",
+        "Keep this moment": "keep",
+        "Not now": "not-now"
+      };
+      (reachState.choices || []).forEach(label => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = label === "Not safe" || label === "They asked for space" ? "ghost btn" : "go inline";
+        b.textContent = label;
+        b.onclick = () => {
+          if (choiceFor[label] === "keep") {
+            const draft = document.getElementById("reach-draft").value;
+            const entry = Reach.courageEntry(draft, new Date().toISOString());
+            if (entry) commitRecord(Rec.add(record, entry, entry.at));
+            document.getElementById("reach").classList.add("hidden");
+            return;
+          }
+          if (choiceFor[label] === "not-now") {
+            document.getElementById("reach").classList.add("hidden");
+            return;
+          }
+          reachState = Reach.screen(reachState, choiceFor[label]);
+          paintReach();
+        };
+        actions.appendChild(b);
+      });
+      if (reachState.step === "readings" && !reachState.listening) {
+        const faith = document.createElement("button");
+        faith.type = "button";
+        faith.className = "ghost btn";
+        faith.textContent = reachState.faith ? "Faith lines on" : "Faith lines off";
+        faith.onclick = () => {
+          reachState = Reach.screen(reachState, reachState.faith ? "faith-off" : "faith-on");
+          try { localStorage.setItem("ariel-faith", reachState.faith ? "1" : "0"); } catch (err) {}
+          paintReach();
+        };
+        actions.appendChild(faith);
+      }
+      const editing = reachState.step === "message";
+      document.getElementById("reach-edit").classList.toggle("hidden", !editing);
+      document.getElementById("reach-courage").classList.toggle("hidden", !editing || !!reachState.listening);
+      if (editing && !document.getElementById("reach-draft").value) {
+        document.getElementById("reach-draft").value = Reach.starterFor(reachState.courage);
+      }
+    }
+    function openReach() {
+      const faith = localStorage.getItem("ariel-faith") === "1";
+      reachState = Reach.start(graceMode());
+      reachState.faith = faith && graceMode() !== "listen";
+      document.getElementById("reach-draft").value = "";
+      paintReach();
+    }
+    function paintReel() {
+      const box = document.getElementById("reel");
+      const body = document.getElementById("reel-body");
+      const picked = Reach.reelCard(reelState, reelIndex);
+      if (!reelState || !reelState.show || !picked) { box.classList.add("hidden"); return; }
+      box.classList.remove("hidden");
+      body.replaceChildren();
+      const p = document.createElement("p");
+      p.textContent = picked.card.text;
+      body.appendChild(p);
+      document.getElementById("reel-next").classList.toggle("hidden", !!picked.last);
+    }
+    function offerReel(asked) {
+      const items = Reach.memories(record.entries, kindness);
+      const next = Reach.reel(items, { seen: reelSeen, asked: asked, dismissed: reelDismissed, mode: graceMode(), text: graceText() });
+      if (!next.show) {
+        if (next.safety) {
+          document.getElementById("reel").classList.remove("hidden");
+          document.getElementById("reel-body").textContent = next.line + " " + next.trusted;
+        }
+        return;
+      }
+      reelState = next;
+      reelIndex = 0;
+      if (!asked) reelSeen = true;
+      paintReel();
+    }
+    document.getElementById("reach-open").onclick = () => openReach();
+    document.getElementById("spiral-reach").onclick = () => openReach();
+    document.getElementById("reel-open").onclick = () => offerReel(true);
+    document.getElementById("reach-slider").oninput = () => {
+      if (!reachState) return;
+      reachState.courage = +document.getElementById("reach-slider").value;
+      const names = ["tiny", "small", "medium"];
+      document.getElementById("reach-size").textContent = names[reachState.courage] || "small";
+      document.getElementById("reach-draft").value = Reach.starterFor(reachState.courage);
+    };
+    document.getElementById("reel-next").onclick = () => {
+      reelIndex += 1;
+      paintReel();
+    };
+    document.getElementById("reel-not").onclick = () => {
+      reelDismissed = true;
+      reelSeen = true;
+      document.getElementById("reel").classList.add("hidden");
+    };
     window.addEventListener("message", (e) => {
       const d = e.data;
       if (!d || d.type !== "ariel-state") return;
