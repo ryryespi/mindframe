@@ -47,11 +47,10 @@
     body:not(.advanced) .advanced-only { display:none; }
     .crisis { margin:14px 0 0; padding:8px 10px; border:1px solid var(--line); border-radius:10px; color:var(--muted); }
     .shows { margin-top:8px; }
-    .subtabs { display:flex; gap:4px; background:#090d16; border:1px solid var(--line); border-radius:12px; padding:4px; margin:8px 0 12px; }
-    .subtabs [role="tab"] { flex:1; border:0; border-radius:8px; background:transparent; color:var(--muted); min-height:40px; }
-    .subtabs [role="tab"][aria-selected="true"] { background:var(--em); color:#fff; }
-    #create-words-frame iframe { width:100%; height:70vh; min-height:70vh; border:0; display:block; background:#f4f1ec; }
-    @media (max-width:700px) { #create-words-frame iframe { height:calc(100vh - 220px); min-height:calc(100vh - 220px); } }
+    nav { flex: 1 1 280px; max-width: 100%; overflow-x: auto; }
+    nav button { flex: 0 0 auto; }
+    #wordgame.words-tab { padding: 0; background: #f4f1ec; overflow: hidden; }
+    #suite-game, #suite-game iframe { width: 100%; height: calc(100vh - 132px); min-height: 70vh; border: 0; display: block; background: #f4f1ec; }
     #honest-body { transition: opacity 0.8s ease; }
     #honest-body.fade { opacity: 0; }
     #enough { margin:0 0 12px; }
@@ -59,7 +58,7 @@
     @media (max-width:700px) {
       .grid { grid-template-columns:1fr; }
       iframe, .frame { height:78vh; min-height:78vh; }
-      #suite-canvas { height:calc(100vh - 168px); min-height:calc(100vh - 168px); }
+      #suite-canvas, #suite-game, #suite-game iframe { height:calc(100vh - 168px); min-height:calc(100vh - 168px); }
       nav button { font-size:12px; }
     }
   </style>
@@ -78,6 +77,7 @@
         <button type="button" class="on" data-tab="discover">Discover</button>
         <button type="button" data-tab="create">Create</button>
         <button type="button" data-tab="canvas">Canvas</button>
+        <button type="button" data-tab="wordgame">Ariel Words</button>
         <button type="button" data-tab="learn">Learn</button>
         <button type="button" data-tab="rest">Rest</button>
         <button type="button" data-tab="record">Record</button>
@@ -128,11 +128,6 @@
     </section>
     <section id="create" class="card hidden">
       <p class="k">CREATE</p>
-      <div class="subtabs" role="tablist" aria-label="Create">
-        <button type="button" role="tab" id="create-tab-make" aria-controls="create-panel-make" aria-selected="true">Out of the Void</button>
-        <button type="button" role="tab" id="create-tab-words" aria-controls="create-panel-words" aria-selected="false" tabindex="-1">Ariel Words</button>
-      </div>
-      <div id="create-panel-make" role="tabpanel" aria-labelledby="create-tab-make">
       <h2>Out of the Void</h2>
       <p class="sub" id="void-how">Draw a circle for a word that is already yours, or a line for a skill. A barrier is a chance to choose. This is not a grade.</p>
       <div class="rec-actions">
@@ -181,10 +176,9 @@
       </div>
       <p id="story-presence" class="hidden"></p>
       <button type="button" class="ghost btn" id="afraid-open">I'm afraid to stop</button>
-      </div>
-      <div id="create-panel-words" role="tabpanel" aria-labelledby="create-tab-words" hidden>
-        <div id="create-words-frame"></div>
-      </div>
+    </section>
+    <section id="wordgame" class="card words-tab hidden">
+      <div id="suite-game"></div>
     </section>
     <section id="canvas" class="card canvas-tab hidden">
       <iframe id="suite-canvas" title="Ariel canvas" src="../index.html?embed=1&amp;full=1"></iframe>
@@ -410,7 +404,7 @@
       if (Array.isArray(saved)) saved.forEach(row => { if (row && typeof row.v === "number") hist.push(row); });
       zoneLog = JSON.parse(localStorage.getItem("ariel-zones") || "[]") || [];
     } catch (err) {}
-    const TABS = ["discover", "create", "canvas", "learn", "rest", "record", "gate", "charts"];
+    const TABS = ["discover", "create", "canvas", "wordgame", "learn", "rest", "record", "gate", "charts"];
     function setAdvanced(on) {
       document.body.classList.toggle("advanced", !!on);
       document.querySelectorAll(".advanced-tab").forEach(btn => btn.classList.toggle("hidden", !on));
@@ -431,6 +425,7 @@
         document.getElementById("learn-idea").value = journalText.value;
       }
       if (btn.dataset.tab === "rest") paintRest();
+      if (btn.dataset.tab === "wordgame") ensureSuiteWords();
       leaveHonest();
     });
     const journalText = document.getElementById("journal-text");
@@ -1985,44 +1980,17 @@
       document.getElementById("free-canvas").classList.toggle("hidden", !on);
       document.getElementById("free-draw").textContent = on ? "Out of the Void" : "Free draw";
     };
-    let createSub = WordsPanel.subBlank();
-    const createTabs = ["make", "words"];
-    function paintCreateSub() {
-      const words = createSub.tab === "words";
-      document.getElementById("create-panel-make").hidden = words;
-      document.getElementById("create-panel-words").hidden = !words;
-      document.getElementById("create-tab-make").setAttribute("aria-selected", words ? "false" : "true");
-      document.getElementById("create-tab-words").setAttribute("aria-selected", words ? "true" : "false");
-      document.getElementById("create-tab-make").tabIndex = words ? -1 : 0;
-      document.getElementById("create-tab-words").tabIndex = words ? 0 : -1;
-    }
-    function showCreateSub(id) {
-      const next = WordsPanel.selectSub(createSub, id);
+    let suiteGame = WordsPanel.blank();
+    function ensureSuiteWords() {
+      const next = WordsPanel.open(suiteGame);
       if (next.created) {
         const frame = document.createElement("iframe");
         frame.src = WordsPanel.PARAMS.suiteSrc;
         frame.title = "Ariel Words";
-        document.getElementById("create-words-frame").appendChild(frame);
+        document.getElementById("suite-game").appendChild(frame);
       }
-      createSub = next;
-      WordsPanel.rememberSub(sessionStorage, createSub);
-      paintCreateSub();
+      suiteGame = next;
     }
-    document.getElementById("create-tab-make").onclick = () => showCreateSub("make");
-    document.getElementById("create-tab-words").onclick = () => showCreateSub("words");
-    document.querySelector("#create .subtabs").addEventListener("keydown", (e) => {
-      const i = createTabs.indexOf(createSub.tab);
-      let dest = "";
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") dest = createTabs[(i + 1) % createTabs.length];
-      else if (e.key === "ArrowLeft" || e.key === "ArrowUp") dest = createTabs[(i + createTabs.length - 1) % createTabs.length];
-      else if (e.key === "Home") dest = createTabs[0];
-      else if (e.key === "End") dest = createTabs[createTabs.length - 1];
-      else return;
-      e.preventDefault();
-      showCreateSub(dest);
-      document.getElementById(dest === "words" ? "create-tab-words" : "create-tab-make").focus();
-    });
-    if (WordsPanel.recallSub(sessionStorage) === "words") showCreateSub("words");
     paintVoid();
     window.addEventListener("message", (e) => {
       const d = e.data;

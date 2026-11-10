@@ -46,16 +46,15 @@ test("the canvas page keeps the game in a panel and ignores drawing while it is 
   assert.match(page, /next\.created/);
   assert.match(page, /pointerEvents=wordsState\.open\?'none':''/);
   assert.match(page, /stopImmediatePropagation/);
-  assert.match(shell, /openArielWords/);
-  assert.doesNotMatch(shell, /words-link"[\s\S]{0,80}href = "\.\/words\/"/);
+  assert.match(shell, /getElementById\("bWords"\)/);
+  assert.match(shell, /appendChild\(wordsBtn\)/);
   assert.match(words, /html\.embed #back-canvas \{ display: none/);
   assert.match(words, /embed=1/);
   assert.match(words, /Dedication/);
   assert.match(words, /AI assistant: Grok Bot/);
-  assert.match(suite, /id="create-tab-words"/);
-  assert.match(suite, /role="tablist"/);
+  assert.match(suite, /data-tab="wordgame"/);
   assert.match(suite, /WordsPanel\.PARAMS\.suiteSrc/);
-  assert.match(page, /id="words-panel"/);
+  assert.doesNotMatch(suite, /create-tab-words/);
 });
 
 console.log(`\n${passed} passed`);

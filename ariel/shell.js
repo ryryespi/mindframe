@@ -31,6 +31,9 @@
     #sig-eq{font:11px ui-monospace,monospace;margin:4px 0}
     #sig-plot{width:100%;height:36px;display:block;background:#f4f1ec;border-radius:6px}
     body.cad #bar{position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+    body.cad #bWords{position:fixed;z-index:9;left:12px;bottom:46px;width:auto;min-width:44px;height:36px;opacity:1;pointer-events:auto;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;background:#fffc;color:#5b6472;box-shadow:0 2px 12px #0001;font:13px system-ui,sans-serif}
+    body.cad #bWords svg{width:18px;height:18px;stroke:#5b6472;fill:none;stroke-width:2;flex:none}
+    body.cad #bWords.on{background:#e6e1d8}
     body.cad #layers{position:fixed;z-index:6;left:8px;top:60px;bottom:70px;width:168px;transform:none;max-height:none;display:none;flex-direction:column;align-items:stretch;gap:6px;background:#fffc;border-radius:12px;box-shadow:0 2px 12px #0001;padding:8px;overflow:auto}
     body.cad.dock-open #layers{display:flex}
     body.cad #layers > div:not(#layer-meta){width:16px;height:16px}
@@ -57,8 +60,6 @@
     #demo{position:fixed;z-index:9;left:12px;right:12px;top:60px;max-width:420px;background:#f7f4ef;border-radius:12px;padding:12px;display:none;box-shadow:0 2px 14px #0002;font:13px/1.4 system-ui;color:#5b6472}
     #demo.on{display:block}
     a.paper-dl{align-self:center;margin-left:auto;font:12px system-ui;color:#5b6472;white-space:nowrap}
-    button.words-link{align-self:center;margin-right:4px;width:36px;height:36px;min-width:36px;display:grid;place-items:center;border-radius:50%;padding:0;flex:none}
-    button.words-link svg{width:20px;height:20px;stroke:#5b6472;fill:none;stroke-width:2;stroke-linecap:round}
     body.cad #layer-meta, body.cad #layer-meta div, body.cad #layer-meta p{width:auto!important;height:auto!important;border:0!important;opacity:1!important;transform:none!important;border-radius:0!important}
     #xport textarea{width:100%;height:46vh;font:12px/1.45 ui-monospace,monospace;border:1px solid #e4dfd6;border-radius:10px;padding:8px;color:#5b6472}
     #help{font-size:14px}
@@ -104,14 +105,8 @@
   paperLink.textContent = "Download the paper (PDF)";
   ribbon.appendChild(paperLink);
   document.body.appendChild(ribbon);
-  const wordsLink = document.createElement("button");
-  wordsLink.type = "button";
-  wordsLink.className = "words-link";
-  wordsLink.title = "Ariel Words";
-  wordsLink.setAttribute("aria-label", "Ariel Words");
-  wordsLink.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 6h14v9H9l-4 3V6z"/></svg>';
-  wordsLink.onclick = () => { if (window.openArielWords) window.openArielWords(); };
-  ribbon.insertBefore(wordsLink, ribbon.firstChild);
+  const wordsBtn = document.getElementById("bWords");
+  if (wordsBtn) document.body.appendChild(wordsBtn);
 
   const status = document.createElement("div");
   status.id = "status";
@@ -432,10 +427,7 @@
     if (id === "help") { fillHelp(); help.classList.add("on"); return; }
   }
   function mark() {
-    document.querySelectorAll("#ribbon button").forEach(b => {
-      if (b.classList.contains("words-link")) return;
-      b.classList.toggle("on", b.dataset.cad === tool || (tool === "dot" && b.dataset.cad === "point"));
-    });
+    document.querySelectorAll("#ribbon button").forEach(b => b.classList.toggle("on", b.dataset.cad === tool || (tool === "dot" && b.dataset.cad === "point")));
   }
 
   addEventListener("pointerdown", e => {
