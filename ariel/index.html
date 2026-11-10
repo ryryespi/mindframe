@@ -27,6 +27,11 @@ canvas{display:block;width:100vw;height:100vh}
 #lex canvas{width:30px;height:30px;border-radius:8px;background:#fffc;box-shadow:0 1px 4px #0001;cursor:pointer}
 #tp{position:fixed;left:8px;right:8px;bottom:96px;height:50vh;background:#fffffaee;border-radius:14px;box-shadow:0 2px 14px #0002;display:none;overflow:hidden}
 #tp.on{display:block}
+#words-panel{position:fixed;z-index:12;left:8px;right:8px;top:64px;bottom:78px;background:#fffffaee;border-radius:14px;box-shadow:0 2px 14px #0002;display:none;overflow:hidden}
+#words-panel.on{display:block}
+#words-panel iframe{position:absolute;left:0;right:0;top:36px;bottom:0;width:100%;height:calc(100% - 36px);border:0;background:#f4f1ec}
+#words-close{position:absolute;right:8px;top:4px;width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:#5b6472;font:18px system-ui;cursor:pointer}
+@media(max-width:700px){#words-panel{left:0;right:0;top:0;bottom:0;border-radius:0;background:#f4f1ec}}
 #tpt{position:absolute;left:0;right:0;top:0;height:28px;display:flex;align-items:center;gap:4px;padding:0 8px;border-bottom:1px solid #0001}
 #tpt span{width:26px;height:24px;display:grid;place-items:center;border-radius:8px;cursor:pointer;opacity:.6}#tpt span.on{background:#e6e1d8;opacity:1}
 #tpb,#tpa{position:absolute;inset:28px 0 0 0;margin:0;padding:10px;font:12px/1.5 ui-monospace,monospace;white-space:pre-wrap;word-break:break-all;box-sizing:border-box;overflow:auto}
@@ -45,7 +50,11 @@ canvas{display:block;width:100vw;height:100vh}
  <button id="bAI" class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M10 9v6M14 9v6"/></svg></button>
  <button id="bClr"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
  <button id="bHelp"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3 2.4V14"/><circle cx="12" cy="17" r=".6"/></svg></button>
- <a id="bWords" href="./words/" title="Ariel Words" aria-label="Ariel Words"><svg viewBox="0 0 24 24"><path d="M5 6h14v9H9l-4 3V6z"/></svg></a>
+ <button type="button" id="bWords" title="Ariel Words" aria-label="Ariel Words"><svg viewBox="0 0 24 24"><path d="M5 6h14v9H9l-4 3V6z"/></svg></button>
+</div>
+<div id="words-panel" aria-label="Ariel Words">
+ <button type="button" id="words-close" aria-label="Close">×</button>
+ <div id="words-frame"></div>
 </div>
 <div id="help"><b>?</b><br>
 ● tap empty space: place a dot / line / circle (chosen tool) on the selected layer.<br>
@@ -74,6 +83,7 @@ canvas{display:block;width:100vw;height:100vh}
 <script src="cad.js"></script>
 <script src="signal.js"></script>
 <script src="suite/feedback.js"></script>
+<script src="words-panel.js"></script>
 <script>
 "use strict";
 window.onerror=(m)=>{document.getElementById('err').textContent+='ERR:'+m+';'};
@@ -231,6 +241,14 @@ function drawBase(t){
 
 /* ===================== INPUT (touch + mouse via pointer events) ===================== */
 let drag=null,downT=0,downP=null,lastTap=0,press=null,orbit=null;
+let wordsState = ArielWordsPanel.blank();
+function blockWordsDraw(e){
+  if(!ArielWordsPanel.ignoresCanvas(wordsState))return;
+  if(e.target===cv){e.preventDefault();e.stopImmediatePropagation()}
+}
+addEventListener('pointerdown',blockWordsDraw,true);
+addEventListener('pointermove',blockWordsDraw,true);
+addEventListener('pointerup',blockWordsDraw,true);
 const key=(m)=>m.i+'-'+m.j+'-'+Math.round(EQ.angle(m.l1)*1e2);
 function hit(p){const L=layers[active],d=(a)=>Math.hypot(a.x-p.x,a.y-p.y);
   for(const k of L.circles){if(d({x:k.c.x+k.r,y:k.c.y})<P.hitR)return{k,part:'r'};if(d(k.c)<P.hitR)return{k,part:'c'}}
@@ -274,6 +292,29 @@ bView.onclick=()=>{tiltT=tiltT?0:P.sideTilt;if(!tiltT)yaw=0;bView.classList.togg
 bAI.onclick=()=>{aiOn=!aiOn;bAI.classList.toggle('on',aiOn);bAI.querySelector('path').setAttribute('d',aiOn?'M10 9v6M14 9v6':'M10 8l5 4-5 4z')};
 bClr.onclick=()=>{layers[active]=mkLayer(layers[active].ai);};
 bHelp.onclick=()=>help.classList.add('on');help.onclick=()=>help.classList.remove('on');
+function paintWords(){
+  const box=document.getElementById('words-panel');
+  box.classList.toggle('on',wordsState.open);
+  bWords.classList.toggle('on',wordsState.open);
+  const rib=document.querySelector('.words-link');
+  if(rib)rib.classList.toggle('on',wordsState.open);
+  cv.style.pointerEvents=wordsState.open?'none':'';
+}
+function openArielWords(){
+  const next=ArielWordsPanel.open(wordsState);
+  if(next.created){
+    const frame=document.createElement('iframe');
+    frame.src=ArielWordsPanel.PARAMS.src;
+    frame.title='Ariel Words';
+    document.getElementById('words-frame').appendChild(frame);
+  }
+  wordsState=next;
+  paintWords();
+}
+function closeArielWords(){wordsState=ArielWordsPanel.close(wordsState);paintWords()}
+bWords.onclick=()=>{if(wordsState.open)closeArielWords();else openArielWords()};
+document.getElementById('words-close').onclick=closeArielWords;
+window.openArielWords=openArielWords;
 
 
 /* =====================================================================

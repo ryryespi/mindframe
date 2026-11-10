@@ -57,8 +57,8 @@
     #demo{position:fixed;z-index:9;left:12px;right:12px;top:60px;max-width:420px;background:#f7f4ef;border-radius:12px;padding:12px;display:none;box-shadow:0 2px 14px #0002;font:13px/1.4 system-ui;color:#5b6472}
     #demo.on{display:block}
     a.paper-dl{align-self:center;margin-left:auto;font:12px system-ui;color:#5b6472;white-space:nowrap}
-    a.words-link{align-self:center;margin-right:4px;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;text-decoration:none;flex:none}
-    a.words-link svg{width:20px;height:20px;stroke:#5b6472;fill:none;stroke-width:2;stroke-linecap:round}
+    button.words-link{align-self:center;margin-right:4px;width:36px;height:36px;min-width:36px;display:grid;place-items:center;border-radius:50%;padding:0;flex:none}
+    button.words-link svg{width:20px;height:20px;stroke:#5b6472;fill:none;stroke-width:2;stroke-linecap:round}
     body.cad #layer-meta, body.cad #layer-meta div, body.cad #layer-meta p{width:auto!important;height:auto!important;border:0!important;opacity:1!important;transform:none!important;border-radius:0!important}
     #xport textarea{width:100%;height:46vh;font:12px/1.45 ui-monospace,monospace;border:1px solid #e4dfd6;border-radius:10px;padding:8px;color:#5b6472}
     #help{font-size:14px}
@@ -103,12 +103,13 @@
   paperLink.textContent = "Download the paper (PDF)";
   ribbon.appendChild(paperLink);
   document.body.appendChild(ribbon);
-  const wordsLink = document.createElement("a");
+  const wordsLink = document.createElement("button");
+  wordsLink.type = "button";
   wordsLink.className = "words-link";
-  wordsLink.href = "./words/";
   wordsLink.title = "Ariel Words";
   wordsLink.setAttribute("aria-label", "Ariel Words");
   wordsLink.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 6h14v9H9l-4 3V6z"/></svg>';
+  wordsLink.onclick = () => { if (window.openArielWords) window.openArielWords(); };
   ribbon.insertBefore(wordsLink, ribbon.firstChild);
 
   const status = document.createElement("div");
@@ -430,7 +431,10 @@
     if (id === "help") { fillHelp(); help.classList.add("on"); return; }
   }
   function mark() {
-    document.querySelectorAll("#ribbon button").forEach(b => b.classList.toggle("on", b.dataset.cad === tool || (tool === "dot" && b.dataset.cad === "point")));
+    document.querySelectorAll("#ribbon button").forEach(b => {
+      if (b.classList.contains("words-link")) return;
+      b.classList.toggle("on", b.dataset.cad === tool || (tool === "dot" && b.dataset.cad === "point"));
+    });
   }
 
   addEventListener("pointerdown", e => {

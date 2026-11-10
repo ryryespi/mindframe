@@ -45,6 +45,11 @@
     body:not(.advanced) .advanced-only { display:none; }
     .crisis { margin:14px 0 0; padding:8px 10px; border:1px solid var(--line); border-radius:10px; color:var(--muted); }
     .shows { margin-top:8px; }
+    #suite-words { position:fixed; z-index:20; left:12px; right:12px; top:72px; bottom:12px; background:#fffffaee; border-radius:14px; box-shadow:0 2px 14px #0002; display:none; overflow:hidden; }
+    #suite-words.on { display:flex; flex-direction:column; }
+    #suite-words iframe { flex:1; width:100%; border:0; background:#f4f1ec; }
+    #suite-words-close { align-self:flex-end; }
+    @media (max-width:700px) { #suite-words { left:0; right:0; top:0; bottom:0; border-radius:0; background:#f4f1ec; } }
     #honest-body { transition: opacity 0.8s ease; }
     #honest-body.fade { opacity: 0; }
     #enough { margin:0 0 12px; }
@@ -127,7 +132,7 @@
         <button type="button" class="ghost btn" id="free-draw">Free draw</button>
         <button type="button" class="ghost btn" id="save-sketch">Save sketch</button>
         <button type="button" class="ghost btn" id="more-tools">More tools</button>
-        <a class="ghost btn" id="ariel-words" href="../words/" title="Ariel Words" aria-label="Ariel Words">Ariel Words</a>
+        <button type="button" class="ghost btn" id="ariel-words" title="Ariel Words" aria-label="Ariel Words">Ariel Words</button>
       </div>
       <div id="void-game">
         <canvas id="void-canvas" width="640" height="360"></canvas>
@@ -151,6 +156,10 @@
         <button type="button" class="go" id="sketch-keep">Save</button>
       </div>
       <div class="frame hidden" id="free-canvas"><iframe id="ariel" title="Ariel canvas" src="../index.html?embed=1"></iframe></div>
+      <div id="suite-words" aria-label="Ariel Words">
+        <button type="button" class="ghost btn" id="suite-words-close" aria-label="Close">×</button>
+        <div id="suite-words-frame"></div>
+      </div>
       <div id="story-panel">
         <p id="story-ready" class="sub">Draw, then ask for a story. The same drawing tells the same one.</p>
         <button type="button" class="go" id="story-tell">Tell me a story</button>
@@ -366,6 +375,7 @@
   <script src="sketch.js"></script>
   <script src="honest.js"></script>
   <script src="feedback.js"></script>
+  <script src="../words-panel.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
@@ -380,6 +390,7 @@
     const Sketch = window.ArielSketch;
     const Honest = window.ArielHonest;
     const Shows = window.ArielFeedback;
+    const WordsPanel = window.ArielWordsPanel;
     let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
     let zoneLog = [];
@@ -1962,6 +1973,27 @@
       document.getElementById("void-game").classList.toggle("hidden", on);
       document.getElementById("free-canvas").classList.toggle("hidden", !on);
       document.getElementById("free-draw").textContent = on ? "Out of the Void" : "Free draw";
+    };
+    let suiteWords = WordsPanel.blank();
+    function paintSuiteWords() {
+      document.getElementById("suite-words").classList.toggle("on", suiteWords.open);
+      document.getElementById("ariel-words").classList.toggle("on", suiteWords.open);
+      document.getElementById("void-canvas").style.pointerEvents = WordsPanel.ignoresCanvas(suiteWords) ? "none" : "";
+    }
+    document.getElementById("ariel-words").onclick = () => {
+      const next = suiteWords.open ? WordsPanel.close(suiteWords) : WordsPanel.open(suiteWords);
+      if (next.created) {
+        const frame = document.createElement("iframe");
+        frame.src = WordsPanel.PARAMS.suiteSrc;
+        frame.title = "Ariel Words";
+        document.getElementById("suite-words-frame").appendChild(frame);
+      }
+      suiteWords = next;
+      paintSuiteWords();
+    };
+    document.getElementById("suite-words-close").onclick = () => {
+      suiteWords = WordsPanel.close(suiteWords);
+      paintSuiteWords();
     };
     paintVoid();
     window.addEventListener("message", (e) => {
