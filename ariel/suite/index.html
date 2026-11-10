@@ -118,6 +118,7 @@
         <p id="story-meta" class="sub advanced-only"></p>
       </div>
       <p id="story-presence" class="hidden"></p>
+      <button type="button" class="ghost btn" id="afraid-open">I'm afraid to stop</button>
     </section>
     <section id="learn" class="card hidden">
       <p class="k">LEARN</p>
@@ -141,6 +142,7 @@
       <h2>A pause</h2>
       <p id="rest-pause" class="sub">You can pause here, even if the hour is quiet.</p>
       <button type="button" class="go" id="rest-pause-btn">Pause</button>
+      <button type="button" class="ghost btn" id="afraid-open-rest">I'm afraid to stop</button>
       <p id="rest-forgive">You can let yourself off the hook for this.</p>
       <label>The drive you want to keep
         <textarea id="rest-dream" placeholder="Your dream, in your words."></textarea>
@@ -171,6 +173,27 @@
       <button type="button" class="ghost btn" id="rest-check">Reality check</button>
       <div id="rest-reality" class="node hidden"></div>
       <p class="crisis">In crisis, call or text <strong>988</strong> (US). In an emergency, call <strong>911</strong>.</p>
+    </section>
+    <section id="afraid" class="card hidden">
+      <p class="k">YOU CAN REST</p>
+      <div id="afraid-lines"></div>
+      <div id="afraid-kept"></div>
+      <div class="rec-actions">
+        <button type="button" class="ghost btn" id="afraid-record">See what you've kept</button>
+        <button type="button" class="go inline" id="afraid-dose">Rest 10 seconds</button>
+        <button type="button" class="ghost btn" id="afraid-close">Not now</button>
+      </div>
+      <p id="afraid-done" class="hidden"></p>
+    </section>
+    <section id="spiral" class="card hidden">
+      <p class="k">SLOW THE SPIRAL</p>
+      <div id="spiral-safety" class="crisis hidden"></div>
+      <div id="spiral-offer"></div>
+      <div id="spiral-actions" class="rec-actions">
+        <button type="button" class="go inline" id="spiral-try">I'll try this</button>
+        <button type="button" class="ghost btn" id="spiral-skip">Not this one</button>
+      </div>
+      <div id="spiral-practice"></div>
     </section>
     <section id="gate" class="card hidden">
       <p class="k">GATED ENGINE</p>
@@ -214,6 +237,11 @@
       </label>
       <button type="button" class="go" id="rec-add">Add to the record</button>
       <p class="sub">Saved on this device only. Kept as a list of facts.</p>
+      <h3>Kindness I've seen</h3>
+      <p class="sub">A moment someone was kind, a stranger helped, or you noticed beauty. Saved on this device.</p>
+      <input id="kind-text" type="text" aria-label="A kindness you saw" placeholder="A kindness you saw">
+      <button type="button" class="go" id="kind-add">Add kindness</button>
+      <div id="kind-list"></div>
       <div class="rec-actions">
         <button type="button" class="ghost btn" id="rec-export">Export record</button>
         <button type="button" class="ghost btn" id="rec-import">Import record</button>
@@ -226,6 +254,7 @@
   <script src="guide.js"></script>
   <script src="story.js"></script>
   <script src="grace.js"></script>
+  <script src="paths.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
@@ -233,6 +262,7 @@
     const G = window.ArielGuide;
     const Story = window.ArielStory;
     const Grace = window.ArielGrace;
+    const Paths = window.ArielPaths;
     let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
     const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
@@ -262,6 +292,7 @@
       const n = journalText.value.trim().split(/\s+/).filter(Boolean).length;
       document.getElementById("words").textContent = n + " words";
       considerGrace();
+      scanPaths();
     };
     function apply(read, fromCanvas) {
       last = read;
@@ -571,7 +602,7 @@
       commitRecord(Rec.add(record, entry, new Date().toISOString()));
       field.value = "";
     };
-    journalText.addEventListener("input", () => { lastInputAt = Date.now(); });
+      journalText.addEventListener("input", () => { lastInputAt = Date.now(); scanPaths(); });
     try { document.getElementById("rest-dream").value = localStorage.getItem("ariel-dream") || ""; } catch (err) {}
     document.getElementById("rest-dream").oninput = () => {
       try { localStorage.setItem("ariel-dream", document.getElementById("rest-dream").value); } catch (err) {}
@@ -933,13 +964,271 @@
       if (frame && frame.contentWindow) frame.contentWindow.postMessage({ type: "ariel-simplify", on: graceSimple }, "*");
       document.getElementById("grace-simple").textContent = graceSimple ? "Bring the layers back" : "One clean line";
     };
-    ["learn-idea", "rest-dream"].forEach(id => document.getElementById(id).addEventListener("input", considerGrace));
+    ["learn-idea", "rest-dream"].forEach(id => document.getElementById(id).addEventListener("input", () => { lastInputAt = Date.now(); considerGrace(); scanPaths(); }));
+    // ===== AFRAID TO STOP / SLOW THE SPIRAL =====
+    // Small rests. One spiral step at a time. Nothing opens by itself.
+    let lastBreakAt = Date.now();
+    let doseStep = 0;
+    let doseTimer = null;
+    let afraidDismissed = false;
+    let spiralDismissed = false;
+    let spiralState = null;
+    let spiralIndex = 0;
+    let kindness = [];
+    try { kindness = JSON.parse(localStorage.getItem("ariel-kindness") || "[]") || []; } catch (err) { kindness = []; }
+    function renderKindness() {
+      const box = document.getElementById("kind-list");
+      box.replaceChildren();
+      Paths.kindnessProof(kindness, kindness.length).forEach(item => {
+        const p = document.createElement("p");
+        p.textContent = item.text;
+        box.appendChild(p);
+      });
+    }
+    function paintAfraid(view) {
+      const box = document.getElementById("afraid");
+      if (!view || !view.show || view.safety) { box.classList.add("hidden"); return; }
+      box.classList.remove("hidden");
+      const lines = document.getElementById("afraid-lines");
+      lines.replaceChildren();
+      view.lines.forEach(line => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        lines.appendChild(p);
+      });
+      const kept = document.getElementById("afraid-kept");
+      kept.replaceChildren();
+      const recent = Paths.recentKept(record.entries, 3);
+      if (!recent.length) {
+        const p = document.createElement("p");
+        p.className = "sub";
+        p.textContent = "Nothing is written down yet.";
+        kept.appendChild(p);
+      } else recent.forEach(text => {
+        const p = document.createElement("p");
+        p.textContent = text;
+        kept.appendChild(p);
+      });
+      const step = Paths.dose(view.doses.length === 1 ? 0 : doseStep);
+      const button = document.getElementById("afraid-dose");
+      button.classList.remove("hidden");
+      button.textContent = step.label;
+      document.getElementById("afraid-done").classList.add("hidden");
+    }
+    function openAfraid() {
+      afraidDismissed = false;
+      doseStep = 0;
+      paintAfraid(Paths.afraid({ text: "afraid to stop", sessionMs: 0, breaks: 0, mode: graceMode() }));
+    }
+    function paintSpiral() {
+      const picked = Paths.offerAt(spiralState, spiralIndex);
+      const box = document.getElementById("spiral");
+      if (!picked) { box.classList.add("hidden"); return; }
+      box.classList.remove("hidden");
+      document.getElementById("spiral-safety").classList.add("hidden");
+      document.getElementById("spiral-actions").classList.remove("hidden");
+      const offer = document.getElementById("spiral-offer");
+      offer.replaceChildren();
+      const title = document.createElement("p");
+      const strong = document.createElement("b");
+      strong.textContent = picked.offer.title;
+      title.appendChild(strong);
+      const line = document.createElement("p");
+      line.textContent = picked.offer.line || (picked.offer.steps || []).join(" · ");
+      offer.appendChild(title);
+      offer.appendChild(line);
+      document.getElementById("spiral-skip").classList.toggle("hidden", spiralState.offers.length < 2);
+    }
+    function paintDoor(blocked) {
+      document.getElementById("afraid").classList.add("hidden");
+      const box = document.getElementById("spiral");
+      box.classList.remove("hidden");
+      const safety = document.getElementById("spiral-safety");
+      safety.classList.remove("hidden");
+      safety.replaceChildren();
+      const a = document.createElement("p");
+      a.textContent = blocked.line;
+      const b = document.createElement("p");
+      b.textContent = blocked.trusted;
+      safety.appendChild(a);
+      safety.appendChild(b);
+      document.getElementById("spiral-offer").replaceChildren();
+      document.getElementById("spiral-actions").classList.add("hidden");
+      document.getElementById("spiral-practice").replaceChildren();
+    }
+    function scanPaths() {
+      const text = graceText();
+      const blocked = Paths.door(text);
+      if (blocked) { paintDoor(blocked); return; }
+      const mode = graceMode();
+      const view = Paths.afraid({ text: text, sessionMs: Date.now() - lastBreakAt, breaks: 0, mode: mode });
+      if (view.show && !afraidDismissed && document.getElementById("afraid").classList.contains("hidden")) paintAfraid(view);
+      const sp = Paths.spiral({ text: text, change: false, drop: false, mode: mode });
+      if (sp.show && !spiralDismissed && document.getElementById("spiral").classList.contains("hidden")) {
+        spiralState = sp;
+        spiralIndex = 0;
+        paintSpiral();
+      }
+    }
+    function fillPractice(offer) {
+      const box = document.getElementById("spiral-practice");
+      box.replaceChildren();
+      if (offer.id === "wait") {
+        const p = document.createElement("p");
+        p.textContent = offer.line;
+        box.appendChild(p);
+        let left = offer.seconds;
+        const tick = document.createElement("p");
+        tick.textContent = "10 minutes. Nothing has to be decided yet.";
+        box.appendChild(tick);
+        const timer = setInterval(() => {
+          left -= 1;
+          if (left > 0) tick.textContent = Math.ceil(left / 60) + " minutes left.";
+          else { clearInterval(timer); tick.textContent = Paths.PARAMS.waitDone; }
+        }, 1000);
+        return;
+      }
+      if (offer.id === "breathe") {
+        const p = document.createElement("p");
+        p.id = "breathe-phase";
+        p.textContent = "Breathe in.";
+        box.appendChild(p);
+        const pace = Paths.PARAMS.breathe;
+        let left = pace.seconds;
+        const beat = (which) => {
+          p.textContent = which === "in" ? "Breathe in." : "Let it out more slowly.";
+          const hold = which === "in" ? pace.inhale : pace.exhale;
+          left -= hold;
+          if (left <= 0) { p.textContent = "One minute. Your work is still here."; return; }
+          setTimeout(() => beat(which === "in" ? "out" : "in"), hold * 1000);
+        };
+        beat("in");
+        return;
+      }
+      if (offer.id === "stop") {
+        let step = 0;
+        const p = document.createElement("p");
+        p.textContent = offer.steps[0];
+        const next = document.createElement("button");
+        next.type = "button";
+        next.textContent = "Next step";
+        next.onclick = () => {
+          step += 1;
+          if (step >= offer.steps.length) { p.textContent = "You can proceed when you want to."; next.classList.add("hidden"); return; }
+          p.textContent = offer.steps[step];
+        };
+        box.appendChild(p);
+        box.appendChild(next);
+        return;
+      }
+      if (offer.id === "kindness") {
+        const lead = document.createElement("p");
+        lead.textContent = offer.line;
+        box.appendChild(lead);
+        const proof = Paths.kindnessProof(kindness, 3);
+        if (!proof.length) {
+          const empty = document.createElement("p");
+          empty.textContent = "Nothing is saved yet. You can add a kindness in the Record.";
+          box.appendChild(empty);
+        } else proof.forEach(item => {
+          const p = document.createElement("p");
+          p.textContent = item.text;
+          box.appendChild(p);
+        });
+        return;
+      }
+      if (offer.id === "person") {
+        const lead = document.createElement("p");
+        lead.textContent = offer.line;
+        const out = document.createElement("p");
+        out.textContent = offer.outside;
+        const who = document.createElement("input");
+        who.type = "text";
+        who.placeholder = "Someone you trust, if you want to name them";
+        who.value = localStorage.getItem("ariel-trust-who") || "";
+        who.oninput = () => { try { localStorage.setItem("ariel-trust-who", who.value); } catch (err) {} };
+        box.appendChild(lead);
+        box.appendChild(out);
+        box.appendChild(who);
+        return;
+      }
+      if (offer.id === "record") {
+        const lead = document.createElement("p");
+        lead.textContent = offer.line;
+        box.appendChild(lead);
+        const recent = Paths.recentKept(record.entries, 2);
+        if (!recent.length) {
+          const p = document.createElement("p");
+          p.textContent = "Nothing is written down yet.";
+          box.appendChild(p);
+        } else recent.forEach(text => {
+          const p = document.createElement("p");
+          p.textContent = text;
+          box.appendChild(p);
+        });
+        return;
+      }
+      const p = document.createElement("p");
+      p.textContent = offer.line || "";
+      box.appendChild(p);
+    }
+    document.getElementById("afraid-open").onclick = () => openAfraid();
+    document.getElementById("afraid-open-rest").onclick = () => openAfraid();
+    document.getElementById("afraid-close").onclick = () => {
+      afraidDismissed = true;
+      clearInterval(doseTimer);
+      document.getElementById("afraid").classList.add("hidden");
+    };
+    document.getElementById("afraid-record").onclick = () => showTab("record");
+    document.getElementById("afraid-dose").onclick = () => {
+      const listening = graceMode() === "listen";
+      const step = Paths.dose(listening ? 0 : doseStep);
+      const done = document.getElementById("afraid-done");
+      done.classList.remove("hidden");
+      let left = step.seconds;
+      done.textContent = left + " seconds. Rest is short.";
+      clearInterval(doseTimer);
+      doseTimer = setInterval(() => {
+        left -= 1;
+        if (left > 0) done.textContent = left + " seconds. Rest is short.";
+        else {
+          clearInterval(doseTimer);
+          done.textContent = step.end;
+          lastBreakAt = Date.now();
+          if (!listening && step.next != null) {
+            doseStep = step.next;
+            document.getElementById("afraid-dose").textContent = Paths.dose(doseStep).label;
+          } else document.getElementById("afraid-dose").classList.add("hidden");
+        }
+      }, 1000);
+    };
+    document.getElementById("spiral-skip").onclick = () => {
+      if (!spiralState) return;
+      spiralIndex = Math.min(spiralState.offers.length - 1, spiralIndex + 1);
+      document.getElementById("spiral-practice").replaceChildren();
+      paintSpiral();
+    };
+    document.getElementById("spiral-try").onclick = () => {
+      const picked = Paths.offerAt(spiralState, spiralIndex);
+      if (picked) fillPractice(picked.offer);
+    };
+    document.getElementById("kind-add").onclick = () => {
+      const field = document.getElementById("kind-text");
+      const next = Paths.addKindness(kindness, field.value, new Date().toISOString());
+      if (next.length === kindness.length) return;
+      kindness = next;
+      field.value = "";
+      try { localStorage.setItem("ariel-kindness", JSON.stringify(kindness)); } catch (err) {}
+      renderKindness();
+    };
+    renderKindness();
     window.addEventListener("message", (e) => {
       const d = e.data;
       if (!d || d.type !== "ariel-state") return;
       if (Array.isArray(d.marks)) storyMarks = d.marks;
       graceStrokes = Array.isArray(d.trace) && d.trace.length > 1 ? [{ color: "#7a9cc6", points: d.trace }] : storyMarks;
       considerGrace();
+      scanPaths();
       document.getElementById("story-ready").textContent = storyMarks.length
         ? "This drawing can tell a story."
         : "Draw, then ask for a story. The same drawing tells the same one.";
