@@ -14,6 +14,7 @@
 // note      something the user wrote themselves
 // enough    an idea the user marked as settled
 // explore   a fundamental looked at for the joy of it
+// story     a story kept from the canvas
 "use strict";
 (function (root, factory) {
   const api = factory();
@@ -32,7 +33,8 @@
     session: "Session",
     note: "Note",
     enough: "Enough",
-    explore: "Explore"
+    explore: "Explore",
+    story: "Story"
   };
 
   function blank() { return { entries: [] }; }
@@ -66,6 +68,7 @@
       source: src.source === "auto" ? "auto" : "manual",
       key
     };
+    if (src.thumb && String(src.thumb).indexOf("data:image/") === 0) entry.thumb = String(src.thumb);
     return { entries: entries.concat([entry]) };
   }
 
@@ -76,7 +79,9 @@
       const text = p.text != null ? String(p.text).trim() : e.text;
       if (!text) return e;
       const note = p.note != null ? String(p.note).trim() : e.note;
-      return { id: e.id, at: e.at, type: e.type, text, note, href: e.href, source: e.source, key: e.key, edited: true };
+      const next = { id: e.id, at: e.at, type: e.type, text, note, href: e.href, source: e.source, key: e.key, edited: true };
+      if (e.thumb) next.thumb = e.thumb;
+      return next;
     });
     return { entries };
   }
@@ -324,7 +329,8 @@
           href: String(e.href || ""),
           source: e.source === "auto" ? "auto" : "manual",
           key: String(e.key || ""),
-          edited: !!e.edited
+          edited: !!e.edited,
+          thumb: typeof e.thumb === "string" && e.thumb.indexOf("data:image/") === 0 ? e.thumb : ""
         }))
       };
     } catch (e) {
@@ -360,7 +366,8 @@
         href: String(e.href || ""),
         source: e.source === "auto" ? "auto" : "manual",
         key: String(e.key || ""),
-        edited: !!e.edited
+        edited: !!e.edited,
+        thumb: typeof e.thumb === "string" && e.thumb.indexOf("data:image/") === 0 ? e.thumb : ""
       });
     });
     return { ok: true, record: { entries } };

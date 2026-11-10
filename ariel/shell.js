@@ -893,6 +893,24 @@
     setTabSig(k);
     if (k === "m" && sigOn && tpa && Sig) tpa.value = (tpa.value ? tpa.value + "\n" : "") + Sig.EQ;
   };
+  function storyMarks() {
+    const palette = ["#7a9cc6", "#c79a7a", "#5b6472", "#e8c76a", "#8a93a0"];
+    const q = (n) => Math.round(Number(n) / 16) * 16;
+    const marks = [];
+    layers.forEach((L, i) => {
+      const color = palette[i % palette.length];
+      (L.dots || []).forEach((p, k) => marks.push({ color: color, t: k, points: [{ x: q(p.x), y: q(p.y) }] }));
+      (L.lines || []).forEach((l, k) => marks.push({ color: color, t: 100 + k, points: [{ x: q(l.a.x), y: q(l.a.y) }, { x: q(l.b.x), y: q(l.b.y) }] }));
+      (L.circles || []).forEach((c, k) => marks.push({ color: c.doubt ? "#9aa3ad" : color, t: 200 + k, points: [{ x: q(c.c.x), y: q(c.c.y) }, { x: q(c.r || 0), y: 0 }] }));
+      (L.ink || []).forEach((stroke, k) => {
+        const pts = [];
+        for (let n = 0; n < stroke.length && pts.length < 12; n += 4) pts.push({ x: q(stroke[n].x), y: q(stroke[n].y) });
+        if (pts.length) marks.push({ color: color, t: 300 + k, points: pts });
+      });
+    });
+    if (marks.length > 30) marks.length = 30;
+    return marks;
+  }
   function publishSuite() {
     if (window.parent === window) return;
     let rho = 0, doubts = 0, shapes = 0;
@@ -910,6 +928,7 @@
       collapsed: !!collapsed,
       collapseText: collapseRead,
       layers: layers.map(L => ({ name: L.name || "", role: L.role || "", domain: L.domain || "custom", dots: (L.dots || []).length, lines: (L.lines || []).length, circles: (L.circles || []).length, doubts: (L.circles || []).filter(c => c.doubt).length, ink: (L.ink || []).length })),
+      marks: storyMarks(),
       signal: sig ? { p: sig.p, sAtO: sig.hist.length ? sig.hist[sig.hist.length - 1] : 0 } : null
     }, "*");
   }

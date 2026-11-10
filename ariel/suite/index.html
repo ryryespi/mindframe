@@ -92,6 +92,22 @@
       <p class="sub">Draw the idea. Art and story. It stays on this device.</p>
       <button type="button" class="ghost btn" id="more-tools">More tools</button>
       <div class="frame"><iframe id="ariel" title="Ariel canvas" src="../index.html?embed=1"></iframe></div>
+      <div id="story-panel">
+        <p id="story-ready" class="sub">Draw, then ask for a story. The same drawing tells the same one.</p>
+        <button type="button" class="go" id="story-tell">Tell me a story</button>
+        <div id="story-guard" class="node hidden">
+          <p>That's a lot of stories. Want to rest with this one for a moment?</p>
+          <div class="rec-actions">
+            <button type="button" class="go inline" id="story-rest">Rest</button>
+            <button type="button" class="ghost btn" id="story-more">One more</button>
+          </div>
+        </div>
+        <div id="story-body"></div>
+        <img id="story-thumb" alt="" width="80" height="80" class="hidden">
+        <button type="button" class="ghost btn hidden" id="story-keep">Keep this story</button>
+        <p id="story-meta" class="sub advanced-only"></p>
+      </div>
+      <p id="story-presence" class="hidden"></p>
     </section>
     <section id="learn" class="card hidden">
       <p class="k">LEARN</p>
@@ -180,11 +196,13 @@
   <script src="bridge.js"></script>
   <script src="record.js"></script>
   <script src="guide.js"></script>
+  <script src="story.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
     const B = window.ArielBridge;
     const G = window.ArielGuide;
+    const Story = window.ArielStory;
     let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
     const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
@@ -245,6 +263,7 @@
         box.appendChild(d);
       });
       document.getElementById("tone-line").textContent = G.toneLine(G.tone(read.v));
+      paintStoryGate();
       if (learnReady && !document.getElementById("learn").classList.contains("hidden") && G.tone(read.v) !== learnTone) paintLearn();
       if (!document.getElementById("rest").classList.contains("hidden")) paintRest();
       document.getElementById("feedback").textContent = read.v > 0.6
@@ -534,9 +553,17 @@
             note.textContent = entry.note;
             item.appendChild(note);
           }
+          if (entry.thumb && String(entry.thumb).indexOf("data:image/") === 0) {
+            const img = document.createElement("img");
+            img.src = entry.thumb;
+            img.alt = "";
+            img.width = 80;
+            img.height = 80;
+            item.appendChild(img);
+          }
           const row = document.createElement("div");
           row.className = "rec-actions";
-          if (entry.href === "#journal" || entry.href === "#draw") {
+          if (entry.href === "#journal" || entry.href === "#draw" || entry.href === "#create") {
             const open = document.createElement("button");
             open.type = "button";
             open.textContent = "Open";
@@ -662,9 +689,88 @@
       });
     };
     window.addEventListener("pagehide", () => { if (sessionDirty) finishSession(); });
+    // ===== STORY SEED =====
+    // The drawing is the seed. Same marks, same story. Kept on this device.
+    let storyMarks = [];
+    let storyResult = null;
+    function readJSON(key, fallback) {
+      try {
+        const v = JSON.parse(localStorage.getItem(key) || "");
+        return v == null ? fallback : v;
+      } catch (err) { return fallback; }
+    }
+    function paintStoryGate() {
+      const listening = currentTone() === "listen";
+      document.getElementById("story-panel").classList.toggle("hidden", listening);
+      const presence = document.getElementById("story-presence");
+      presence.classList.toggle("hidden", !listening);
+      if (listening) presence.textContent = Story.PARAMS.presence + " " + Story.PARAMS.forgiveness;
+    }
+    function showStory(result) {
+      storyResult = result;
+      const body = document.getElementById("story-body");
+      body.replaceChildren();
+      const p = document.createElement("p");
+      p.textContent = result.text;
+      body.appendChild(p);
+      const img = document.getElementById("story-thumb");
+      img.src = result.thumb || "";
+      img.classList.toggle("hidden", !result.thumb);
+      const keep = document.getElementById("story-keep");
+      keep.classList.remove("hidden");
+      keep.textContent = "Keep this story";
+      document.getElementById("story-guard").classList.add("hidden");
+      document.getElementById("story-meta").textContent = "Seed " + result.seed.toString(16) + ". " + result.differ + " elements differ from your recent stories." + (result.nudged ? " The seed stepped forward so this one would not repeat." : "");
+    }
+    function rememberStory(result) {
+      const times = readJSON("ariel-story-times", []);
+      times.push(Date.now());
+      const log = readJSON("ariel-story-log", []);
+      log.push({ seed: result.seed, elements: result.elements });
+      try {
+        localStorage.setItem("ariel-story-times", JSON.stringify(times.slice(-30)));
+        localStorage.setItem("ariel-story-log", JSON.stringify(log.slice(-12)));
+      } catch (err) {}
+    }
+    function tellStory(force) {
+      if (currentTone() === "listen") { paintStoryGate(); return; }
+      const times = readJSON("ariel-story-times", []);
+      const gate = Story.guard(times, Date.now());
+      if (gate.offer && !force) {
+        document.getElementById("story-guard").classList.remove("hidden");
+        return;
+      }
+      const result = Story.tell(storyMarks, { previous: readJSON("ariel-story-log", []), tone: currentTone() });
+      if (!result.show) {
+        const body = document.getElementById("story-body");
+        body.replaceChildren();
+        const p = document.createElement("p");
+        p.textContent = result.presence;
+        body.appendChild(p);
+        document.getElementById("story-keep").classList.add("hidden");
+        document.getElementById("story-guard").classList.add("hidden");
+        return;
+      }
+      rememberStory(result);
+      showStory(result);
+    }
+    document.getElementById("story-tell").onclick = () => tellStory(false);
+    document.getElementById("story-more").onclick = () => tellStory(true);
+    document.getElementById("story-rest").onclick = () => showTab("rest");
+    document.getElementById("story-keep").onclick = () => {
+      const entry = Story.keepEntry(storyResult, new Date().toISOString());
+      if (!entry) return;
+      commitRecord(Rec.add(record, entry, entry.at));
+      document.getElementById("story-keep").textContent = "Kept";
+    };
+    paintStoryGate();
     window.addEventListener("message", (e) => {
       const d = e.data;
       if (!d || d.type !== "ariel-state") return;
+      if (Array.isArray(d.marks)) storyMarks = d.marks;
+      document.getElementById("story-ready").textContent = storyMarks.length
+        ? "This drawing can tell a story."
+        : "Draw, then ask for a story. The same drawing tells the same one.";
       const shapes = d.shapes || 0;
       document.getElementById("density").textContent = shapes + " marks · " + (d.doubts || 0) + " doubt circles · ρ " + (d.doubtRho || 0).toFixed(2);
       const snap = canvasState(d);
