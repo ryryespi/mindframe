@@ -1,0 +1,3 @@
+# Keep WebGL binaries byte-for-byte. Do not use Git LFS; GitHub Pages will not serve LFS pointers.
+ariel/words/Build/*.wasm binary
+ariel/words/Build/*.data binary
