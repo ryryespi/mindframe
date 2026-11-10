@@ -38,6 +38,10 @@
     .k { color:var(--teal); font-size:11px; letter-spacing:.04em; }
     canvas.chart { width:100%; height:160px; background:#090d16; border-radius:10px; }
     a { color:var(--teal); }
+    body:not(.advanced) .advanced-only { display:none; }
+    .crisis { margin:14px 0 0; padding:8px 10px; border:1px solid var(--line); border-radius:10px; color:var(--muted); }
+    #enough { margin:0 0 12px; }
+    #advanced.on, #more-tools.on { color:var(--ink); }
     @media (max-width:700px) {
       .grid { grid-template-columns:1fr; }
       iframe, .frame { height:78vh; min-height:78vh; }
@@ -51,44 +55,74 @@
       <div class="mark" aria-hidden="true"></div>
       <div>
         <h1>Project Ariel Suite</h1>
-        <p class="sub">One canvas, shared with the journal, the gate, the charts, and the record. <a href="../index.html">Classic view</a> · <a href="../../research/">Research notes</a></p>
+        <p class="sub">Discover, make, learn, rest, and remember. <a href="../index.html">Classic view</a> · <a href="../../research/">Research notes</a></p>
+        <p id="tone-line" class="sub">Here with you.</p>
       </div>
+      <button type="button" id="advanced" class="ghost">Advanced</button>
       <nav>
-        <button type="button" class="on" data-tab="draw">Drawing</button>
-        <button type="button" data-tab="journal">Journal</button>
-        <button type="button" data-tab="gate">Gate</button>
-        <button type="button" data-tab="charts">Analytics</button>
+        <button type="button" class="on" data-tab="discover">Discover</button>
+        <button type="button" data-tab="create">Create</button>
+        <button type="button" data-tab="learn">Learn</button>
+        <button type="button" data-tab="rest">Rest</button>
         <button type="button" data-tab="record">Record</button>
+        <button type="button" class="advanced-tab hidden" data-tab="gate">Gate</button>
+        <button type="button" class="advanced-tab hidden" data-tab="charts">Analytics</button>
       </nav>
     </div>
   </header>
   <main>
-    <section id="draw" class="card">
-      <p class="k">DRAWING CANVAS</p>
-      <h2>Ariel canvas</h2>
-      <p class="sub">The AutoCAD layout replaces the freehand sketch. Freehand is a tool on that canvas. Analyze reads the live shapes.</p>
-      <div class="grid">
-        <div class="frame"><iframe id="ariel" title="Ariel canvas" src="../index.html?embed=1"></iframe></div>
-        <div>
-          <p class="k">FROM THE CANVAS</p>
-          <p id="density">Waiting for the canvas.</p>
-          <p>Threat v <b id="da-v">–</b> · Control r <b id="da-r">–</b><br>Gate g <b id="da-g">–</b> · Output y <b id="da-y">–</b></p>
-          <button type="button" class="go" id="analyze">Analyze drawing</button>
-        </div>
+    <p id="enough" class="node hidden"></p>
+    <section id="discover" class="card">
+      <p class="k">DISCOVER</p>
+      <h2>Listen</h2>
+      <p class="sub">Write freely. Ariel reflects what it hears and names the core. No judgment.</p>
+      <textarea id="journal-text" placeholder="Write what is here. It stays on this device."></textarea>
+      <p id="words" class="sub hidden">0 words</p>
+      <button type="button" class="go" id="discover-listen">Listen</button>
+      <div id="discover-reflect"></div>
+      <div class="rec-actions">
+        <button type="button" class="ghost btn" id="discover-enough">This is enough</button>
+        <button type="button" class="ghost btn" id="journal-save">Keep this note</button>
       </div>
+      <div id="nodes" class="advanced-only"></div>
     </section>
-    <section id="journal" class="card hidden">
-      <p class="k">JOURNAL MAPPING</p>
-      <h2>Nodes from the canvas</h2>
-      <textarea id="journal-text" placeholder="Optional note. The nodes update from the canvas layers."></textarea>
-      <p id="words" class="sub">0 words</p>
-      <button type="button" class="go" id="journal-save">Save note</button>
-      <div id="nodes"></div>
+    <section id="create" class="card hidden">
+      <p class="k">CREATE</p>
+      <h2>Make something</h2>
+      <p class="sub">Draw the idea. Art and story. It stays on this device.</p>
+      <button type="button" class="ghost btn" id="more-tools">More tools</button>
+      <div class="frame"><iframe id="ariel" title="Ariel canvas" src="../index.html?embed=1"></iframe></div>
+    </section>
+    <section id="learn" class="card hidden">
+      <p class="k">LEARN</p>
+      <h2>Fundamentals</h2>
+      <p class="sub">From your idea, a few base concepts and one kindred mind. Suggestions only. No exercises and no tests.</p>
+      <textarea id="learn-idea" placeholder="The idea, in your words."></textarea>
+      <button type="button" class="go" id="learn-suggest">Suggest</button>
+      <div id="learn-out"></div>
+      <button type="button" class="ghost btn" id="learn-enough">This is enough</button>
+    </section>
+    <section id="rest" class="card hidden">
+      <p class="k">REST</p>
+      <h2>A pause</h2>
+      <p id="rest-pause" class="sub">You can pause here, even if the hour is quiet.</p>
+      <button type="button" class="go" id="rest-pause-btn">Pause</button>
+      <p id="rest-forgive">You can let yourself off the hook for this.</p>
+      <label>The drive you want to keep
+        <textarea id="rest-dream" placeholder="Your dream, in your words."></textarea>
+      </label>
+      <p id="rest-drive"></p>
+      <button type="button" class="ghost btn" id="rest-check">Reality check</button>
+      <div id="rest-reality" class="node hidden"></div>
+      <p class="crisis">In crisis, call or text <strong>988</strong> (US). In an emergency, call <strong>911</strong>.</p>
     </section>
     <section id="gate" class="card hidden">
       <p class="k">GATED ENGINE</p>
       <h2>Gate g scales transfer along I → O</h2>
-      <p class="sub">Doubt raises threat v and lowers control r. The I→O span sets the bridge y. Follow the canvas, or move a slider to hold it.</p>
+      <p class="sub">Doubt raises threat v and lowers control r. The I→O span sets the bridge y. Follow the canvas, or move a slider to hold it. These numbers stay behind Advanced.</p>
+      <p id="density">Waiting for the canvas.</p>
+      <p>Threat v <b id="da-v">–</b> · Control r <b id="da-r">–</b><br>Gate g <b id="da-g">–</b> · Output y <b id="da-y">–</b></p>
+      <button type="button" class="go" id="analyze">Analyze drawing</button>
       <label>Threat v <b id="lbl-v">0.35</b><input id="slider-v" type="range" min="0" max="1" step="0.01" value="0.35"></label>
       <label>Control r <b id="lbl-r">0.75</b><input id="slider-r" type="range" min="0" max="1" step="0.01" value="0.75"></label>
       <label>Bridge y <b id="lbl-y">0.00</b><input id="slider-y" type="range" min="0" max="6.4" step="0.05" value="0"></label>
@@ -133,18 +167,35 @@
   </main>
   <script src="bridge.js"></script>
   <script src="record.js"></script>
+  <script src="guide.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
     const B = window.ArielBridge;
-    let follow = true, last = null;
+    const G = window.ArielGuide;
+    let follow = true, last = null, moreTools = false, realityOpen = false;
     const hist = [];
+    const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
+    function setAdvanced(on) {
+      document.body.classList.toggle("advanced", !!on);
+      document.querySelectorAll(".advanced-tab").forEach(btn => btn.classList.toggle("hidden", !on));
+      document.getElementById("advanced").classList.toggle("on", !!on);
+      try { localStorage.setItem("ariel-suite-advanced", on ? "1" : "0"); } catch (err) {}
+      const current = document.querySelector("nav button.on");
+      if (!on && current && current.classList.contains("advanced-tab")) showTab("discover");
+    }
+    document.getElementById("advanced").onclick = () => setAdvanced(!document.body.classList.contains("advanced"));
+    try { if (localStorage.getItem("ariel-suite-advanced") === "1") setAdvanced(true); } catch (err) {}
     document.querySelectorAll("nav button").forEach(btn => btn.onclick = () => {
       document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b === btn));
-      ["draw", "journal", "gate", "charts", "record"].forEach(id => document.getElementById(id).classList.toggle("hidden", id !== btn.dataset.tab));
+      TABS.forEach(id => document.getElementById(id).classList.toggle("hidden", id !== btn.dataset.tab));
       if (btn.dataset.tab === "charts") paintCharts();
       if (btn.dataset.tab === "gate") paintEngine();
       if (btn.dataset.tab === "record") renderRecord();
+      if (btn.dataset.tab === "learn" && !document.getElementById("learn-idea").value.trim()) {
+        document.getElementById("learn-idea").value = journalText.value;
+      }
+      if (btn.dataset.tab === "rest") paintRest();
     });
     const journalText = document.getElementById("journal-text");
     journalText.oninput = () => {
@@ -181,6 +232,8 @@
         d.innerHTML = "<div class='k'>" + n.kind + "</div><b>" + n.label + "</b><div>" + n.detail + "</div>";
         box.appendChild(d);
       });
+      document.getElementById("tone-line").textContent = G.toneLine(G.tone(read.v));
+      if (!document.getElementById("rest").classList.contains("hidden")) paintRest();
       document.getElementById("feedback").textContent = read.v > 0.6
         ? "Threat is high because doubt is up. The gate narrows transfer along I→O. One small move on the canvas lowers ρ."
         : "Control is holding. The gate is open enough for transfer along I→O.";
@@ -214,9 +267,132 @@
       if (!document.getElementById("record").classList.contains("hidden")) renderRecord();
     }
     function showTab(id) {
+      if (id === "draw") id = "create";
+      if (id === "journal") id = "discover";
       const btn = document.querySelector('nav button[data-tab="' + id + '"]');
       if (btn) btn.click();
     }
+    function currentTone() { return G.tone(last ? last.v : 0.35); }
+    function showEnough(title) {
+      const pack = G.enough(title);
+      const box = document.getElementById("enough");
+      box.classList.remove("hidden");
+      box.textContent = pack.text;
+      const next = Rec.add(record, pack.entry, new Date().toISOString());
+      if (next.entries.length !== record.entries.length) commitRecord(next);
+    }
+    function paintListen(clear) {
+      const heard = G.reflect(journalText.value, currentTone());
+      const box = document.getElementById("discover-reflect");
+      box.replaceChildren();
+      heard.lines.forEach(line => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        box.appendChild(p);
+      });
+      if (!clear) return heard;
+      return heard;
+    }
+    function paintLearn() {
+      const pack = G.learn(document.getElementById("learn-idea").value);
+      const box = document.getElementById("learn-out");
+      box.replaceChildren();
+      if (pack.concepts.length) {
+        const list = document.createElement("ul");
+        pack.concepts.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          list.appendChild(li);
+        });
+        box.appendChild(list);
+      }
+      if (pack.mind) {
+        const card = document.createElement("div");
+        card.className = "node";
+        const k = document.createElement("div");
+        k.className = "k";
+        k.textContent = "KINDRED MIND";
+        const name = document.createElement("b");
+        name.textContent = pack.mind.name;
+        const line = document.createElement("p");
+        line.textContent = pack.mind.line;
+        card.appendChild(k);
+        card.appendChild(name);
+        card.appendChild(line);
+        const keep = document.createElement("button");
+        keep.type = "button";
+        keep.textContent = "Keep this suggestion";
+        keep.onclick = () => {
+          commitRecord(Rec.add(record, {
+            type: "kindred",
+            text: "Saved a kindred mind: " + pack.mind.name,
+            note: pack.mind.line,
+            source: "auto",
+            key: "kindred:" + pack.mind.name + ":saved"
+          }, new Date().toISOString()));
+        };
+        card.appendChild(keep);
+        box.appendChild(card);
+      }
+      const note = document.createElement("p");
+      note.className = "sub";
+      note.textContent = pack.note;
+      box.appendChild(note);
+    }
+    function fillReality(card) {
+      const box = document.getElementById("rest-reality");
+      box.classList.remove("hidden");
+      box.replaceChildren();
+      [card.heard, card.trueNow, card.dreamHolds, card.invite].forEach(line => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        box.appendChild(p);
+      });
+    }
+    function paintRest() {
+      const dream = document.getElementById("rest-dream").value;
+      const idea = document.getElementById("learn-idea").value || journalText.value;
+      const offer = G.restOffer(last ? last.v : 0.35, dream, idea);
+      document.getElementById("rest-pause").textContent = offer.pause;
+      document.getElementById("rest-forgive").textContent = offer.forgiveness;
+      document.getElementById("rest-drive").textContent = offer.drive;
+      if (offer.reality.flagged || realityOpen) fillReality(offer.reality);
+      else document.getElementById("rest-reality").classList.add("hidden");
+    }
+    document.getElementById("discover-listen").onclick = () => {
+      const heard = paintListen();
+      const item = Rec.journalEntry(journalText.value, new Date().toISOString());
+      if (!item) return heard;
+      item.key = "journal:" + item.text;
+      commitRecord(Rec.add(record, item, item.at));
+    };
+    document.getElementById("discover-enough").onclick = () => {
+      const heard = G.reflect(journalText.value, currentTone());
+      showEnough(heard.core || "this idea");
+    };
+    document.getElementById("learn-suggest").onclick = () => paintLearn();
+    document.getElementById("learn-enough").onclick = () => {
+      const idea = document.getElementById("learn-idea").value.trim();
+      const heard = G.reflect(idea, currentTone());
+      showEnough(heard.core || idea || "this idea");
+    };
+    document.getElementById("rest-pause-btn").onclick = () => paintRest();
+    document.getElementById("rest-check").onclick = () => { realityOpen = true; paintRest(); };
+    try { document.getElementById("rest-dream").value = localStorage.getItem("ariel-dream") || ""; } catch (err) {}
+    document.getElementById("rest-dream").oninput = () => {
+      try { localStorage.setItem("ariel-dream", document.getElementById("rest-dream").value); } catch (err) {}
+      if (!document.getElementById("rest").classList.contains("hidden")) paintRest();
+    };
+    let toolsOn = false;
+    document.getElementById("more-tools").onclick = () => {
+      toolsOn = !toolsOn;
+      moreTools = toolsOn;
+      const btn = document.getElementById("more-tools");
+      btn.classList.toggle("on", toolsOn);
+      btn.textContent = toolsOn ? "Fewer tools" : "More tools";
+      const frame = document.getElementById("ariel");
+      if (frame.contentWindow) frame.contentWindow.postMessage({ type: "ariel-tools", on: toolsOn }, "*");
+    };
     function fillFilter() {
       const sel = document.getElementById("rec-filter");
       if (sel.options.length) return;
@@ -336,10 +512,8 @@
     document.getElementById("journal-save").onclick = () => {
       const item = Rec.journalEntry(journalText.value, new Date().toISOString());
       if (!item) return;
+      item.key = "journal:" + item.text;
       commitRecord(Rec.add(record, item, item.at));
-      journalText.value = "";
-      document.getElementById("words").textContent = "0 words";
-      showTab("record");
     };
     document.getElementById("rec-filter").onchange = () => renderRecord();
     document.getElementById("rec-add").onclick = () => {
@@ -404,7 +578,11 @@
       const snap = canvasState(d);
       if (canvasSnap) {
         const next = Rec.ingest(record, canvasSnap, snap, new Date().toISOString());
+        const added = next.entries.filter(entry => !record.entries.some(old => old.id === entry.id));
         if (JSON.stringify(next) !== JSON.stringify(record)) commitRecord(next);
+        added.filter(entry => entry.type === "loop").forEach(entry => {
+          showEnough(entry.text.replace(/^Closed a loop on /, ""));
+        });
       }
       canvasSnap = snap;
       apply(B.fromAriel(d), true);

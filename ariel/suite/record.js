@@ -12,6 +12,7 @@
 // path      a knowledge-path step the canvas reported
 // session   a session finished
 // note      something the user wrote themselves
+// enough    an idea the user marked as settled
 "use strict";
 (function (root, factory) {
   const api = factory();
@@ -28,7 +29,8 @@
     kindred: "Kindred mind",
     path: "Knowledge path",
     session: "Session",
-    note: "Note"
+    note: "Note",
+    enough: "Enough"
   };
 
   function blank() { return { entries: [] }; }
@@ -85,7 +87,7 @@
     const list = (record && record.entries) || [];
     const n = (types) => list.filter(e => types.indexOf(e.type) >= 0).length;
     return {
-      ideas: n(["bridge", "loop", "path"]),
+      ideas: n(["bridge", "loop", "path", "enough"]),
       loops: n(["loop"]),
       drawings: n(["drawing"]),
       journal: n(["journal"])

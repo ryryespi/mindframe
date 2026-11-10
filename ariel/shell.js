@@ -45,6 +45,10 @@
     body.cad #tp{bottom:78px}
     body.cad #lex{top:60px}
     body.cad:not(.adv) #lex,body.cad:not(.adv) #dial,body.cad:not(.adv) #side{display:none!important}
+    body.cad.embed:not(.more-tools) #ribbon .g:nth-child(n+4),
+    body.cad.embed:not(.more-tools) #status,
+    body.cad.embed:not(.more-tools) #cmdrow,
+    body.cad.embed:not(.more-tools) a.paper-dl{display:none!important}
     #xport,#help{z-index:9}
     #xport{position:fixed;inset:56px 10px 70px;background:#f4f1ecf7;display:none;padding:12px;border-radius:14px;overflow:auto}
     #xport.on{display:block}
@@ -63,6 +67,7 @@
       body.cad #layers{width:min(78vw,240px)}
     }`;
   document.head.appendChild(style);
+  if (/[?&]embed=1/.test(location.search)) document.body.classList.add("embed");
 
   const ribbon = document.createElement("header");
   ribbon.id = "ribbon";
@@ -911,7 +916,9 @@
   setInterval(publishSuite, 500);
   window.addEventListener("message", (e) => {
     const d = e.data;
-    if (!d || d.type !== "ariel-gate" || typeof d.g !== "number") return;
+    if (!d) return;
+    if (d.type === "ariel-tools") { document.body.classList.toggle("more-tools", !!d.on); return; }
+    if (d.type !== "ariel-gate" || typeof d.g !== "number") return;
     window.__arielGate = Math.max(0, Math.min(1, d.g));
   });
   if (location.hash.includes("collapse")) toggleCollapse();

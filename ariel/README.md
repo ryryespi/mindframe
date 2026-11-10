@@ -8,7 +8,7 @@ All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.
 
 Live demo: [https://ryryespi.github.io/mindframe/ariel/](https://ryryespi.github.io/mindframe/ariel/)
 
-The suite (dark tabs: canvas, journal, gate, analytics, record) is [ariel/suite/](suite/). The canvas there is this same AutoCAD view. Doubt raises threat and lowers control; the I→O span sets the bridge; the gate scales the signal. The Accomplishment Record is a factual list of what you did — a journal note, a drawing, a layer, an I→O line, a closed loop, a finished session — so you do not have to remember it all. It stays on this device. It is not a score. Everything stays in the browser.
+The suite is [ariel/suite/](suite/). The default tabs are Discover, Create, Learn, Rest, and Record. Discover listens and names the core of what you wrote. Create is this same canvas, with the extra CAD tools behind More tools. Learn suggests a few fundamentals and one kindred mind, not a test. Rest offers a pause, a line of self-forgiveness, your own dream quoted back, and a reality check that never shames. The Accomplishment Record is a factual list of what you did. Marking an idea as enough closes it with "You've learned what you needed here. Nothing more to prove." The gate still sets the tone. Its numbers and charts sit behind Advanced. Everything stays in the browser. It is not a score.
 
 [Download the paper (PDF)](Project-Ariel-Paper.pdf).
 
