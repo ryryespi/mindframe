@@ -687,7 +687,25 @@
     if (tilt > 0.35) drawAlignedAxes();
     paintStatus();
     if (sel && layers[sel.layer]) highlight();
+    if (graceSimple) drawGraceLine();
   };
+  let graceSimple = false;
+  function drawGraceLine() {
+    if (typeof ctx === "undefined" || typeof ioOf !== "function") return;
+    const io = ioOf(layers[0], 0);
+    ctx.save();
+    ctx.fillStyle = "rgba(244,241,236,0.86)";
+    ctx.fillRect(0, 0, typeof W !== "undefined" ? W : ctx.canvas.width, typeof H_ !== "undefined" ? H_ : ctx.canvas.height);
+    ctx.strokeStyle = "#5b6472";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    const A = typeof proj === "function" ? proj(io.i, 0) : io.i;
+    const B = typeof proj === "function" ? proj(io.o, 0) : io.o;
+    ctx.moveTo(A.x, A.y);
+    ctx.lineTo(B.x, B.y);
+    ctx.stroke();
+    ctx.restore();
+  }
   function drawCollapsed() {
     const axes = layerAxes();
     if (!axes.length) return;
@@ -893,6 +911,13 @@
     setTabSig(k);
     if (k === "m" && sigOn && tpa && Sig) tpa.value = (tpa.value ? tpa.value + "\n" : "") + Sig.EQ;
   };
+  const graceTrace = [];
+  function noteGracePoint(e) {
+    if (!e || !e.buttons) return;
+    graceTrace.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+    if (graceTrace.length > 240) graceTrace.splice(0, graceTrace.length - 240);
+  }
+  window.addEventListener("pointermove", noteGracePoint);
   function storyMarks() {
     const palette = ["#7a9cc6", "#c79a7a", "#5b6472", "#e8c76a", "#8a93a0"];
     const q = (n) => Math.round(Number(n) / 16) * 16;
@@ -929,6 +954,7 @@
       collapseText: collapseRead,
       layers: layers.map(L => ({ name: L.name || "", role: L.role || "", domain: L.domain || "custom", dots: (L.dots || []).length, lines: (L.lines || []).length, circles: (L.circles || []).length, doubts: (L.circles || []).filter(c => c.doubt).length, ink: (L.ink || []).length })),
       marks: storyMarks(),
+      trace: graceTrace.filter(p => performance.now() - p.t < 2500).slice(-80),
       signal: sig ? { p: sig.p, sAtO: sig.hist.length ? sig.hist[sig.hist.length - 1] : 0 } : null
     }, "*");
   }
@@ -937,6 +963,7 @@
     const d = e.data;
     if (!d) return;
     if (d.type === "ariel-tools") { document.body.classList.toggle("more-tools", !!d.on); return; }
+    if (d.type === "ariel-simplify") { graceSimple = !!d.on; return; }
     if (d.type !== "ariel-gate" || typeof d.g !== "number") return;
     window.__arielGate = Math.max(0, Math.min(1, d.g));
   });

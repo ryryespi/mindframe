@@ -72,6 +72,16 @@
   </header>
   <main>
     <p id="enough" class="node hidden"></p>
+    <section id="grace" class="card hidden">
+      <p class="k">A PAUSE</p>
+      <div id="grace-lines"></div>
+      <div id="grace-safety" class="crisis hidden"></div>
+      <div class="rec-actions">
+        <button type="button" class="go inline" id="grace-rest">Rest</button>
+        <button type="button" class="ghost btn" id="grace-keep">Keep going</button>
+        <button type="button" class="ghost btn hidden" id="grace-simple">One clean line</button>
+      </div>
+    </section>
     <section id="discover" class="card">
       <p class="k">DISCOVER</p>
       <h2>Listen</h2>
@@ -197,12 +207,14 @@
   <script src="record.js"></script>
   <script src="guide.js"></script>
   <script src="story.js"></script>
+  <script src="grace.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
     const B = window.ArielBridge;
     const G = window.ArielGuide;
     const Story = window.ArielStory;
+    const Grace = window.ArielGrace;
     let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
     const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
@@ -231,6 +243,7 @@
     journalText.oninput = () => {
       const n = journalText.value.trim().split(/\s+/).filter(Boolean).length;
       document.getElementById("words").textContent = n + " words";
+      considerGrace();
     };
     function apply(read, fromCanvas) {
       last = read;
@@ -764,10 +777,98 @@
       document.getElementById("story-keep").textContent = "Kept";
     };
     paintStoryGate();
+    // ===== GRANDIOSE LOOP =====
+    // Unearned grace. Never an argument, and never a verdict on the person.
+    let graceState = { active: false, turn: 0 };
+    let graceStrokes = [];
+    let graceSimple = false;
+    let graceEnoughSent = false;
+    function graceText() {
+      return [journalText.value, document.getElementById("learn-idea").value, document.getElementById("rest-dream").value].join("\n");
+    }
+    function graceMode() { return currentTone() === "listen" ? "listen" : "open"; }
+    function paintGrace() {
+      const box = document.getElementById("grace");
+      const lines = document.getElementById("grace-lines");
+      const safety = document.getElementById("grace-safety");
+      const simple = document.getElementById("grace-simple");
+      if (!graceState.active) { box.classList.add("hidden"); return; }
+      box.classList.remove("hidden");
+      lines.replaceChildren();
+      if (graceState.safety) {
+        safety.classList.remove("hidden");
+        safety.replaceChildren();
+        const a = document.createElement("p");
+        a.textContent = graceState.safetyLine;
+        const b = document.createElement("p");
+        b.textContent = graceState.trusted;
+        safety.appendChild(a);
+        safety.appendChild(b);
+      } else {
+        safety.classList.add("hidden");
+        safety.replaceChildren();
+        (graceState.lines || []).forEach(line => {
+          const p = document.createElement("p");
+          p.textContent = line;
+          lines.appendChild(p);
+        });
+        if (graceState.aside) {
+          const p = document.createElement("p");
+          p.textContent = graceState.aside;
+          lines.appendChild(p);
+        }
+      }
+      simple.classList.toggle("hidden", !graceState.simplify);
+      simple.textContent = graceSimple ? "Bring the layers back" : "One clean line";
+      if (graceState.enough && !graceEnoughSent) {
+        graceEnoughSent = true;
+        showEnough("today");
+      }
+    }
+    function considerGrace() {
+      const text = graceText();
+      const reading = Grace.assess({ text: text, strokes: graceStrokes, threat: last ? last.v : 0, now: Date.now() });
+      if (reading.safety) {
+        graceState = Grace.begin(reading, graceMode());
+        paintGrace();
+        return;
+      }
+      if (!graceState.active) {
+        if (!reading.trigger) return;
+        graceState = Grace.begin(reading, graceMode());
+        graceEnoughSent = false;
+        paintGrace();
+        return;
+      }
+      if (graceState.steppedBack || graceState.safety) return;
+      const next = Grace.advance(graceState, { text: text, slow: reading.slow, mode: graceMode() });
+      if (next.turn !== graceState.turn || next.safety !== graceState.safety || next.enough !== graceState.enough) {
+        graceState = next;
+        paintGrace();
+      }
+    }
+    document.getElementById("grace-rest").onclick = () => {
+      graceState = Grace.advance(graceState, { text: graceText(), choice: "rest", mode: graceMode() });
+      paintGrace();
+      showTab("rest");
+    };
+    document.getElementById("grace-keep").onclick = () => {
+      graceState = Grace.advance(graceState, { text: "", choice: "keep", mode: graceMode() });
+      paintGrace();
+    };
+    document.getElementById("grace-simple").onclick = () => {
+      graceSimple = !graceSimple;
+      const frame = document.getElementById("ariel");
+      if (frame && frame.contentWindow) frame.contentWindow.postMessage({ type: "ariel-simplify", on: graceSimple }, "*");
+      document.getElementById("grace-simple").textContent = graceSimple ? "Bring the layers back" : "One clean line";
+    };
+    ["learn-idea", "rest-dream"].forEach(id => document.getElementById(id).addEventListener("input", considerGrace));
     window.addEventListener("message", (e) => {
       const d = e.data;
       if (!d || d.type !== "ariel-state") return;
       if (Array.isArray(d.marks)) storyMarks = d.marks;
+      graceStrokes = Array.isArray(d.trace) && d.trace.length > 1 ? [{ color: "#7a9cc6", points: d.trace }] : storyMarks;
+      considerGrace();
       document.getElementById("story-ready").textContent = storyMarks.length
         ? "This drawing can tell a story."
         : "Draw, then ask for a story. The same drawing tells the same one.";
