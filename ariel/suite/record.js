@@ -13,6 +13,7 @@
 // session   a session finished
 // note      something the user wrote themselves
 // enough    an idea the user marked as settled
+// explore   a fundamental looked at for the joy of it
 "use strict";
 (function (root, factory) {
   const api = factory();
@@ -30,7 +31,8 @@
     path: "Knowledge path",
     session: "Session",
     note: "Note",
-    enough: "Enough"
+    enough: "Enough",
+    explore: "Explore"
   };
 
   function blank() { return { entries: [] }; }

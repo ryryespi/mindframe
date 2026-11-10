@@ -99,6 +99,12 @@
       <p class="sub">From your idea, a few base concepts and one kindred mind. Suggestions only. No exercises and no tests.</p>
       <textarea id="learn-idea" placeholder="The idea, in your words."></textarea>
       <button type="button" class="go" id="learn-suggest">Suggest</button>
+      <p id="learn-presence" class="hidden"></p>
+      <p id="learn-invite" class="hidden"></p>
+      <div id="learn-actions" class="rec-actions hidden">
+        <button type="button" class="go inline" id="learn-joy">Show me, for the joy of it</button>
+        <button type="button" class="ghost btn" id="learn-later">Not now</button>
+      </div>
       <div id="learn-out"></div>
       <p class="sub" id="learn-footer">Not a tower to climb, a world to discover.</p>
       <p class="sub" id="learn-verse">It is the glory of God to conceal a thing: but the honour of kings is to search out a matter. (Proverbs 25:2)</p>
@@ -239,6 +245,7 @@
         box.appendChild(d);
       });
       document.getElementById("tone-line").textContent = G.toneLine(G.tone(read.v));
+      if (learnReady && !document.getElementById("learn").classList.contains("hidden") && G.tone(read.v) !== learnTone) paintLearn();
       if (!document.getElementById("rest").classList.contains("hidden")) paintRest();
       document.getElementById("feedback").textContent = read.v > 0.6
         ? "Threat is high because doubt is up. The gate narrows transfer along I→O. One small move on the canvas lowers ρ."
@@ -305,10 +312,14 @@
       if (!clear) return heard;
       return heard;
     }
-    function paintLearn() {
-      const pack = G.learn(document.getElementById("learn-idea").value);
+    let learnPack = null;
+    let learnFundamental = "";
+    let learnReady = false;
+    let learnTone = "";
+    function renderLearnDetail(pack) {
       const box = document.getElementById("learn-out");
       box.replaceChildren();
+      if (!pack) return;
       if (pack.concepts.length) {
         const list = document.createElement("ul");
         pack.concepts.forEach(item => {
@@ -366,6 +377,52 @@
       note.textContent = pack.note;
       box.appendChild(note);
     }
+    function paintLearn() {
+      const idea = document.getElementById("learn-idea").value;
+      const pack = G.learn(idea);
+      const invite = G.invitationFor(idea, currentTone(), pack);
+      learnPack = pack;
+      learnFundamental = invite.fundamental;
+      learnTone = invite.tone;
+      const presence = document.getElementById("learn-presence");
+      const said = document.getElementById("learn-invite");
+      const actions = document.getElementById("learn-actions");
+      document.getElementById("learn-out").replaceChildren();
+      if (!invite.show) {
+        presence.classList.remove("hidden");
+        presence.textContent = invite.forgiveness ? invite.presence + " " + invite.forgiveness : invite.presence;
+        said.classList.add("hidden");
+        said.textContent = "";
+        actions.classList.add("hidden");
+        return;
+      }
+      presence.classList.add("hidden");
+      presence.textContent = "";
+      said.classList.remove("hidden");
+      said.classList.toggle("sub", invite.depth === "soft");
+      said.textContent = invite.text;
+      actions.classList.remove("hidden");
+    }
+    document.getElementById("learn-joy").onclick = () => {
+      const choice = G.learnChoice("show", learnFundamental);
+      document.getElementById("learn-actions").classList.add("hidden");
+      renderLearnDetail(learnPack);
+      if (!choice.log) return;
+      commitRecord(Rec.add(record, {
+        type: "explore",
+        text: choice.log,
+        source: "auto",
+        key: "explore:" + learnFundamental
+      }, new Date().toISOString()));
+    };
+    document.getElementById("learn-later").onclick = () => {
+      const choice = G.learnChoice("later", learnFundamental);
+      document.getElementById("learn-actions").classList.add("hidden");
+      document.getElementById("learn-out").replaceChildren();
+      const said = document.getElementById("learn-invite");
+      said.classList.remove("hidden");
+      said.textContent = choice.dismiss;
+    };
     function fillReality(card) {
       const box = document.getElementById("rest-reality");
       box.classList.remove("hidden");
@@ -405,7 +462,7 @@
       const heard = G.reflect(journalText.value, currentTone());
       showEnough(heard.core || "this idea");
     };
-    document.getElementById("learn-suggest").onclick = () => paintLearn();
+    document.getElementById("learn-suggest").onclick = () => { learnReady = true; paintLearn(); };
     document.getElementById("learn-enough").onclick = () => {
       const idea = document.getElementById("learn-idea").value.trim();
       const heard = G.reflect(idea, currentTone());

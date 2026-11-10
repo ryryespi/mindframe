@@ -129,6 +129,70 @@ test("the wonder card appears for proving language and stays dismissed", () => {
   assert.doesNotMatch(prove.line, /shame|vain|stupid|you failed/i);
 });
 
+test("the invitation fills the fundamental and the thread, and Listening hides it", () => {
+  const full = G.invitationFor("the geometry of a sunflower", "expansive");
+  assert.equal(full.show, true);
+  assert.equal(full.depth, "full");
+  assert.equal(full.fundamental, "geometry");
+  assert.equal(full.thread, "one line");
+  assert.equal(full.text, G.PARAMS.invitation.replace("{fundamental}", "geometry").replace("{thread}", "one line"));
+  assert.match(full.text, /You're safe here/);
+  assert.match(full.text, /nothing to prove/);
+  assert.match(full.text, /how beautifully the architecture is put together/);
+  assert.doesNotMatch(full.text, /You are entirely right/);
+  const soft = G.invitationFor("the geometry of a sunflower", "gentle");
+  assert.equal(soft.depth, "soft");
+  assert.match(soft.text, /You're safe here/);
+  assert.match(soft.text, /specific geometry/);
+  assert.match(soft.text, /one line/);
+  assert.ok(full.text.indexOf("You're safe here.") >= 0);
+  assert.ok(full.text.indexOf("But look at this specific geometry right here.") >= 0);
+  assert.ok(full.text.indexOf("Do you want to see where this one line leads, just for the joy of it?") >= 0);
+  assert.doesNotMatch(soft.text, /ultimate truth/);
+  const symmetry = G.invitationFor("the symmetry of a leaf", "expansive");
+  assert.equal(symmetry.fundamental, "symmetry");
+  assert.equal(symmetry.thread, "one pattern");
+  const ratio = G.invitationFor("this ratio", "gentle");
+  assert.equal(ratio.fundamental, "ratio");
+  assert.equal(ratio.thread, "one ratio");
+  const story = G.invitationFor("a story about home", "expansive");
+  assert.equal(story.fundamental, "story");
+  assert.equal(story.thread, "one idea");
+  const drawing = G.invitationFor("I am drawing", "expansive");
+  assert.equal(drawing.fundamental, "drawing");
+  assert.equal(drawing.thread, "one line");
+  const quiet = G.invitationFor("the geometry of a sunflower", "listen");
+  assert.equal(quiet.show, false);
+  assert.equal(quiet.text, "");
+  assert.match(quiet.presence, /Pause here/);
+  assert.equal(quiet.forgiveness, G.FORGIVENESS);
+  assert.doesNotMatch(quiet.presence + quiet.forgiveness, /Do you want to see/);
+});
+
+test("Show me logs joy, and Not now is not a failure", () => {
+  const show = G.learnChoice("show", "geometry");
+  const later = G.learnChoice("later", "geometry");
+  assert.equal(show.failure, false);
+  assert.equal(later.failure, false);
+  assert.equal(show.log, "Explored geometry for joy");
+  assert.equal(later.log, null);
+  assert.equal(later.dismiss, "That's fine. It'll be here whenever you want it.");
+  const when = "2026-11-10T12:30:00.000Z";
+  let rec = R.add(R.blank(), { type: "explore", text: show.log, source: "auto", key: "explore:geometry" }, when);
+  rec = R.add(rec, { type: "explore", text: show.log, source: "auto", key: "explore:geometry" }, when);
+  assert.equal(rec.entries.length, 1);
+  assert.equal(rec.entries[0].text, "Explored geometry for joy");
+  assert.equal(R.counts(rec).ideas, 0);
+  const guide = fs.readFileSync(path.join(__dirname, "../ariel/suite/guide.js"), "utf8");
+  const suite = fs.readFileSync(path.join(__dirname, "../ariel/suite/index.html"), "utf8");
+  assert.match(guide, /Ryan's words/);
+  assert.match(guide, /You're safe here/);
+  assert.match(suite, /id="learn-joy"/);
+  assert.match(suite, /Show me, for the joy of it/);
+  assert.match(suite, /id="learn-later"/);
+  assert.match(suite, /Not now/);
+});
+
 test("the suite keeps five plain tabs, hides the gate behind Advanced, and leaves the engine in place", () => {
   const suite = fs.readFileSync(path.join(__dirname, "../ariel/suite/index.html"), "utf8");
   const shell = fs.readFileSync(path.join(__dirname, "../ariel/shell.js"), "utf8");

@@ -6,12 +6,21 @@
 // listen     threat is high: fewer words, a pause is offered
 // gentle     the middle: reflect, and do not grade
 // expansive  threat is low: there is room to stay with the idea
+//
+// ===== PARAMS =====
+// Ariel's invitation, in Ryan's words.
+// "You are entirely right" is written "You're safe here" so the line never affirms a possibly false fact.
 "use strict";
 (function (root, factory) {
   const api = factory();
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.ArielGuide = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
+  const PARAMS = {
+    invitation: "You're safe here. The ultimate truth is already held safely, and you have absolutely nothing to prove to me or to the canvas. But look at this specific {fundamental} right here. We don't have to solve it to earn our peace; we can just explore it to see how beautifully the architecture is put together. Do you want to see where this {thread} leads, just for the joy of it?",
+    dismiss: "That's fine. It'll be here whenever you want it.",
+    exploreLog: "Explored {fundamental} for joy"
+  };
   const FORGIVENESS = "You can let yourself off the hook for this.";
   const ENOUGH = "You've learned what you needed here. Nothing more to prove.";
   const ENOUGH_MORE = "And there is always more to enjoy.";
@@ -138,6 +147,86 @@
     return { concepts, woven };
   }
 
+  const FUNDAMENTALS = [
+    { name: "geometry", thread: "one line", keys: ["geometry", "geometric", "fibonacci", "spiral"] },
+    { name: "drawing", thread: "one line", keys: ["draw", "drawing", "sketch"] },
+    { name: "symmetry", thread: "one pattern", keys: ["symmetry", "symmetric", "snowflake", "snowflakes"] },
+    { name: "ratio", thread: "one ratio", keys: ["ratio", "ratios", "proportion", "harmony", "music", "musical"] },
+    { name: "story", thread: "one idea", keys: ["story", "stories"] }
+  ];
+
+  function threadFor(name) {
+    const n = String(name || "").toLowerCase();
+    if (/geometry|draw/.test(n)) return "one line";
+    if (/symmetry/.test(n)) return "one pattern";
+    if (/ratio/.test(n)) return "one ratio";
+    return "one idea";
+  }
+
+  function pickFundamental(text, concepts) {
+    const raw = String(text || "");
+    let best = null;
+    let bestAt = 1e9;
+    FUNDAMENTALS.forEach(rule => {
+      rule.keys.forEach(k => {
+        const at = raw.toLowerCase().search(new RegExp("\\b" + k + "\\b"));
+        if (at >= 0 && at < bestAt) { best = rule; bestAt = at; }
+      });
+    });
+    if (best) return { name: best.name, thread: best.thread };
+    const fallback = concepts && concepts[0] && concepts[0].name ? concepts[0].name : "idea";
+    return { name: fallback, thread: threadFor(fallback) };
+  }
+
+  function fillInvitation(fundamental, thread) {
+    return PARAMS.invitation.replace(/\{fundamental\}/g, fundamental).replace(/\{thread\}/g, thread);
+  }
+
+  /**
+   * The Learn opener. Listening (high threat) keeps only a Rest-style presence.
+   * Here with you shows the invitation softly. There is room shows it in full.
+   */
+  function invitationFor(text, toneName, pack) {
+    const raw = String(text || "").trim();
+    const learned = pack || learn(raw);
+    const top = pickFundamental(raw, learned.concepts);
+    const full = fillInvitation(top.name, top.thread);
+    const toneUsed = toneName === "listen" || toneName === "expansive" ? toneName : "gentle";
+    if (!raw) {
+      return {
+        show: false, empty: true, tone: toneUsed, depth: "none",
+        fundamental: top.name, thread: top.thread, text: "", full: "",
+        presence: learned.note, forgiveness: ""
+      };
+    }
+    if (toneUsed === "listen") {
+      const rest = restOffer(1, "", raw);
+      return {
+        show: false, empty: false, tone: "listen", depth: "presence",
+        fundamental: top.name, thread: top.thread, text: "", full: full,
+        presence: rest.pause, forgiveness: rest.forgiveness
+      };
+    }
+    const soft = "You're safe here. But look at this specific " + top.name + " right here. Do you want to see where this " + top.thread + " leads, just for the joy of it?";
+    return {
+      show: true, empty: false, tone: toneUsed,
+      depth: toneUsed === "expansive" ? "full" : "soft",
+      fundamental: top.name, thread: top.thread,
+      text: toneUsed === "expansive" ? full : soft,
+      full: full,
+      presence: "", forgiveness: ""
+    };
+  }
+
+  /** Neither choice is a failure. Only "show" writes a record line. */
+  function learnChoice(which, fundamental) {
+    const name = String(fundamental || "idea");
+    if (which === "show") {
+      return { failure: false, log: PARAMS.exploreLog.replace(/\{fundamental\}/g, name), dismiss: "" };
+    }
+    return { failure: false, log: null, dismiss: PARAMS.dismiss };
+  }
+
   function learn(text) {
     const raw = String(text || "").trim();
     const words = contentWords(raw);
@@ -254,7 +343,7 @@
   }
 
   return {
-    FORGIVENESS, ENOUGH, ENOUGH_MORE, FOOTER, VERSE, WONDER_LINE,
-    tone, toneLine, reflect, learn, reality, restOffer, enough, wonderCard
+    PARAMS, FORGIVENESS, ENOUGH, ENOUGH_MORE, FOOTER, VERSE, WONDER_LINE,
+    tone, toneLine, reflect, learn, reality, restOffer, enough, wonderCard, invitationFor, learnChoice
   };
 });
