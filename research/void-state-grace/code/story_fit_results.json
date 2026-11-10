@@ -1,0 +1,1824 @@
+{
+  "note": "Conceptual. Story pulses change A and x only at scheduled times. policy=none recovers the original trajectory. Random is the mean of 8 seeds. Notation matches arielwords/STORY_RESEARCH_MAP.md.",
+  "defaults": {
+    "LAMBDA_A": 0.3,
+    "LAMBDA_P": 0.3,
+    "LAMBDA_B": 0.4,
+    "MARGIN": 0.08,
+    "PENALTY": 0.85,
+    "ALPHA": 0.4,
+    "Y_SCALE": 0.25,
+    "K_BEN": 0.1,
+    "K_HARM": 0.07,
+    "PATH_LOW_W": 0.33,
+    "PATH_HIGH_W": 0.4,
+    "Y_SLICE": 0.18,
+    "STORY_RELS": [
+      18.0,
+      38.0,
+      52.0
+    ]
+  },
+  "stories": [
+    {
+      "id": "endure-stay",
+      "path": "endure",
+      "a": 0.8,
+      "p": 0.22,
+      "b": 0.1
+    },
+    {
+      "id": "endure-name",
+      "path": "endure",
+      "a": 0.7,
+      "p": 0.28,
+      "b": 0.16
+    },
+    {
+      "id": "out-step",
+      "path": "out",
+      "a": 0.48,
+      "p": 0.52,
+      "b": 0.36
+    },
+    {
+      "id": "out-skill",
+      "path": "out",
+      "a": 0.42,
+      "p": 0.58,
+      "b": 0.44
+    },
+    {
+      "id": "sustain-enough",
+      "path": "sustain",
+      "a": 0.18,
+      "p": 0.62,
+      "b": 0.4
+    },
+    {
+      "id": "sustain-always",
+      "path": "sustain",
+      "a": 0.12,
+      "p": 0.88,
+      "b": 0.85
+    }
+  ],
+  "results": [
+    {
+      "mean_load": 0.28627446266728546,
+      "peak_load": 0.481204352204011,
+      "cumulative_output": 33.37611825119997,
+      "mean_A": 0.23463603171052777,
+      "peak_A": 0.5398078949307755,
+      "mean_x": -0.9115007546333318,
+      "final_x": -1.0,
+      "frac_void": 1.0,
+      "frac_edge": 0.0,
+      "frac_out": 0.0,
+      "n_stories": 0.0,
+      "n_overshoot": 0.0,
+      "frac_overshoot": 0.0,
+      "mean_fit": 0.0,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 0.0,
+        "out": 0.0,
+        "sustain": 0.0
+      },
+      "label": "Unassisted",
+      "policy": "none",
+      "I0": 0.0,
+      "M": 0.0,
+      "decouple": false,
+      "example_picks": []
+    },
+    {
+      "mean_load": 0.28627446266728546,
+      "peak_load": 0.481204352204011,
+      "cumulative_output": 33.37611825119997,
+      "mean_A": 0.23463603171052777,
+      "peak_A": 0.5398078949307755,
+      "mean_x": -0.7570470562184642,
+      "final_x": -0.974541804847001,
+      "frac_void": 1.0,
+      "frac_edge": 0.0,
+      "frac_out": 0.0,
+      "n_stories": 12.0,
+      "n_overshoot": 0.0,
+      "frac_overshoot": 0.0,
+      "mean_fit": 0.7605107904190124,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 11.0,
+        "out": 1.0,
+        "sustain": 0.0
+      },
+      "label": "Unassisted",
+      "policy": "matched",
+      "I0": 0.0,
+      "M": 0.0,
+      "decouple": false,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "out-step",
+          "path": "out",
+          "fit": 0.9297299171931216,
+          "overshoot": false,
+          "yt": 0.2900892049482856,
+          "w": 0.4494865611595986
+        },
+        {
+          "t": 38.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.8584174708569843,
+          "overshoot": false,
+          "yt": 0.12436726062015234,
+          "w": 0.3211268171875329
+        },
+        {
+          "t": 52.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.6103397746951726,
+          "overshoot": false,
+          "yt": 0.17617012464777632,
+          "w": 0.4701494033100338
+        },
+        {
+          "t": 98.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.7742246101643535,
+          "overshoot": false,
+          "yt": 0.23250926831753682,
+          "w": 0.43661046777316165
+        },
+        {
+          "t": 118.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.8572690108105728,
+          "overshoot": false,
+          "yt": 0.10586472229679238,
+          "w": 0.3194931673955808
+        },
+        {
+          "t": 132.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.6105297012027914,
+          "overshoot": false,
+          "yt": 0.15314236013391305,
+          "w": 0.46967729741550335
+        },
+        {
+          "t": 178.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.7765185064887113,
+          "overshoot": false,
+          "yt": 0.21181199605233358,
+          "w": 0.43660608346690466
+        },
+        {
+          "t": 198.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.85590396893764,
+          "overshoot": false,
+          "yt": 0.09747207398926352,
+          "w": 0.31949261220937647
+        },
+        {
+          "t": 212.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.6103880239886972,
+          "overshoot": false,
+          "yt": 0.14202708877628076,
+          "w": 0.4696771369517443
+        },
+        {
+          "t": 258.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.7773733251174546,
+          "overshoot": false,
+          "yt": 0.20160685173472376,
+          "w": 0.4366060819767102
+        },
+        {
+          "t": 278.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.8551637079120069,
+          "overshoot": false,
+          "yt": 0.09333325436846238,
+          "w": 0.319492612020673
+        },
+        {
+          "t": 292.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.6102714676606422,
+          "overshoot": false,
+          "yt": 0.13654540075601582,
+          "w": 0.46967713689720364
+        }
+      ]
+    },
+    {
+      "mean_load": 0.2886952576173394,
+      "peak_load": 0.4870177031501889,
+      "cumulative_output": 33.18998854087039,
+      "mean_A": 0.23850762184586696,
+      "peak_A": 0.6031622321710564,
+      "mean_x": -0.8854277745398778,
+      "final_x": -1.0,
+      "frac_void": 1.0,
+      "frac_edge": 0.0,
+      "frac_out": 0.0,
+      "n_stories": 12.0,
+      "n_overshoot": 7.75,
+      "frac_overshoot": 0.6458333333333334,
+      "mean_fit": 0.26743500127472575,
+      "n_seeds": 8,
+      "mean_path_counts": {
+        "endure": 4.0,
+        "out": 3.875,
+        "sustain": 4.125
+      },
+      "label": "Unassisted",
+      "policy": "random",
+      "I0": 0.0,
+      "M": 0.0,
+      "decouple": false,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.2900892049482856,
+          "w": 0.4494865611595986
+        },
+        {
+          "t": 38.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.1231312178031889,
+          "w": 0.3199652807522592
+        },
+        {
+          "t": 52.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.17335439963690452,
+          "w": 0.46785060336256634
+        },
+        {
+          "t": 98.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.7744150388614154,
+          "overshoot": false,
+          "yt": 0.23180166189592902,
+          "w": 0.4364588195619136
+        },
+        {
+          "t": 118.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.857246520119912,
+          "overshoot": false,
+          "yt": 0.10562562090248978,
+          "w": 0.3194739627606867
+        },
+        {
+          "t": 132.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.5473459549865941,
+          "overshoot": false,
+          "yt": 0.15284051160590287,
+          "w": 0.4696717467535826
+        },
+        {
+          "t": 178.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.7098356266066028,
+          "overshoot": false,
+          "yt": 0.21153940711955727,
+          "w": 0.4366060319189965
+        },
+        {
+          "t": 198.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.7995928726651135,
+          "overshoot": false,
+          "yt": 0.0973615369373083,
+          "w": 0.3194926056818515
+        },
+        {
+          "t": 212.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.610385311982179,
+          "overshoot": false,
+          "yt": 0.1418806918427525,
+          "w": 0.46967713506511344
+        },
+        {
+          "t": 258.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.20147244159417305,
+          "w": 0.4366060819591885
+        },
+        {
+          "t": 278.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.09233704473941319,
+          "w": 0.3183511753140692
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.13424116730862468,
+          "w": 0.4673885831948628
+        }
+      ]
+    },
+    {
+      "mean_load": 0.2900605202804828,
+      "peak_load": 0.48702178312543964,
+      "cumulative_output": 33.08833659204066,
+      "mean_A": 0.2406242803497757,
+      "peak_A": 0.6031677662075838,
+      "mean_x": -0.9129849867321945,
+      "final_x": -1.0,
+      "frac_void": 1.0,
+      "frac_edge": 0.0,
+      "frac_out": 0.0,
+      "n_stories": 12.0,
+      "n_overshoot": 12.0,
+      "frac_overshoot": 1.0,
+      "mean_fit": 0.0,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 0.0,
+        "out": 0.0,
+        "sustain": 12.0
+      },
+      "label": "Unassisted",
+      "policy": "sustain",
+      "I0": 0.0,
+      "M": 0.0,
+      "decouple": false,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.2900892049482856,
+          "w": 0.4494865611595986
+        },
+        {
+          "t": 38.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.1231312178031889,
+          "w": 0.3199652807522592
+        },
+        {
+          "t": 52.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.17335439963690452,
+          "w": 0.46785060336256634
+        },
+        {
+          "t": 98.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.23180166189592902,
+          "w": 0.4364588195619136
+        },
+        {
+          "t": 118.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.1045712183841162,
+          "w": 0.3183327549854559
+        },
+        {
+          "t": 132.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.15037078235493806,
+          "w": 0.4673833098541308
+        },
+        {
+          "t": 178.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.21086515365527725,
+          "w": 0.4364545285925161
+        },
+        {
+          "t": 198.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.09615455168409547,
+          "w": 0.3183322183125712
+        },
+        {
+          "t": 212.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.139283103518474,
+          "w": 0.4673831562159822
+        },
+        {
+          "t": 258.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.20055102562555208,
+          "w": 0.4364545271817022
+        },
+        {
+          "t": 278.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.0920075185651886,
+          "w": 0.31833221813612056
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.13381981519975647,
+          "w": 0.4673831561654684
+        }
+      ]
+    },
+    {
+      "mean_load": 0.1951801520547054,
+      "peak_load": 0.38849810888761066,
+      "cumulative_output": 48.242608613975065,
+      "mean_A": 0.1374845902336789,
+      "peak_A": 0.47717754404028107,
+      "mean_x": 0.8440952751861457,
+      "final_x": 1.0,
+      "frac_void": 0.07332844477034864,
+      "frac_edge": 0.4505032997800147,
+      "frac_out": 0.4761682554496367,
+      "n_stories": 0.0,
+      "n_overshoot": 0.0,
+      "frac_overshoot": 0.0,
+      "mean_fit": 0.0,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 0.0,
+        "out": 0.0,
+        "sustain": 0.0
+      },
+      "label": "Zero-Debt Grace",
+      "policy": "none",
+      "I0": 0.0,
+      "M": 0.0,
+      "decouple": false,
+      "example_picks": []
+    },
+    {
+      "mean_load": 0.1951801520547054,
+      "peak_load": 0.38849810888761066,
+      "cumulative_output": 48.242608613975065,
+      "mean_A": 0.1374845902336789,
+      "peak_A": 0.47717754404028107,
+      "mean_x": 0.8524695378390187,
+      "final_x": 1.0,
+      "frac_void": 0.07332844477034864,
+      "frac_edge": 0.4459036064262383,
+      "frac_out": 0.4807679488034131,
+      "n_stories": 12.0,
+      "n_overshoot": 0.0,
+      "frac_overshoot": 0.0,
+      "mean_fit": 0.8610615038888678,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 3.0,
+        "out": 1.0,
+        "sustain": 8.0
+      },
+      "label": "Zero-Debt Grace",
+      "policy": "matched",
+      "I0": 0.0,
+      "M": 0.0,
+      "decouple": false,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "out-step",
+          "path": "out",
+          "fit": 0.9297299171931216,
+          "overshoot": false,
+          "yt": 0.2900892049482856,
+          "w": 0.4494865611595986
+        },
+        {
+          "t": 38.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.9190427575832766,
+          "overshoot": false,
+          "yt": 0.4733387100362001,
+          "w": 0.6539392356107333
+        },
+        {
+          "t": 52.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.8235517475925355,
+          "overshoot": false,
+          "yt": 0.592323952385529,
+          "w": 0.7723640285537341
+        },
+        {
+          "t": 98.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.7682151122870009,
+          "overshoot": false,
+          "yt": 0.2513881959571158,
+          "w": 0.4416642944189974
+        },
+        {
+          "t": 118.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.9314660005163939,
+          "overshoot": false,
+          "yt": 0.4286776947196425,
+          "w": 0.6533199571757022
+        },
+        {
+          "t": 132.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.8435321120100586,
+          "overshoot": false,
+          "yt": 0.5427601335792032,
+          "w": 0.7722749739298411
+        },
+        {
+          "t": 178.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.7703546590786728,
+          "overshoot": false,
+          "yt": 0.23670770572704306,
+          "w": 0.4416637643921386
+        },
+        {
+          "t": 198.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.9337717283762484,
+          "overshoot": false,
+          "yt": 0.4067530162161126,
+          "w": 0.6533199152031266
+        },
+        {
+          "t": 212.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.8520471947412112,
+          "overshoot": false,
+          "yt": 0.5178984254379833,
+          "w": 0.7722749678932088
+        },
+        {
+          "t": 258.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.7712968492137922,
+          "overshoot": false,
+          "yt": 0.22931409363611935,
+          "w": 0.4416637643562103
+        },
+        {
+          "t": 278.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.9338539317479567,
+          "overshoot": false,
+          "yt": 0.39571057279480115,
+          "w": 0.6533199152002817
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.855876036326146,
+          "overshoot": false,
+          "yt": 0.505376702945421,
+          "w": 0.7722749678927988
+        }
+      ]
+    },
+    {
+      "mean_load": 0.19641597200191416,
+      "peak_load": 0.39614449531536516,
+      "cumulative_output": 48.12521770396136,
+      "mean_A": 0.13953191887639754,
+      "peak_A": 0.5212772930515442,
+      "mean_x": 0.8467050718250984,
+      "final_x": 1.0,
+      "frac_void": 0.07332844477034864,
+      "frac_edge": 0.44973668422105195,
+      "frac_out": 0.47693487100859944,
+      "n_stories": 12.0,
+      "n_overshoot": 4.0,
+      "frac_overshoot": 0.3333333333333333,
+      "mean_fit": 0.4589234620125401,
+      "n_seeds": 8,
+      "mean_path_counts": {
+        "endure": 4.0,
+        "out": 3.875,
+        "sustain": 4.125
+      },
+      "label": "Zero-Debt Grace",
+      "policy": "random",
+      "I0": 0.0,
+      "M": 0.0,
+      "decouple": false,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.2900892049482856,
+          "w": 0.4494865611595986
+        },
+        {
+          "t": 38.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.8476823432881094,
+          "overshoot": false,
+          "yt": 0.4710199208316239,
+          "w": 0.6529152132816259
+        },
+        {
+          "t": 52.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.7314702904987932,
+          "overshoot": false,
+          "yt": 0.5914491976558267,
+          "w": 0.772218584970383
+        },
+        {
+          "t": 98.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.7682415185189261,
+          "overshoot": false,
+          "yt": 0.2512241864837398,
+          "w": 0.44166342902536915
+        },
+        {
+          "t": 118.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.5891222391643275,
+          "overshoot": false,
+          "yt": 0.42843405054790384,
+          "w": 0.6533198886455887
+        },
+        {
+          "t": 132.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.39995543195364414,
+          "overshoot": false,
+          "yt": 0.5424839586801946,
+          "w": 0.7722749640736163
+        },
+        {
+          "t": 178.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.7023688084126349,
+          "overshoot": false,
+          "yt": 0.23662558017557217,
+          "w": 0.4416637643334771
+        },
+        {
+          "t": 198.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.5219276192495409,
+          "overshoot": false,
+          "yt": 0.4066303608572473,
+          "w": 0.6533199151984809
+        },
+        {
+          "t": 212.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.480993974414494,
+          "overshoot": false,
+          "yt": 0.5177593388037228,
+          "w": 0.7722749678925402
+        },
+        {
+          "t": 258.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.22927273070490223,
+          "w": 0.441663764356206
+        },
+        {
+          "t": 278.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.846448735261855,
+          "overshoot": false,
+          "yt": 0.39366243900262715,
+          "w": 0.652301567798803
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.5045070748561085,
+          "w": 0.772130293572819
+        }
+      ]
+    },
+    {
+      "mean_load": 0.19877899839264215,
+      "peak_load": 0.39621763282893424,
+      "cumulative_output": 47.8970768910129,
+      "mean_A": 0.14342815136270076,
+      "peak_A": 0.5213722034854721,
+      "mean_x": 0.8438897282990017,
+      "final_x": 1.0,
+      "frac_void": 0.07332844477034864,
+      "frac_edge": 0.4512365842277182,
+      "frac_out": 0.4754349710019332,
+      "n_stories": 12.0,
+      "n_overshoot": 12.0,
+      "frac_overshoot": 1.0,
+      "mean_fit": 0.0,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 0.0,
+        "out": 0.0,
+        "sustain": 12.0
+      },
+      "label": "Zero-Debt Grace",
+      "policy": "sustain",
+      "I0": 0.0,
+      "M": 0.0,
+      "decouple": false,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.2900892049482856,
+          "w": 0.4494865611595986
+        },
+        {
+          "t": 38.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.4710199208316239,
+          "w": 0.6529152132816259
+        },
+        {
+          "t": 52.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.5867731075235326,
+          "w": 0.7700985929771262
+        },
+        {
+          "t": 98.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.25065120044461126,
+          "w": 0.4414904663658613
+        },
+        {
+          "t": 118.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.4257161117949968,
+          "w": 0.6522879690353276
+        },
+        {
+          "t": 132.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.5366899065648587,
+          "w": 0.7700090975251296
+        },
+        {
+          "t": 178.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.2357193146896311,
+          "w": 0.441489938597178
+        },
+        {
+          "t": 198.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.4034940737767574,
+          "w": 0.6522879276236081
+        },
+        {
+          "t": 212.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.5115881519797565,
+          "w": 0.7700090916156732
+        },
+        {
+          "t": 258.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.22820535384765242,
+          "w": 0.44148993856232904
+        },
+        {
+          "t": 278.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.3923111944039332,
+          "w": 0.6522879276208745
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.49895606917379315,
+          "w": 0.7700090916152831
+        }
+      ]
+    },
+    {
+      "mean_load": 0.5205205659186333,
+      "peak_load": 0.8187009261308805,
+      "cumulative_output": 18.691859819710313,
+      "mean_A": 0.45300251578835493,
+      "peak_A": 0.9043787578496671,
+      "mean_x": -0.980968143043941,
+      "final_x": -1.0,
+      "frac_void": 1.0,
+      "frac_edge": 0.0,
+      "frac_out": 0.0,
+      "n_stories": 0.0,
+      "n_overshoot": 0.0,
+      "frac_overshoot": 0.0,
+      "mean_fit": 0.0,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 0.0,
+        "out": 0.0,
+        "sustain": 0.0
+      },
+      "label": "High-I Unassisted",
+      "policy": "none",
+      "I0": 0.8,
+      "M": 0.1,
+      "decouple": false,
+      "example_picks": []
+    },
+    {
+      "mean_load": 0.5214482031534613,
+      "peak_load": 0.8231650918665393,
+      "cumulative_output": 18.66148173903859,
+      "mean_A": 0.4545780699039171,
+      "peak_A": 0.9694663777018838,
+      "mean_x": -0.9746294485764864,
+      "final_x": -1.0,
+      "frac_void": 1.0,
+      "frac_edge": 0.0,
+      "frac_out": 0.0,
+      "n_stories": 12.0,
+      "n_overshoot": 3.0,
+      "frac_overshoot": 0.25,
+      "mean_fit": 0.6192877326757803,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 12.0,
+        "out": 0.0,
+        "sustain": 0.0
+      },
+      "label": "High-I Unassisted",
+      "policy": "matched",
+      "I0": 0.8,
+      "M": 0.1,
+      "decouple": false,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.9047278577442432,
+          "overshoot": false,
+          "yt": 0.14936102098907714,
+          "w": 0.26691161156252086
+        },
+        {
+          "t": 38.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.9302559532512666,
+          "overshoot": false,
+          "yt": 0.02931365393141534,
+          "w": 0.14196949239803647
+        },
+        {
+          "t": 52.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.6557396305485668,
+          "overshoot": false,
+          "yt": 0.04998442833384726,
+          "w": 0.26463434527945134
+        },
+        {
+          "t": 98.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.9101133616093465,
+          "overshoot": false,
+          "yt": 0.06518541201964063,
+          "w": 0.20118386554458098
+        },
+        {
+          "t": 118.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.07163319987722383,
+          "overshoot": true,
+          "yt": 0.01757270209519213,
+          "w": 0.13190727148284012
+        },
+        {
+          "t": 132.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.6630243210371451,
+          "overshoot": false,
+          "yt": 0.03360132625139723,
+          "w": 0.2561514134073643
+        },
+        {
+          "t": 178.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.9143977614060183,
+          "overshoot": false,
+          "yt": 0.04652267161309657,
+          "w": 0.18837526491078846
+        },
+        {
+          "t": 198.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.06780778243231411,
+          "overshoot": true,
+          "yt": 0.013355599413787311,
+          "w": 0.12873296865765604
+        },
+        {
+          "t": 212.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.6657725407241364,
+          "overshoot": false,
+          "yt": 0.026720080417550394,
+          "w": 0.2532445299549775
+        },
+        {
+          "t": 258.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.9150257337814174,
+          "overshoot": false,
+          "yt": 0.0385357376849631,
+          "w": 0.18270746724159295
+        },
+        {
+          "t": 278.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.06595832031604065,
+          "overshoot": true,
+          "yt": 0.011430554898429403,
+          "w": 0.12729133805728857
+        },
+        {
+          "t": 292.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.6669963293816454,
+          "overshoot": false,
+          "yt": 0.023481077914079176,
+          "w": 0.25202558551409593
+        }
+      ]
+    },
+    {
+      "mean_load": 0.5241968129282686,
+      "peak_load": 0.8240082647619917,
+      "cumulative_output": 18.530330297261983,
+      "mean_A": 0.45889724518007424,
+      "peak_A": 0.969919119794126,
+      "mean_x": -0.9803997014649342,
+      "final_x": -1.0,
+      "frac_void": 1.0,
+      "frac_edge": 0.0,
+      "frac_out": 0.0,
+      "n_stories": 12.0,
+      "n_overshoot": 10.75,
+      "frac_overshoot": 0.8958333333333333,
+      "mean_fit": 0.0862308761833682,
+      "n_seeds": 8,
+      "mean_path_counts": {
+        "endure": 4.0,
+        "out": 3.875,
+        "sustain": 4.125
+      },
+      "label": "High-I Unassisted",
+      "policy": "random",
+      "I0": 0.8,
+      "M": 0.1,
+      "decouple": false,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.14936102098907714,
+          "w": 0.26691161156252086
+        },
+        {
+          "t": 38.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.02898643830363615,
+          "w": 0.14152084086439234
+        },
+        {
+          "t": 52.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.04905079978568302,
+          "w": 0.2634771260525458
+        },
+        {
+          "t": 98.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.05854639451944488,
+          "overshoot": true,
+          "yt": 0.06477173623322119,
+          "w": 0.2008491859282592
+        },
+        {
+          "t": 118.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.013186154710997045,
+          "overshoot": true,
+          "yt": 0.0173164003676379,
+          "w": 0.13153033818526216
+        },
+        {
+          "t": 132.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.6631395940501978,
+          "overshoot": false,
+          "yt": 0.03338396544386094,
+          "w": 0.25600035830991147
+        },
+        {
+          "t": 178.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.9144238663012915,
+          "overshoot": false,
+          "yt": 0.04631996727653822,
+          "w": 0.18823246947112504
+        },
+        {
+          "t": 198.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.06776263076369637,
+          "overshoot": true,
+          "yt": 0.013307807865638172,
+          "w": 0.12869709717532066
+        },
+        {
+          "t": 212.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.026641051498415808,
+          "w": 0.2532144299094118
+        },
+        {
+          "t": 258.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.03834419624417462,
+          "w": 0.18254271384970663
+        },
+        {
+          "t": 278.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.011272555536847506,
+          "w": 0.12700000891015162
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.02334566188864665,
+          "w": 0.2519436224609592
+        }
+      ]
+    },
+    {
+      "mean_load": 0.5246615102033378,
+      "peak_load": 0.8242730136058904,
+      "cumulative_output": 18.508347825580998,
+      "mean_A": 0.45960659028851625,
+      "peak_A": 0.9700554101531427,
+      "mean_x": -0.9809710076141817,
+      "final_x": -1.0,
+      "frac_void": 1.0,
+      "frac_edge": 0.0,
+      "frac_out": 0.0,
+      "n_stories": 12.0,
+      "n_overshoot": 12.0,
+      "frac_overshoot": 1.0,
+      "mean_fit": 0.0,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 0.0,
+        "out": 0.0,
+        "sustain": 12.0
+      },
+      "label": "High-I Unassisted",
+      "policy": "sustain",
+      "I0": 0.8,
+      "M": 0.1,
+      "decouple": false,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.14936102098907714,
+          "w": 0.26691161156252086
+        },
+        {
+          "t": 38.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.02898643830363615,
+          "w": 0.14152084086439234
+        },
+        {
+          "t": 52.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.04905079978568302,
+          "w": 0.2634771260525458
+        },
+        {
+          "t": 98.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.06477173623322119,
+          "w": 0.2008491859282592
+        },
+        {
+          "t": 118.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.0173164003676379,
+          "w": 0.13153033818526216
+        },
+        {
+          "t": 132.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.03338396544386094,
+          "w": 0.25600035830991147
+        },
+        {
+          "t": 178.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.04619611844455309,
+          "w": 0.18811275411899273
+        },
+        {
+          "t": 198.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.013149974610982834,
+          "w": 0.1284023250913856
+        },
+        {
+          "t": 212.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.026533791407593137,
+          "w": 0.2531382634276175
+        },
+        {
+          "t": 258.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.03824805233402363,
+          "w": 0.18247350435906154
+        },
+        {
+          "t": 278.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.01124911536377097,
+          "w": 0.12698251599436766
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.023305144025153803,
+          "w": 0.2519285770670491
+        }
+      ]
+    },
+    {
+      "mean_load": 0.22549497526657922,
+      "peak_load": 0.4498404993795778,
+      "cumulative_output": 45.70320914091718,
+      "mean_A": 0.16374653805187908,
+      "peak_A": 0.5549389618074603,
+      "mean_x": 0.8147234258100142,
+      "final_x": 1.0,
+      "frac_void": 0.0,
+      "frac_edge": 0.18172121858542764,
+      "frac_out": 0.8182787814145723,
+      "n_stories": 0.0,
+      "n_overshoot": 0.0,
+      "frac_overshoot": 0.0,
+      "mean_fit": 0.0,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 0.0,
+        "out": 0.0,
+        "sustain": 0.0
+      },
+      "label": "High-I Combined",
+      "policy": "none",
+      "I0": 0.8,
+      "M": 0.75,
+      "decouple": true,
+      "example_picks": []
+    },
+    {
+      "mean_load": 0.22549497526657922,
+      "peak_load": 0.4498404993795778,
+      "cumulative_output": 45.70320914091718,
+      "mean_A": 0.16374653805187908,
+      "peak_A": 0.5549389618074603,
+      "mean_x": 0.8271481703498899,
+      "final_x": 1.0,
+      "frac_void": 0.0,
+      "frac_edge": 0.17625491633891074,
+      "frac_out": 0.8237450836610892,
+      "n_stories": 12.0,
+      "n_overshoot": 0.0,
+      "frac_overshoot": 0.0,
+      "mean_fit": 0.8731793625367573,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 4.0,
+        "out": 0.0,
+        "sustain": 8.0
+      },
+      "label": "High-I Combined",
+      "policy": "matched",
+      "I0": 0.8,
+      "M": 0.75,
+      "decouple": true,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.8111586342024899,
+          "overshoot": false,
+          "yt": 0.2388095037373614,
+          "w": 0.38481643122601633
+        },
+        {
+          "t": 38.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.9408339623504756,
+          "overshoot": false,
+          "yt": 0.39910643007491337,
+          "w": 0.5831032740241899
+        },
+        {
+          "t": 52.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.8591346966890079,
+          "overshoot": false,
+          "yt": 0.5337322603796012,
+          "w": 0.7284892417006654
+        },
+        {
+          "t": 98.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.8207236819471395,
+          "overshoot": false,
+          "yt": 0.19899006260920812,
+          "w": 0.3780518739549625
+        },
+        {
+          "t": 118.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.937304616763065,
+          "overshoot": false,
+          "yt": 0.3618192893842732,
+          "w": 0.5919956734265789
+        },
+        {
+          "t": 132.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.8730775244446055,
+          "overshoot": false,
+          "yt": 0.4862936044320978,
+          "w": 0.7345930699251674
+        },
+        {
+          "t": 178.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.8128753613230525,
+          "overshoot": false,
+          "yt": 0.19274224739730098,
+          "w": 0.3891260239836437
+        },
+        {
+          "t": 198.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.9345638599390953,
+          "overshoot": false,
+          "yt": 0.3502975999813353,
+          "w": 0.6033954821731675
+        },
+        {
+          "t": 212.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.8753065541903849,
+          "overshoot": false,
+          "yt": 0.46855458824287144,
+          "w": 0.7416581595025654
+        },
+        {
+          "t": 258.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.8050817494461425,
+          "overshoot": false,
+          "yt": 0.19328053826854052,
+          "w": 0.39953404503360324
+        },
+        {
+          "t": 278.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.9338870025651578,
+          "overshoot": false,
+          "yt": 0.34933870804222145,
+          "w": 0.6136776330441185
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.8742047065804713,
+          "overshoot": false,
+          "yt": 0.4641530009378229,
+          "w": 0.7480303173697044
+        }
+      ]
+    },
+    {
+      "mean_load": 0.22696628370729086,
+      "peak_load": 0.4575003215071439,
+      "cumulative_output": 45.56857216819347,
+      "mean_A": 0.16614024200970057,
+      "peak_A": 0.5890733855788296,
+      "mean_x": 0.817701438729878,
+      "final_x": 1.0,
+      "frac_void": 0.0,
+      "frac_edge": 0.18240450636624225,
+      "frac_out": 0.8175954936337577,
+      "n_stories": 12.0,
+      "n_overshoot": 4.625,
+      "frac_overshoot": 0.3854166666666667,
+      "mean_fit": 0.4336286394166553,
+      "n_seeds": 8,
+      "mean_path_counts": {
+        "endure": 4.0,
+        "out": 3.875,
+        "sustain": 4.125
+      },
+      "label": "High-I Combined",
+      "policy": "random",
+      "I0": 0.8,
+      "M": 0.75,
+      "decouple": true,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.2388095037373614,
+          "w": 0.38481643122601633
+        },
+        {
+          "t": 38.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.8908377368628716,
+          "overshoot": false,
+          "yt": 0.3969752679946115,
+          "w": 0.5820699873603176
+        },
+        {
+          "t": 52.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.7521664294973519,
+          "overshoot": false,
+          "yt": 0.5327893061327196,
+          "w": 0.7282992744164852
+        },
+        {
+          "t": 98.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.8207602198528019,
+          "overshoot": false,
+          "yt": 0.1988290024797014,
+          "w": 0.3780217593564214
+        },
+        {
+          "t": 118.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.641184604002276,
+          "overshoot": false,
+          "yt": 0.3615760380525342,
+          "w": 0.5919706755834083
+        },
+        {
+          "t": 132.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.42673244136822663,
+          "overshoot": false,
+          "yt": 0.48600813159864614,
+          "w": 0.7345766162370048
+        },
+        {
+          "t": 178.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.7475099847337738,
+          "overshoot": false,
+          "yt": 0.19265987970677637,
+          "w": 0.3891135015185303
+        },
+        {
+          "t": 198.0,
+          "id": "endure-stay",
+          "path": "endure",
+          "fit": 0.564697868249239,
+          "overshoot": false,
+          "yt": 0.3501727962702731,
+          "w": 0.6033852715035509
+        },
+        {
+          "t": 212.0,
+          "id": "endure-name",
+          "path": "endure",
+          "fit": 0.5030059790680175,
+          "overshoot": false,
+          "yt": 0.4684088450740315,
+          "w": 0.7416514951991242
+        },
+        {
+          "t": 258.0,
+          "id": "sustain-enough",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.19323821675536512,
+          "w": 0.39952891581937894
+        },
+        {
+          "t": 278.0,
+          "id": "out-skill",
+          "path": "out",
+          "fit": 0.011204697818974596,
+          "overshoot": true,
+          "yt": 0.34746728217897055,
+          "w": 0.6126928929475228
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.459550426313855,
+          "w": 0.7458276040314269
+        }
+      ]
+    },
+    {
+      "mean_load": 0.2291856607356681,
+      "peak_load": 0.4575003215071439,
+      "cumulative_output": 45.36391998870051,
+      "mean_A": 0.16974977835753405,
+      "peak_A": 0.5896340023558333,
+      "mean_x": 0.8143844778442276,
+      "final_x": 1.0,
+      "frac_void": 0.0,
+      "frac_edge": 0.18298780081327912,
+      "frac_out": 0.8170121991867209,
+      "n_stories": 12.0,
+      "n_overshoot": 12.0,
+      "frac_overshoot": 1.0,
+      "mean_fit": 0.0,
+      "n_seeds": 1,
+      "mean_path_counts": {
+        "endure": 0.0,
+        "out": 0.0,
+        "sustain": 12.0
+      },
+      "label": "High-I Combined",
+      "policy": "sustain",
+      "I0": 0.8,
+      "M": 0.75,
+      "decouple": true,
+      "example_picks": [
+        {
+          "t": 18.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.2388095037373614,
+          "w": 0.38481643122601633
+        },
+        {
+          "t": 38.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.3969752679946115,
+          "w": 0.5820699873603176
+        },
+        {
+          "t": 52.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.5283653045948437,
+          "w": 0.7263078594441107
+        },
+        {
+          "t": 98.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.19831533606351917,
+          "w": 0.3778067666606164
+        },
+        {
+          "t": 118.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.35911146416641715,
+          "w": 0.5909195127640556
+        },
+        {
+          "t": 132.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.48061775310143595,
+          "w": 0.7323526175826481
+        },
+        {
+          "t": 178.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.19181497919146398,
+          "w": 0.38885352561550646
+        },
+        {
+          "t": 198.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.34727781982631845,
+          "w": 0.6023104947740261
+        },
+        {
+          "t": 212.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.4626037940238948,
+          "w": 0.7394057433603302
+        },
+        {
+          "t": 258.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.19222820428441836,
+          "w": 0.39926832288586345
+        },
+        {
+          "t": 278.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.3461442141126963,
+          "w": 0.6125964011054372
+        },
+        {
+          "t": 292.0,
+          "id": "sustain-always",
+          "path": "sustain",
+          "fit": 0.0,
+          "overshoot": true,
+          "yt": 0.4580375907289341,
+          "w": 0.7457715167664948
+        }
+      ]
+    }
+  ]
+}
