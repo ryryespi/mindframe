@@ -44,6 +44,8 @@
     a { color:var(--teal); }
     body:not(.advanced) .advanced-only { display:none; }
     .crisis { margin:14px 0 0; padding:8px 10px; border:1px solid var(--line); border-radius:10px; color:var(--muted); }
+    #honest-body { transition: opacity 0.8s ease; }
+    #honest-body.fade { opacity: 0; }
     #enough { margin:0 0 12px; }
     #advanced.on, #more-tools.on { color:var(--ink); }
     @media (max-width:700px) {
@@ -188,6 +190,7 @@
       <button type="button" class="go" id="rest-pause-btn">Pause</button>
       <button type="button" class="ghost btn" id="afraid-open-rest">I'm afraid to stop</button>
       <button type="button" class="ghost btn" id="reach-open">Reach out</button>
+      <button type="button" class="ghost btn" id="honest-open">Honest room</button>
       <button type="button" class="ghost btn" id="reel-open">What we've made</button>
       <button type="button" class="ghost btn" id="gifts-open">Six gifts</button>
       <p id="rest-forgive">You can let yourself off the hook for this.</p>
@@ -242,6 +245,23 @@
       </div>
       <div id="spiral-practice"></div>
       <button type="button" class="ghost btn" id="spiral-reach">Reach out</button>
+    </section>
+    <section id="honest" class="card hidden">
+      <p class="k">HONEST ROOM</p>
+      <p class="sub" id="honest-privacy">Nothing here leaves your device. Nothing is judged.</p>
+      <p class="sub" id="honest-danger">If someone is in danger, contacting help comes first.</p>
+      <div id="honest-body">
+        <div id="honest-lines"></div>
+        <div id="honest-scripture"></div>
+        <label id="honest-write" class="hidden">Write it here
+          <textarea id="honest-text" aria-label="What you want to say" placeholder="It stays in this room unless you keep it."></textarea>
+        </label>
+        <label id="honest-lock" class="hidden">Optional passcode. It stays on this device.
+          <input id="honest-pass" type="password" autocomplete="off" aria-label="Optional passcode">
+        </label>
+      </div>
+      <div id="honest-actions" class="rec-actions"></div>
+      <div id="honest-kept"></div>
     </section>
     <section id="reach" class="card hidden">
       <p class="k">REACH OUT</p>
@@ -339,6 +359,7 @@
   <script src="reach.js"></script>
   <script src="welcome.js"></script>
   <script src="sketch.js"></script>
+  <script src="honest.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
@@ -351,6 +372,7 @@
     const Reach = window.ArielReach;
     const Welcome = window.ArielWelcome;
     const Sketch = window.ArielSketch;
+    const Honest = window.ArielHonest;
     let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
     const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
@@ -374,6 +396,7 @@
         document.getElementById("learn-idea").value = journalText.value;
       }
       if (btn.dataset.tab === "rest") paintRest();
+      leaveHonest();
     });
     const journalText = document.getElementById("journal-text");
     journalText.oninput = () => {
@@ -1327,6 +1350,187 @@
       renderKindness();
     };
     renderKindness();
+    // ===== HONEST ROOM =====
+    // Ryan's room. One screen at a time. Nothing is saved unless they keep it.
+    let honestState = null;
+    let honestEpoch = 0;
+    let honestFading = false;
+    function paintKept() {
+      const box = document.getElementById("honest-kept");
+      box.replaceChildren();
+      if (!honestState || (honestState.step !== "welcome" && honestState.step !== "kept")) return;
+      const list = Honest.loadKept(localStorage);
+      if (!list.length) return;
+      const title = document.createElement("p");
+      title.className = "sub";
+      title.textContent = "Kept on this device";
+      box.appendChild(title);
+      list.forEach(entry => {
+        const item = document.createElement("div");
+        item.className = "node";
+        const line = document.createElement("p");
+        line.textContent = entry.locked ? "Private entry" : entry.text;
+        item.appendChild(line);
+        if (entry.locked) {
+          const pass = document.createElement("input");
+          pass.type = "password";
+          pass.autocomplete = "off";
+          pass.setAttribute("aria-label", "Passcode");
+          const open = document.createElement("button");
+          open.type = "button";
+          open.className = "ghost btn";
+          open.textContent = "Open";
+          open.onclick = () => {
+            Honest.openSeal(entry.blob, pass.value).then(result => {
+              line.textContent = result.ok ? result.text : "That passcode didn't open it.";
+            });
+          };
+          item.appendChild(pass);
+          item.appendChild(open);
+        }
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "ghost btn";
+        del.textContent = "Delete";
+        del.onclick = () => {
+          if (!window.confirm("Delete this private entry?")) return;
+          Honest.saveKept(localStorage, Honest.removeKept(Honest.loadKept(localStorage), entry.id));
+          paintKept();
+        };
+        item.appendChild(del);
+        box.appendChild(item);
+      });
+    }
+    function paintHonest() {
+      const box = document.getElementById("honest");
+      if (!honestState) { box.classList.add("hidden"); return; }
+      const seen = Honest.view(honestState);
+      box.classList.remove("hidden");
+      const lines = document.getElementById("honest-lines");
+      lines.replaceChildren();
+      seen.lines.forEach(line => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        lines.appendChild(p);
+      });
+      const verses = document.getElementById("honest-scripture");
+      verses.replaceChildren();
+      (seen.scripture || []).forEach(verse => {
+        const p = document.createElement("p");
+        p.textContent = verse.ref + " — " + verse.line;
+        verses.appendChild(p);
+      });
+      document.getElementById("honest-write").classList.toggle("hidden", !seen.field);
+      document.getElementById("honest-lock").classList.toggle("hidden", !seen.passcode);
+      document.getElementById("honest-privacy").textContent = seen.privacy;
+      document.getElementById("honest-danger").textContent = seen.danger;
+      const actions = document.getElementById("honest-actions");
+      actions.replaceChildren();
+      seen.choices.forEach(choice => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = choice.id === "continue" || choice.id === "save" ? "go inline" : "ghost btn";
+        b.textContent = choice.label;
+        b.onclick = () => honestAct(choice.id);
+        actions.appendChild(b);
+      });
+      if (seen.step === "welcome" && !honestState.listening) {
+        const faith = document.createElement("button");
+        faith.type = "button";
+        faith.className = "ghost btn";
+        faith.textContent = honestState.faith ? "Faith lines on" : "Faith lines off";
+        faith.onclick = () => honestAct(honestState.faith ? "faith-off" : "faith-on");
+        actions.appendChild(faith);
+      }
+      paintKept();
+    }
+    function honestAct(action) {
+      if (!honestState || honestFading) return;
+      const text = document.getElementById("honest-text").value;
+      if (action === "save") { keepHonest(honestState.text || text); return; }
+      const next = Honest.apply(honestState, action, text);
+      if (next.fading) { fadeHonest(next); return; }
+      honestState = next;
+      if (next.step !== "write") document.getElementById("honest-text").value = "";
+      paintHonest();
+    }
+    function keepHonest(text) {
+      const pass = document.getElementById("honest-pass").value;
+      const id = "honest-" + Date.now();
+      const at = new Date().toISOString();
+      const finish = entry => {
+        try {
+          Honest.saveKept(localStorage, Honest.addKept(Honest.loadKept(localStorage), entry));
+        } catch (err) {}
+        document.getElementById("honest-text").value = "";
+        document.getElementById("honest-pass").value = "";
+        honestState = Honest.afterKeep(honestState);
+        paintHonest();
+      };
+      if (pass) {
+        Honest.seal(text, pass).then(blob => finish(Honest.lockedEntry(id, at, blob))).catch(() => {});
+        return;
+      }
+      finish(Honest.plainEntry(id, at, text));
+    }
+    function fadeHonest(next) {
+      honestFading = true;
+      const epoch = ++honestEpoch;
+      const body = document.getElementById("honest-body");
+      body.classList.add("fade");
+      window.setTimeout(() => {
+        if (epoch !== honestEpoch) return;
+        honestFading = false;
+        document.getElementById("honest-text").value = "";
+        document.getElementById("honest-pass").value = "";
+        honestState = next;
+        paintHonest();
+        body.classList.remove("fade");
+        if (next.handoff === "reach") {
+          document.getElementById("honest").classList.add("hidden");
+          openReach();
+        }
+        if (next.handoff === "rest") document.getElementById("honest").classList.add("hidden");
+      }, 800);
+    }
+    function leaveHonest() {
+      if (!honestState && document.getElementById("honest").classList.contains("hidden")) return;
+      honestEpoch += 1;
+      honestFading = false;
+      const field = document.getElementById("honest-text");
+      if (field) field.value = "";
+      const pass = document.getElementById("honest-pass");
+      if (pass) pass.value = "";
+      document.getElementById("honest-lines").replaceChildren();
+      document.getElementById("honest-scripture").replaceChildren();
+      const body = document.getElementById("honest-body");
+      body.classList.add("fade");
+      honestState = honestState ? Honest.leave(honestState) : null;
+      const epoch = honestEpoch;
+      window.setTimeout(() => {
+        if (epoch !== honestEpoch) return;
+        document.getElementById("honest").classList.add("hidden");
+        body.classList.remove("fade");
+        honestState = null;
+      }, 800);
+    }
+    function openHonest() {
+      honestEpoch += 1;
+      honestFading = false;
+      document.getElementById("reach").classList.add("hidden");
+      document.getElementById("reel").classList.add("hidden");
+      document.getElementById("afraid").classList.add("hidden");
+      document.getElementById("spiral").classList.add("hidden");
+      document.getElementById("gallery").classList.add("hidden");
+      let faith = false;
+      try { faith = localStorage.getItem("ariel-faith") === "1"; } catch (err) {}
+      honestState = Honest.start({ faith: faith, mode: graceMode() });
+      document.getElementById("honest-text").value = "";
+      document.getElementById("honest-pass").value = "";
+      document.getElementById("honest-body").classList.remove("fade");
+      paintHonest();
+    }
+    document.getElementById("honest-open").onclick = () => openHonest();
     // ===== REACH OUT / WHAT WE'VE MADE =====
     // Ryan's paths. One screen at a time. Ariel never sends a message.
     let reachState = null;
@@ -1405,6 +1609,7 @@
       }
     }
     function openReach() {
+      if (honestState) leaveHonest();
       const faith = localStorage.getItem("ariel-faith") === "1";
       reachState = Reach.start(graceMode());
       reachState.faith = faith && graceMode() !== "listen";
