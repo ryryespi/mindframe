@@ -34,6 +34,10 @@
     .rec-item button, .ghost.btn { background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:8px; min-height:32px; padding:4px 8px; }
     #rec-memory { border-color:var(--teal); }
     #rec-note { min-height:72px; }
+    #void-canvas { width:100%; height:280px; background:#090d16; border-radius:12px; touch-action:none; display:block; }
+    #void-bag { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    #void-bag span { border:1px solid var(--line); border-radius:999px; padding:2px 8px; color:var(--muted); font-size:12px; }
+    #create:not(.free) #story-panel { display:none; }
     .node { background:#090d16; border:1px solid var(--line); border-radius:10px; padding:8px; margin:6px 0; }
     .k { color:var(--teal); font-size:11px; letter-spacing:.04em; }
     canvas.chart { width:100%; height:160px; background:#090d16; border-radius:10px; }
@@ -112,10 +116,29 @@
     </section>
     <section id="create" class="card hidden">
       <p class="k">CREATE</p>
-      <h2>Make something</h2>
-      <p class="sub">Draw the idea. Art and story. It stays on this device.</p>
-      <button type="button" class="ghost btn" id="more-tools">More tools</button>
-      <div class="frame"><iframe id="ariel" title="Ariel canvas" src="../index.html?embed=1"></iframe></div>
+      <h2>Out of the Void</h2>
+      <p class="sub" id="void-how">Draw a circle for a word that is already yours, or a line for a skill. A barrier is a chance to choose. This is not a grade.</p>
+      <div class="rec-actions">
+        <button type="button" class="ghost btn" id="void-line">Line</button>
+        <button type="button" class="ghost btn" id="void-circle">Circle</button>
+        <button type="button" class="ghost btn" id="free-draw">Free draw</button>
+        <button type="button" class="ghost btn" id="more-tools">More tools</button>
+      </div>
+      <div id="void-game">
+        <canvas id="void-canvas" width="640" height="360"></canvas>
+        <p id="void-gate" class="sub">The gate is narrow.</p>
+        <p id="void-word"></p>
+        <div id="void-choices" class="rec-actions"></div>
+        <p id="void-heavy" class="hidden"></p>
+        <div id="void-bag"></div>
+        <div id="void-out" class="hidden">
+          <div id="void-lines"></div>
+          <div id="void-flood"></div>
+          <div id="void-offers" class="rec-actions"></div>
+        </div>
+        <p class="crisis">In crisis, call or text <strong>988</strong> (US). In an emergency, call <strong>911</strong>.</p>
+      </div>
+      <div class="frame hidden" id="free-canvas"><iframe id="ariel" title="Ariel canvas" src="../index.html?embed=1"></iframe></div>
       <div id="story-panel">
         <p id="story-ready" class="sub">Draw, then ask for a story. The same drawing tells the same one.</p>
         <button type="button" class="go" id="story-tell">Tell me a story</button>
@@ -290,6 +313,7 @@
   <script src="record.js"></script>
   <script src="guide.js"></script>
   <script src="story.js"></script>
+  <script src="void.js"></script>
   <script src="grace.js"></script>
   <script src="paths.js"></script>
   <script src="reach.js"></script>
@@ -300,6 +324,7 @@
     const B = window.ArielBridge;
     const G = window.ArielGuide;
     const Story = window.ArielStory;
+    const VoidGame = window.ArielVoid;
     const Grace = window.ArielGrace;
     const Paths = window.ArielPaths;
     const Reach = window.ArielReach;
@@ -1447,6 +1472,139 @@
     document.getElementById("welcome-stay").onclick = () => closeGifts("rest");
     document.getElementById("gifts-open").onclick = () => openGifts();
     if (Welcome.shouldOpen(localStorage.getItem("ariel-gifts"))) openGifts();
+    // ===== OUT OF THE VOID =====
+    // Ryan's canvas. Words from the marks. The story is the reward, not a grade.
+    const voidCanvas = document.getElementById("void-canvas");
+    const vctx = voidCanvas.getContext("2d");
+    let voidState = VoidGame.blank();
+    let voidTool = "line";
+    let voidMarks = [];
+    let voidDrag = null;
+    function paintVoid() {
+      const w = voidCanvas.width, h = voidCanvas.height;
+      vctx.clearRect(0, 0, w, h);
+      vctx.fillStyle = "#090d16";
+      vctx.fillRect(0, 0, w, h);
+      const gate = VoidGame.width(voidState);
+      vctx.strokeStyle = "rgba(45,212,191," + (0.28 + gate * 0.72) + ")";
+      vctx.lineWidth = 10 + gate * 36;
+      vctx.beginPath();
+      vctx.arc(w / 2, h / 2, Math.min(w, h) * 0.28, 0, Math.PI * 2 * Math.max(0.12, gate));
+      vctx.stroke();
+      vctx.strokeStyle = "#cbd5e1";
+      vctx.lineWidth = 2;
+      voidMarks.forEach(mark => {
+        vctx.beginPath();
+        if (mark.kind === "circle") {
+          const a = mark.points[0], b = mark.points[1];
+          vctx.arc(a.x, a.y, Math.hypot(b.x - a.x, b.y - a.y), 0, Math.PI * 2);
+        } else mark.points.forEach((p, i) => i ? vctx.lineTo(p.x, p.y) : vctx.moveTo(p.x, p.y));
+        vctx.stroke();
+      });
+      document.getElementById("void-gate").textContent = VoidGame.gateWord(gate);
+      const bag = document.getElementById("void-bag");
+      bag.replaceChildren();
+      voidState.bag.forEach(item => {
+        const chip = document.createElement("span");
+        chip.textContent = item.word;
+        bag.appendChild(chip);
+      });
+      const choices = document.getElementById("void-choices");
+      choices.replaceChildren();
+      if (voidState.pending && voidState.pending.choices) {
+        voidState.pending.choices.forEach(skill => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "ghost btn";
+          b.textContent = skill;
+          b.onclick = () => {
+            voidState = VoidGame.choose(voidState, skill).state;
+            paintVoid();
+          };
+          choices.appendChild(b);
+        });
+      }
+      const heavy = document.getElementById("void-heavy");
+      heavy.classList.toggle("hidden", !voidState.heavy);
+      heavy.textContent = voidState.heavy ? VoidGame.PARAMS.heavyLine : "";
+      const out = document.getElementById("void-out");
+      if (!voidState.open) { out.classList.add("hidden"); return; }
+      const face = VoidGame.present(voidState, graceMode());
+      out.classList.remove("hidden");
+      const lines = document.getElementById("void-lines");
+      lines.replaceChildren();
+      face.lines.forEach(line => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        lines.appendChild(p);
+      });
+      const flood = document.getElementById("void-flood");
+      flood.replaceChildren();
+      VoidGame.flood(Reach.memories(record.entries, kindness)).forEach(text => {
+        const p = document.createElement("p");
+        p.textContent = text;
+        flood.appendChild(p);
+      });
+      const offers = document.getElementById("void-offers");
+      offers.replaceChildren();
+      face.offers.forEach(label => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "ghost btn";
+        b.textContent = label;
+        b.onclick = () => {
+          if (label.indexOf("story") >= 0) tellFromBag(false);
+          else if (label === "Rest here") showTab("rest");
+          else commitRecord(Rec.add(record, { type: "note", text: "Out of the void", note: VoidGame.sentence(voidState), source: "manual", href: "#create", key: "void-out" }, new Date().toISOString()));
+        };
+        offers.appendChild(b);
+      });
+    }
+    function tellFromBag(force) {
+      const guard = Story.guard(readJSON("ariel-story-times", []), Date.now());
+      if (guard.offer && !force) {
+        const heavy = document.getElementById("void-heavy");
+        heavy.classList.remove("hidden");
+        heavy.textContent = guard.line;
+        return;
+      }
+      const result = Story.tell(VoidGame.bagMarks(voidState), { previous: readJSON("ariel-story-log", []), tone: graceMode() });
+      if (!result.show) return;
+      rememberStory(result);
+      const p = document.createElement("p");
+      p.textContent = result.text;
+      document.getElementById("void-flood").appendChild(p);
+    }
+    function voidPoint(e) {
+      const r = voidCanvas.getBoundingClientRect();
+      return {
+        x: (e.clientX - r.left) * (voidCanvas.width / Math.max(r.width, 1)),
+        y: (e.clientY - r.top) * (voidCanvas.height / Math.max(r.height, 1))
+      };
+    }
+    voidCanvas.addEventListener("pointerdown", e => { voidDrag = voidPoint(e); });
+    voidCanvas.addEventListener("pointerup", e => {
+      if (!voidDrag) return;
+      const end = voidPoint(e);
+      const start = voidDrag;
+      voidDrag = null;
+      if (Math.hypot(end.x - start.x, end.y - start.y) < 8) return;
+      const mark = { kind: voidTool === "circle" ? "circle" : "line", color: "#cbd5e1", t: voidMarks.length, points: [start, end] };
+      voidMarks.push(mark);
+      voidState = VoidGame.take(voidState, VoidGame.reveal(mark)).state;
+      graceStrokes = voidMarks.map(m => ({ points: m.points.map((p, i) => ({ x: p.x, y: p.y, t: Date.now() - i * 20 })) }));
+      considerGrace();
+      paintVoid();
+    });
+    document.getElementById("void-line").onclick = () => { voidTool = "line"; };
+    document.getElementById("void-circle").onclick = () => { voidTool = "circle"; };
+    document.getElementById("free-draw").onclick = () => {
+      const on = document.getElementById("create").classList.toggle("free");
+      document.getElementById("void-game").classList.toggle("hidden", on);
+      document.getElementById("free-canvas").classList.toggle("hidden", !on);
+      document.getElementById("free-draw").textContent = on ? "Out of the Void" : "Free draw";
+    };
+    paintVoid();
     window.addEventListener("message", (e) => {
       const d = e.data;
       if (!d || d.type !== "ariel-state") return;
