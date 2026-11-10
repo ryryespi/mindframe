@@ -24,9 +24,16 @@
     .hidden { display:none; }
     label { display:block; margin:8px 0; color:var(--muted); font-size:12px; }
     input[type=range] { width:100%; accent-color:var(--em); }
-    textarea, button.go { width:100%; }
-    textarea { background:#090d16; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:8px; min-height:140px; }
+    textarea, button.go, input[type=text], select.field { width:100%; }
+    textarea, input[type=text], select.field { background:#090d16; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:8px; }
+    textarea { min-height:140px; }
     button.go { margin-top:8px; background:var(--em); color:#fff; border:0; border-radius:10px; min-height:40px; }
+    button.go.inline { width:auto; padding:8px 14px; }
+    .rec-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .rec-day { margin:16px 0 6px; color:var(--muted); font-size:12px; }
+    .rec-item button, .ghost.btn { background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:8px; min-height:32px; padding:4px 8px; }
+    #rec-memory { border-color:var(--teal); }
+    #rec-note { min-height:72px; }
     .node { background:#090d16; border:1px solid var(--line); border-radius:10px; padding:8px; margin:6px 0; }
     .k { color:var(--teal); font-size:11px; letter-spacing:.04em; }
     canvas.chart { width:100%; height:160px; background:#090d16; border-radius:10px; }
@@ -44,13 +51,14 @@
       <div class="mark" aria-hidden="true"></div>
       <div>
         <h1>Project Ariel Suite</h1>
-        <p class="sub">One canvas, shared with the journal, the gate, and the charts. <a href="../index.html">Classic view</a> · <a href="../../research/">Research notes</a></p>
+        <p class="sub">One canvas, shared with the journal, the gate, the charts, and the record. <a href="../index.html">Classic view</a> · <a href="../../research/">Research notes</a></p>
       </div>
       <nav>
         <button type="button" class="on" data-tab="draw">Drawing</button>
         <button type="button" data-tab="journal">Journal</button>
         <button type="button" data-tab="gate">Gate</button>
         <button type="button" data-tab="charts">Analytics</button>
+        <button type="button" data-tab="record">Record</button>
       </nav>
     </div>
   </header>
@@ -72,8 +80,9 @@
     <section id="journal" class="card hidden">
       <p class="k">JOURNAL MAPPING</p>
       <h2>Nodes from the canvas</h2>
-      <textarea id="journal" placeholder="Optional note. The nodes update from the canvas layers."></textarea>
+      <textarea id="journal-text" placeholder="Optional note. The nodes update from the canvas layers."></textarea>
       <p id="words" class="sub">0 words</p>
+      <button type="button" class="go" id="journal-save">Save note</button>
       <div id="nodes"></div>
     </section>
     <section id="gate" class="card hidden">
@@ -94,8 +103,36 @@
       <canvas id="radar" class="chart"></canvas>
       <p id="feedback"></p>
     </section>
+    <section id="record" class="card hidden">
+      <p class="k">ACCOMPLISHMENT RECORD</p>
+      <h2>What you've done</h2>
+      <p class="sub">A record so you don't have to remember it all.</p>
+      <p id="rec-counts"></p>
+      <div class="rec-actions">
+        <button type="button" class="go inline" id="rec-remember">Remember</button>
+        <button type="button" class="ghost btn" id="rec-finish">Finish session</button>
+      </div>
+      <div id="rec-memory" class="node hidden"></div>
+      <label>Show
+        <select id="rec-filter" class="field" aria-label="Filter by type"></select>
+      </label>
+      <div id="rec-list"></div>
+      <h3>Add something you did</h3>
+      <input id="rec-text" type="text" aria-label="What you did" placeholder="What you did">
+      <label>Optional note
+        <textarea id="rec-note" aria-label="Optional note" placeholder="Optional note"></textarea>
+      </label>
+      <button type="button" class="go" id="rec-add">Add to the record</button>
+      <p class="sub">Saved on this device only. Kept as a list of facts.</p>
+      <div class="rec-actions">
+        <button type="button" class="ghost btn" id="rec-export">Export record</button>
+        <button type="button" class="ghost btn" id="rec-import">Import record</button>
+        <input id="rec-file" type="file" accept="application/json,.json" hidden>
+      </div>
+    </section>
   </main>
   <script src="bridge.js"></script>
+  <script src="record.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
@@ -104,12 +141,14 @@
     const hist = [];
     document.querySelectorAll("nav button").forEach(btn => btn.onclick = () => {
       document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b === btn));
-      ["draw", "journal", "gate", "charts"].forEach(id => document.getElementById(id).classList.toggle("hidden", id !== btn.dataset.tab));
+      ["draw", "journal", "gate", "charts", "record"].forEach(id => document.getElementById(id).classList.toggle("hidden", id !== btn.dataset.tab));
       if (btn.dataset.tab === "charts") paintCharts();
       if (btn.dataset.tab === "gate") paintEngine();
+      if (btn.dataset.tab === "record") renderRecord();
     });
-    document.getElementById("journal").oninput = () => {
-      const n = document.getElementById("journal").value.trim().split(/\s+/).filter(Boolean).length;
+    const journalText = document.getElementById("journal-text");
+    journalText.oninput = () => {
+      const n = journalText.value.trim().split(/\s+/).filter(Boolean).length;
       document.getElementById("words").textContent = n + " words";
     };
     function apply(read, fromCanvas) {
@@ -161,11 +200,213 @@
         ? last.nodes.length + " nodes from the canvas. Gate g is " + last.g.toFixed(3) + "."
         : "The canvas has not reported yet.";
     };
+    // ===== RECORD =====
+    // A factual log of what happened, kept on this device. Not a score.
+    const Rec = window.ArielRecord;
+    let record = Rec.load(localStorage);
+    let canvasSnap = null;
+    let sessionDirty = false;
+    let sessionClosed = false;
+    function commitRecord(next) {
+      record = next;
+      try { Rec.save(localStorage, record); } catch (err) {}
+      sessionDirty = true;
+      if (!document.getElementById("record").classList.contains("hidden")) renderRecord();
+    }
+    function showTab(id) {
+      const btn = document.querySelector('nav button[data-tab="' + id + '"]');
+      if (btn) btn.click();
+    }
+    function fillFilter() {
+      const sel = document.getElementById("rec-filter");
+      if (sel.options.length) return;
+      const all = document.createElement("option");
+      all.value = "all"; all.textContent = "Everything";
+      sel.appendChild(all);
+      Object.keys(Rec.TYPES).forEach(k => {
+        const o = document.createElement("option");
+        o.value = k; o.textContent = Rec.TYPES[k];
+        sel.appendChild(o);
+      });
+    }
+    function renderRecord() {
+      fillFilter();
+      document.getElementById("rec-counts").textContent = Rec.summary(record);
+      const groups = Rec.groupByDay(Rec.filter(record, document.getElementById("rec-filter").value));
+      const list = document.getElementById("rec-list");
+      list.innerHTML = "";
+      if (!groups.length) {
+        const p = document.createElement("p");
+        p.className = "sub";
+        p.textContent = record.entries.length ? "Nothing of that kind yet." : "Nothing is written down yet.";
+        list.appendChild(p);
+        return;
+      }
+      groups.forEach(day => {
+        const h = document.createElement("p");
+        h.className = "rec-day";
+        h.textContent = day.label;
+        list.appendChild(h);
+        day.entries.forEach(entry => {
+          const item = document.createElement("article");
+          item.className = "node rec-item";
+          const kind = document.createElement("div");
+          kind.className = "k";
+          kind.textContent = Rec.TYPES[entry.type] || entry.type;
+          const title = document.createElement("b");
+          title.textContent = entry.text;
+          const time = document.createElement("div");
+          time.className = "sub";
+          time.textContent = Rec.when(entry.at);
+          item.appendChild(kind);
+          item.appendChild(title);
+          item.appendChild(time);
+          if (entry.note) {
+            const note = document.createElement("p");
+            note.textContent = entry.note;
+            item.appendChild(note);
+          }
+          const row = document.createElement("div");
+          row.className = "rec-actions";
+          if (entry.href === "#journal" || entry.href === "#draw") {
+            const open = document.createElement("button");
+            open.type = "button";
+            open.textContent = "Open";
+            open.onclick = () => showTab(entry.href.slice(1));
+            row.appendChild(open);
+          }
+          const editBtn = document.createElement("button");
+          editBtn.type = "button";
+          editBtn.textContent = "Edit";
+          editBtn.onclick = () => startEdit(item, entry);
+          const del = document.createElement("button");
+          del.type = "button";
+          del.textContent = "Delete";
+          del.onclick = () => {
+            if (!window.confirm("Delete this entry?")) return;
+            commitRecord(Rec.remove(record, entry.id));
+            renderRecord();
+          };
+          row.appendChild(editBtn);
+          row.appendChild(del);
+          item.appendChild(row);
+          list.appendChild(item);
+        });
+      });
+    }
+    function startEdit(item, entry) {
+      const text = document.createElement("input");
+      text.type = "text";
+      text.value = entry.text;
+      text.setAttribute("aria-label", "Entry text");
+      const note = document.createElement("textarea");
+      note.value = entry.note || "";
+      note.setAttribute("aria-label", "Entry note");
+      const save = document.createElement("button");
+      save.type = "button"; save.className = "go inline"; save.textContent = "Save";
+      const cancel = document.createElement("button");
+      cancel.type = "button"; cancel.textContent = "Cancel";
+      save.onclick = () => {
+        commitRecord(Rec.edit(record, entry.id, { text: text.value, note: note.value }));
+        renderRecord();
+      };
+      cancel.onclick = () => renderRecord();
+      const row = document.createElement("div");
+      row.className = "rec-actions";
+      row.appendChild(save);
+      row.appendChild(cancel);
+      item.appendChild(text);
+      item.appendChild(note);
+      item.appendChild(row);
+    }
+    function finishSession() {
+      if (sessionClosed) return;
+      sessionClosed = true;
+      commitRecord(Rec.add(record, { type: "session", text: "Finished a session", source: "auto" }, new Date().toISOString()));
+      renderRecord();
+    }
+    function canvasState(d) {
+      return {
+        layers: d.layers || [],
+        collapsed: !!d.collapsed,
+        collapseText: d.collapseText || "",
+        events: d.events || []
+      };
+    }
+    document.getElementById("journal-save").onclick = () => {
+      const item = Rec.journalEntry(journalText.value, new Date().toISOString());
+      if (!item) return;
+      commitRecord(Rec.add(record, item, item.at));
+      journalText.value = "";
+      document.getElementById("words").textContent = "0 words";
+      showTab("record");
+    };
+    document.getElementById("rec-filter").onchange = () => renderRecord();
+    document.getElementById("rec-add").onclick = () => {
+      const text = document.getElementById("rec-text");
+      const note = document.getElementById("rec-note");
+      const next = Rec.add(record, { type: "note", text: text.value, note: note.value, source: "manual" }, new Date().toISOString());
+      if (next.entries.length === record.entries.length) return;
+      text.value = "";
+      note.value = "";
+      commitRecord(next);
+      renderRecord();
+    };
+    document.getElementById("rec-remember").onclick = () => {
+      const hit = Rec.remember(record);
+      const box = document.getElementById("rec-memory");
+      box.classList.remove("hidden");
+      box.replaceChildren();
+      if (!hit) { box.textContent = "Nothing is written down yet."; return; }
+      const kind = document.createElement("div");
+      kind.className = "k";
+      kind.textContent = Rec.TYPES[hit.type] || hit.type;
+      const title = document.createElement("b");
+      title.textContent = hit.text;
+      const time = document.createElement("div");
+      time.className = "sub";
+      time.textContent = Rec.when(hit.at);
+      box.appendChild(kind);
+      box.appendChild(title);
+      if (hit.note) {
+        const p = document.createElement("p");
+        p.textContent = hit.note;
+        box.appendChild(p);
+      }
+      box.appendChild(time);
+    };
+    document.getElementById("rec-finish").onclick = () => finishSession();
+    document.getElementById("rec-export").onclick = () => {
+      const blob = new Blob([Rec.toJSON(record)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "ariel-record.json";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    };
+    document.getElementById("rec-import").onclick = () => document.getElementById("rec-file").click();
+    document.getElementById("rec-file").onchange = () => {
+      const file = document.getElementById("rec-file").files[0];
+      if (!file) return;
+      file.text().then(raw => {
+        const merged = Rec.mergeImport(record, raw);
+        if (!merged.ok) return;
+        commitRecord(merged.record);
+        renderRecord();
+      });
+    };
+    window.addEventListener("pagehide", () => { if (sessionDirty) finishSession(); });
     window.addEventListener("message", (e) => {
       const d = e.data;
       if (!d || d.type !== "ariel-state") return;
       const shapes = d.shapes || 0;
       document.getElementById("density").textContent = shapes + " marks · " + (d.doubts || 0) + " doubt circles · ρ " + (d.doubtRho || 0).toFixed(2);
+      const snap = canvasState(d);
+      if (canvasSnap) {
+        const next = Rec.ingest(record, canvasSnap, snap, new Date().toISOString());
+        if (JSON.stringify(next) !== JSON.stringify(record)) commitRecord(next);
+      }
+      canvasSnap = snap;
       apply(B.fromAriel(d), true);
     });
     function paintEngine() {

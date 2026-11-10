@@ -148,6 +148,7 @@
     localStorage.setItem("ariel-terms", JSON.stringify(all));
   }
   let collapsed = false;
+  let collapseRead = "";
   function note(msg) { echo.textContent = msg; }
 
   function snap() {
@@ -360,7 +361,7 @@
   function showCollapse() {
     const btn = document.querySelector('#ribbon button[data-cad="collapse"]');
     if (btn) { btn.textContent = collapsed ? "Expand" : "Collapse"; btn.classList.toggle("primary", true); }
-    if (!collapsed) { cmp.classList.remove("on"); return null; }
+    if (!collapsed) { cmp.classList.remove("on"); collapseRead = ""; return null; }
     const map = gatherMap();
     const line = map ? CAD.collapseToLine(map) : null;
     const rows = CAD.compareLayerLines(layerAxes());
@@ -380,6 +381,7 @@
       cmp.appendChild(p);
     });
     cmp.classList.add("on");
+    collapseRead = (line && line.ok) ? line.text : "";
     return line;
   }
   function toggleCollapse() {
@@ -900,6 +902,8 @@
       doubtRho: rho,
       doubts, shapes,
       bridge: Math.max(0, Math.min(1, span)),
+      collapsed: !!collapsed,
+      collapseText: collapseRead,
       layers: layers.map(L => ({ name: L.name || "", role: L.role || "", domain: L.domain || "custom", dots: (L.dots || []).length, lines: (L.lines || []).length, circles: (L.circles || []).length, doubts: (L.circles || []).filter(c => c.doubt).length, ink: (L.ink || []).length })),
       signal: sig ? { p: sig.p, sAtO: sig.hist.length ? sig.hist[sig.hist.length - 1] : 0 } : null
     }, "*");
