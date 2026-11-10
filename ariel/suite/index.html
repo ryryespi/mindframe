@@ -44,6 +44,7 @@
     a { color:var(--teal); }
     body:not(.advanced) .advanced-only { display:none; }
     .crisis { margin:14px 0 0; padding:8px 10px; border:1px solid var(--line); border-radius:10px; color:var(--muted); }
+    .shows { margin-top:8px; }
     #honest-body { transition: opacity 0.8s ease; }
     #honest-body.fade { opacity: 0; }
     #enough { margin:0 0 12px; }
@@ -130,6 +131,7 @@
       <div id="void-game">
         <canvas id="void-canvas" width="640" height="360"></canvas>
         <p id="void-gate" class="sub">The gate is narrow.</p>
+        <div id="void-shows" class="shows"></div>
         <p id="void-word"></p>
         <div id="void-choices" class="rec-actions"></div>
         <p id="void-heavy" class="hidden"></p>
@@ -307,13 +309,15 @@
       <p>Gate g <b id="eng-g">–</b> · Transfer y <b id="eng-y">–</b></p>
       <button type="button" class="go" id="follow">Follow the canvas</button>
       <div class="frame" style="min-height:180px"><canvas id="engine" class="chart"></canvas></div>
+      <div id="engine-shows" class="shows"></div>
     </section>
     <section id="charts" class="card hidden">
       <p class="k">ANALYTICS</p>
       <h2>Live values, kept on this device</h2>
       <canvas id="curves" class="chart"></canvas>
+      <div id="curves-shows" class="shows"></div>
       <canvas id="radar" class="chart"></canvas>
-      <p id="feedback"></p>
+      <div id="radar-shows" class="shows"></div>
     </section>
     <section id="record" class="card hidden">
       <p class="k">ACCOMPLISHMENT RECORD</p>
@@ -360,6 +364,7 @@
   <script src="welcome.js"></script>
   <script src="sketch.js"></script>
   <script src="honest.js"></script>
+  <script src="feedback.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
@@ -373,8 +378,15 @@
     const Welcome = window.ArielWelcome;
     const Sketch = window.ArielSketch;
     const Honest = window.ArielHonest;
+    const Shows = window.ArielFeedback;
     let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
+    let zoneLog = [];
+    try {
+      const saved = JSON.parse(localStorage.getItem("ariel-suite") || "[]");
+      if (Array.isArray(saved)) saved.forEach(row => { if (row && typeof row.v === "number") hist.push(row); });
+      zoneLog = JSON.parse(localStorage.getItem("ariel-zones") || "[]") || [];
+    } catch (err) {}
     const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
     function setAdvanced(on) {
       document.body.classList.toggle("advanced", !!on);
@@ -407,7 +419,10 @@
     };
     function apply(read, fromCanvas) {
       last = read;
-      hist.push({ v: read.v, r: read.r, g: read.g, y: read.yOut });
+      hist.push({
+        v: read.v, r: read.r, g: read.g, y: read.yOut, day: graphDay(),
+        w: typeof voidState !== "undefined" && voidState ? VoidGame.width(voidState) : read.g
+      });
       if (hist.length > 40) hist.shift();
       document.getElementById("da-v").textContent = read.v.toFixed(2);
       document.getElementById("da-r").textContent = read.r.toFixed(2);
@@ -426,7 +441,7 @@
       document.getElementById("eng-g").textContent = g.toFixed(3);
       document.getElementById("eng-y").textContent = yOut.toFixed(3);
       const frame = document.getElementById("ariel");
-      if (frame.contentWindow) frame.contentWindow.postMessage({ type: "ariel-gate", g }, "*");
+      if (frame.contentWindow) frame.contentWindow.postMessage({ type: "ariel-gate", g: g, listen: graceMode() === "listen" }, "*");
       const box = document.getElementById("nodes");
       box.innerHTML = "";
       read.nodes.forEach(n => {
@@ -439,10 +454,8 @@
       paintStoryGate();
       if (learnReady && !document.getElementById("learn").classList.contains("hidden") && G.tone(read.v) !== learnTone) paintLearn();
       if (!document.getElementById("rest").classList.contains("hidden")) paintRest();
-      document.getElementById("feedback").textContent = read.v > 0.6
-        ? "Threat is high because doubt is up. The gate narrows transfer along I→O. One small move on the canvas lowers ρ."
-        : "Control is holding. The gate is open enough for transfer along I→O.";
-      try { localStorage.setItem("ariel-suite", JSON.stringify(hist.slice(-20))); } catch (e) {}
+      try { localStorage.setItem("ariel-suite", JSON.stringify(hist.slice(-40))); } catch (e) {}
+      refreshShows();
     }
     function fromSliders() {
       const v = +document.getElementById("slider-v").value;
@@ -1743,6 +1756,7 @@
         vctx.stroke();
       });
       document.getElementById("void-gate").textContent = VoidGame.gateWord(gate);
+      refreshShows();
       const bag = document.getElementById("void-bag");
       bag.replaceChildren();
       voidState.bag.forEach(item => {
@@ -1951,7 +1965,9 @@
     paintVoid();
     window.addEventListener("message", (e) => {
       const d = e.data;
-      if (!d || d.type !== "ariel-state") return;
+      if (!d) return;
+      if (d.type === "ariel-show") { openShown(d.action); return; }
+      if (d.type !== "ariel-state") return;
       if (Array.isArray(d.marks)) storyMarks = d.marks;
       graceStrokes = Array.isArray(d.trace) && d.trace.length > 1 ? [{ color: "#7a9cc6", points: d.trace }] : storyMarks;
       considerGrace();
@@ -1989,6 +2005,7 @@
         }
         g.stroke();
       });
+      refreshShows();
     }
     function paintCharts() {
       const line = (id, keys, colors) => {
@@ -2006,6 +2023,135 @@
       };
       line("curves", ["v", "r", "g"], ["#f43f5e", "#10b981", "#2dd4bf"]);
       line("radar", ["y"], ["#f59e0b"]);
+      refreshShows();
+    }
+    function graphDay(at) {
+      const d = at ? new Date(at) : new Date();
+      if (Number.isNaN(d.getTime())) return "";
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const date = String(d.getDate()).padStart(2, "0");
+      return d.getFullYear() + "-" + month + "-" + date;
+    }
+    function noteZone(zone) {
+      const day = graphDay();
+      const last = zoneLog[zoneLog.length - 1];
+      if (!last || last.day !== day) zoneLog.push({ day: day, zone: zone });
+      else last.zone = zone;
+      if (zoneLog.length > 21) zoneLog = zoneLog.slice(-21);
+      try { localStorage.setItem("ariel-zones", JSON.stringify(zoneLog)); } catch (err) {}
+    }
+    function showFactors() {
+      const row = hist[hist.length - 1] || {};
+      const v = row.v == null ? 0.35 : row.v;
+      const r = row.r == null ? 0.75 : row.r;
+      const journal = journalText ? journalText.value : "";
+      const raw = String(journal || "").toLowerCase();
+      const guilt = String(journal || "").trim()
+        ? (["guilt", "guilty", "ashamed", "i am bad", "i'm bad"].some(word => raw.indexOf(word) >= 0) ? 0.8 : 0.1)
+        : null;
+      return {
+        rest: Math.max(0, Math.min(1, (1 - v) * 0.5 + r * 0.5)),
+        kindness: (kindness || []).length,
+        rumination: voidState && voidState.heavy ? 0.75 : (voidState && voidState.barrierRun >= 2 ? 0.55 : 0.15),
+        guilt: guilt
+      };
+    }
+    function paintShows(id, card) {
+      const box = document.getElementById(id);
+      if (!box || !card) return;
+      box.replaceChildren();
+      const k = document.createElement("p");
+      k.className = "k";
+      k.textContent = "WHAT THIS SHOWS";
+      box.appendChild(k);
+      card.lines.forEach(line => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        box.appendChild(p);
+      });
+      if (card.suggestion) {
+        const p = document.createElement("p");
+        p.textContent = card.suggestion;
+        box.appendChild(p);
+      }
+      if (card.action) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "ghost btn";
+        b.textContent = card.label;
+        b.onclick = () => openShown(card.action);
+        box.appendChild(b);
+      }
+      const guide = document.createElement("p");
+      guide.className = "sub";
+      guide.textContent = card.guide;
+      box.appendChild(guide);
+      if (card.crisis) {
+        const c = document.createElement("p");
+        c.className = "crisis";
+        c.textContent = card.crisisLine;
+        box.appendChild(c);
+      }
+    }
+    function pointsOf(key) {
+      return hist.map(row => ({ value: Number(row[key]) || 0, day: row.day || "" }));
+    }
+    function refreshShows() {
+      if (!Shows) return;
+      const factors = showFactors();
+      const width = voidState ? VoidGame.width(voidState) : (hist.length ? hist[hist.length - 1].g : 0.5);
+      const valence = Shows.fromWidth(width, { rumination: factors.rumination, isolation: 0 });
+      const prevRow = hist.length > 1 ? hist[hist.length - 2] : null;
+      const prev = prevRow ? Shows.fromWidth(prevRow.w == null ? prevRow.g : prevRow.w, { rumination: factors.rumination, isolation: 0 }) : null;
+      noteZone(valence.zone);
+      const shared = {
+        listening: graceMode() === "listen",
+        factors: factors,
+        valence: valence,
+        valencePrev: prev,
+        zones: zoneLog.map(item => item.zone)
+      };
+      paintShows("engine-shows", Shows.chart(Object.assign({
+        series: [
+          { id: "v", name: "Threat", higherIsBetter: false, points: pointsOf("v") },
+          { id: "g", name: "The gate", higherIsBetter: true, points: pointsOf("g") },
+          { id: "y", name: "Transfer", higherIsBetter: true, points: pointsOf("y") }
+        ]
+      }, shared)));
+      paintShows("curves-shows", Shows.chart(Object.assign({
+        series: [
+          { id: "v", name: "Threat", higherIsBetter: false, points: pointsOf("v") },
+          { id: "r", name: "Control", higherIsBetter: true, points: pointsOf("r") },
+          { id: "g", name: "The gate", higherIsBetter: true, points: pointsOf("g") }
+        ]
+      }, shared)));
+      paintShows("radar-shows", Shows.chart(Object.assign({
+        series: [{ id: "y", name: "Transfer", higherIsBetter: true, points: pointsOf("y") }]
+      }, shared)));
+      const widths = hist.filter(row => row.w != null).map(row => ({ value: row.w, day: row.day || "" }));
+      if (!widths.length) widths.push({ value: width, day: graphDay() });
+      paintShows("void-shows", Shows.chart(Object.assign({
+        series: [{ id: "w", name: "The gate", higherIsBetter: true, points: widths }]
+      }, shared)));
+    }
+    function openShown(action) {
+      if (action === "spiral") {
+        spiralDismissed = false;
+        spiralState = Paths.spiral({ text: "I feel isolated", change: false, drop: false, mode: graceMode() });
+        spiralIndex = 0;
+        paintSpiral();
+        return;
+      }
+      if (action === "reach") { openReach(); return; }
+      if (action === "afraid") { openAfraid(); return; }
+      if (action === "rest") { showTab("rest"); return; }
+      if (action === "kindness") {
+        showTab("record");
+        const field = document.getElementById("kind-text");
+        if (field) field.focus();
+        return;
+      }
+      if (action === "honest") openHonest();
     }
     paintEngine();
   </script>

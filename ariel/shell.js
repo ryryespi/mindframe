@@ -829,7 +829,7 @@
     g.clearRect(0, 0, w, h);
     g.strokeStyle = "#c79a7a"; g.lineWidth = 2;
     const hist = sig.hist;
-    if (hist.length < 2) return;
+    if (hist.length < 2) { paintSignalShows(hist); return; }
     g.beginPath();
     hist.forEach((v, i) => {
       const x = i / (hist.length - 1) * w;
@@ -837,6 +837,38 @@
       i ? g.lineTo(x, y) : g.moveTo(x, y);
     });
     g.stroke();
+    paintSignalShows(hist);
+  }
+  function paintSignalShows(hist) {
+    const box = document.getElementById("sig-shows");
+    const Shows = window.ArielFeedback;
+    if (!box || !Shows) return;
+    const card = Shows.chart({
+      listening: !!window.__arielListen,
+      series: [{ id: "signal", name: "The signal at O", higherIsBetter: true, deadband: 0.15, sharpDrop: 0.8, points: hist || [] }]
+    });
+    box.replaceChildren();
+    const k = document.createElement("p");
+    k.textContent = card.title;
+    box.appendChild(k);
+    card.lines.forEach(line => {
+      const p = document.createElement("p");
+      p.textContent = line;
+      box.appendChild(p);
+    });
+    const note = document.createElement("p");
+    note.textContent = card.guide;
+    box.appendChild(note);
+    if (card.suggestion) {
+      const p = document.createElement("p");
+      p.textContent = card.suggestion;
+      box.appendChild(p);
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = card.label;
+      b.onclick = () => { if (window.parent) window.parent.postMessage({ type: "ariel-show", action: card.action }, "*"); };
+      box.appendChild(b);
+    }
   }
   function paintSignalRead() {
     if (!sig || !sigOpt) return;
@@ -891,7 +923,7 @@
       + "<label>ρ doubt <input id='sig-r' type='range' min='0' max='1.5' step='0.01'></label>"
       + "<label>u your level <input id='sig-u' type='range' min='0' max='1' step='0.01'></label>"
       + "<p><button type='button' id='sig-play'>Play</button> <button type='button' id='sig-pause'>Pause</button> <button type='button' id='sig-reset'>Reset</button></p>"
-      + "<canvas id='sig-plot'></canvas><p id='sig-vals'></p>"
+      + "<canvas id='sig-plot'></canvas><div id='sig-shows'></div><p id='sig-vals'></p>"
       + "<p>Kᵢ gain on the integral. α weight on your level u. Ψ goal peak at O. I integral of e, clamped. β gain on v·n̂, the tracer speed along I→O. γ diffusion of S. ρ doubt weight. χ_doubt is 1 inside a doubt circle.</p>";
     document.body.appendChild(panel);
     document.getElementById("sig-eq").textContent = Sig.EQ;
@@ -966,6 +998,7 @@
     if (d.type === "ariel-simplify") { graceSimple = !!d.on; return; }
     if (d.type !== "ariel-gate" || typeof d.g !== "number") return;
     window.__arielGate = Math.max(0, Math.min(1, d.g));
+    window.__arielListen = !!d.listen;
   });
   if (location.hash.includes("collapse")) toggleCollapse();
   if (location.hash.includes("signal")) { toggleSignal(); for (let i = 0; i < 14; i++) stepSignal(); }
