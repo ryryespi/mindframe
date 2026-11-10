@@ -17,6 +17,7 @@
 // story     a story kept from the canvas
 // courage   a reach-out the user chose to keep
 // gift      a welcome gift the user chose to receive
+// sketch    a drawing kept with a thought and its words
 "use strict";
 (function (root, factory) {
   const api = factory();
@@ -38,7 +39,8 @@
     explore: "Explore",
     story: "Story",
     courage: "Courage",
-    gift: "Gift"
+    gift: "Gift",
+    sketch: "Sketches"
   };
 
   function blank() { return { entries: [] }; }
@@ -73,6 +75,8 @@
       key
     };
     if (src.thumb && String(src.thumb).indexOf("data:image/") === 0) entry.thumb = String(src.thumb);
+    if (Array.isArray(src.words) && src.words.length) entry.words = src.words.map(String);
+    if (src.imageId) entry.imageId = String(src.imageId);
     return { entries: entries.concat([entry]) };
   }
 
@@ -85,6 +89,8 @@
       const note = p.note != null ? String(p.note).trim() : e.note;
       const next = { id: e.id, at: e.at, type: e.type, text, note, href: e.href, source: e.source, key: e.key, edited: true };
       if (e.thumb) next.thumb = e.thumb;
+      if (e.words && e.words.length) next.words = e.words.slice();
+      if (e.imageId) next.imageId = e.imageId;
       return next;
     });
     return { entries };
@@ -334,7 +340,9 @@
           source: e.source === "auto" ? "auto" : "manual",
           key: String(e.key || ""),
           edited: !!e.edited,
-          thumb: typeof e.thumb === "string" && e.thumb.indexOf("data:image/") === 0 ? e.thumb : ""
+          thumb: typeof e.thumb === "string" && e.thumb.indexOf("data:image/") === 0 ? e.thumb : "",
+          words: Array.isArray(e.words) ? e.words.map(String) : [],
+          imageId: e.imageId ? String(e.imageId) : ""
         }))
       };
     } catch (e) {
@@ -371,7 +379,9 @@
         source: e.source === "auto" ? "auto" : "manual",
         key: String(e.key || ""),
         edited: !!e.edited,
-        thumb: typeof e.thumb === "string" && e.thumb.indexOf("data:image/") === 0 ? e.thumb : ""
+        thumb: typeof e.thumb === "string" && e.thumb.indexOf("data:image/") === 0 ? e.thumb : "",
+        words: Array.isArray(e.words) ? e.words.map(String) : [],
+        imageId: e.imageId ? String(e.imageId) : ""
       });
     });
     return { ok: true, record: { entries } };

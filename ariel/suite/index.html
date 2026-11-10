@@ -122,6 +122,7 @@
         <button type="button" class="ghost btn" id="void-line">Line</button>
         <button type="button" class="ghost btn" id="void-circle">Circle</button>
         <button type="button" class="ghost btn" id="free-draw">Free draw</button>
+        <button type="button" class="ghost btn" id="save-sketch">Save sketch</button>
         <button type="button" class="ghost btn" id="more-tools">More tools</button>
       </div>
       <div id="void-game">
@@ -137,6 +138,12 @@
           <div id="void-offers" class="rec-actions"></div>
         </div>
         <p class="crisis">In crisis, call or text <strong>988</strong> (US). In an emergency, call <strong>911</strong>.</p>
+      </div>
+      <div id="sketch-box" class="hidden">
+        <label>An inner thought, if you want one
+          <textarea id="sketch-thought" placeholder="Optional. It stays on this device."></textarea>
+        </label>
+        <button type="button" class="go" id="sketch-keep">Save</button>
       </div>
       <div class="frame hidden" id="free-canvas"><iframe id="ariel" title="Ariel canvas" src="../index.html?embed=1"></iframe></div>
       <div id="story-panel">
@@ -247,12 +254,24 @@
         <input id="reach-slider" type="range" min="0" max="2" step="1" value="1" aria-label="Courage size">
       </p>
     </section>
+    <section id="gallery" class="card hidden">
+      <p class="k">GALLERY</p>
+      <img id="gallery-img" alt="" width="320">
+      <p id="gallery-thought"></p>
+      <p id="gallery-reframe" class="hidden"></p>
+      <p id="gallery-words" class="sub"></p>
+      <div class="rec-actions">
+        <button type="button" class="go inline" id="gallery-next">Next</button>
+        <button type="button" class="ghost btn" id="gallery-close">Close</button>
+      </div>
+    </section>
     <section id="reel" class="card hidden">
       <p class="k">WHAT WE'VE MADE</p>
       <div id="reel-body"></div>
       <div class="rec-actions">
         <button type="button" class="go inline" id="reel-next">Next</button>
         <button type="button" class="ghost btn" id="reel-not">Not now</button>
+        <button type="button" class="ghost btn" id="reel-art">Show me my art</button>
       </div>
     </section>
     <section id="gate" class="card hidden">
@@ -290,6 +309,7 @@
         <select id="rec-filter" class="field" aria-label="Filter by type"></select>
       </label>
       <div id="rec-list"></div>
+      <button type="button" class="ghost btn" id="make-gallery">Make a gallery</button>
       <h3>Add something you did</h3>
       <input id="rec-text" type="text" aria-label="What you did" placeholder="What you did">
       <label>Optional note
@@ -318,6 +338,7 @@
   <script src="paths.js"></script>
   <script src="reach.js"></script>
   <script src="welcome.js"></script>
+  <script src="sketch.js"></script>
   <script>
     // Suite shell. The iframe is the Ariel canvas. Messages stay on this origin.
     "use strict";
@@ -329,6 +350,7 @@
     const Paths = window.ArielPaths;
     const Reach = window.ArielReach;
     const Welcome = window.ArielWelcome;
+    const Sketch = window.ArielSketch;
     let follow = true, last = null, moreTools = false, realityOpen = false, wonderDismissedKey = "";
     const hist = [];
     const TABS = ["discover", "create", "learn", "rest", "record", "gate", "charts"];
@@ -728,10 +750,16 @@
           item.appendChild(kind);
           item.appendChild(title);
           item.appendChild(time);
-          if (entry.note) {
+          if (entry.note && entry.type !== "sketch") {
             const note = document.createElement("p");
             note.textContent = entry.note;
             item.appendChild(note);
+          }
+          if (entry.words && entry.words.length) {
+            const words = document.createElement("p");
+            words.className = "sub";
+            words.textContent = entry.words.join(" · ");
+            item.appendChild(words);
           }
           if (entry.thumb && String(entry.thumb).indexOf("data:image/") === 0) {
             const img = document.createElement("img");
@@ -743,7 +771,13 @@
           }
           const row = document.createElement("div");
           row.className = "rec-actions";
-          if (entry.href === "#journal" || entry.href === "#draw" || entry.href === "#create") {
+          if (entry.type === "sketch") {
+            const openSketch = document.createElement("button");
+            openSketch.type = "button";
+            openSketch.textContent = "Open";
+            openSketch.onclick = () => openGallery(entry.id);
+            row.appendChild(openSketch);
+          } else if (entry.href === "#journal" || entry.href === "#draw" || entry.href === "#create") {
             const open = document.createElement("button");
             open.type = "button";
             open.textContent = "Open";
@@ -759,6 +793,7 @@
           del.textContent = "Delete";
           del.onclick = () => {
             if (!window.confirm("Delete this entry?")) return;
+            if (entry.imageId) sketchStore.remove(entry.imageId);
             commitRecord(Rec.remove(record, entry.id));
             renderRecord();
           };
@@ -775,14 +810,15 @@
       text.value = entry.text;
       text.setAttribute("aria-label", "Entry text");
       const note = document.createElement("textarea");
-      note.value = entry.note || "";
-      note.setAttribute("aria-label", "Entry note");
+      note.value = entry.type === "sketch" ? (entry.note || "") : (entry.note || "");
+      note.setAttribute("aria-label", entry.type === "sketch" ? "Thought" : "Entry note");
       const save = document.createElement("button");
       save.type = "button"; save.className = "go inline"; save.textContent = "Save";
       const cancel = document.createElement("button");
       cancel.type = "button"; cancel.textContent = "Cancel";
       save.onclick = () => {
-        commitRecord(Rec.edit(record, entry.id, { text: text.value, note: note.value }));
+        const patch = entry.type === "sketch" ? Sketch.editThought(entry, note.value) : { text: text.value, note: note.value };
+        commitRecord(Rec.edit(record, entry.id, patch));
         renderRecord();
       };
       cancel.onclick = () => renderRecord();
@@ -790,7 +826,7 @@
       row.className = "rec-actions";
       row.appendChild(save);
       row.appendChild(cancel);
-      item.appendChild(text);
+      if (entry.type !== "sketch") item.appendChild(text);
       item.appendChild(note);
       item.appendChild(row);
     }
@@ -1598,6 +1634,109 @@
     });
     document.getElementById("void-line").onclick = () => { voidTool = "line"; };
     document.getElementById("void-circle").onclick = () => { voidTool = "circle"; };
+    const sketchStore = {
+      open() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open("ariel-sketches", 1);
+          req.onupgradeneeded = () => {
+            if (!req.result.objectStoreNames.contains("images")) req.result.createObjectStore("images");
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      },
+      put(id, data) {
+        return this.open().then(db => new Promise((resolve, reject) => {
+          const tx = db.transaction("images", "readwrite");
+          tx.objectStore("images").put(data, id);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        }));
+      },
+      get(id) {
+        return this.open().then(db => new Promise((resolve) => {
+          const tx = db.transaction("images", "readonly");
+          const req = tx.objectStore("images").get(id);
+          req.onsuccess = () => resolve(req.result || "");
+          req.onerror = () => resolve("");
+        }));
+      },
+      remove(id) {
+        return this.open().then(db => new Promise((resolve) => {
+          const tx = db.transaction("images", "readwrite");
+          tx.objectStore("images").delete(id);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => resolve();
+        })).catch(() => {});
+      }
+    };
+    let galleryFrames = [];
+    let galleryAt = 0;
+    function sketchSource() {
+      if (!document.getElementById("void-game").classList.contains("hidden")) return voidCanvas;
+      const frame = document.getElementById("ariel");
+      try { return frame && frame.contentDocument ? frame.contentDocument.querySelector("canvas") : null; }
+      catch (err) { return null; }
+    }
+    function captureSketch(source) {
+      if (!source) return "";
+      const size = Sketch.fit(source.width, source.height);
+      const copy = document.createElement("canvas");
+      copy.width = size.width;
+      copy.height = size.height;
+      copy.getContext("2d").drawImage(source, 0, 0, size.width, size.height);
+      return copy.toDataURL("image/png");
+    }
+    function showGalleryFrame() {
+      const frame = galleryFrames[galleryAt];
+      const box = document.getElementById("gallery");
+      if (!frame) { box.classList.add("hidden"); return; }
+      box.classList.remove("hidden");
+      document.getElementById("gallery-thought").textContent = frame.thought || frame.title || "";
+      const reframe = document.getElementById("gallery-reframe");
+      reframe.textContent = frame.reframe || "";
+      reframe.classList.toggle("hidden", !frame.reframe);
+      document.getElementById("gallery-words").textContent = (frame.words || []).join(" · ");
+      const img = document.getElementById("gallery-img");
+      const entry = record.entries.filter(item => item.id === frame.id)[0];
+      img.src = entry && entry.thumb ? entry.thumb : "";
+      if (entry && entry.imageId) sketchStore.get(entry.imageId).then(data => { if (data) img.src = data; });
+      document.getElementById("gallery-next").classList.toggle("hidden", galleryAt >= galleryFrames.length - 1);
+    }
+    function openGallery(id) {
+      galleryFrames = Sketch.frames(record.entries);
+      galleryAt = Math.max(0, galleryFrames.findIndex(frame => frame.id === id));
+      showGalleryFrame();
+    }
+    document.getElementById("make-gallery").onclick = () => openGallery();
+    document.getElementById("gallery-next").onclick = () => { galleryAt += 1; showGalleryFrame(); };
+    document.getElementById("gallery-close").onclick = () => document.getElementById("gallery").classList.add("hidden");
+    document.getElementById("save-sketch").onclick = () => document.getElementById("sketch-box").classList.toggle("hidden");
+    document.getElementById("sketch-keep").onclick = () => {
+      const source = sketchSource();
+      const thumb = captureSketch(source);
+      const words = document.getElementById("void-game").classList.contains("hidden") ? [] : (voidState.bag || []).map(item => item.word);
+      const id = "sketch-" + Date.now();
+      const entry = Sketch.card({
+        id: id,
+        imageId: id,
+        thought: document.getElementById("sketch-thought").value,
+        words: words,
+        at: new Date().toISOString(),
+        thumb: thumb
+      });
+      commitRecord(Rec.add(record, entry, entry.at));
+      if (thumb) sketchStore.put(id, thumb).catch(() => {});
+      document.getElementById("sketch-thought").value = "";
+      document.getElementById("sketch-box").classList.add("hidden");
+    };
+    document.getElementById("reel-art").onclick = () => {
+      const cards = Sketch.artCards(record.entries);
+      reelState = { show: true, cards: cards, asked: true };
+      reelIndex = 0;
+      reelSeen = true;
+      paintReel();
+    };
     document.getElementById("free-draw").onclick = () => {
       const on = document.getElementById("create").classList.toggle("free");
       document.getElementById("void-game").classList.toggle("hidden", on);
