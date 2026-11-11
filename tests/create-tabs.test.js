@@ -38,7 +38,7 @@ test("Ariel Words is a top-level tab and Create has no sub-tabs", () => {
   assert.match(page, /id="bWords"/);
   assert.match(page, /id="words-panel"/);
   assert.match(page, /flex:0 0 36px/);
-  assert.match(sw, /mindframe-shell-v29/);
+  assert.match(sw, /mindframe-shell-v30/);
   assert.match(sw, /\/ariel\//);
 });
 

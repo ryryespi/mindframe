@@ -185,7 +185,7 @@ test("page: Anchor and About me rows and views, scripts in order, sw v28 caches 
   ["pet-anchor", "p-anchor", "an-words", "an-svg", "an-path", "an-math", "an-math-box", "an-tau", "gv", "gv-words", "gv-math", "an-review", "an-story", "an-save", "pet-about", "p-about", "ab-hobbies", "ab-field", "ab-save"].forEach(id => assert.match(html, new RegExp(`id="${id}"`), id));
   assert.match(html, /nothing quantum/);
   ["./js/core/topology.js", "./js/core/governor.js", "./js/features/scenes.js", "./js/features/about.js"].forEach(f => assert.ok(sw.includes(f), f));
-  assert.match(sw, /mindframe-shell-v29/);
+  assert.match(sw, /mindframe-shell-v30/);
   ["js/core/topology.js", "js/core/governor.js", "js/features/scenes.js"].forEach(f => assert.ok(!/fetch\(|XMLHttpRequest|sendBeacon/.test(read(f)), f));
 });
 

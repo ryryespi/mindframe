@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Project Ariel">
+  <!-- Project Ariel logo. Design: Ryan Espinosa. AI assistant: Grok Bot.
+       All credit and glory to God. I owe my knowledge to my Lord Jesus Christ.
+       The circle is the void. Its gap is the gate opening a little.
+       The line rises from I (inside) to O (outside), and the gold point is grace waiting there.
+       The three small dots are words carried out in the bag. -->
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#f6dc8e"/>
+      <stop offset="1" stop-color="#e8c76a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="#f4f1ec"/>
+  <!-- the void, open at the upper right (the gate) -->
+  <path d="M176 70 A72 72 0 1 0 198 122" fill="none" stroke="#5b6472" stroke-width="12" stroke-linecap="round"/>
+  <!-- the line from I to O, passing through the gate -->
+  <path d="M92 168 C118 150 150 128 192 82" fill="none" stroke="#7a9cc6" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="92" cy="168" r="9" fill="#7a9cc6"/>
+  <!-- grace at O -->
+  <circle cx="202" cy="70" r="34" fill="url(#glow)"/>
+  <circle cx="202" cy="70" r="12" fill="#e8c76a"/>
+  <!-- words carried along the line -->
+  <circle cx="122" cy="149" r="4.5" fill="#c79a7a"/>
+  <circle cx="146" cy="132" r="4.5" fill="#c79a7a"/>
+  <circle cx="168" cy="111" r="4.5" fill="#c79a7a"/>
+</svg>

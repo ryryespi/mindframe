@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="../assets/ariel-logo.svg" type="image/svg+xml">
+  <link rel="icon" href="../assets/ariel-logo-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="../assets/ariel-logo-180.png">
   <title>Project Ariel Suite</title>
   <style>
     :root { --bg:#090d16; --card:#0f172a; --line:#1e293b; --ink:#f8fafc; --muted:#94a3b8; --em:#10b981; --teal:#2dd4bf; --rose:#f43f5e; }
@@ -10,7 +13,7 @@
     body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font:14px/1.45 system-ui, sans-serif; }
     header { position:sticky; top:0; z-index:5; background:#0f172acc; border-bottom:1px solid var(--line); }
     .bar { max-width:1100px; margin:0 auto; padding:10px 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .mark { width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#059669,#2dd4bf); }
+    .mark { width:36px; height:36px; border-radius:12px; display:block; }
     h1 { margin:0; font-size:16px; }
     .sub { margin:0; color:var(--muted); font-size:12px; }
     nav { display:flex; gap:4px; flex-wrap:wrap; }
@@ -66,7 +69,7 @@
 <body>
   <header>
     <div class="bar">
-      <div class="mark" aria-hidden="true"></div>
+      <img class="mark" src="../assets/ariel-logo.svg" alt="" width="36" height="36">
       <div>
         <h1>Project Ariel Suite</h1>
         <p class="sub">Discover, make, learn, rest, and remember. <a href="../index.html">Classic view</a> · <a href="../../research/">Research notes</a></p>
