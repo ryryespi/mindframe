@@ -400,7 +400,8 @@ if (typeof window === "undefined") { require("./data/strings.js"); require("../.
   }
   renderAll();
 
-  if ("serviceWorker" in navigator) {
+  // The Suite embeds this page. Registering here would claim the same scope as the standalone app.
+  if ("serviceWorker" in navigator && !/(?:^|[?&])embed=1(?:&|$)/.test(location.search)) {
     navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(() => { /* works online without it */ });
   }
 })();

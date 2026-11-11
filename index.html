@@ -17,6 +17,7 @@
   <script>
     // Old links (?view=, ?chip=, ?thought=) all open this one page. Nothing from the link is used.
     if (/[?&](view|chip|thought)=/.test(location.search)) history.replaceState(null, "", location.pathname + location.hash);
+    if (/(?:^|[?&])embed=1(?:&|$)/.test(location.search)) document.documentElement.classList.add("embed");
   </script>
 </head>
 <body>

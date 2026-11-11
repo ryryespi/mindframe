@@ -7,7 +7,7 @@ const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
 
-const WIDTHS = [[1366, 768], [1920, 1080], [2560, 1440]];
+const WIDTHS = [[390, 844], [1366, 768], [1920, 1080], [2560, 1440]];
 const ROOT = path.join(__dirname, "..");
 
 function serve() {
@@ -74,11 +74,15 @@ async function main() {
       await send("Page.navigate", { url: "http://127.0.0.1:" + port + "/ariel/suite/?desk=" + width });
       await ev("new Promise(r => setTimeout(r, 400))");
       const tabBox = JSON.parse(await ev(`(() => {
-        const b = [...document.querySelectorAll("nav button")].find(x => x.textContent === "Ariel Words");
-        const r = b.getBoundingClientRect();
-        return JSON.stringify({ w: r.width, h: r.height, x: r.x, y: r.y, shown: getComputedStyle(b).display !== "none" });
+        function box(name) {
+          const b = [...document.querySelectorAll("nav button")].find(x => x.textContent === name);
+          const r = b.getBoundingClientRect();
+          return { w: r.width, h: r.height, x: r.x, y: r.y, shown: getComputedStyle(b).display !== "none" };
+        }
+        return JSON.stringify({ words: box("Ariel Words"), mind: box("MindFrame") });
       })()`));
-      assert.ok(boxInside(tabBox, width, height), width + " suite tab " + JSON.stringify(tabBox));
+      assert.ok(boxInside(tabBox.words, width, height), width + " suite words " + JSON.stringify(tabBox.words));
+      assert.ok(boxInside(tabBox.mind, width, height), width + " suite mind " + JSON.stringify(tabBox.mind));
       await send("Page.navigate", { url: "http://127.0.0.1:" + port + "/ariel/index.html?desk=" + width });
       await ev("new Promise(r => setTimeout(r, 500))");
       const btn = JSON.parse(await ev(`(() => {
