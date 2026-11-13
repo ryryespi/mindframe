@@ -767,7 +767,7 @@ Every source below was checked in October 2026. Journal articles were checked ag
 
 [Project Ariel](https://ryryespi.github.io/mindframe/ariel/) is a separate offline canvas in [`ariel/`](ariel/). Conceptual, not validated science.
 
-This week's research notes (After the Line, the Void-State Framework, the Gated Line, the Ariel Suite paper, and Ariel Students) are listed in [`research/`](research/). Conceptual, not validated science.
+This week's research notes (After the Line, the Void-State Framework, the Gated Line, the Ariel Suite paper, and Ariel Students) are listed in [`research/`](research/). Later notes add [Coherence Under Decay](research/coherence-under-decay/Coherence-Under-Decay.pdf) and the [quantum boundary proposal](research/quantum-boundary/Quantum-Boundary-Proposal.pdf). Conceptual, not validated science, and not new physics. The live sandbox is the [Ariel Marketplace](https://ryryespi.github.io/mindframe/ariel/marketplace/), also a Suite tab.
 
 ## Privacy
 

@@ -1,6 +1,6 @@
 # Research notes
 
-Papers and toy simulations from the week of 8–10 November 2026. **All of them are conceptual, not validated science.** They are not diagnoses, measurements, or treatments.
+Papers and toy simulations from 8–12 November 2026. **All of them are conceptual, not validated science.** They are not diagnoses, measurements, treatments, or new physics.
 
 | Paper | Date | Summary | PDF |
 |---|---|---|---|
@@ -17,5 +17,9 @@ Papers and toy simulations from the week of 8–10 November 2026. **All of them 
 | Novelty Must Gain Novelty | 10 November 2026 | Entropy, rumination, and why an app that never ends cannot close a loop. | [PDF](novelty-must-gain-novelty/Novelty-Must-Gain-Novelty.pdf) |
 | Espinosa, R. (10 November 2026). The Void-State Framework and Zero-Debt Grace: A Dynamic Model and a Testable Answer | 10 November 2026 | Conceptual research note. Rebuilds the Void-State model with bounded states and a performance measure, tests grace against fighting through, adds identity fusion with creating, the narrowing gate, slowing the spiral, relationship, legacy, and reaching out, an effective clock and an in-void / edge / out readout, a cross-referenced postulate audit, and Narrative Fit: matching stories to threat, control and bridge (conceptual). | [PDF](void-state-grace/Void-State-and-Zero-Debt-Grace.pdf) · [paper.html](void-state-grace/paper.html) · [sim.py](void-state-grace/code/sim.py) · [shock_delay.py](void-state-grace/code/shock_delay.py) · [story_fit.py](void-state-grace/code/story_fit.py) · [story_fit_results.json](void-state-grace/code/story_fit_results.json) · [fig_story_paths.svg](void-state-grace/code/fig_story_paths.svg) · [valence_results.json](void-state-grace/code/valence_results.json) · [postulate-audit.md](void-state-grace/postulate-audit.md) |
 | Zero Debt, Chosen Burst | 10 November 2026 | Can a system grounded in unearned grace match the long-term performance of fighting through? | [PDF](grace-vs-fighting-through/grace-vs-fighting-through.pdf) |
+| Coherence Under Decay | 12 November 2026 | Design framework. Merges the zero-point chronomimetic notes with the quantum boundary proposal as one shared control template (CUD). The physics lines are labelled standard results. The commons is a design hypothesis. The link is a structural analogy, not a claim that economics is quantum mechanics, and not new physics. | [PDF](coherence-under-decay/Coherence-Under-Decay.pdf) · [MD](coherence-under-decay/Coherence-Under-Decay.md) |
+| Quantum boundary proposal | 12 November 2026 | Precursor. An honest experimental mapping of Ariel control labels onto textbook qubit results (barrier control, thermal occupation, bath decoupling). Research agenda, not a claim of new physics. Nothing here was tested by the author. | [PDF](quantum-boundary/Quantum-Boundary-Proposal.pdf) · [MD](quantum-boundary/Quantum-Boundary-Proposal.md) |
+
+The live sandbox these notes describe is the [Ariel Marketplace](https://ryryespi.github.io/mindframe/ariel/marketplace/). The [Project Ariel Suite](https://ryryespi.github.io/mindframe/ariel/suite/) opens that same page as its Marketplace tab. Chrons are not money. The app is a conceptual sandbox, not a market and not a physics experiment. Its blueprint is [ariel/marketplace/SPEC.txt](../ariel/marketplace/SPEC.txt); the page that actually runs is [ariel/marketplace/index.html](../ariel/marketplace/index.html).
 
 Simulation code and result files sit next to each paper (`simulate.py`, `sim/`, CSV, SVG, JSON).
