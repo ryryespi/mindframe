@@ -15,7 +15,7 @@
 
 This note records Ryan Espinosa's **C-R-Z Framework** as developed in three prior working papers: *The Unified C-R-Z Somatic-Kinetic Framework*; *Returning to Reality and Neutralizing Threat Responses* (V1 and V2); and *Everyday C-R-Z: The Low-Friction Architecture*. The model is meant to bypass slow verbal introspection, neutralize threat responses, and preserve personal sovereignty through three pillars — **Calibration (c)**, **Reality-Return (r)**, and **Zero-Velocity (z)** — and a brief action protocol, **Drop-Press-Snap**, with later daily adaptations.
 
-The first task is to present that architecture faithfully. The second is to grade each major claim against literature actually checked for this draft, using three evidence tiers: **supported**, **plausible**, and **speculative**. The third is to cross-reference the framework with two related notes in this collection, *Coherence Under Decay* and the quantum boundary proposal, and with the Orun story's skill of dropping everything, listening for a key to reality, and exiting the gate. The note then proposes a small, testable within-subject pilot of Drop-Press-Snap against a control, on subjective distress and heart rate, and closes with safety limits, including the need for clinical follow-up when mania warning signs appear.
+The first task is to present that architecture faithfully. The second is to grade each major claim against literature actually checked for this draft, using three evidence tiers: **supported**, **plausible**, and **speculative**. The third is to cross-reference the framework with two related notes in this collection, *Coherence Under Decay* and the quantum boundary proposal, and with the Orun story's skill of dropping everything, listening for a key to reality, and exiting the gate. A later section, Attention as Selu, asks how a person may visit an inner or fictional world without letting it override the living one, and treats attention as a limited coin, like Orun's selu, spent between those worlds. The note then proposes a small, testable within-subject pilot of Drop-Press-Snap against a control, on subjective distress and heart rate, and closes with safety limits, including the need for clinical follow-up when mania warning signs appear, and when immersive daydreaming crowds out life.
 
 The short version of the audit is this. Outward sensory reorienting, affect labeling, plantar contribution to posture, and slow, exhale-emphasized breathing have real literatures behind them. A brief motor task can interrupt rumination, but not specifically because an ASL "C" handshape bypasses the phonological loop. Shifting weight onto the soles is a reasonable proprioceptive anchor; a "solar plexus reflex point" on the foot is not a supported physiological mechanism. Expansive-posture hormone claims failed to replicate, though modest effects on how a posture *feels* are still discussed. "Glimmers," in Deb Dana's polyvagal-informed usage, are small cues of safety and must not be confused with mania prodromes. Polyvagal theory itself is disputed. C-R-Z agrees with *Coherence Under Decay* and with the Orun story on returning to a rest that is not empty and on leaving a loop. It conflicts with them if Zero-Velocity is read as a literal arrival at *v* = 0, and it conflicts with itself if "mania glimmers" and safety glimmers keep the same name.
 
@@ -33,7 +33,7 @@ Each claim below is tagged as one of:
 
 A fourth label, **[Values]**, is used where the claim states what is worth protecting (sovereignty, non-extraction, grace, the dignity of leaving). Values are not tested by experiment and are not diminished by being labelled.
 
-Sources in Section 10 were checked on 13 November 2026 against publisher, PubMed, PMC, or other bibliographic records and against abstracts or open full text returned in those records. They were not all read in their entirety. Page numbers and DOIs are given where the record supplied them.
+Sources in Section 11 were checked on 13 November 2026 against publisher, PubMed, PMC, or other bibliographic records and against abstracts or open full text returned in those records. They were not all read in their entirety. Page numbers and DOIs are given where the record supplied them.
 
 ---
 
@@ -229,7 +229,107 @@ There is no serious conflict of aim, only a conflict of emphasis if C-R-Z is pra
 
 ---
 
-## 5. A simple, testable pilot
+
+---
+
+## 5. Attention as Selu: Switching Between Inner Worlds and Reality
+
+The earlier sections treated C-R-Z as a way out of threat, rumination, and a closed loop with the dead. This section treats a kinder and more ordinary problem, which is also the author's: how to be lost in thought, or in a fictional world such as Orun, *without* letting that world override the living one, and how to come back when a real conversation is already underway.
+
+In Orun, **selu** is the coin of the commons. It fades if it sits unused, and it cannot buy a life, a morning, or a person home. Here it is used as a picture of **attention**. Attention is limited. It can be spent on an inner world or on this room. Spent well on a living voice, it returns you to the commons. Hoarded inside a story, it thins what the people in front of you can reach. The author's line for this is short, and it is **[Values]** as well as design: **Attention is life.**
+
+None of the amounts below are measured units. The budget is a metaphor, in the same family as the circulation and decay pictures in *Coherence Under Decay*. The techniques are graded, as before, against literature checked for this draft.
+
+### 5.1 The honest science of "multitasking"
+
+People often say they are multitasking when they are switching. For attention-demanding work, the brain does not run two full tasks in true parallel. It reconfigures, and the reconfiguration has a cost. Monsell (2003) reviewed the task-switching literature and described reliable switch costs in time and, often, in errors. Rubinstein, Meyer, and Evans (2001) found that alternation cost more when the rules were more complex, and less when a clear cue told the person which task was now in force. They modelled the work as goal shifting plus rule activation. That is **supported**. It is also the honest warning under this whole section: visiting Orun and listening to a friend are two tasks. Moving between them is a switch, not a free overlay. A cue that says "this is the living task now" is not a flourish. It is how switching gets cheaper.
+
+Mind-wandering is common, and it is not free. Killingsworth and Gilbert (2010), sampling people through the day, found that minds were on something other than the current activity in nearly half of the samples, and that those moments were, on average, associated with less happiness than moments of attention to the present, including when the off-task thoughts were pleasant. That is **supported** as a large experience-sampling result. It is not a law that every daydream makes a person unhappy, and it is not a reason to crush imagination. It is a reason to notice when attention has left a life that still needs it.
+
+Not all mind-wandering is the same. Seli, Risko, and Smilek (2016) showed that intentional and unintentional mind-wandering can move in opposite directions: an easy, boring task produced more *deliberate* wandering, a harder task more *unintended* drift, while the overall rate looked unchanged if the two were lumped together. Smallwood and Schooler (2015), reviewing the field, described a balance of costs (errors, decoupled perception) and possible benefits (planning, some forms of creativity). Deliberate, bounded wandering is therefore **plausible** as a useful state. Unintended wandering that the person does not notice is the costlier one.
+
+The skill that makes a budget possible is **meta-awareness**: noticing that the mind has left. Schooler (2002) distinguished experience from the explicit awareness of that experience. People often fail to notice that they have drifted; unaware episodes tend to hurt performance more than ones the person has already caught (Smallwood and Schooler 2015). Catching the drift — "I am not in this conversation" — is **supported** as a real, trainable distinction, and it is the first move in the protocol below.
+
+Two large-scale brain networks are often mentioned in this neighborhood. A default-mode network tends to be more active in undirected, inward, or stimulus-independent thought (Raichle et al. 2001). A more task-positive, attention-oriented network tends to trade off with it; the two can be anticorrelated even at rest (Fox, Snyder, Vincent, Corbetta, Van Essen, and Raichle 2005). That physiology is **supported**. Using it as a complete map of "Orun versus the kitchen" is **speculative**. The practical lesson does not need a scanner: inward and outward stances compete, and a cue can help you change stance.
+
+**Planned daydreaming**, or scheduled absorption with an exit cue, is the design this evidence points toward. Set a time and a place to enter the inner world on purpose. Decide, in advance, what will end it — a timer, a bell, a doorway, a phrase, a living voice. That package is **plausible**. It borrows intentional mind-wandering, the value of a task cue (Rubinstein et al. 2001), implementation intentions (Gollwitzer 1999, already cited), and the idea that an event boundary can close one episode and open another (Section 5.4). It has not been tested as a named C-R-Z or Orun protocol.
+
+Research on presence and absorption, including in virtual environments, shows that a well-built world can feel "here" (for a classic questionnaire approach, Witmer and Singer 1998). That is **supported** as a measurement tradition, and **plausible** as a description of why fiction is powerful. It does not, by itself, license any particular exit method, and it should not be over-read as proof that a person can inhabit two worlds at full strength at once.
+
+### 5.2 The Drop: letting go of a complex or tempting thought
+
+The author's Drop is already in C-R-Z as the first beat of Drop-Press-Snap, and in the Orun story as putting down the purse and the maps. This section is about using that same move on a thought that is complex, glittering, or hard to leave — and doing it as **letting go**, not as suppression.
+
+Classic thought-stopping — a sudden "Stop!" meant to erase the thought — is a weak foundation. Wegner (1994) described ironic processes of mental control: an effortful attempt to push a thought away can be yoked to a monitor that keeps looking for that thought, and under load the unwanted thought becomes *more* available. That rebound risk is **supported**. It is one reason C-R-Z should not be taught as "crush the thought until it is gone."
+
+What has a better neighbor in the clinic is not a fight. In Acceptance and Commitment Therapy, a person **defuses** from a thought by naming it as a thought — "I am having the thought that…" — rather than treating it as a command (Hayes, Strosahl, and Wilson 1999). The tug-of-war metaphor, often taught as **drop the rope**, makes the same point: you need not win against the thought; you can stop spending your strength on the struggle and step toward what matters. **Urge surfing** asks a person to feel a craving or a pull rise and fall, like a wave, without immediately acting on it (Bowen and Marlatt 2009, in a brief mindfulness intervention with smokers). These are **plausible** supports for a Drop that notices the thought, declines to wrestle it, and turns to a present cue. They are not a trial of C-R-Z, and defusion is a clinical method, not a parlor trick.
+
+The form that ties this to the rest of the framework is an **implementation intention** plus a body drop. Gollwitzer (1999) showed that pre-decided if-then plans make a cue more likely to trigger a chosen act. The C-R-Z Drop, written that way, is:
+
+> If I notice a thought that is looping, tempting, or pulling me out of this room, then I drop my shoulders, put my weight into my feet, let the thought be a thought, and look at one real thing (or one living face) here.
+
+That is **plausible** as a package: meta-awareness supplies the "if," the body supplies a fast somatic interrupt, defusion supplies the stance (let go, do not suppress), and Reality-Return supplies the "then." It should be taught in those words, not as a guarantee that the thought will vanish.
+
+### 5.3 Syncing back into a real conversation
+
+Drifting in a conversation is ordinary. The repair is a skill, not a confession of failure.
+
+Ordinary talk already has a system for fixing trouble. Schegloff, Jefferson, and Sacks (1977) described conversational repair, including a preference for people to correct themselves, and for others to prompt rather than overwrite. An honest sentence such as "Sorry, I drifted — can you say that last part again?" is **plausible** as good repair, and it is closer to that literature than bluffing or pretending you heard. There is no need to invent a new social science for the sentence. There is a need to give yourself permission to say it.
+
+Once you are back, small **backchannel** cues (a nod, "mm," "I see") and a short paraphrase of what you just heard — reflective listening, in the tradition of Rogers and of later motivational interviewing — help the other person know you have landed, and help you check that you have. Those practices are **supported** as widely taught communication methods. As a snap-back kit they are **plausible**.
+
+Re-anchor on what is actually in the conversation: the speaker's face, the sound of their voice, and their last words. A practical catch-up some listeners use is to replay the **last three words** they are sure they heard, and to ask from there. As a named method, that trick is **speculative**. As a use of the most recent speech still in ear and memory, it is **plausible**, and it is kinder than inventing the missing middle.
+
+This is the story's own teaching in civic form. Relationships snap you back in reality. The living sentence, not the empty door, gets the reply.
+
+### 5.4 Mental anchors for switching
+
+Anchors are cues that help the mind change worlds on purpose, and find the way back.
+
+**Singing or humming the thought.** Melody can make words more memorable. Wallace (1994) found that a melody could aid recall of text, under conditions that should not be over-generalized. Melodic intonation therapy has a clinical life in some aphasia work (Albert, Sparks, and Helm 1973), which is a different problem than everyday attention. Humming, because it lengthens the exhale, sits near the slow-breathing literature already graded in Section 3.6. Using a quiet hummed line, or singing a thought once in order to set it down and leave it, is **plausible** as a personal anchor. It is **speculative** as a special neural key, and it should be silent or nearly silent if a living conversation is in the room.
+
+**The environment.** Outward naming (the 5-4-3-2-1 family, already discussed), a familiar object in the hand, a window, or the feel of a chair are present-tense cues. Context also colors memory: Godden and Baddeley (1975) found that divers recalled word lists better in the environment where they had learned them, land or water. That is **supported** for memory, and **plausible** as a reason to give the inner world and the real world slightly different physical cues — a chair for writing Orun, the kitchen table for the living meal — so that each place helps you return to its task.
+
+**A short ritual to enter and leave the gate.** Walking through a doorway can make information from the previous room less available; Radvansky, Krawietz, and Tamplin (2011) treated doorways as event boundaries that update the current event model. That effect is **supported**. Using a small phrase, a gesture, or an actual threshold as a "gate" into and out of the fictional world is **plausible**. It is the same shape as the Orun tali: a gate that opens slowly, and that you can also close. The words can be ordinary ("I am going in"; "I am coming back"). They do not need to be a spell.
+
+**Nature, bells, and a personal line.** Kaplan's attention restoration theory (1995) proposes that some natural settings can rest directed attention through "soft fascination." The theory is influential; the evidence is mixed in size and design, so the honest grade is **plausible** as a reason to step outside, not **supported** as a proven dose. A timer or a bell is a simple external cue, in the same family as mindfulness of the bell in contemplative practice. A verse or a short prayer can be a personal cue of the same kind. Those are **plausible** as signals, and **[Values]** as content.
+
+### 5.5 A selu attention-budget model
+
+Treat attention as a limited coin, like selu.
+
+- There is only so much to spend in an hour. You cannot pay full price to Orun and full price to the person in the chair.
+- **Real people have priority.** If a living voice, a child, a colleague, or a need in the room arises, the inner world yields. That is the commons rule, not a punishment of imagination.
+- **Absorption is allowed**, on purpose, with a budget and an exit cue: a start, an intended span, and a way back (timer, doorway, phrase, body Drop, a name said in this hour).
+- **Spending on reality restores** the account in the only sense that matters here: you return, you repair if you drifted, and the next visit to the inner world is leaveable again. This is akin to *Coherence Under Decay*'s rest that is not empty, and to residual decay that prevents a perfect hoarding shelter. An inner world with no nurev, no fade, and no exit becomes a vault.
+- The sentence at the center is the author's: **Attention is life.** It is a values claim and a design rule. It is not a measured quantity, a currency, or a diagnosis.
+
+The model is **speculative** as economics or neuroscience, and **plausible** as a compact way to remember the findings in Sections 5.1–5.4: switching has a cost, unnoticed drift has a cost, deliberate visits with a cue are safer than being quietly overwritten, and the living world gets first claim.
+
+### 5.6 Take heart: the author's closing anchor
+
+The author adds a conviction from his faith. In the Gospel of John, Jesus says, "In the world ye shall have tribulation: but be of good cheer; I have overcome the world" (John 16:33, King James Version). A common modern rendering is "Take heart; I have overcome the world."
+
+This is presented as **the author's belief**, respectfully, and as a personal closing anchor: a higher power has already overcome this world, so a person may put a thought, a fear, or even a beloved inner world down, and come back. It is **[Values]**. It is not a clinical result, not a substitute for 988 or for care, and not evidence that C-R-Z works. A reader who does not share the faith can use the rest of the protocol without it. A reader who does may keep the verse as the last gate-phrase, the way other people might keep a breath, a name, or a bell.
+
+### 5.7 A practical protocol card
+
+<div class="protocol">
+<p class="protocol-title">Protocol card: Attention as selu</p>
+<p>One short sequence, to be used as a card, not as a treatment.</p>
+<ol>
+<li><strong>Enter the gate.</strong> If you are visiting the inner or fictional world on purpose, mark the start with a small phrase, a gesture, or a threshold. This is planned absorption, not a sneak departure from life.</li>
+<li><strong>Set the budget.</strong> Choose a span and an exit cue (a timer, a bell, a doorway, a verse, a body cue). Remember the priority rule: a living person, a real need, or a conversation already underway can close the gate early. Attention is life.</li>
+<li><strong>Catch the drift.</strong> When you are supposed to be in the real world and you notice you are not — "I am not in this conversation" — that noticing is the skill. You do not have to have been gone long for the noticing to count.</li>
+<li><strong>Drop.</strong> Do not wrestle the tempting or complex thought. Name it as a thought if that helps. Drop the shoulders, put weight into the feet, and look at one real thing. Let go; do not suppress.</li>
+<li><strong>Sync back.</strong> If a conversation is in progress, repair honestly: "Sorry, I drifted. Can you say that last part again?" Re-anchor on the speaker's face, voice, and last words. Paraphrase what you just heard. Answer the living sentence.</li>
+<li><strong>Close the gate.</strong> When the visit or the repair is done, mark the end the same way you marked the start. Come back all the way. If you use the author's faith-anchor, this is a place for "Take heart." Then give the room, not the leftover story, the next unit of attention.</li>
+</ol>
+</div>
+
+If immersive daydreaming is crowding out work, relationships, sleep, or care, this card is not enough. See Section 7.
+
+## 6. A simple, testable pilot
 
 C-R-Z has not been tested as a package. A first study should be small, pre-registered, and willing to fail.
 
@@ -253,7 +353,7 @@ This is a first measurement, in the same spirit as the small app pilot in *Coher
 
 ---
 
-## 6. Safety
+## 7. Safety
 
 C-R-Z is a personal practice framework. **It is not medical treatment, not a substitute for psychotherapy or medication, and not a crisis service.**
 
@@ -262,11 +362,12 @@ C-R-Z is a personal practice framework. **It is not medical treatment, not a sub
 - **Mania or hypomania warning signs** — including markedly less need for sleep, a sustained burst of energy or confidence that others find unlike you, racing speech or spending, or a rising sense that ordinary limits no longer apply — warrant clinical follow-up. They are not "glimmers" to be ridden, and they are not a reason to intensify Drop-Press-Snap in place of care.
 - People with trauma histories should keep the outward emphasis of Reality-Return. If a turn toward the body increases alarm or detachment, stop.
 - The weight-shift in the Drop should not be done in a way that risks a fall. A seated version, with both feet on the floor, is a full version, not a lesser one.
+- If immersive daydreaming, looping stories, or a fictional world begins to crowd out work, relationships, sleep, or ordinary care, that is a reason to seek professional help. Somer (2002) described **maladaptive daydreaming** as a pattern in which extensive, vivid fantasy becomes difficult to control and interferes with life. This protocol is not a treatment for that pattern.
 - Nothing in this note is an instruction to leave prescribed medication or to delay emergency care.
 
 ---
 
-## 7. What this is not
+## 8. What this is not
 
 - Not a validated treatment, diagnosis, or medical device.
 - Not evidence that an ASL "C," a foot reflex point, or a triangle gaze has a unique neural pathway.
@@ -274,12 +375,15 @@ C-R-Z is a personal practice framework. **It is not medical treatment, not a sub
 - Not a claim that economics, quantum mechanics, or fiction prove a somatic protocol. Cross-references in Section 4 are structural and narrative, not empirical transfer.
 - Not a promise that threat can be neutralized on demand, or that sovereignty can be made absolute.
 - Not a reason to ignore other people when a living voice is the key that works.
+- Not a claim that true, cost-free multitasking is possible, or that a fictional world can be inhabited at full strength at the same time as a living conversation.
+- Not a treatment for maladaptive daydreaming, and not a license to disappear into an inner world when life is asking for attention.
+- Not clinical evidence for a verse of Scripture. John 16:33 is offered as the author's faith-anchor, not as a finding.
 
 ---
 
-## 8. Limitations
+## 9. Limitations
 
-This audit is only as strong as the records checked on 13 November 2026. Some nearby literatures (for example, sensorimotor psychotherapy and somatic experiencing) were not reviewed in depth and should not be treated as silently endorsed or silently dismissed. The three source papers were not available to this draft as public, dated, paginated documents; the framework is taken from the author's own synopsis, which he offered as the authoritative short form. If a later comparison with the full source papers shows a missed nuance, the source papers govern the description, and this audit should be revised.
+This audit is only as strong as the records checked on 13 November 2026, including the Attention as Selu sources added the same day. Some nearby literatures (for example, sensorimotor psychotherapy and somatic experiencing) were not reviewed in depth and should not be treated as silently endorsed or silently dismissed. The three source papers were not available to this draft as public, dated, paginated documents; the framework is taken from the author's own synopsis, which he offered as the authoritative short form. If a later comparison with the full source papers shows a missed nuance, the source papers govern the description, and this audit should be revised.
 
 The evidence tiers grade *component claims*, not the character of the author or the worth of the values layer. A speculative mechanism can sit next to a sound aim. The aim is not thereby proved, and the person is not thereby discredited.
 
@@ -287,7 +391,7 @@ A within-subject pilot will not settle long-term use, clinical populations, or t
 
 ---
 
-## 9. Recommendations
+## 10. Recommendations
 
 1. Keep the three-part shape: interrupt, look outward, come to rest on the ground.
 2. Keep Drop-Press-Snap as a brief sequence, with the Press reframed as a toe-and-sole attention anchor, and with a documented alternative to the ASL "C."
@@ -295,14 +399,17 @@ A within-subject pilot will not settle long-term use, clinical populations, or t
 4. Replace "mania glimmers" with "mania early-warning signs" or "prodromes," and keep "glimmers," if at all, for small cues of present safety.
 5. Write Zero-Velocity as an approach to rest (*v* approaching a floor, not *v* = 0), in line with *Coherence Under Decay*.
 6. Let relationship stay inside Reality-Return: a living voice is a valid key.
-7. Run the pilot in Section 5 before any public claim that the package regulates the vagus, hormones, or threat "at the hardware level."
-8. Leave the values — sovereignty, grace, the right to leave, collective peace as an exhaled hope — labelled as values.
+7. Run the pilot in Section 6 before any public claim that the package regulates the vagus, hormones, or threat "at the hardware level."
+8. Leave the values — sovereignty, grace, the right to leave, collective peace as an exhaled hope, and "Attention is life" — labelled as values.
+9. Treat attention as a limited selu budget, with living people first, and allow inner-world absorption only with a span and an exit cue.
+10. Teach the Drop as an if-then plus a body drop, and as letting go, not as thought-stopping.
+11. Keep "Take heart; I have overcome the world" (John 16:33) in the values layer, as the author's closing anchor, not as a clinical claim.
 
 ---
 
-## 10. References
+## 11. References
 
-### 10.1 Source papers for the framework
+### 11.1 Source papers for the framework
 
 1. Ryan Espinosa, *The Unified C-R-Z Somatic-Kinetic Framework*, working paper.
 2. Ryan Espinosa, *Returning to Reality and Neutralizing Threat Responses*, V1 and V2, working papers.
@@ -310,13 +417,13 @@ A within-subject pilot will not settle long-term use, clinical populations, or t
 
 The synopsis of pillars, Drop-Press-Snap, and V2 adaptations used in this note was provided by the author on 13 November 2026.
 
-### 10.2 Related notes in this collection
+### 11.2 Related notes in this collection
 
 4. Ryan Espinosa, with Grok Bot, *Coherence Under Decay: A Shared Control Template for Qubits and a Zero-Debt Commons*, 12 November 2026, MindFrame research notes, [Coherence-Under-Decay](https://ryryespi.github.io/mindframe/research/coherence-under-decay/Coherence-Under-Decay.pdf).
 5. Ryan Espinosa, with Grok Bot, *Dynamic Boundary Control and Vacuum-Referenced Stabilization of Qubits: A conceptual research proposal for Project Ariel (revised)*, 12 November 2026, [Quantum-Boundary-Proposal](https://ryryespi.github.io/mindframe/research/quantum-boundary/Quantum-Boundary-Proposal.pdf).
 6. Ryan Espinosa, *Selu Cannot Buy the Morning Back* and *The Path of Rivel* (Orun narrative and game, 2026), including the skill of dropping everything, listening for a key to reality, and exiting the gate.
 
-### 10.3 Literature checked for this draft
+### 11.3 Literature checked for this draft
 
 7. A. D. Baddeley and G. J. Hitch, "Working memory," in G. H. Bower (ed.), *The Psychology of Learning and Motivation*, Vol. 8 (Academic Press, 1974), pp. 47–89.
 8. A. Baddeley, "Working memory: theories, models, and controversies," *Annual Review of Psychology* **63**, 1–29 (2012).
@@ -346,9 +453,34 @@ The synopsis of pillars, Drop-Press-Snap, and V2 adaptations used in this note w
 32. R. K. Morriss, M. A. Faizal, A. P. Jones, P. R. Williamson, C. A. Bolton, and J. P. McCarthy, "Interventions for helping people recognise early signs of recurrence in bipolar disorder," *Cochrane Database of Systematic Reviews*, Issue 1, CD004854 (2007). https://doi.org/10.1002/14651858.CD004854.pub2
 33. P. M. Gollwitzer, "Implementation intentions: strong effects of simple plans," *American Psychologist* **54**(7), 493–503 (1999). Cited as a nearby account of brief pre-decided cues, not as a study of C-R-Z.
 
-Item 9 carries a flag to confirm pagination against the publisher version before any formal quotation. All other bibliographic details above were taken from publisher, PubMed, PMC, or Cochrane records checked on 13 November 2026, or from abstracts and open text supplied by those records. They were not all read in full.
 
-### 10.4 AI assistant
+*Attention, switching, mind-wandering, and anchors (checked 13 November 2026)*
+35. S. Monsell, "Task switching," *Trends in Cognitive Sciences* **7**(3), 134–140 (2003). https://doi.org/10.1016/S1364-6613(03)00028-7
+36. J. S. Rubinstein, D. E. Meyer, and J. E. Evans, "Executive control of cognitive processes in task switching," *Journal of Experimental Psychology: Human Perception and Performance* **27**(4), 763–797 (2001). https://doi.org/10.1037/0096-1523.27.4.763
+37. M. A. Killingsworth and D. T. Gilbert, "A wandering mind is an unhappy mind," *Science* **330**(6006), 932 (2010). https://doi.org/10.1126/science.1192439
+38. P. Seli, E. F. Risko, and D. Smilek, "On the necessity of distinguishing between unintentional and intentional mind wandering," *Psychological Science* **27**(5), 685–691 (2016). https://doi.org/10.1177/0956797616634068
+39. J. Smallwood and J. W. Schooler, "The science of mind wandering: empirically navigating the stream of consciousness," *Annual Review of Psychology* **66**, 487–518 (2015). https://doi.org/10.1146/annurev-psych-010814-015331
+40. J. W. Schooler, "Re-representing consciousness: dissociations between experience and meta-consciousness," *Trends in Cognitive Sciences* **6**(8), 339–344 (2002).
+41. M. E. Raichle, A. M. MacLeod, A. Z. Snyder, W. J. Powers, D. A. Gusnard, and G. L. Shulman, "A default mode of brain function," *Proceedings of the National Academy of Sciences* **98**(2), 676–682 (2001).
+42. M. D. Fox, A. Z. Snyder, J. L. Vincent, M. Corbetta, D. C. Van Essen, and M. E. Raichle, "The human brain is intrinsically organized into dynamic, anticorrelated functional networks," *Proceedings of the National Academy of Sciences* **102**(27), 9673–9678 (2005).
+43. B. G. Witmer and M. J. Singer, "Measuring presence in virtual environments: a presence questionnaire," *Presence: Teleoperators and Virtual Environments* **7**(3), 225–240 (1998).
+44. D. M. Wegner, "Ironic processes of mental control," *Psychological Review* **101**(1), 34–52 (1994).
+45. S. C. Hayes, K. D. Strosahl, and K. G. Wilson, *Acceptance and Commitment Therapy: An Experiential Approach to Behavior Change* (Guilford, 1999). Source for defusion, including naming a thought as a thought, and for the tug-of-war / "drop the rope" stance.
+46. S. Bowen and G. A. Marlatt, "Surfing the urge: brief mindfulness-based intervention for college student smokers," *Psychology of Addictive Behaviors* **23**(4), 666–671 (2009). https://doi.org/10.1037/a0017127
+47. E. A. Schegloff, G. Jefferson, and H. Sacks, "The preference for self-correction in the organization of repair in conversation," *Language* **53**(2), 361–382 (1977).
+48. C. R. Rogers, *Client-Centered Therapy* (Houghton Mifflin, 1951); W. R. Miller and S. Rollnick, *Motivational Interviewing* (various editions). Cited for reflective listening and brief paraphrases as ordinary repair, not as a trial of C-R-Z.
+49. W. T. Wallace, "Memory for music: effect of melody on recall of text," *Journal of Experimental Psychology: Learning, Memory, and Cognition* **20**(6), 1471–1485 (1994).
+50. M. L. Albert, R. W. Sparks, and N. A. Helm, "Melodic intonation therapy for aphasia," *Archives of Neurology* **29**(2), 130–131 (1973). A clinical literature, not an everyday attention study; cited only as the neighboring evidence on singing and language, and not as a claim that humming is a treatment.
+51. D. R. Godden and A. D. Baddeley, "Context-dependent memory in two natural environments: on land and underwater," *British Journal of Psychology* **66**(3), 325–331 (1975).
+52. G. A. Radvansky, S. A. Krawietz, and A. K. Tamplin, "Walking through doorways causes forgetting: further explorations," *Quarterly Journal of Experimental Psychology* **64**(8), 1632–1645 (2011).
+53. S. Kaplan, "The restorative benefits of nature: toward an integrative framework," *Journal of Environmental Psychology* **15**(3), 169–182 (1995).
+54. E. Somer, "Maladaptive daydreaming: a qualitative inquiry," *Journal of Contemporary Psychotherapy* **32**(2–3), 197–212 (2002). https://doi.org/10.1023/A:1020597026919
+55. *The Holy Bible*, King James Version, John 16:33. Cited as the author's faith-anchor, not as empirical evidence.
+
+Item 9 carries a flag to confirm pagination against the publisher version before any formal quotation. Item 40 and item 51 should be spot-checked for pagination if quoted at length. All other bibliographic details above were taken from publisher, PubMed, PMC, or Cochrane records checked on 13 November 2026, or from abstracts and open text supplied by those records. They were not all read in full.
+
+
+### 11.4 AI assistant
 
 34. Grok Bot (2026). AI assistant used, under the author's direction, to help draft this note, look up and format literature, cross-reference the author's related papers, and prepare the PDF. Grok Bot is an AI assistant. It is not a co-investigator, not a clinician, and not a source of primary evidence. Every empirical claim in this note is only as strong as the published record it cites.
 
