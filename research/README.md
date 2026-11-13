@@ -1,6 +1,6 @@
 # Research notes
 
-Papers and toy simulations from 8–12 November 2026. **All of them are conceptual, not validated science.** They are not diagnoses, measurements, treatments, or new physics.
+Papers and toy simulations from 8–13 November 2026. **All of them are conceptual, not validated science.** They are not diagnoses, measurements, treatments, or new physics.
 
 | Paper | Date | Summary | PDF |
 |---|---|---|---|
@@ -19,6 +19,7 @@ Papers and toy simulations from 8–12 November 2026. **All of them are conceptu
 | Zero Debt, Chosen Burst | 10 November 2026 | Can a system grounded in unearned grace match the long-term performance of fighting through? | [PDF](grace-vs-fighting-through/grace-vs-fighting-through.pdf) |
 | Coherence Under Decay | 12 November 2026 | Design framework. Merges the zero-point chronomimetic notes with the quantum boundary proposal as one shared control template (CUD). The physics lines are labelled standard results. The commons is a design hypothesis. The link is a structural analogy, not a claim that economics is quantum mechanics, and not new physics. | [PDF](coherence-under-decay/Coherence-Under-Decay.pdf) · [MD](coherence-under-decay/Coherence-Under-Decay.md) |
 | Quantum boundary proposal | 12 November 2026 | Precursor. An honest experimental mapping of Ariel control labels onto textbook qubit results (barrier control, thermal occupation, bath decoupling). Research agenda, not a claim of new physics. Nothing here was tested by the author. | [PDF](quantum-boundary/Quantum-Boundary-Proposal.pdf) · [MD](quantum-boundary/Quantum-Boundary-Proposal.md) |
+| The C-R-Z Framework | 13 November 2026 | Conceptual research note. Records Calibration, Reality-Return, and Zero-Velocity from the author's C-R-Z papers, grades each claim against checked literature (supported, plausible, or speculative), cross-references Coherence Under Decay and the Orun "key to reality" skill, and proposes a small Drop-Press-Snap pilot. Not a validated treatment. | [PDF](c-r-z-framework/C-R-Z-Framework.pdf) · [MD](c-r-z-framework/C-R-Z-Framework.md) |
 
 The live sandbox these notes describe is the [Ariel Marketplace](https://ryryespi.github.io/mindframe/ariel/marketplace/). The [Project Ariel Suite](https://ryryespi.github.io/mindframe/ariel/suite/) opens that same page as its Marketplace tab. Chrons are not money. The app is a conceptual sandbox, not a market and not a physics experiment. Its blueprint is [ariel/marketplace/SPEC.txt](../ariel/marketplace/SPEC.txt); the page that actually runs is [ariel/marketplace/index.html](../ariel/marketplace/index.html).
 
