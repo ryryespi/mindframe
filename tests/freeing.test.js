@@ -290,7 +290,7 @@ test("UI and docs: Write / Pick feelings toggle, chips, the freeing tile, Copy f
   assert.match(index, /id="copy-mix" class="secondary">Copy freeing mix</);
   assert.match(css, /\.feel-chip \{[^}]*min-height: 2\.9rem/);
   assert.match(css, /\.mode button \{[^}]*min-height: 2\.75rem/);
-  assert.match(sw, /mindframe-shell-v31/);
+  assert.match(sw, /mindframe-shell-v32/);
   ["./js/features/freeing.js", "./js/features/picker.js"].forEach(f => assert.ok(sw.includes(f), f));
   ["## Pick feelings", "## The freeing mix", "J(e) = P(e) \u2212 \u03BC\u00B7N(e)", "mf 3", "Tangney, J. P. (2000)", "Gilbert, P., & Procter, S. (2006)", "Gilbert, P. (2009)", "Burns, D. D. (1980)", "Interior Castle", "Romans 12:3", "1 John 4:19"].forEach(x => assert.ok(r.includes(x), x));
 });

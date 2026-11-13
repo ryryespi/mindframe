@@ -479,7 +479,7 @@ test("single page: index has no tools links; tools.html only redirects; the serv
   assert.ok(/history\.replaceState/.test(index), "old ?view/?chip links are stripped");
   assert.ok(/location\.replace\("\.\/"\)/.test(tools) && /http-equiv="refresh"/.test(tools));
   assert.ok(!/<textarea|<script src/.test(tools), "tools.html is only a redirect");
-  assert.match(sw, /mindframe-shell-v31/);
+  assert.match(sw, /mindframe-shell-v32/);
   const scripts = [...index.matchAll(/<script src="([^"]+)"/g)].map(x => x[1]);
   assert.deepEqual(scripts, ["js/data/strings.js", "js/data/params.js", "js/core/equations.js", "js/core/signals.js", "js/core/grounding.js", "js/core/movers.js", "js/core/reality.js", "js/core/peace.js", "js/core/kai.js", "js/core/master.js", "js/core/topology.js", "js/core/governor.js", "js/core/words.js",
     "js/features/relationship.js", "js/features/forgiveness.js", "js/features/practices.js", "js/features/freeing.js", "js/features/picker.js", "js/features/writer/stories.js", "js/features/writer/games.js", "js/features/historian.js",

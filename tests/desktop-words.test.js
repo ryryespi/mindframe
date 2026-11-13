@@ -79,10 +79,11 @@ async function main() {
           const r = b.getBoundingClientRect();
           return { w: r.width, h: r.height, x: r.x, y: r.y, shown: getComputedStyle(b).display !== "none" };
         }
-        return JSON.stringify({ words: box("Ariel Words"), mind: box("MindFrame") });
+        return JSON.stringify({ words: box("Ariel Words"), mind: box("MindFrame"), market: box("Marketplace") });
       })()`));
       assert.ok(boxInside(tabBox.words, width, height), width + " suite words " + JSON.stringify(tabBox.words));
       assert.ok(boxInside(tabBox.mind, width, height), width + " suite mind " + JSON.stringify(tabBox.mind));
+      assert.ok(boxInside(tabBox.market, width, height), width + " suite market " + JSON.stringify(tabBox.market));
       await send("Page.navigate", { url: "http://127.0.0.1:" + port + "/ariel/index.html?desk=" + width });
       await ev("new Promise(r => setTimeout(r, 500))");
       const btn = JSON.parse(await ev(`(() => {

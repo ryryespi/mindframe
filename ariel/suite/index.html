@@ -56,6 +56,8 @@
     #suite-game, #suite-game iframe { width: 100%; height: calc(100vh - 132px); min-height: 70vh; border: 0; display: block; background: #f4f1ec; }
     #mindframe.frame-tab { padding: 0; background: #f3f0ea; overflow: hidden; }
     #suite-mind, #suite-mind iframe { width: 100%; height: calc(100vh - 132px); min-height: 70vh; border: 0; display: block; background: #f3f0ea; }
+    #marketplace.frame-tab { padding: 0; background: #0a0d14; overflow: hidden; }
+    #suite-market, #suite-market iframe { width: 100%; height: calc(100vh - 132px); min-height: 70vh; border: 0; display: block; background: #0a0d14; }
     #honest-body { transition: opacity 0.8s ease; }
     #honest-body.fade { opacity: 0; }
     #enough { margin:0 0 12px; }
@@ -63,7 +65,7 @@
     @media (max-width:700px) {
       .grid { grid-template-columns:1fr; }
       iframe, .frame { height:78vh; min-height:78vh; }
-      #suite-canvas, #suite-game, #suite-game iframe, #suite-mind, #suite-mind iframe { height:calc(100vh - 168px); min-height:calc(100vh - 168px); }
+      #suite-canvas, #suite-game, #suite-game iframe, #suite-mind, #suite-mind iframe, #suite-market, #suite-market iframe { height:calc(100vh - 168px); min-height:calc(100vh - 168px); }
       nav button { font-size:12px; }
     }
   </style>
@@ -84,6 +86,7 @@
         <button type="button" data-tab="canvas">Canvas</button>
         <button type="button" data-tab="wordgame">Ariel Words</button>
         <button type="button" data-tab="mindframe">MindFrame</button>
+        <button type="button" data-tab="marketplace">Marketplace</button>
         <button type="button" data-tab="learn">Learn</button>
         <button type="button" data-tab="rest">Rest</button>
         <button type="button" data-tab="record">Record</button>
@@ -188,6 +191,9 @@
     </section>
     <section id="mindframe" class="card frame-tab hidden">
       <div id="suite-mind"></div>
+    </section>
+    <section id="marketplace" class="card frame-tab hidden">
+      <div id="suite-market"></div>
     </section>
     <section id="canvas" class="card canvas-tab hidden">
       <iframe id="suite-canvas" title="Ariel canvas" src="../index.html?embed=1&amp;full=1"></iframe>
@@ -413,7 +419,7 @@
       if (Array.isArray(saved)) saved.forEach(row => { if (row && typeof row.v === "number") hist.push(row); });
       zoneLog = JSON.parse(localStorage.getItem("ariel-zones") || "[]") || [];
     } catch (err) {}
-    const TABS = ["discover", "create", "canvas", "wordgame", "mindframe", "learn", "rest", "record", "gate", "charts"];
+    const TABS = ["discover", "create", "canvas", "wordgame", "mindframe", "marketplace", "learn", "rest", "record", "gate", "charts"];
     function setAdvanced(on) {
       document.body.classList.toggle("advanced", !!on);
       document.querySelectorAll(".advanced-tab").forEach(btn => btn.classList.toggle("hidden", !on));
@@ -436,6 +442,7 @@
       if (btn.dataset.tab === "rest") paintRest();
       if (btn.dataset.tab === "wordgame") ensureSuiteWords();
       if (btn.dataset.tab === "mindframe") ensureSuiteMind();
+      if (btn.dataset.tab === "marketplace") ensureSuiteMarket();
       leaveHonest();
     });
     const journalText = document.getElementById("journal-text");
@@ -2011,6 +2018,17 @@
         document.getElementById("suite-mind").appendChild(frame);
       }
       suiteMind = next;
+    }
+    let suiteMarket = WordsPanel.blank();
+    function ensureSuiteMarket() {
+      const next = WordsPanel.open(suiteMarket);
+      if (next.created) {
+        const frame = document.createElement("iframe");
+        frame.src = "../marketplace/?embed=1";
+        frame.title = "Marketplace";
+        document.getElementById("suite-market").appendChild(frame);
+      }
+      suiteMarket = next;
     }
     paintVoid();
     window.addEventListener("message", (e) => {

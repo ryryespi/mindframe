@@ -33,7 +33,7 @@ test("MindFrame is a Suite tab and stays itself when embedded", () => {
   assert.match(app, /serviceWorker\.register\("\.\/sw\.js"/);
   const register = app.slice(app.indexOf("serviceWorker"));
   assert.match(register, /embed=1/);
-  assert.match(sw, /mindframe-shell-v31/);
+  assert.match(sw, /mindframe-shell-v32/);
 });
 
 console.log(`\n${passed} passed`);

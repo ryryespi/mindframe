@@ -167,7 +167,7 @@ test("offline first and gentle fallbacks: offline, busy, errors and timeouts nev
   Object.keys(V.MOODS).forEach(id => assert.equal(V.suggest(id).length, 3, id));
   // The service worker never caches other sites (the film APIs go straight to the network).
   assert.match(read("sw.js"), /if \(new URL\(request\.url\)\.origin !== self\.location\.origin\) return;/);
-  assert.match(read("sw.js"), /mindframe-shell-v31/);
+  assert.match(read("sw.js"), /mindframe-shell-v32/);
   assert.ok(read("sw.js").includes('"./js/features/movies.js"'));
 });
 

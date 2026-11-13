@@ -51,7 +51,7 @@ test("app: the Credits view in the sheet, offline, cached, no network", () => {
   assert.match(app, /"movies", "credits", "anchor", "about"\]/);
   assert.match(app, /MF\.Credits, MF\.Topology, MF\.About\]\.map/);
   assert.ok(sw.includes("./js/features/credits.js"));
-  assert.match(sw, /mindframe-shell-v31/);
+  assert.match(sw, /mindframe-shell-v32/);
   assert.ok(!/fetch\(|XMLHttpRequest/.test(src));
 });
 
