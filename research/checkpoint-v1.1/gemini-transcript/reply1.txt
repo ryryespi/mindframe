@@ -1,0 +1,77 @@
+Here is a peer review of Orun Unified Research: Returning to the Living and its companion test-bed novel, Selu Cannot Buy the Morning Back.
+
+1. Strongest Contributions
+
+Epistemic Discipline and Self-Correction: The paper’s greatest strength is its unusually rigorous boundary-policing. By explicitly retiring earlier overclaims—such as the foot solar plexus reflex point, literal 
+𝑣
+=
+0
+v=0 velocity, power-posing hormone effects, "mania glimmers", and "learning styles" matching—the author demonstrates genuine intellectual honesty. Separating empirical claims, design rules, and personal [Values] prevents faith convictions from being disguised as experimental data and protects empirical propositions from becoming unfalsifiable.
+
+Resolving the Solo-Circuit Weakness via Paired Call-and-Answer: Earlier iterations of somatic/attentional grounding (C-R-Z) risked functioning as a closed, solitary loop where an individual could get stuck "listening" to silence. Integrating the novel’s paired call-and-answer protocol ("Where are you?" / "Here. Heard.") directly addresses this by shifting Reality-Return from an internal cognitive maneuver to an interpersonal, closed-loop communication check.
+
+Operationalizing "Continuing Bonds" Without Hoarding or Pathologizing: The design of rivel—knowledge of the dead credited to their name, funded only through active use, requiring consent, and strictly prohibited from being sold or used to win living arguments—is a clever socio-technical translation of Klass et al.’s (1996) Continuing Bonds and Stroebe & Schut’s (1999) Dual Process Model. Adding the novel's innovation of "living names without living purses" solves the problem of generational attention-hoarding without reintroducing wealth accumulation.
+
+Non-Punitive Incentive Architecture: Removing variable-ratio rewards (lotteries) in favor of a fixed, deterministic gift earned by time away from the marketplace, alongside excluding inner-state metrics (
+Ψ
+Ψ and believability scores) from economic or access decisions, directly counters Goodhart’s law and dark-pattern engagement loops.
+
+The "Surprise Test" as a Practical Heuristic: While unvalidated, Kesh’s diagnostic question ("When did she last surprise you?") is an intuitive, high-utility heuristic for distinguishing genuine relational engagement from self-generated rumination or parasocial simulation.
+
+2. Weakest Claims
+
+The Exclusivity Clauses in the Connection Postulate (P1, P3, U8): Propositions asserting that only connection completes a purpose (P1) or that honoring people outside the mind is the only way out (P3) are empirically indefensible. People routinely resolve stalled goals through solitary creative work, cognitive reframing, or acceptance without interpersonal intervention—a fact the paper implicitly concedes when noting Tamar’s solitary success with the clay in the novel. While the paper rightly downgrades these to Speculative or [Values], their retention in the core postulate list slightly muddies the conceptual waters.
+
+Macroeconomic Generalizability of the Fading-Value Commons (U6): The claim that demurrage with a zero-debt floor produces healthy circulation and dignity relies on thin, Depression-era micro-historical anecdotes (Gesell, Fisher, Wörgl) and Ostrom’s principles for physical common-pool resources. In a real-world app or economy, continuous exponential decay (
+𝑉
+(
+𝑡
+)
+=
+𝑉
+0
+𝑒
+−
+𝜆
+𝑡
+V(t)=V
+0
+	​
+
+e
+−λt
+) creates perverse incentives (e.g., rapid, low-value "hot-potato" spending or wash-trading tokens back and forth right before decay thresholds) unless heavily policed by friction and human review.
+
+Intergroup Prejudice Reduction via UDL Routes: Section 3.4 maps Pettigrew and Tropp’s (2006) intergroup contact theory onto "swappable thinking-style routes". While the paper correctly labels this Speculative, the conceptual leap is strained: offering multimodal UI/educational pathways (words, pictures, movement) is an accessibility design choice (UDL), not an intergroup contact mechanism across social or demographic divides.
+
+Demand Characteristics and Partner Burden in the Proposed Pilot: In Phase B of the proposed pilot, participants choose their own check-in partner. While ecologically valid, self-selected partners introduce massive selection bias and demand characteristics. Furthermore, the protocol does not adequately account for asymmetric relational burden—what happens if one partner relies on the "Where are you?" prompt excessively, turning a lightweight grounding cue into a reassurance-seeking compulsion (which would violate P7).
+
+3. Citations and Evidence Grades to Question
+
+Feinstein, Duff, and Tranel (2010) Supporting U7 / P6: The paper cites this study of five patients with bilateral hippocampal damage to support the proposition that "feelings can outlast memory of their cause, so how we treat people matters even when it will be forgotten". While the paper accurately notes the small sample and bidirectional nature of the finding (sadness persisted as well as happiness), extrapolating acute emotional persistence over 30 minutes in densely amnesic neurological patients to long-term existential or relational permanence ("when memories fade, love remains") stretches the empirical source beyond its scope.
+
+Nalborczyk et al. (2022) and Baddeley & Hitch (1974) for Motor Interrupts: Section 3.1 grades "A brief motor act can interrupt induced rumination" as Plausible based on articulatory suppression (mouthing) and finger-tapping studies. In working memory literature, articulatory suppression specifically disrupts the phonological loop (verbal rumination), whereas simple postural shifts (dropping the shoulders, shifting weight to the feet) engage proprioceptive/vestibular systems rather than the phonological loop. Grading the general motor-interrupt claim as Plausible is fair, but the cited mechanism does not neatly cover the specific somatic moves of C-R-Z.
+
+Gollwitzer (1999) for "Planned Absorption with an Exit Cue": Citing implementation intentions (if-then plans) to support scheduled immersion in fantasy/inner worlds with a pre-set exit cue is a reasonable theoretical neighbor, though in practice, absorbed states (maladaptive daydreaming or deep grief loops) degrade the very meta-awareness (Schooler, 2002) required to notice the exit cue when it arrives.
+
+Unverified Secondary Citations: Relying on unverified memory-based citations from Coherence Under Decay for Ferster and Skinner (1957), Schüll (2012), and the Wörgl demurrage figures is acceptable in a transparent working paper, provided they are formally verified before any peer-reviewed journal submission.
+
+4. How Well the Novel Dramatizes the Research
+
+Exceptional Operationalization Without Didacticism: For a novel explicitly built as a conceptual test bed, Selu Cannot Buy the Morning Back avoids reading like an allegorical tract. The mechanics of C-R-Z—dropping the shoulders, feeling the weight in the feet on cool stone or river shallows, waiting past the "first sound"—are seamlessly integrated into physical scenes (the create-hall, luoma, the flooded water-stair) without ever using clinical jargon or naming the framework.
+
+Genuine Narrative Stress-Testing of the Framework: The novel is at its best when it exposes the failure modes of its own rules rather than letting them work effortlessly:
+
+Silence as a trap: In Chapter XVI, Neru uses the Drop and quiet listening only for her mother’s imagined voice to fill the vacuum, proving that a solo grounding technique can become a hiding place until Ilun breaks the silence with blunt truth.
+
+Institutionalized grief as stagnation: In Chapters XII and XIX, the town’s reverence for rivel nearly fossilizes their craft and endangers lives when Neru uses her dead mother’s authority to block Tamar’s clay innovation, and Kesh sells unwalked, outdated river maps.
+
+The limits of careful phrasing: In Chapter XVII, Neru’s painstakingly non-coercive letter ("I'm not asking") backfires and reads as indifference, showing that adherence to communication rules does not prevent human misinterpretation.
+
+Where the Fiction Smooths Over Real-World Friction:
+
+High-functioning community compliance: Orun operates with virtually zero bad-faith actors. Aside from Bram’s initial outsider skepticism and Kesh’s brief temptation to forge a border, no one games the dawn roll, counterfeits glass, or free-rides on Mira’s surplus bread. The narrative sidesteps the messy enforcement mechanisms that Ostrom’s commons require.
+
+Clean emotional resolutions: While the book avoids cheap melodrama (Alun stays dead; Vethan leaves again by choice; Ren and Sareth remain a child's width apart), Neru’s somatic Drop works reliably in high-stakes moments, and Ilun’s blunt confrontation ("She is dead, Neru") lands cleanly without triggering defensive rupture or prolonged clinical despair.
+
+Successful Synthesis of Co-Authoring Styles: The structural tension between the dense, sensory world-building (kiln-smoke, river-mint, wet stone) and the sharper, plot-driven dialogue seeded by Copilot (Kesh’s surprise test, the sisters' sparring, the gardeners arguing over beans) works well. The novel successfully serves as an intuitive, human-scale stress test that enriches the theoretical paper—most notably by generating the four design refinements that the abstract framework had missed.

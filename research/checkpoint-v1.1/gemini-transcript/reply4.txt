@@ -1,0 +1,53 @@
+Here is a concrete 30-day execution plan to launch Direction #2 (Dyadic "Read-Back" Grounding vs. Co-Rumination and Reassurance-Seeking), splitting roles cleanly between you as Principal Investigator (PI) and your two AI research assistants, followed by the overclaims to retire before data collection begins.
+
+Division of Labor
+
+You (Principal Investigator — Ryan Espinosa): Owns ethical oversight, IRB/ethics submission, human participant recruitment, informed consent, safety monitoring (988 protocols), and final theoretical decisions. Neither AI is a co-investigator or source of primary evidence.
+
+Grok (Literature, Canon & Protocol Consistency): Handles primary literature verification (checking full-text paginations and exact scale licensing terms, such as SWEMWBS), maintains alignment with your existing C-R-Z and Return Card specifications, and drafts participant onboarding scripts.
+
+Gemini (Methodology, Statistical Analysis & Adversarial Audit): Designs the randomization and pre-registration blueprint (OSF), builds the statistical analysis script (mixed-effects models for dyadic data), and stress-tests the study materials for demand characteristics and partner-burden confounds.
+
+30-Day Execution Plan
+
+Week 1: Pre-Registration & Protocol Lock (Days 1–7)
+
+You: Define exact inclusion/exclusion criteria (adults with non-clinical brooding; excluding acute crisis, mania, psychosis, and active prolonged grief disorder) and finalize the 988 safety referral flow.
+
+Grok: Verify full-text citations and licensing permissions for the Ruminative Responses Scale (RRS), Perceived Partner Responsiveness Scale, and SWEMWBS. Format the exact two-arm pocket/phone Return Card instructions ("Where are you?" / "Here. Heard." plus naming one physical object).
+
+Gemini: Draft the Open Science Framework (OSF) pre-registration document, specifying sample size power targets, primary/secondary endpoints, and explicit stop rules (e.g., partner burden threshold or worsening distress).
+
+Week 2: Instrumentation, Ethics & Simulation (Days 8–14)
+
+You: Submit the protocol for ethics/IRB review and set up the secure, minimal-identifier survey/EMA pipeline (e.g., REDCap, Qualtrics, or an encrypted daily SMS/web form).
+
+Grok: Write plain-language consent forms for both primary participants and their chosen partners, stripping out all Orun/philosophical jargon so participants aren't primed by the underlying theory.
+
+Gemini: Generate synthetic dyadic datasets (simulating baseline brooding, daily check-ins, and partner burden scores) and write the reproducible R/Python analysis script before any real data is collected.
+
+Week 3: Dry-Run Pilot & Adversarial Stress-Test (Days 15–21)
+
+You: Run a 5-day internal dry run with 3–5 volunteer test pairs (friends or colleagues outside the research program) to test friction, notification timing, and clarity of the "no-content-rehashing" rule.
+
+Grok: Collect qualitative friction notes from the dry run and refine the onboarding instructions where pairs accidentally slip into problem-solving or co-rumination.
+
+Gemini: Audit the dry-run data and onboarding copy for demand characteristics—ensuring the control arm ("Unconstrained Supportive Check-In") is framed just as positively and credibly as the "Constrained Read-Back" arm.
+
+Week 4: Recruitment Launch & Baseline Intake (Days 22–30)
+
+You: Open recruitment (targeting 40–50 dyads), conduct informed consent with both members of each pair, and administer baseline measures (RRS, UCLA Loneliness Scale, SWEMWBS).
+
+Grok: Maintain a clean, version-controlled study log and monitor daily check-in completion rates to flag drop-offs early.
+
+Gemini: Run automated data-quality and balance checks across the two randomized arms (verifying baseline brooding and relationship length are evenly distributed) as cohorts enter Week 1 of the field trial.
+
+Overclaims to Drop Before Launching
+
+Drop the "Living Key" Superiority Premise in Participant Materials: While U5 ("A living voice is a better key out of a loop than a solitary technique") is your core hypothesis, treating it as a settled fact in study materials will ruin the experiment via demand characteristics. Frame the study neutrally as comparing two distinct communication habits (structured procedural check-ins vs. open supportive check-ins).
+
+Drop Any Claim That Read-Backs "Cure" or "Stop" Rumination: Position "Here. Heard." strictly as an attentional reorienting and conversational grounding cue, not a clinical intervention or guaranteed loop-breaker. Acknowledge upfront that for some people, a partner prompt may fail to interrupt brooding or feel intrusive.
+
+Drop the Universality of "Connection Completes Purpose" (P1/U8): Keep metaphysical or absolute claims ("only connection ends a purpose," "only love remains") strictly in your personal [Values] layer. In the empirical study, treat connection as a measurable behavioral variable with clear boundaries, costs, and failure modes.
+
+Drop C-R-Z / Orun Branding Inside the Experiment: Do not give participants the novel, the philosophical backstory, or terms like selu, eshva, or Zero-Velocity. If participants know they are testing an author's cherished philosophical system, self-report bias will make the data unusable.

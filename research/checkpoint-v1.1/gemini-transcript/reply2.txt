@@ -1,0 +1,125 @@
+1. "Living Key" (Interpersonal Grounding) vs. Solo Grounding (The Drop)
+
+(a) What current research actually says:
+
+Solo grounding and outward sensory reorienting have strong empirical backing as a family of practices for reducing acute distress and dissociation, including affect labeling (Lieberman et al., 2007) and brief, exhale-emphasized slow breathing (Zaccaro et al., 2018; Balban et al., 2023).
+
+Suppressing unwanted thoughts backfires via ironic rebound effects (Wegner, 1994), whereas acceptance and cognitive defusion ("dropping the rope") reduce entanglement (Hayes, Strosahl, & Wilson, 1999).
+
+On the interpersonal side, perceived partner responsiveness (Reis, Clark, & Holmes, 2004) and conversational grounding/read-backs (Clark & Brennan, 1991; Schegloff, Jefferson, & Sacks, 1977) are well-established mechanisms for establishing shared reality and co-regulation. However, no direct head-to-head trial compares a brief solo somatic-attentional drop against a structured dyadic call-and-answer cue for breaking active rumination.
+
+(b) Most interesting open question:
+
+Under what conditions does an interpersonal "living key" accelerate exit from a rumination loop versus transforming into compulsive reassurance-seeking, where the distressed person outsources their meta-awareness to their partner?
+
+(c) One testable idea:
+
+Run a two-week randomized ambulatory assessment (EMA) trial with adults experiencing daily brooding (measured via the Ruminative Responses Scale; Treynor, Gonzalez, & Nolen-Hoeksema, 2003). Randomize participants to either a Solo Grounding Prompt (postural drop + naming three ambient sounds) or a Paired Call-and-Answer Prompt (exchanging a brief, non-analytical read-back cue like "Where are you?" / "Here. Heard." with a designated partner). Measure time-to-recovery from rumination episodes, momentary affect, and partner burden at day 14.
+
+2. Attention as a Fading Currency (Demurrage) and a Zero-Debt Commons
+
+(a) What current research actually says:
+
+The theoretical foundation for demurrage (currency that loses value over time to prevent hoarding and encourage circulation) comes from Silvio Gesell (The Natural Economic Order, 1916) and Irving Fisher (Stamp Scrip, 1933), with thin, confounded historical precedent from Depression-era local scrip experiments like Wörgl (1932–1933).
+
+Community-scale, non-market equal-credit systems have been studied through Time Banking (Cahn & Rowe, Time Dollars, 1992), which demonstrates viability for civic reciprocity alongside challenges in sustained engagement.
+
+Elinor Ostrom’s (Governing the Commons, 1990) field research establishes that durable commons rely on clear boundaries, local rule-making, monitoring, and graduated sanctions. Meanwhile, behavioral psychology confirms that variable-ratio schedules (lotteries/jackpots) drive compulsive checking (Ferster & Skinner, 1957; Schüll, 2012).
+
+(b) Most interesting open question:
+
+In a digital platform or micro-community, does a decaying token with a zero-debt floor genuinely foster prosocial, unhurried exchange—or does continuous decay induce "hot-potato" anxiety and low-value wash-trading just to beat the clock?
+
+(c) One testable idea:
+
+Build a closed-loop, 4-week experimental online micro-economy (n = 120 participants) exchanging peer feedback or micro-tasks. Compare three token conditions: (1) Standard Non-Decaying Tokens (can accumulate, no debt), (2) Decaying Demurrage Tokens (
+𝑉
+(
+𝑡
+)
+=
+𝑉
+0
+𝑒
+−
+𝜆
+𝑡
+V(t)=V
+0
+	​
+
+e
+−λt
+ with a zero floor and fixed daily baseline gift), and (3) Variable-Bonus Tokens (gamified lottery rewards). Measure network velocity, Gini inequality of token holdings, quality of peer contributions, and self-reported platform anxiety.
+
+3. Mind-Wandering vs. Real-World Attention & Conversational Syncing
+
+(a) What current research actually says:
+
+Large-scale experience sampling shows people spend nearly half their waking hours mind-wandering, which consistently correlates with lower momentary happiness (Killingsworth & Gilbert, 2010).
+
+Researchers distinguish between intentional (deliberate) and unintentional (spontaneous) mind-wandering (Seli, Risko, & Smilek, 2016), and between experiential drift and meta-awareness—noticing that one has drifted (Schooler, 2002; Smallwood & Schooler, 2015).
+
+Cognitive psychology proves that task switching incurs measurable reaction-time and accuracy costs, which external cues can mitigate (Monsell, 2003; Rubinstein, Meyer, & Evans, 2001), and physical thresholds/doorways act as natural "event boundaries" that segment memory and attention (Radvansky, Krawietz, & Tamplin, 2011).
+
+In conversation, the mere presence of a mobile device degrades perceived closeness and empathy (Przybylski & Weinstein, 2013), while active-constructive responding (Gable et al., 2004) and explicit conversational repair (Schegloff et al., 1977) restore alignment.
+
+(b) Most interesting open question:
+
+Can explicit, socially normalized "repair scripts" (e.g., briefly stating "Sorry, I drifted—can you repeat that last part?" followed by a one-line read-back) eliminate the social penalty of attentional lapses and reduce the cognitive switch cost of re-entering a live conversation?
+
+(c) One testable idea:
+
+Conduct a dyadic laboratory conversation study where one partner is covertly cued to perform a brief working-memory distraction task mid-conversation. Compare three recovery conditions: (1) Naturalistic Recovery (no script), (2) Silent Re-engagement (internally dropping the distraction and nodding), and (3) Explicit Repair + Read-Back (naming the drift aloud and summarizing the partner's last point). Measure the listening partner's ratings of perceived responsiveness (Reis et al., 2004) and conversational recall accuracy.
+
+4. "Feelings Outlast Memory" in Grief and Dementia
+
+(a) What current research actually says:
+
+In a landmark study of five patients with dense bilateral hippocampal amnesia, Feinstein, Duff, and Tranel (2010) demonstrated that intense emotions (both sadness and happiness) persisted for over 30 minutes after patients had completely forgotten the film clips that induced them.
+
+In bereavement research, the field has shifted away from requiring detachment toward Continuing Bonds—maintaining an ongoing, evolving internal connection with the deceased (Klass, Silverman, & Nickman, 1996). Stroebe and Schut’s (1999) Dual Process Model shows that healthy grief oscillates between loss-oriented coping and restoration-oriented engagement with daily life, whereas persistent, impairing yearning is classified as Prolonged Grief Disorder in the DSM-5-TR (APA, 2022).
+
+(b) Most interesting open question:
+
+In progressive dementias (such as Alzheimer’s disease, where amygdala and limbic structures are often preserved longer than hippocampal episodic memory), how long does the residual emotional valence of a social interaction persist, and can structured environmental or relational cues sustain positive emotional residue after the caregiver leaves?
+
+(c) One testable idea:
+
+Adapt the Feinstein et al. (2010) paradigm into an observational care-facility protocol for moderate-to-severe dementia residents. Compare standardized 10-minute visits using Task-Focused Care (neutral, functional interaction) versus Warm Relational Presence (unhurried, validating presence without memory-quizzing). Measure observable facial affect, vocal agitation, and physiological arousal at 15, 45, and 90 minutes post-visit—after episodic recall of the visit has vanished.
+
+5. Swappable Thinking Styles via Universal Design for Learning (UDL) vs. "Learning Styles"
+
+(a) What current research actually says:
+
+The classic "meshing hypothesis"—that diagnosing a person's fixed "learning style" (visual, auditory, kinesthetic) and matching instruction to it improves outcomes—has been thoroughly debunked for lack of empirical evidence (Pashler, McDaniel, Rohrer, & Bjork, 2008).
+
+Conversely, Universal Design for Learning (UDL) (CAST, 2024) is supported as an inclusive accessibility framework: rather than pigeonholing individuals into static types, it offers all learners multiple, unranked means of engagement, representation, and action.
+
+While Pettigrew and Tropp’s (2006) meta-analysis of 515 studies confirms that direct intergroup contact reduces prejudice, there is no empirical evidence yet that offering swappable cognitive or reflective modalities reduces social prejudice.
+
+(b) Most interesting open question:
+
+Does allowing adults to dynamically swap reflective modalities (e.g., switching between somatic movement, logical steps, imagery, or quiet solitude) during emotional regulation improve adherence and self-efficacy compared to offering a single standardized protocol—and does practicing someone else's preferred modality foster cognitive empathy?
+
+(c) One testable idea:
+
+Run a 3-arm randomized controlled trial for a digital stress-regulation tool: (1) Fixed Single-Mode Protocol (text/logic steps only), (2) Assessed "Style-Matched" Protocol (assigned once via baseline preference survey), and (3) Swappable UDL Menu (users can freely switch among text, audio, somatic movement, imagery, or quiet timer at every session without ranking). Compare 30-day retention, distress reduction, and perceived autonomy across arms.
+
+6. Fiction and AI Roleplay as a Research Test Bed
+
+(a) What current research actually says:
+
+Narrative transportation theory (Green & Brock, 2000) shows that immersive fiction temporarily suspends counterarguing and allows readers to simulate social and emotional scenarios.
+
+Horton and Wohl’s (1956) work on parasocial interaction demonstrates that humans treat fictional or mediated personas using real social heuristics, while Somer (2002) documents how immersive fantasy can cross into maladaptive daydreaming when it replaces real-world functioning.
+
+In behavioral science and HCI, simulated worlds and agent-based roleplay are recognized as hypothesis-generation and edge-case discovery tools ("thought experiments in narrative form"), though narrative coherence cannot validate empirical causality because an author controls the outcomes.
+
+(b) Most interesting open question:
+
+Can structured adversarial roleplay with LLMs—specifically prompting an AI co-author to adopt skeptical, outsider, or edge-case personas—systematically expose hidden failure modes and boundary conditions in behavioral frameworks before costly human trials are run?
+
+(c) One testable idea:
+
+Conduct a comparative framework-stress-test study: take 20 early-stage behavioral or social-design proposals and divide them into two groups. Group A undergoes standard Solo Author Revision; Group B undergoes Adversarial Narrative Simulation (where authors and an LLM roleplay multi-character scenarios designed to break the rules via free-riders, miscommunication, and emotional loops). Have an independent panel of behavioral scientists rate the revised proposals on blind-spot identification, boundary precision, and falsifiability.
