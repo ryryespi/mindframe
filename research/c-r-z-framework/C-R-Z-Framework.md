@@ -15,7 +15,7 @@
 
 This note records Ryan Espinosa's **C-R-Z Framework** as developed in three prior working papers: *The Unified C-R-Z Somatic-Kinetic Framework*; *Returning to Reality and Neutralizing Threat Responses* (V1 and V2); and *Everyday C-R-Z: The Low-Friction Architecture*. The model is meant to bypass slow verbal introspection, neutralize threat responses, and preserve personal sovereignty through three pillars — **Calibration (c)**, **Reality-Return (r)**, and **Zero-Velocity (z)** — and a brief action protocol, **Drop-Press-Snap**, with later daily adaptations.
 
-The first task is to present that architecture faithfully. The second is to grade each major claim against literature actually checked for this draft, using three evidence tiers: **supported**, **plausible**, and **speculative**. The third is to cross-reference the framework with two related notes in this collection, *Coherence Under Decay* and the quantum boundary proposal, and with the Orun story's skill of dropping everything, listening for a key to reality, and exiting the gate. A later section, Attention as Selu, asks how a person may visit an inner or fictional world without letting it override the living one, and treats attention as a limited coin, like Orun's selu, spent between those worlds. The note then proposes a small, testable within-subject pilot of Drop-Press-Snap against a control, on subjective distress and heart rate, and closes with safety limits, including the need for clinical follow-up when mania warning signs appear, and when immersive daydreaming crowds out life.
+The first task is to present that architecture faithfully. The second is to grade each major claim against literature actually checked for this draft, using three evidence tiers: **supported**, **plausible**, and **speculative**. The third is to cross-reference the framework with two related notes in this collection, *Coherence Under Decay* and the quantum boundary proposal, and with the Orun story's skill of dropping everything, listening for a key to reality, and exiting the gate. A later section, Attention as Selu, asks how a person may visit an inner or fictional world without letting it override the living one, and treats attention as a limited coin, like Orun's selu, spent between those worlds. A further section records the author's Connection Postulate: purpose keeps turning in the mind until connection with living people can complete it; fantasy both connects and traps; reality must be checked against shame, guilt, and false gossip; connection takes priority, including a respectful drop toward God and toward people who reach out; and the hope, held as a values claim, is that when memories fade, love remains, and that being present to respond beats seeking more knowledge. The note then proposes a small, testable within-subject pilot of Drop-Press-Snap against a control, on subjective distress and heart rate, and closes with safety limits, including the need for clinical follow-up when mania warning signs appear, and when immersive daydreaming crowds out life.
 
 The short version of the audit is this. Outward sensory reorienting, affect labeling, plantar contribution to posture, and slow, exhale-emphasized breathing have real literatures behind them. A brief motor task can interrupt rumination, but not specifically because an ASL "C" handshape bypasses the phonological loop. Shifting weight onto the soles is a reasonable proprioceptive anchor; a "solar plexus reflex point" on the foot is not a supported physiological mechanism. Expansive-posture hormone claims failed to replicate, though modest effects on how a posture *feels* are still discussed. "Glimmers," in Deb Dana's polyvagal-informed usage, are small cues of safety and must not be confused with mania prodromes. Polyvagal theory itself is disputed. C-R-Z agrees with *Coherence Under Decay* and with the Orun story on returning to a rest that is not empty and on leaving a loop. It conflicts with them if Zero-Velocity is read as a literal arrival at *v* = 0, and it conflicts with itself if "mania glimmers" and safety glimmers keep the same name.
 
@@ -33,7 +33,7 @@ Each claim below is tagged as one of:
 
 A fourth label, **[Values]**, is used where the claim states what is worth protecting (sovereignty, non-extraction, grace, the dignity of leaving). Values are not tested by experiment and are not diminished by being labelled.
 
-Sources in Section 11 were checked on 13 November 2026 against publisher, PubMed, PMC, or other bibliographic records and against abstracts or open full text returned in those records. They were not all read in their entirety. Page numbers and DOIs are given where the record supplied them.
+Sources in Section 12 were checked on 13 November 2026 against publisher, PubMed, PMC, or other bibliographic records and against abstracts or open full text returned in those records. They were not all read in their entirety. Page numbers and DOIs are given where the record supplied them.
 
 ---
 
@@ -327,9 +327,126 @@ This is presented as **the author's belief**, respectfully, and as a personal cl
 </ol>
 </div>
 
-If immersive daydreaming is crowding out work, relationships, sleep, or care, this card is not enough. See Section 7.
+When a living person reaches out, see also the Connection Postulate card in Section 6.6.
 
-## 6. A simple, testable pilot
+If immersive daydreaming is crowding out work, relationships, sleep, or care, this card is not enough. See Section 8.
+
+## 6. The Connection Postulate: Purpose, Fantasy, and Presence
+
+This section records a further postulate of the author's, offered in his own words on 13 November 2026, and then restated as seven numbered sub-postulates in plain English. The task, as in the rest of this note, is not to prove the postulate as a whole, and not to dilute it until it is only a slogan. It is to state it faithfully, set it beside the earlier architecture, and grade the parts that can meet a literature.
+
+The author's wording, quoted so that the restatement can be checked against it:
+
+> purpose is continually contemplated in the mind and only when techniques are used to connect to other people can the purposes end and accept fictional truths of actual techniques and mental ones fantasy is what connects us and also traps us the only way out of this story is for a need to honor people outside the mind and reality must continually be checked such as techniques to fight shame guilt and negativity tends to push false gossip similar to being caught in fantasy. there must be respect of God and other people who reach out to you to drop everything for genuine conversations and connection that triggers all senses. connection takes priority. based on this research find true ways to keep connections and sustain conversations memories and peace so when there are no more memories only love will remain the feeling of being loved in the end and surrender that all connections ended as they should be without seeking more knowledge when we can be grateful that energy and information will trigger the best point in time and the best knowledge to gain and create is being present to react than to seek.
+
+### 6.1 The postulate, stated faithfully
+
+The following seven sub-postulates are the author's. They are a clarifying restatement, not a replacement. Where a short title is added, it is only a handle.
+
+- **P1. Purpose cycles in contemplation until connection completes it.** Purpose is continually contemplated in the mind. Techniques for connecting with other people are what can bring those purposes to an end, so that fictional and mental techniques can be accepted as techniques, rather than as the living aim.
+
+- **P2. Fantasy both connects and traps.** Fantasy is what connects us, and also what traps us.
+
+- **P3. The way out is honoring people outside the mind.** The only way out of this story is a need to honor people who exist outside the mind.
+
+- **P4. Reality must be continually checked.** Shame, guilt, and a negativity bias tend to push false gossip and false inner narratives, which resemble being caught in fantasy. Techniques are needed to meet those drifts.
+
+- **P5. Connection takes priority.** Respect for God, and for people who reach out, means dropping everything for a genuine conversation and a connection that can engage the senses. When a living person reaches out, connection comes first.
+
+- **P6. When memories fade, love remains.** The hope is that, when there are no more memories, what remains is love: the felt sense of being loved, and a surrender that connections ended as they should, without a restless search for more knowledge, and with gratitude.
+
+- **P7. Being present to respond beats seeking more knowledge.** The best knowledge to gain and create is being present to respond, rather than seeking on and on. Gratitude trusts that energy and information can meet the right moment, instead of trying to hoard every fact in advance.
+
+P5's respect for God, P6's hope about love and surrender, and P7's trust that the right moment will arrive are **[Values]** as well as design rules. They are the author's convictions. They are not diminished by being labelled, and they are not turned into findings by being placed in a research note.
+
+### 6.2 Cross-references
+
+**Among the sub-postulates.** P1 through P3 form one arc: inner purpose keeps turning until a living person is honored, and fantasy is both the bridge and the snare. P4 is the maintenance rule for that arc: reality has to be checked, because shame, guilt, and negativity can invent a story that feels as closed as a daydream. P5 is the priority rule when a person actually reaches out. P6 and P7 are the long view: love as what is left when memory thins, presence as a better knowledge than endless seeking. They support one another if "the story" is the inner loop, and if "ending a purpose" means completing or setting down a mental errand by meeting someone real. They pull apart if "the only way out" or "only when" is read as a unique mechanism, or if "drop everything" is read as a duty to erase oneself.
+
+**With C-R-Z.** Reality-Return is the nearest pillar: look at what is actually here, including the person in front of you. Calibration and the Drop (Sections 3.3 and 5.2) are the tools for interrupting a shame or gossip loop without wrestling it. Zero-Velocity is the rest that is not empty, which is close to P6's peace, and close to the warning in Section 4.2 that rest must not become isolation. The everyday architecture already treats a living voice as a valid key (Section 4.1). The tension to watch is sovereignty: the right to stop, refuse, and leave must not be rewritten as a closed system, and "drop everything" must not be rewritten as having no right to a boundary.
+
+**With Attention as Selu.** P2 and P5 are almost the same claim as Section 5, said at the level of a life rather than a visit. Fantasy can be entered on purpose, with a budget and an exit cue; a living person can close the gate early; "Attention is life" is the author's sentence for that priority. P4's reality-check is kin to catching the drift and to syncing back (Sections 5.2–5.3). P1 adds something Section 5 did not quite say: that connecting with people is not only how one *returns*, but how a contemplated purpose can *complete*. That is a stronger claim, and it is graded as such in Section 6.3.
+
+**With *Coherence Under Decay*.** The notes agree on bounded control, a rest that is not a void, clean egress, and the refusal to treat compulsion as virtue. Honoring people outside the mind is kin to the Circuit of Grace and to the warning that isolation is not sovereignty. P7 agrees with CUD if "do not seek on and on" means do not use compulsive checking or knowledge-hoarding as a substitute for a protected present. It conflicts with CUD, and with this note, if it is read as a ban on honest inquiry. CUD's standard should win here too: say what is a values rule, what is a design rule, and what would count as a measurement.
+
+**A standing tension: P7 and the research enterprise.** This paper is itself an act of seeking. It gathers sources, grades claims, and proposes a pilot. P7 does not quietly cancel that work, and the work does not cancel P7. The honest reading, and the one used below, is narrower: seeking is not the highest knowledge when a living person is here, and it is not a peace when it is used to postpone presence, gratitude, or the end of a visit. A research note can still be written. It should not be used as a place to hide.
+
+**With the Orun story.** "Drop everything, listen for a key to reality, and exit the gate," and the finding that relationships snap a person back, are the narrative form of P3 and P5. Fantasy as the culture's gift and its trap is the world of Orun itself. Songs, shared names, and the rule that one comes home only by choice are already a memory-and-consent practice. P6's hope that love remains when memory fades is a later sentence in the same key: a name, a feeling, and a return that does not have to be argued from a complete archive.
+
+### 6.3 Evidence audit
+
+Each sub-postulate is graded in the same tiers as Section 0. Support for a nearby finding is never support for the postulate as a sealed system, and never a claim that the author's faith has been tested.
+
+| Sub-postulate | Tier | Short verdict |
+|---|---|---|
+| P1. Purpose cycles until connection completes it | **Plausible** as a design rule; the "only when" clause is **speculative** | Unfinished goals stay active in mind (Zeigarnik 1927; Martin and Tesser 1989, 1996). Social connection can close some loops. It is not the only way a purpose ends: goals are also completed, revised, or set down alone. |
+| P2. Fantasy both connects and traps | **Supported** for the two-sided claim; **[Values]** as a metaphysics of "this story" | Narrative transportation, parasocial bonds, and maladaptive daydreaming are real literatures. Stories can create closeness and can also absorb a person until the living world thins. |
+| P3. The way out is honoring people outside the mind | **Supported** that real relationships matter for health and a good life; "the only way out" is **[Values]** / **speculative** as a unique exit | Holt-Lunstad, Smith, and Layton (2010); the Harvard Study of Adult Development as reported by Waldinger and Schulz (2010, 2023). The exclusivity clause is a conviction, not a finding. |
+| P4. Reality must be checked; shame, guilt, and negativity can drive false narratives | **Supported** for negativity bias and for the shame–guilt distinction; **plausible** as an analogy to fantasy-capture, and as a toolkit | Baumeister et al. (2001); Tangney and colleagues; Dunbar on gossip as a social channel. "False gossip" is not all gossip. Self-compassion, compassion-focused work, defusion, and "check the facts" are reasonable tools, untested as a C-R-Z package. |
+| P5. Drop everything for genuine, multisensory conversation; connection takes priority | **Supported** that undivided, in-person presence matters; **plausible** for richer sensory conversation; priority and respect for God are **[Values]** | Phubbing and even the mere presence of a phone can lower conversation quality (Roberts and David 2016; Przybylski and Weinstein 2013). "All senses" should not be read as a literal requirement. "Drop everything" needs bounds (Section 6.5). |
+| P6. When memories fade, love remains | **Supported** that feelings can persist after memory of the cause is lost; "only love will remain," and surrender that every connection ended as it should, are **[Values]** / **speculative** as predictions | Feinstein, Duff, and Tranel (2010) found that sadness *and* happiness could persist in amnesia after the inducing event was forgotten. That is the nearest finding, and it does not single out love. Socioemotional selectivity (Carstensen, Isaacowitz, and Charles 1999) supports a late-life turn toward meaningful ties. Ware's "regrets of the dying" is anecdotal. |
+| P7. Being present to respond beats seeking more knowledge | **Plausible** as a priority rule; the claim that energy and information will meet the best moment is **[Values]** / **speculative** | Mindful presence has a well-being literature (Brown and Ryan 2003). Intolerance of uncertainty feeds worry and checking (Dugas, Gosselin, and Ladouceur 2001). This does not make inquiry a fault, and it does not prove a kairos mechanism. |
+
+**P1, in more detail.** A century of work on unfinished tasks, often under the name of the Zeigarnik effect, found that incomplete aims tend to remain more available in memory than completed ones (Zeigarnik 1927). Martin and Tesser's goal-progress account of rumination says that thought keeps returning to a goal when progress is stalled, and that the loop eases when the goal is reached, when progress becomes manageable, or when the goal is relinquished (Martin and Tesser 1989, 1996). That is real support for "purpose is continually contemplated" until something completes or releases it. The author's distinctive clause is that *connecting with other people* is what can end the purpose, and that this is how fictional and mental techniques can be accepted as techniques. That is a reasonable design rule, and it fits the Orun finding that a living voice can snap a person back. It is not the only exit the rumination literature allows, and it has not been tested as a C-R-Z claim. The exclusivity of "only when" is therefore **speculative**.
+
+**P2, in more detail.** Green and Brock (2000) described narrative transportation as a melding of attention, imagery, and feeling in which a person is absorbed into a story and may return somewhat changed, sometimes less able to notice the story's "false notes." Horton and Wohl (1956) described para-social interaction: a one-sided intimacy with a mediated figure that can feel like a relationship. Somer (2002), already cited in Section 5, described maladaptive daydreaming, in which vivid fantasy becomes hard to control and begins to interfere with life. Together these literatures **support** the two-sided claim: stories and inner worlds can connect people, teach them, and give them a place to stand, and they can also trap attention so that the living world is postponed. They do not decide the metaphysics of "this story." That remains the author's.
+
+**P3, in more detail.** A meta-analysis of 148 prospective studies, with more than 300,000 participants, found that stronger social relationships were associated with a 50 percent greater likelihood of survival, an effect comparable to well-known risk factors for mortality (Holt-Lunstad, Smith, and Layton 2010, [open access](https://doi.org/10.1371/journal.pmed.1000316)). The Harvard Study of Adult Development, a decades-long study of adult lives, has repeatedly found that the quality of close relationships is a central predictor of later happiness and health. Waldinger and Schulz (2010) reported, in a sample of married octogenarians from that tradition, that satisfying marriages buffered the daily-mood cost of health stressors; their later book-length account of the study puts the same lesson in public form (Waldinger and Schulz 2023). This **supports** the practical heart of P3: people outside the mind are not an optional decoration on a private purpose. It does not show that honoring them is the *only* way out of an inner story. That clause is **[Values]**.
+
+**P4, in more detail.** "Bad is stronger than good" is the title, and the conclusion, of a wide review: negative events, feedback, and information tend to outweigh comparable positive ones in impact and in how thoroughly they are processed (Baumeister, Bratslavsky, Finkenauer, and Vohs 2001). That is strong support for a negativity bias that can tilt a story toward harm. Tangney and colleagues distinguish shame, which condemns the global self ("I am bad"), from guilt, which condemns a specific act ("I did something bad"); guilt more often leads toward repair, and shame more often toward hiding or defensiveness (Tangney, Miller, Flicker, and Barlow 1996; Tangney and Dearing 2002). Dunbar (2004) treats gossip as a human form of social grooming: a way of bonding, keeping track of a group, and sometimes policing it. That means gossip is not only a vice, and not only false. The author's narrower warning still stands as **plausible**: unchecked negativity, especially when mixed with shame, can generate and spread a story that has come loose from what can be checked, and living inside that story can feel like living inside a fantasy. Nearby tools include self-compassion (Neff 2003), compassion-focused therapy's work with shame (Gilbert 2009), cognitive defusion (Hayes, Strosahl, and Wilson 1999, already cited in Section 5), and dialectical behavior therapy's "check the facts" skill (Linehan 2015). These are **plausible** techniques for the drift P4 names. They are not a tested C-R-Z protocol, and they are not a reason to skip care when shame or rumination has become a clinical problem.
+
+**P5, in more detail.** Partner "phubbing" — snubbing a person in favor of a phone — has been linked to more conflict over phone use and to lower relationship satisfaction (Roberts and David 2016). Even the mere presence of a mobile phone during a face-to-face conversation can reduce closeness and conversation quality, especially when the topic is personally meaningful (Przybylski and Weinstein 2013). Responsiveness research, taken up again in Section 6.4, finds that people feel closer when they are understood, validated, and cared for (Reis, Clark, and Holmes 2004), which is easier to do when attention is actually available. This **supports** the design rule that genuine conversation needs presence, and that a living reach-out should be able to interrupt an inner world, as Section 5 already said. It is **plausible**, not proven, that a conversation which can use face, voice, touch, and shared space is usually richer than text. "Triggers all senses" should be read as a wish for embodied presence, not as a requirement that every sense be engaged or that texted care does not count. Respect for God, and the rule that connection takes priority, remain **[Values]**. The bounds on "drop everything" are in Section 6.5.
+
+**P6, in more detail.** This is the sub-postulate that must be handled with the most care, because it touches memory loss, dying, and grief. Feinstein, Duff, and Tranel (2010, [PNAS](https://doi.org/10.1073/pnas.0914054107)) studied patients with severe amnesia after bilateral hippocampal damage. After sad or happy film clips, the patients quickly lost factual memory of what they had seen, yet their sadness or happiness persisted, sometimes more strongly than in comparison participants who still remembered the films. The honest lesson is sharp and limited: **a feeling can last after the memory of its cause is gone.** The study was small, it used laboratory inductions rather than a life of being loved, and it was a study of amnesia, not a dementia trial. It also ran in both directions. Sadness persisted too. So the finding **supports** "feelings can remain when memories do not." It does **not** support "only love will remain" as a prediction. That sentence is the author's hope and conviction, and it is labelled **[Values]**.
+
+A second neighbor is socioemotional selectivity theory: as the time horizon shortens, people tend to prioritize emotionally meaningful relationships over information-seeking and weaker ties (Carstensen, Isaacowitz, and Charles 1999; see also Carstensen 2006). That **supports** a late-life turn toward love and presence, which is close to P6 and P7 as priorities. It is not a finding about what remains after memory is gone. Bronnie Ware's *The Top Five Regrets of the Dying* is sometimes cited in this neighborhood. It is a palliative-care nurse's anecdotal account, not a systematic study, and it is labelled as such here. Gratitude practices have experimental support for modest gains in well-being (Emmons and McCullough 2003), which can serve P6 as a practice, not as proof of its eschatology. "Surrender that all connections ended as they should" is **[Values]**. It must not be used to tell a grieving person to stop missing someone, or to treat complicated grief, abandonment, or harm as a tidy completion.
+
+**P7, in more detail.** Brown and Ryan (2003) found that a disposition to mindful presence was associated with higher well-being. Dugas, Gosselin, and Ladouceur (2001) found that intolerance of uncertainty was specifically tied to worry, a pattern that often shows up as checking, rehearsing, and information-seeking that does not bring rest. Those findings make P7 **plausible** as a priority: when the alternative is anxious seeking, being present to the person and the moment in front of you is the better knowledge. The further claim, that energy and information will trigger the best point in time, is a trust statement, close to a theology of kairos, and is **[Values]** / **speculative** as a mechanism. The tension with this research note is real and should stay visible: the note may gather sources, and then it should be put down so that a living conversation can have the next unit of attention.
+
+### 6.4 True ways to keep connections and sustain conversations, memories, and peace
+
+The author asked this note to find, from the research, true ways to keep connections and to sustain conversations, memories, and peace, so that love can be what remains. What follows is a practical toolkit, not a treatment plan and not a promise. Each item is tagged by evidence tier, and each is mapped, where it helps, to a skill already named in C-R-Z, in Attention as Selu, or in the Orun story.
+
+**Reaching-out rituals.** **Plausible** as a design, with **supported** neighbors. Do not wait for the perfect mood or the finished thought. Set a simple, repeatable contact — a weekly call, a shared meal, a standing walk, a short message that is actually meant — and keep it small enough to survive a hard week. Sharing good news, and receiving it well, adds something of its own: capitalization research finds that telling another person about a positive event, and being met with an active, constructive response, is linked to better daily affect and to closer relationships (Gable, Reis, Impett, and Asher 2004). In Orun terms, this is spending selu on the commons before the coin sits unused.
+
+**Drop-everything rules for incoming connection, with healthy limits.** **[Values]** as a priority, **plausible** as a practice. When a person reaches out for a genuine conversation, pause the inner world, close the gate early, and arrive. That is already the priority rule in Section 5.7. The limit, stated gently and kept in view, is that "drop everything" is not a command to drop safety, consent, or one's own basic needs. A reach-out does not override a child who needs supervision, a task that cannot be abandoned without harm, a boundary already stated, or the difference between a living request and an endless stream of pings. Compulsive availability is not the same as honor. If the reach-out is a crisis, the honest move may be to stay and also to help the person get care, including **988** in the United States. Details are in Section 6.5.
+
+**Conversation sustainers: open questions, responsiveness, and repair.** **Supported** as a family of findings; untested as a C-R-Z script. Perceived responsiveness — feeling understood, validated, and cared for — is a central path to closeness (Reis, Clark, and Holmes 2004). When someone shares a joy, an active-constructive reply (interest, a question, a face that actually lights up) tends to travel farther than a quiet nod or a turn to the downside (Gable et al. 2004). Open questions and a short paraphrase of what was just heard are ordinary ways to give that responsiveness. When attention has drifted, the repair in Section 5.3 still stands: "Sorry, I drifted. Can you say that last part again?" Then answer the living sentence. In Orun, this is the snap back that a living voice can give, and the grace of admitting one was gone.
+
+**Shared memory practices: reminiscence, life-story work, shared rituals, and songs.** **Supported** for reminiscence and life-review as a class of interventions; **plausible** for everyday rituals and songs. A meta-analysis of 128 controlled studies found that reminiscence and life-review interventions can improve ego-integrity and reduce depression, with smaller effects on well-being, purpose, and social integration (Pinquart and Forstmeier 2012). That is clinical and structured work, often with older adults, and it is not a home recipe. The transferable practice is gentler: tell the stories together while they can still be told; keep the rituals that carry a name, a meal, a holiday, or a song; let music hold words that might otherwise be lost (the neighboring, limited literature on melody and recall is already cited in Section 5.4). In Orun, this is the song, the shared dance, and a name that can be carried when a fact begins to fade.
+
+**Reality checks for shame and gossip.** **Plausible** as a bundle of existing skills. When a harsh story about the self or about someone else starts to close, pause and check it as a story. Name the feeling. Ask what, exactly, was done, and what is known, and what is being filled in. Distinguish shame ("I am bad") from guilt ("I did this, and I can repair it"). If the story is about another person, do not spread what you cannot stand behind. Defusion helps: "I am having the thought that…" is already in Section 5.2. DBT's "check the facts" is the same family (Linehan 2015). Self-compassion and, where needed, clinical work on shame are the kinder path, not thought-stopping (Neff 2003; Gilbert 2009; Wegner 1994, already cited). This is P4 in practice, and it is a Reality-Return for social narrative.
+
+**Gratitude and surrender practices.** **Supported** for simple gratitude exercises as modest well-being practices; surrender is **[Values]**. Emmons and McCullough (2003) found that regularly noting blessings, compared with noting burdens, was associated with more positive affect in their experiments. A short end-of-visit or end-of-day thanks — for the person, for the time, for what was enough — is a low-friction form of that work. Surrender, in the author's sense, is not apathy and not a forced cheerfulness. It is the willingness to let a conversation, a purpose, or even a life-chapter end without immediately hunting for more knowledge to fill the space. If grief is complicated, persistent, or despairing, this practice is not enough; see Section 8.
+
+**Legacy-of-love practices.** **Plausible** as an ethical design, with a limited **supported** neighbor in the feeling-after-memory finding. If feelings can outlast the facts of their cause, then how a person is treated now may still matter when the episode itself cannot be recalled, by them or by us. The honest version of that hope includes the warning from Feinstein, Duff, and Tranel (2010): unkindness can leave a feeling behind too. The practice is therefore ordinary and serious: be someone whose presence would be a good feeling to keep. Write the letter, keep the song, record the voice, say the name, and make repair while repair can be received. Then let the connection be complete enough to put down. In Orun, this is coming home by choice, and leaving a name that can still be loved.
+
+### 6.5 Faith, values, and bounds
+
+The author includes, as a conviction of faith, respect for God, and a hope that love remains when memory does not. As in Section 5.6, this is presented as **the author's belief**, respectfully, and as **[Values]**. It is not a clinical result, not a substitute for 988 or for care, and not evidence that C-R-Z or this postulate has been validated. A reader who does not share the faith can use the reality-check, the conversation tools, and the presence rule without it. A reader who does may keep the respect, the gratitude, and the earlier faith-anchor ("Take heart; I have overcome the world," John 16:33) as part of how they drop a story and meet a person.
+
+**"Drop everything" needs bounds.** The priority is real: a genuine reach-out may close an inner gate early. The bound is also real. Connection does not require the abandonment of safety, of another person's consent, or of one's own basic needs. It does not require answering every request at once, remaining in a harmful conversation, or treating guilt as a proof that one has not given enough. Honor, in this note, includes the dignity of leaving, which the framework has already named as sovereignty. A person may say, "I want to give you my attention. I need a few minutes to finish this safely, and then I am here."
+
+If you are in emotional crisis or thinking about suicide, in the United States, call or text **988**. If you are in immediate danger, call **911**. Nothing in this section is an instruction to delay emergency care, to leave prescribed treatment, or to use gratitude or surrender in place of help for depression, trauma, dementia care, or complicated grief.
+
+### 6.6 A practical protocol card
+
+<div class="protocol">
+<p class="protocol-title">Protocol card: Connection takes priority</p>
+<p>A short addendum to the Attention as selu card in Section 5.7, not a treatment.</p>
+<ol>
+<li><strong>Notice the reach-out.</strong> A living person is asking for you, in the room, on the line, or at the door. That request can close an inner gate early. Connection takes priority.</li>
+<li><strong>Drop, with bounds.</strong> Set the inner story down. Do not wrestle it. Check safety, consent, and whether you can actually arrive. If you need a brief, honest delay to finish something that cannot be dropped, say so, and then come.</li>
+<li><strong>Arrive with the senses you have.</strong> Look up. Put the phone away if you can. Use the face, the voice, and the shared space. You do not have to engage every sense. You do have to be here.</li>
+<li><strong>Sustain the conversation.</strong> Ask one open question. Reflect back a little of what you heard. If they share a joy, meet it actively. If you drifted, repair: "Sorry, I drifted. Can you say that last part again?"</li>
+<li><strong>Check the story.</strong> If shame, guilt, or a harsh account of someone starts to take over, treat it as a story. Check the facts you actually have. Do not spread what you cannot stand behind. If repair is yours to make, make it.</li>
+<li><strong>Close with thanks, and let it end.</strong> When the visit is done, mark the end. Be grateful for what was enough. Do not immediately hunt for more knowledge to fill the space. If you use the author's faith-anchor, this is another place for "Take heart," and for leaving the person, not the leftover story, as the last impression.</li>
+</ol>
+</div>
+
+If isolation, shame, grief, or memory loss is becoming unmanageable, this card is not enough. See Section 8.
+
+## 7. A simple, testable pilot
 
 C-R-Z has not been tested as a package. A first study should be small, pre-registered, and willing to fail.
 
@@ -353,7 +470,7 @@ This is a first measurement, in the same spirit as the small app pilot in *Coher
 
 ---
 
-## 7. Safety
+## 8. Safety
 
 C-R-Z is a personal practice framework. **It is not medical treatment, not a substitute for psychotherapy or medication, and not a crisis service.**
 
@@ -363,11 +480,13 @@ C-R-Z is a personal practice framework. **It is not medical treatment, not a sub
 - People with trauma histories should keep the outward emphasis of Reality-Return. If a turn toward the body increases alarm or detachment, stop.
 - The weight-shift in the Drop should not be done in a way that risks a fall. A seated version, with both feet on the floor, is a full version, not a lesser one.
 - If immersive daydreaming, looping stories, or a fictional world begins to crowd out work, relationships, sleep, or ordinary care, that is a reason to seek professional help. Somer (2002) described **maladaptive daydreaming** as a pattern in which extensive, vivid fantasy becomes difficult to control and interferes with life. This protocol is not a treatment for that pattern.
+- "Drop everything" for a genuine reach-out is a priority rule with bounds: it does not require abandoning safety, consent, or one's own basic needs, and it is not a duty of self-erasure.
+- The hope that "only love will remain" is the author's conviction, not a clinical prediction. It is not a reason to delay dementia care, to skip support for caregivers, or to tell a grieving person that a connection has already ended as it should.
 - Nothing in this note is an instruction to leave prescribed medication or to delay emergency care.
 
 ---
 
-## 8. What this is not
+## 9. What this is not
 
 - Not a validated treatment, diagnosis, or medical device.
 - Not evidence that an ASL "C," a foot reflex point, or a triangle gaze has a unique neural pathway.
@@ -378,12 +497,15 @@ C-R-Z is a personal practice framework. **It is not medical treatment, not a sub
 - Not a claim that true, cost-free multitasking is possible, or that a fictional world can be inhabited at full strength at the same time as a living conversation.
 - Not a treatment for maladaptive daydreaming, and not a license to disappear into an inner world when life is asking for attention.
 - Not clinical evidence for a verse of Scripture. John 16:33 is offered as the author's faith-anchor, not as a finding.
+- Not a finding that only love remains after memory is gone. The nearest study shows that feelings, including sadness, can persist after memory of their cause is lost.
+- Not a command to abandon learning, inquiry, or this research, and not a duty to drop safety, consent, or one's own needs in the name of connection.
+- Not a treatment for complicated grief, clinical shame, social isolation, or dementia, and not a license to spread unverified gossip in the name of "checking reality."
 
 ---
 
-## 9. Limitations
+## 10. Limitations
 
-This audit is only as strong as the records checked on 13 November 2026, including the Attention as Selu sources added the same day. Some nearby literatures (for example, sensorimotor psychotherapy and somatic experiencing) were not reviewed in depth and should not be treated as silently endorsed or silently dismissed. The three source papers were not available to this draft as public, dated, paginated documents; the framework is taken from the author's own synopsis, which he offered as the authoritative short form. If a later comparison with the full source papers shows a missed nuance, the source papers govern the description, and this audit should be revised.
+This audit is only as strong as the records checked on 13 November 2026, including the Attention as Selu sources and the Connection Postulate sources added the same day. The emotion-after-memory finding used in Section 6 is from a small study of hippocampal amnesia, not a dementia trial, and it does not single out love. Some nearby literatures (for example, sensorimotor psychotherapy and somatic experiencing) were not reviewed in depth and should not be treated as silently endorsed or silently dismissed. The three source papers were not available to this draft as public, dated, paginated documents; the framework is taken from the author's own synopsis, which he offered as the authoritative short form. If a later comparison with the full source papers shows a missed nuance, the source papers govern the description, and this audit should be revised.
 
 The evidence tiers grade *component claims*, not the character of the author or the worth of the values layer. A speculative mechanism can sit next to a sound aim. The aim is not thereby proved, and the person is not thereby discredited.
 
@@ -391,7 +513,7 @@ A within-subject pilot will not settle long-term use, clinical populations, or t
 
 ---
 
-## 10. Recommendations
+## 11. Recommendations
 
 1. Keep the three-part shape: interrupt, look outward, come to rest on the ground.
 2. Keep Drop-Press-Snap as a brief sequence, with the Press reframed as a toe-and-sole attention anchor, and with a documented alternative to the ASL "C."
@@ -399,17 +521,21 @@ A within-subject pilot will not settle long-term use, clinical populations, or t
 4. Replace "mania glimmers" with "mania early-warning signs" or "prodromes," and keep "glimmers," if at all, for small cues of present safety.
 5. Write Zero-Velocity as an approach to rest (*v* approaching a floor, not *v* = 0), in line with *Coherence Under Decay*.
 6. Let relationship stay inside Reality-Return: a living voice is a valid key.
-7. Run the pilot in Section 6 before any public claim that the package regulates the vagus, hormones, or threat "at the hardware level."
-8. Leave the values — sovereignty, grace, the right to leave, collective peace as an exhaled hope, and "Attention is life" — labelled as values.
+7. Run the pilot in Section 7 before any public claim that the package regulates the vagus, hormones, or threat "at the hardware level."
+8. Leave the values — sovereignty, grace, the right to leave, collective peace as an exhaled hope, "Attention is life," connection taking priority, and the hope that love remains — labelled as values.
 9. Treat attention as a limited selu budget, with living people first, and allow inner-world absorption only with a span and an exit cue.
 10. Teach the Drop as an if-then plus a body drop, and as letting go, not as thought-stopping.
 11. Keep "Take heart; I have overcome the world" (John 16:33) in the values layer, as the author's closing anchor, not as a clinical claim.
+12. Keep the Connection Postulate as the author's, with the seven sub-postulates graded in Section 6.3, and do not collapse "only when" or "only love will remain" into findings they have not earned.
+13. Practice the drop-everything rule with bounds: safety, consent, and one's own needs remain standing.
+14. Use the toolkit in Section 6.4 — reaching-out rituals, conversation sustainers, shared memory practices, reality checks for shame and gossip, gratitude, and a legacy of love — as ordinary practices, not as a treatment.
+15. Do not let P7 cancel honest inquiry. Let it stop seeking that replaces presence, and let a visit end without hoarding more knowledge.
 
 ---
 
-## 11. References
+## 12. References
 
-### 11.1 Source papers for the framework
+### 12.1 Source papers for the framework
 
 1. Ryan Espinosa, *The Unified C-R-Z Somatic-Kinetic Framework*, working paper.
 2. Ryan Espinosa, *Returning to Reality and Neutralizing Threat Responses*, V1 and V2, working papers.
@@ -417,13 +543,13 @@ A within-subject pilot will not settle long-term use, clinical populations, or t
 
 The synopsis of pillars, Drop-Press-Snap, and V2 adaptations used in this note was provided by the author on 13 November 2026.
 
-### 11.2 Related notes in this collection
+### 12.2 Related notes in this collection
 
 4. Ryan Espinosa, with Grok Bot, *Coherence Under Decay: A Shared Control Template for Qubits and a Zero-Debt Commons*, 12 November 2026, MindFrame research notes, [Coherence-Under-Decay](https://ryryespi.github.io/mindframe/research/coherence-under-decay/Coherence-Under-Decay.pdf).
 5. Ryan Espinosa, with Grok Bot, *Dynamic Boundary Control and Vacuum-Referenced Stabilization of Qubits: A conceptual research proposal for Project Ariel (revised)*, 12 November 2026, [Quantum-Boundary-Proposal](https://ryryespi.github.io/mindframe/research/quantum-boundary/Quantum-Boundary-Proposal.pdf).
 6. Ryan Espinosa, *Selu Cannot Buy the Morning Back* and *The Path of Rivel* (Orun narrative and game, 2026), including the skill of dropping everything, listening for a key to reality, and exiting the gate.
 
-### 11.3 Literature checked for this draft
+### 12.3 Literature checked for this draft
 
 7. A. D. Baddeley and G. J. Hitch, "Working memory," in G. H. Bower (ed.), *The Psychology of Learning and Motivation*, Vol. 8 (Academic Press, 1974), pp. 47–89.
 8. A. Baddeley, "Working memory: theories, models, and controversies," *Annual Review of Psychology* **63**, 1–29 (2012).
@@ -455,6 +581,7 @@ The synopsis of pillars, Drop-Press-Snap, and V2 adaptations used in this note w
 
 
 *Attention, switching, mind-wandering, and anchors (checked 13 November 2026)*
+
 35. S. Monsell, "Task switching," *Trends in Cognitive Sciences* **7**(3), 134–140 (2003). https://doi.org/10.1016/S1364-6613(03)00028-7
 36. J. S. Rubinstein, D. E. Meyer, and J. E. Evans, "Executive control of cognitive processes in task switching," *Journal of Experimental Psychology: Human Perception and Performance* **27**(4), 763–797 (2001). https://doi.org/10.1037/0096-1523.27.4.763
 37. M. A. Killingsworth and D. T. Gilbert, "A wandering mind is an unhappy mind," *Science* **330**(6006), 932 (2010). https://doi.org/10.1126/science.1192439
@@ -477,10 +604,41 @@ The synopsis of pillars, Drop-Press-Snap, and V2 adaptations used in this note w
 54. E. Somer, "Maladaptive daydreaming: a qualitative inquiry," *Journal of Contemporary Psychotherapy* **32**(2–3), 197–212 (2002). https://doi.org/10.1023/A:1020597026919
 55. *The Holy Bible*, King James Version, John 16:33. Cited as the author's faith-anchor, not as empirical evidence.
 
-Item 9 carries a flag to confirm pagination against the publisher version before any formal quotation. Item 40 and item 51 should be spot-checked for pagination if quoted at length. All other bibliographic details above were taken from publisher, PubMed, PMC, or Cochrane records checked on 13 November 2026, or from abstracts and open text supplied by those records. They were not all read in full.
+
+*Connection, purpose, fantasy, presence, memory, and gratitude (checked 13 November 2026)*
+
+56. B. Zeigarnik, "Das Behalten erledigter und unerledigter Handlungen," *Psychologische Forschung* **9**, 1–85 (1927). Classic source for the finding that unfinished tasks tend to remain more available in memory than finished ones; commonly called the Zeigarnik effect.
+57. L. L. Martin and A. Tesser, "Toward a motivational and structural theory of ruminative thought," in J. S. Uleman and J. A. Bargh (eds.), *Unintended Thought* (Guilford, 1989), pp. 306–326.
+58. L. L. Martin and A. Tesser, "Some ruminative thoughts," in R. S. Wyer, Jr. (ed.), *Ruminative Thoughts: Advances in Social Cognition*, Vol. 9 (Lawrence Erlbaum, 1996), pp. 1–47. Goal-progress account: rumination continues while an important goal is stalled, and eases when the goal is reached, becomes manageable, or is relinquished.
+59. J. Holt-Lunstad, T. B. Smith, and J. B. Layton, "Social relationships and mortality risk: a meta-analytic review," *PLoS Medicine* **7**(7), e1000316 (2010). https://doi.org/10.1371/journal.pmed.1000316
+60. R. J. Waldinger and M. S. Schulz, "What's love got to do with it? Social functioning, perceived health, and daily happiness in married octogenarians," *Psychology and Aging* **25**(2), 422–431 (2010). https://doi.org/10.1037/a0019087 A paper from the Harvard Study of Adult Development tradition.
+61. R. Waldinger and M. Schulz, *The Good Life: Lessons from the World's Longest Scientific Study of Happiness* (Simon & Schuster, 2023). Book-length public account of the Harvard Study of Adult Development; cited as a study overview, not as a peer-reviewed trial.
+62. M. C. Green and T. C. Brock, "The role of transportation in the persuasiveness of public narratives," *Journal of Personality and Social Psychology* **79**(5), 701–721 (2000). https://doi.org/10.1037/0022-3514.79.5.701
+63. D. Horton and R. R. Wohl, "Mass communication and para-social interaction: observations on intimacy at a distance," *Psychiatry* **19**(3), 215–229 (1956). https://doi.org/10.1080/00332747.1956.11023049
+64. R. F. Baumeister, E. Bratslavsky, C. Finkenauer, and K. D. Vohs, "Bad is stronger than good," *Review of General Psychology* **5**(4), 323–370 (2001). https://doi.org/10.1037/1089-2680.5.4.323
+65. R. I. M. Dunbar, "Gossip in evolutionary perspective," *Review of General Psychology* **8**(2), 100–110 (2004). https://doi.org/10.1037/1089-2680.8.2.100
+66. J. P. Tangney, R. S. Miller, L. Flicker, and D. H. Barlow, "Are shame, guilt, and embarrassment distinct emotions?" *Journal of Personality and Social Psychology* **70**(6), 1256–1269 (1996). https://doi.org/10.1037/0022-3514.70.6.1256
+67. J. P. Tangney and R. L. Dearing, *Shame and Guilt* (Guilford, 2002).
+68. K. D. Neff, "Self-compassion: an alternative conceptualization of a healthy attitude toward oneself," *Self and Identity* **2**(2), 85–101 (2003). https://doi.org/10.1080/15298860309032
+69. P. Gilbert, "Introducing compassion-focused therapy," *Advances in Psychiatric Treatment* **15**(3), 199–208 (2009). https://doi.org/10.1192/apt.bp.107.005264
+70. M. M. Linehan, *DBT Skills Training Manual*, 2nd ed. (Guilford, 2015). Cited for the emotion-regulation skill "check the facts," not as a trial of C-R-Z.
+71. H. T. Reis, M. S. Clark, and J. G. Holmes, "Perceived partner responsiveness as an organizing construct in the study of intimacy and closeness," in D. J. Mashek and A. Aron (eds.), *Handbook of Closeness and Intimacy* (Lawrence Erlbaum, 2004), pp. 201–225.
+72. S. L. Gable, H. T. Reis, E. A. Impett, and E. R. Asher, "What do you do when things go right? The intrapersonal and interpersonal benefits of sharing positive events," *Journal of Personality and Social Psychology* **87**(2), 228–245 (2004). https://doi.org/10.1037/0022-3514.87.2.228
+73. J. A. Roberts and M. E. David, "My life has become a major distraction from my cell phone: partner phubbing and relationship satisfaction among romantic partners," *Computers in Human Behavior* **54**, 134–141 (2016). https://doi.org/10.1016/j.chb.2015.07.058
+74. A. K. Przybylski and N. Weinstein, "Can you connect with me now? How the presence of mobile communication technology influences face-to-face conversation quality," *Journal of Social and Personal Relationships* **30**(3), 237–246 (2013). https://doi.org/10.1177/0265407512453827
+75. J. S. Feinstein, M. C. Duff, and D. Tranel, "Sustained experience of emotion after loss of memory in patients with amnesia," *Proceedings of the National Academy of Sciences* **107**(17), 7674–7679 (2010). https://doi.org/10.1073/pnas.0914054107
+76. L. L. Carstensen, D. M. Isaacowitz, and S. T. Charles, "Taking time seriously: a theory of socioemotional selectivity," *American Psychologist* **54**(3), 165–181 (1999). https://doi.org/10.1037/0003-066X.54.3.165
+77. L. L. Carstensen, "The influence of a sense of time on human development," *Science* **312**(5782), 1913–1915 (2006). https://doi.org/10.1126/science.1127488
+78. B. Ware, *The Top Five Regrets of the Dying* (Hay House, 2012). First circulated earlier as a blog and a 2011 edition; cited here from the 2012 trade edition. Anecdotal palliative-care memoir, not a systematic study; cited only with that limit.
+79. R. A. Emmons and M. E. McCullough, "Counting blessings versus burdens: an experimental investigation of gratitude and subjective well-being in daily life," *Journal of Personality and Social Psychology* **84**(2), 377–389 (2003). https://doi.org/10.1037/0022-3514.84.2.377
+80. M. Pinquart and S. Forstmeier, "Effects of reminiscence interventions on psychosocial outcomes: a meta-analysis," *Aging & Mental Health* **16**(5), 541–558 (2012). https://doi.org/10.1080/13607863.2011.651434
+81. K. W. Brown and R. M. Ryan, "The benefits of being present: mindfulness and its role in psychological well-being," *Journal of Personality and Social Psychology* **84**(4), 822–848 (2003). https://doi.org/10.1037/0022-3514.84.4.822
+82. M. J. Dugas, P. Gosselin, and R. Ladouceur, "Intolerance of uncertainty and worry: investigating specificity in a nonclinical sample," *Cognitive Therapy and Research* **25**(5), 551–558 (2001). https://doi.org/10.1023/A:1005553414688
+
+Item 9 carries a flag to confirm pagination against the publisher version before any formal quotation. Item 40 and item 51 should be spot-checked for pagination if quoted at length. Items 57, 58, and 71 are book chapters whose page ranges were taken from standard bibliographic records and should be spot-checked against the printed volumes if quoted at length. All other bibliographic details above were taken from publisher, PubMed, PMC, or other bibliographic records checked on 13 November 2026, or from abstracts and open text supplied by those records. They were not all read in full.
 
 
-### 11.4 AI assistant
+### 12.4 AI assistant
 
 34. Grok Bot (2026). AI assistant used, under the author's direction, to help draft this note, look up and format literature, cross-reference the author's related papers, and prepare the PDF. Grok Bot is an AI assistant. It is not a co-investigator, not a clinician, and not a source of primary evidence. Every empirical claim in this note is only as strong as the published record it cites.
 
