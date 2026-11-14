@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ESC Four-Box Architecture Dashboard</title>
+    <style>
+        body { font-family: monospace; background: #0f172a; color: #38bdf8; padding: 2rem; }
+        h1 { color: #f43f5e; }
+        .box { border: 1px solid #334155; padding: 1rem; margin-bottom: 1rem; background: #1e293b; }
+        button { background: #f43f5e; color: #fff; border: none; padding: 0.5rem 1rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Equational Semantic Compression (ESC) Dashboard</h1>
+    <div class="box">
+        <h3>Box 4: Void-State Dampener Status</h3>
+        <p id="status">System Nominal. Laminar Flow Active.</p>
+        <button onclick="triggerStress()">Inject High-Friction Packet</button>
+    </div>
+    <script>
+        let load = 10;
+        function triggerStress() {
+            load += 12;
+            if(load >= 35) {
+                document.getElementById('status').innerText = 'BOX 4 TRIGGERED: Void-State Dampener Active! Allostatic Load Reset.';
+                load = 10;
+            } else {
+                document.getElementById('status').innerText = 'Allostatic Load: ' + load + '/35';
+            }
+        }
+    </script>
+</body>
+</html>
