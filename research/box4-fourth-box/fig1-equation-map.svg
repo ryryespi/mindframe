@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="330" viewBox="0 0 640 330" font-family="DejaVu Sans, sans-serif" font-size="12">
+  <rect x="0" y="0" width="640" height="330" fill="#ffffff"/>
+  <text x="320" y="20" text-anchor="middle" font-size="13" font-weight="bold">Figure 1. Toy map of the equation domain (example numbers only)</text>
+  <!-- Box 3 governor -->
+  <rect x="440" y="40" width="185" height="70" rx="8" fill="#fff4d6" stroke="#b07d00"/>
+  <text x="532" y="62" text-anchor="middle" font-weight="bold">Box 3: human values</text>
+  <text x="532" y="80" text-anchor="middle">accepts / rejects each</text>
+  <text x="532" y="96" text-anchor="middle">translation ("Heard" / "No")</text>
+  <!-- grounded nodes -->
+  <rect x="30" y="140" width="150" height="50" rx="8" fill="#dff0e3" stroke="#2e7d32"/>
+  <text x="105" y="160" text-anchor="middle" font-weight="bold">G1 Rumination AR(1)</text>
+  <text x="105" y="177" text-anchor="middle">grounded · C = 0.8</text>
+  <rect x="30" y="250" width="150" height="50" rx="8" fill="#dff0e3" stroke="#2e7d32"/>
+  <text x="105" y="270" text-anchor="middle" font-weight="bold">G3 Newton cooling</text>
+  <text x="105" y="287" text-anchor="middle">grounded · C = 0.95</text>
+  <rect x="440" y="250" width="185" height="50" rx="8" fill="#dff0e3" stroke="#2e7d32"/>
+  <text x="532" y="270" text-anchor="middle" font-weight="bold">G2 Plan-making</text>
+  <text x="532" y="287" text-anchor="middle">grounded · C = 0.7</text>
+  <!-- speculative node -->
+  <rect x="250" y="160" width="160" height="56" rx="8" fill="#f3f3f3" stroke="#555" stroke-dasharray="6,4"/>
+  <text x="330" y="182" text-anchor="middle" font-weight="bold">S1 dHope/dt (exploratory)</text>
+  <text x="330" y="199" text-anchor="middle">C = 0.1 · N = 0.9</text>
+  <!-- edges -->
+  <line x1="250" y1="182" x2="180" y2="167" stroke="#2e7d32" stroke-width="4"/>
+  <text x="196" y="200" text-anchor="middle">cos 0.97</text>
+  <text x="196" y="214" text-anchor="middle" fill="#b07d00">w 0.50→0.68</text>
+  <line x1="270" y1="216" x2="170" y2="250" stroke="#888" stroke-width="2"/>
+  <text x="245" y="252" text-anchor="middle">cos 0.70</text>
+  <line x1="410" y1="210" x2="480" y2="250" stroke="#bbb" stroke-width="1"/>
+  <text x="470" y="225" text-anchor="middle">cos 0.40</text>
+  <!-- governor arrow -->
+  <line x1="470" y1="110" x2="225" y2="150" stroke="#b07d00" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a)"/>
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#b07d00"/></marker></defs>
+  <text x="320" y="318" text-anchor="middle" font-size="10" fill="#444">Solid = grounded · dashed = exploratory · thicker line = more similar · w = human-confirmed weight</text>
+</svg>
