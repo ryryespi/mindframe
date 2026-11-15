@@ -1,5 +1,19 @@
 # MindFrame
 
+## Try the live apps
+
+These pages run on GitHub Pages from this repo. They are conceptual sandboxes, not treatments. In crisis, call or text **988** (US) or call **911**.
+
+- [MindFrame](https://ryryespi.github.io/mindframe/) — write a thought or pick feelings, then Update. The page composes a reply from the nine-mover equation in this README. Nothing is sent until you ask.
+- [Project Ariel](https://ryryespi.github.io/mindframe/ariel/) — an offline canvas that collapses layers onto one line from an input anchor to an output. From [After the Line](research/after-the-line/After-the-Line.pdf) and the [Project Ariel Suite](research/ariel-suite/Project-Ariel-Suite.pdf) notes.
+- [Project Ariel Suite](https://ryryespi.github.io/mindframe/ariel/suite/) — Discover, Create, Canvas, Ariel Words, MindFrame, Marketplace, Learn, Rest, and Record in one shell. From the Project Ariel Suite paper.
+- [Ariel Words](https://ryryespi.github.io/mindframe/ariel/words/) — the word game, also a Suite tab. From the [Project Ariel Students](research/ariel-students/Project-Ariel-Students.pdf) notes on clear expression.
+- [Ariel Marketplace](https://ryryespi.github.io/mindframe/ariel/marketplace/) — a zero-debt sandbox. Chrons are not money. From [Coherence Under Decay](research/coherence-under-decay/Coherence-Under-Decay.pdf).
+- [ESC Four-Box dashboard](https://ryryespi.github.io/mindframe/esc-four-box-architecture/src/index.html) — inject a high-friction packet and watch the Box 4 dampener trip. From [Equational Semantic Compression](research/esc-four-box/ESC-Four-Box-Paper.pdf) and [The Fourth Box](research/box4-fourth-box/Box4-Fourth-Box-Research.pdf).
+- [Research notes](https://ryryespi.github.io/mindframe/research/index.html) — the index of the papers and toy simulations these apps come from.
+
+`esc_simulator.py` is Python-only. The dashboard above is a small page, not that script: [esc-four-box-architecture/src/esc_simulator.py](esc-four-box-architecture/src/esc_simulator.py).
+
 A calm, local-only practice tool for looking at a thought. One page, one input box (or **Pick feelings** chips), and an **Update** button: nothing is read or shown until you tap Update (or press Ctrl/Cmd + Enter). No account and no API key. **The app composes its own replies from the equation and works offline.** It makes one kind of network call, and only when you tap **Find more online** under Watch something: it sends film genre ids to Wikidata (never your words, feelings or names) and shows you what it will send first. A public AI is optional, through one button that shows you the exact prompt first.
 
 **Not therapy, not a diagnosis.** In crisis, call or text **988** (US) or call **911**. Crisis wording shows only that support box; nothing is computed or saved.
