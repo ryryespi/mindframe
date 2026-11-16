@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%226%22 fill=%22%23ffb45a%22/%3E%3C/svg%3E"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Witness — The Rest State</title>
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#20263a;color:#f4efe6;font:16px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.card{width:min(460px,92vw);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:22px 24px}
+h1{font-weight:500;font-size:22px;margin:0 0 4px}.soft{color:rgba(244,239,230,.7);font-size:14px}
+input{width:100%;box-sizing:border-box;padding:9px 11px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#f4efe6;font-size:15px;margin:6px 0 12px}
+button{font:inherit;color:#f4efe6;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:9px 16px;cursor:pointer;margin:4px 4px 4px 0}
+.primary{background:rgba(255,180,90,.25);border-color:rgba(255,180,90,.6)}
+.light{display:inline-block;width:16px;height:16px;border-radius:50%;background:#ffb45a;box-shadow:0 0 12px 4px rgba(255,180,90,.7);vertical-align:middle;margin-right:8px}
+.off{opacity:.35;box-shadow:none}
+#log{font-size:13px;color:rgba(244,239,230,.75);min-height:3em;margin-top:10px}
+#here{font-size:22px;color:#ffd29a}
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>Witness</h1>
+  <p class="soft">You are the living person who answers. Your light shows in the resting person's view while you're here.</p>
+  <label>Your name <input id="name" maxlength="40" placeholder="e.g. Aunt Rosa"></label>
+  <p><span id="light" class="light off"></span><span id="status">Not present yet</span></p>
+  <button id="presentBtn" class="primary" type="button">I'm here</button>
+  <button id="callBtn" type="button">Call them back</button>
+  <p id="here" hidden>“Here.” <button id="heardBtn" class="primary" type="button">Heard.</button></p>
+  <div id="log" aria-live="polite"></div>
+  <p class="soft" style="font-size:12px">Same-device demo: this page talks to the rest state through BroadcastChannel/localStorage, so both must be open in the same browser on the same device. A real cross-device link needs a small relay server (not included). If someone is in danger, call 911; for crisis support call or text 988 (US).</p>
+</main>
+<script>
+const CH='rest-state-witness'; const bc='BroadcastChannel' in window?new BroadcastChannel(CH):null;
+const $=id=>document.getElementById(id); let present=false;
+function send(m){m.at=Date.now(); if(bc) bc.postMessage(m); try{localStorage.setItem(CH,JSON.stringify(m));}catch(e){}}
+function log(t){ $('log').textContent=t; }
+function onMsg(m){ if(!m||!m.type) return;
+  if(m.type==='ping'&&present) send({type:'presence',present:true,name:$('name').value.trim()});
+  if(m.type==='state'){ const map={entry:'is preparing to rest',rest:'is resting',limit:'is beginning to return',readback:'is reading back',ground:'is grounding in the room',done:'is back',exited:'left (always allowed)'}; log('They '+(map[m.state]||m.state)+'.'); }
+  if(m.type==='satisfied') log('They are satisfied and returning.');
+  if(m.type==='here'){ $('here').hidden=false; log('They said “Here.” Answer them.'); }
+}
+if(bc) bc.onmessage=e=>onMsg(e.data);
+addEventListener('storage',e=>{ if(e.key===CH&&e.newValue&&!bc){ try{onMsg(JSON.parse(e.newValue));}catch(err){} } });
+$('presentBtn').onclick=()=>{ present=!present; $('light').classList.toggle('off',!present); $('status').textContent=present?'Present — your light is on':'Not present'; $('presentBtn').textContent=present?'Step away':'I\'m here'; send({type:'presence',present,name:$('name').value.trim()}); send({type:'ping'}); };
+$('callBtn').onclick=()=>{ send({type:'call'}); log('Call sent. Their witness light pulses; they choose when to return.'); };
+$('heardBtn').onclick=()=>{ send({type:'heard'}); $('here').hidden=true; log('You answered “Heard.”'); };
+addEventListener('beforeunload',()=>send({type:'presence',present:false}));
+</script>
+</body>
+</html>

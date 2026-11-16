@@ -1,6 +1,6 @@
 # Research notes
 
-Papers and toy simulations from 8–14 November 2026. **All of them are conceptual, not validated science.** They are not diagnoses, measurements, treatments, or new physics.
+Papers and toy simulations from 8–15 November 2026. **All of them are conceptual, not validated science.** They are not diagnoses, measurements, treatments, or new physics.
 
 | Paper | Date | Summary | PDF |
 |---|---|---|---|
@@ -27,6 +27,8 @@ Papers and toy simulations from 8–14 November 2026. **All of them are conceptu
 | Equational Semantic Compression and the Four-Box Cybernetic Architecture | 14 November 2026 | Ryan's 3-page Gemini paper. The source framework that The Fourth Box builds on and critically evaluates. Conceptual, not a validated treatment. | [PDF](esc-four-box/ESC-Four-Box-Paper.pdf) |
 | The Fourth Box: Ending Recursive Rumination and Finding the Peak of Existence Now | 14 November 2026 | Final research paper. A testable model of how repetitive thinking closes, a daily protocol, and an honest account of the peak of existence now. 38 pages, 107 verified references. Conceptual, not a validated treatment. | [PDF](box4-fourth-box/Box4-Fourth-Box-Research.pdf) · [MD](box4-fourth-box/Box4-Fourth-Box-Research.md) · [HTML](box4-fourth-box/Box4-Fourth-Box-Research.html) · [equation map](box4-fourth-box/fig1-equation-map.svg) · [ESC & Four-Box Architecture (code)](../esc-four-box-architecture/) |
 | Universal Translation Simulation | 14 November 2026 | Five-round simulation (Ryan with Alexa, Gemini, Copilot and Grok Bot). Verdict: Complete for now. A working model, not a proof. | [PDF](universal-translation-sim/Universal-Translation-Simulation-Report.pdf) · [MD](universal-translation-sim/Universal-Translation-Simulation-Report.md) · [HTML](universal-translation-sim/Universal-Translation-Simulation-Report.html) · [checkpoints](universal-translation-sim/checkpoints/) |
+| The Rest State: A Portal Between Environments | 15 November 2026 | A pause menu for the mind between environments: Return, Dive elsewhere, or Exit. Conceptual framework and working prototype, not a validated treatment. | [PDF](../rest-state/The-Rest-State.pdf) · [MD](../rest-state/The-Rest-State.md) · [HTML](../rest-state/The-Rest-State.html) · [app](../rest-state/app/) |
+| The Blind Sense Guardian | 15 November 2026 | Sensory separation, a witness light, and environment-first ethics for simulated worlds. Conceptual synthesis, not validated science. | [PDF](blind-sense-guardian/Blind-Sense-Guardian.pdf) · [MD](blind-sense-guardian/Blind-Sense-Guardian.md) |
 
 The live sandbox these notes describe is the [Ariel Marketplace](https://ryryespi.github.io/mindframe/ariel/marketplace/). The [Project Ariel Suite](https://ryryespi.github.io/mindframe/ariel/suite/) opens that same page as its Marketplace tab. Chrons are not money. The app is a conceptual sandbox, not a market and not a physics experiment. Its blueprint is [ariel/marketplace/SPEC.txt](../ariel/marketplace/SPEC.txt); the page that actually runs is [ariel/marketplace/index.html](../ariel/marketplace/index.html).
 

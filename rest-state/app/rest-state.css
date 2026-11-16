@@ -1,0 +1,51 @@
+.rs-root{--amber:#ffb45a;--ink:#f4efe6;--soft:rgba(244,239,230,.72);--card:rgba(24,28,38,.72);--line:rgba(255,255,255,.14)}
+.rs-root, .rs-root *{box-sizing:border-box}
+.rs-root,.rs-root{position:fixed;inset:0;z-index:2147483000;margin:0;overflow:hidden;background:#1b2233;color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.rs-root #scene{position:fixed;inset:0}
+.rs-root #scene canvas{display:block;touch-action:none}
+.rs-root .hidden{display:none!important}
+.rs-root #watermark{position:fixed;top:max(10px,env(safe-area-inset-top));left:12px;z-index:30;font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.55);pointer-events:none;user-select:none;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.rs-root .witness{position:fixed;top:max(8px,env(safe-area-inset-top));right:12px;z-index:30;display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.28);border:1px solid var(--line);color:var(--soft);border-radius:999px;padding:5px 12px 5px 8px;font-size:12px;cursor:default}
+.rs-root .witness .dot{width:14px;height:14px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px 3px rgba(255,180,90,.65)}
+.rs-root .witness.off .dot{opacity:.38;box-shadow:0 0 6px 1px rgba(255,180,90,.3)}
+.rs-root .witness.calling .dot{animation:rs-pulse 2.4s ease-in-out infinite}
+@keyframes rs-pulse{0%,100%{transform:scale(1);box-shadow:0 0 10px 3px rgba(255,180,90,.6)}50%{transform:scale(1.35);box-shadow:0 0 22px 8px rgba(255,180,90,.9)}}
+.rs-root .card{position:fixed;z-index:20;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,92vw);max-height:88vh;overflow:auto;background:var(--card);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.rs-root .card.small{width:min(420px,92vw)}
+.rs-root h1{font-weight:500;font-size:22px;margin:0 0 6px}
+.rs-root h2{font-weight:500;font-size:18px;margin:0 0 8px}
+.rs-root label{display:block;margin:10px 0;font-size:14px;color:var(--soft)}
+.rs-root input[type=text]{display:block;width:100%;margin-top:4px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--ink);font-size:15px}
+.rs-root .checks{list-style:none;padding:0;margin:8px 0}
+.rs-root .checks label{margin:6px 0}
+.rs-root .soft{color:var(--soft);margin:0 0 6px}
+.rs-root .fine{font-size:12px;color:rgba(244,239,230,.6)}
+.rs-root .fine a{color:#ffd29a}
+.rs-root .ritual{font-size:14px;color:#ffe2bd}
+.rs-root button{font:inherit;color:var(--ink);background:rgba(255,255,255,.1);border:1px solid var(--line);border-radius:999px;padding:9px 16px;cursor:pointer;margin:4px 4px 4px 0}
+.rs-root button:hover{background:rgba(255,255,255,.18)}
+.rs-root button.primary{background:rgba(255,180,90,.22);border-color:rgba(255,180,90,.55)}
+.rs-root button.hard{background:rgba(255,255,255,.92);color:#1b2233;font-weight:600}
+.rs-root #controls{position:fixed;left:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:25;display:flex;flex-wrap:wrap;gap:4px;max-width:60vw}
+.rs-root #controls button{font-size:13px;padding:7px 12px;background:rgba(0,0,0,.28)}
+.rs-root #exits{position:fixed;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:31;display:flex;gap:4px}
+.rs-root .accept{position:fixed;z-index:15;left:50%;top:22%;transform:translateX(-50%);text-align:center;pointer-events:none;transition:opacity 3s ease;text-shadow:0 1px 8px rgba(0,0,0,.45)}
+.rs-root .accept p{margin:2px 0;font-size:clamp(18px,3vw,26px);font-weight:300;letter-spacing:.02em}
+.rs-root .accept.quiet{top:auto;bottom:70px;opacity:.55}
+.rs-root .accept.quiet p{font-size:13px;display:inline;margin:0 4px}
+.rs-root .breathcue{position:fixed;z-index:14;left:50%;bottom:22%;transform:translateX(-50%);font-size:14px;letter-spacing:.2em;color:rgba(255,240,220,.7);pointer-events:none;text-transform:lowercase;transition:opacity 1.5s}
+.rs-root .notice{position:fixed;z-index:32;left:50%;top:14%;transform:translateX(-50%);background:var(--card);border:1px solid rgba(255,180,90,.6);border-radius:16px;padding:14px 18px;text-align:center;width:min(420px,90vw)}
+.rs-root .big{font-size:clamp(20px,3.2vw,28px);font-weight:300;margin:6px 0}
+.rs-root .heard{font-size:26px;color:#ffd29a;margin:8px 0}
+.rs-root .closure{font-weight:600;margin-top:14px}
+.rs-root #exitSeq{text-align:center;background:rgba(40,40,44,.55)}
+.rs-root #fade{position:fixed;inset:0;z-index:12;pointer-events:none;background:#d8d4cc;opacity:0;transition:opacity 4s ease}
+@media (prefers-reduced-motion:reduce){.rs-root .witness.calling .dot{animation:none;transform:scale(1.25)}.rs-root #fade{transition:opacity 1s}}
+.rs-root .softcue{position:fixed;z-index:16;left:50%;top:30%;transform:translateX(-50%);font-size:15px;color:rgba(255,240,220,.85);text-shadow:0 1px 8px rgba(0,0,0,.5);pointer-events:none;transition:opacity 3s;text-align:center;width:min(480px,90vw)}
+.rs-root.rs-closed{display:none}
+.rs-root #VRButton,.rs-root button#VRButton{z-index:33}
+.rs-root details{margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04)}
+.rs-root summary{cursor:pointer;color:#ffe2bd;font-size:14px}
+.rs-root input[type=file]{display:block;margin-top:4px;font-size:13px;color:var(--soft)}
+.rs-root #lovedDone{color:#ffe2bd;font-style:italic}
+@media (max-width:600px){.rs-root #controls{bottom:calc(60px + env(safe-area-inset-bottom));max-width:94vw}.rs-root #controls button{font-size:12px;padding:6px 10px}.rs-root #VRButton{bottom:auto!important;top:40px!important;font-size:11px!important;padding:6px 10px!important}}

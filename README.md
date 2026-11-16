@@ -10,6 +10,8 @@ These pages run on GitHub Pages from this repo. They are conceptual sandboxes, n
 - [Ariel Words](https://ryryespi.github.io/mindframe/ariel/words/) — the word game, also a Suite tab. From the [Project Ariel Students](research/ariel-students/Project-Ariel-Students.pdf) notes on clear expression.
 - [Ariel Marketplace](https://ryryespi.github.io/mindframe/ariel/marketplace/) — a zero-debt sandbox. Chrons are not money. From [Coherence Under Decay](research/coherence-under-decay/Coherence-Under-Decay.pdf).
 - [ESC Four-Box dashboard](https://ryryespi.github.io/mindframe/esc-four-box-architecture/src/index.html) — inject a high-friction packet and watch the Box 4 dampener trip. From [Equational Semantic Compression](research/esc-four-box/ESC-Four-Box-Paper.pdf) and [The Fourth Box](research/box4-fourth-box/Box4-Fourth-Box-Research.pdf).
+- [Rest State (3D pause menu)](https://ryryespi.github.io/mindframe/rest-state/app/) — a riverbank pause between environments: Return, Dive elsewhere, or Exit. From [The Rest State](rest-state/The-Rest-State.pdf).
+- [Rest State host demo](https://ryryespi.github.io/mindframe/rest-state/app/host-demo.html) — the same pause menu inside a busy stand-in environment. From [The Rest State](rest-state/The-Rest-State.pdf).
 - [Research notes](https://ryryespi.github.io/mindframe/research/index.html) — the index of the papers and toy simulations these apps come from.
 
 `esc_simulator.py` is Python-only. The dashboard above is a small page, not that script: [esc-four-box-architecture/src/esc_simulator.py](esc-four-box-architecture/src/esc_simulator.py).
