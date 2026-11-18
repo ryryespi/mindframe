@@ -4,7 +4,7 @@
 // http://localhost:8000/. On GitHub Pages it is /mindframe/.
 // A leading slash would skip that folder and break one of those two.
 
-const CACHE = "mindframe-shell-v33";
+const CACHE = "mindframe-shell-v34";
 
 const FILES = [
   "./",
@@ -78,8 +78,8 @@ self.addEventListener("fetch", event => {
   // go straight to the network and are never cached here.
   if (new URL(request.url).origin !== self.location.origin) return;
   const url = new URL(request.url);
-  // Ariel pages change in place. Do not keep an old copy of them.
-  if (url.pathname.indexOf("/ariel/") !== -1) {
+  // Ariel and the apps/ PWAs keep their own copies. Do not cache them here.
+  if (url.pathname.indexOf("/ariel/") !== -1 || url.pathname.indexOf("/apps/") !== -1) {
     event.respondWith(fetch(request));
     return;
   }

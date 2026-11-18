@@ -12,6 +12,8 @@ These pages run on GitHub Pages from this repo. They are conceptual sandboxes, n
 - [ESC Four-Box dashboard](https://ryryespi.github.io/mindframe/esc-four-box-architecture/src/index.html) — inject a high-friction packet and watch the Box 4 dampener trip. From [Equational Semantic Compression](research/esc-four-box/ESC-Four-Box-Paper.pdf) and [The Fourth Box](research/box4-fourth-box/Box4-Fourth-Box-Research.pdf).
 - [Rest State (3D pause menu)](https://ryryespi.github.io/mindframe/rest-state/app/) — a riverbank pause between environments: Return, Dive elsewhere, or Exit. From [The Rest State](rest-state/The-Rest-State.pdf).
 - [Rest State host demo](https://ryryespi.github.io/mindframe/rest-state/app/host-demo.html) — the same pause menu inside a busy stand-in environment. From [The Rest State](rest-state/The-Rest-State.pdf).
+- [MindFrame Now (pick your state, get your card in under a minute)](https://ryryespi.github.io/mindframe/apps/now/) — offline card from the State Finder, with an affirmation, words, and a grounding step. Optional save hands the entry to MindFrame Log on this site.
+- [MindFrame Log (long-term logging, trends, reports, training)](https://ryryespi.github.io/mindframe/apps/log/) — daily log, trends, reports, and training drills. Data stays in this browser.
 - [Research notes](https://ryryespi.github.io/mindframe/research/index.html) — the index of the papers and toy simulations these apps come from.
 
 `esc_simulator.py` is Python-only. The dashboard above is a small page, not that script: [esc-four-box-architecture/src/esc_simulator.py](esc-four-box-architecture/src/esc_simulator.py).

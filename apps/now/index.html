@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MindFrame Now</title>
+<meta name="description" content="Pick your state, get one matched affirmation, words and grounding step. Works offline.">
+<meta name="theme-color" content="#4b5a51" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161a1f" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="banner" role="note">Not medical advice. In crisis? Call or text <a href="tel:988">988</a> (US) or <a href="tel:911">911</a>.</div>
+<main>
+  <h1>MindFrame Now</h1>
+  <p class="lede">Pick where you are. Get one card. It takes less than a minute.</p>
+
+  <section id="pick" aria-label="Choose your state">
+    <fieldset>
+      <legend>Energy</legend>
+      <div class="chips" id="energy" role="group" aria-label="Energy"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Stress</legend>
+      <div class="chips" id="stress" role="group" aria-label="Stress"></div>
+    </fieldset>
+    <details class="more" id="more">
+      <summary>More detail (optional)</summary>
+      <fieldset><legend>Mood</legend><div class="chips three" id="mood"></div></fieldset>
+      <fieldset><legend>Focus</legend><div class="chips three" id="focus"></div></fieldset>
+      <fieldset><legend>Right now I'm…</legend><div class="chips three" id="context"></div></fieldset>
+      <label class="inline"><input type="checkbox" id="faith" checked> Include Scripture and faith lines</label>
+      <label class="inline">Theme <select id="theme"><option value="">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+    </details>
+  </section>
+
+  <section id="result" class="hidden" aria-live="polite">
+    <div class="card" id="stateCard">
+      <p class="state-name" id="stateName"></p>
+      <p class="state-meta" id="stateMeta"></p>
+      <p id="stateText"></p>
+      <p class="affirm" id="affirm"></p>
+    </div>
+    <div class="care hidden" id="care">This is a lot to carry alone. Reach one person now. If you might hurt yourself or can't stay safe, call or text <a href="tel:988">988</a> (US), or <a href="tel:911">911</a>.</div>
+    <div class="card" id="techCard">
+      <h2 id="techName"></h2>
+      <ol class="steps" id="techSteps"></ol>
+      <div class="breath hidden" id="breath" aria-hidden="true">breathe</div>
+      <div class="row">
+        <button class="btn" id="timerBtn" type="button">Start timer</button>
+        <span class="timer" id="timer" aria-live="off"></span>
+        <a class="btn ghost hidden" id="restLink" href="#" target="_blank" rel="noopener">Open Rest State</a>
+      </div>
+      <p class="note" id="techNote"></p>
+      <p class="src" id="techSrc"></p>
+    </div>
+    <div class="card" id="wordsCard"><h2>Words for this moment</h2><div id="words"></div></div>
+    <div class="card" id="quoteCard"><blockquote id="quote"></blockquote></div>
+
+    <details class="more" id="saveBox">
+      <summary>Save to log (optional)</summary>
+      <p class="note">This is only needed if you also use MindFrame Log. Nothing leaves this device.</p>
+      <label class="inline">Distress before (0–10) <select id="before"></select></label>
+      <label class="inline">Distress after (0–10) <select id="after"></select></label>
+      <div class="row">
+        <button class="btn" id="saveBtn" type="button">Save to MindFrame Log</button>
+        <button class="btn ghost" id="dlBtn" type="button">Download .json</button>
+      </div>
+      <p class="toast" id="toast" role="status"></p>
+    </details>
+    <div class="row"><button class="btn ghost" id="again" type="button">Start over</button></div>
+  </section>
+
+  <footer class="site">
+    Content is bundled in the app: it works offline and never needs updates.<br>
+    Based on State Finder, Ariel Words and MindFrame research. Reflective use only, not a diagnosis or treatment.<br>
+    All credit and glory to God.
+  </footer>
+</main>
+<script src="content.js"></script>
+<script src="logic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

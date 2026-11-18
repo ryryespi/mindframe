@@ -40,7 +40,7 @@ test("Marketplace is a Suite tab that embeds the published page", () => {
   assert.match(page, /AI assistant: Grok Bot/);
   assert.match(page, /All credit and glory to God\. I owe my knowledge to my Lord Jesus Christ\./);
   assert.match(page, /Chrons never go below zero/);
-  assert.match(sw, /mindframe-shell-v33/);
+  assert.match(sw, /mindframe-shell-v34/);
   assert.match(sw, /\/ariel\//);
 });
 

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MindFrame Log</title>
+<meta name="description" content="Long-term logging, metrics, reports and time-simulation training. Offline; data stays on this device.">
+<meta name="theme-color" content="#4b5a51" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161a1f" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="banner" role="note">Not medical advice. In crisis? Call or text <a href="tel:988">988</a> (US) or <a href="tel:911">911</a>.</div>
+<main>
+  <h1>MindFrame Log</h1>
+  <p class="lede">Log days and moments, see your patterns, and practice for the hard hours. Compare weeks, not days.</p>
+  <p class="example hidden" id="exampleBadge">EXAMPLE DATA: made up for demonstration, not yours. Turn it off under Data.</p>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" data-tab="today" aria-selected="true">Today</button>
+    <button role="tab" data-tab="trends" aria-selected="false">Trends</button>
+    <button role="tab" data-tab="reports" aria-selected="false">Reports</button>
+    <button role="tab" data-tab="training" aria-selected="false">Training</button>
+    <button role="tab" data-tab="data" aria-selected="false">Data</button>
+  </nav>
+
+  <!-- TODAY -->
+  <section class="tab" id="tab-today">
+    <div id="flagsToday"></div>
+    <div class="grid2">
+    <form class="card" id="dailyForm" autocomplete="off">
+      <h2>Daily check-in · Peak Now</h2>
+      <p class="note">Rate today from 0 to 10. It takes about 30 seconds.</p>
+      <div id="peakSliders"></div>
+      <label class="field"><span>Today's peak was…</span><input type="text" id="peakLine" maxlength="200" placeholder="one line"></label>
+      <label class="field"><span>Sleep last night (hours)</span><input type="number" id="sleep" min="0" max="24" step="0.5" inputmode="decimal" placeholder="e.g. 7"></label>
+      <div class="field"><span>Overall state today (optional)</span>
+        <div class="chips" id="dEnergy" aria-label="Energy"></div><div style="height:.4rem"></div>
+        <div class="chips" id="dStress" aria-label="Stress"></div></div>
+      <div class="field"><span>Conversation pauses and repairs</span>
+        <div class="row"><span style="min-width:4.5rem">Pauses</span><div class="counter" data-for="pauses"><button type="button" data-d="-1" aria-label="fewer pauses">−</button><output id="pauses">0</output><button type="button" data-d="1" aria-label="more pauses">+</button></div></div>
+        <div class="row" style="margin-top:.3rem"><span style="min-width:4.5rem">Repairs</span><div class="counter" data-for="repairs"><button type="button" data-d="-1" aria-label="fewer repairs">−</button><output id="repairs">0</output><button type="button" data-d="1" aria-label="more repairs">+</button></div></div>
+      </div>
+      <button class="btn" type="submit">Save today</button>
+      <p class="toast" id="dailyToast" role="status"></p>
+    </form>
+    <form class="card" id="eventForm" autocomplete="off">
+      <h2>Log a moment</h2>
+      <p class="note">A state you were in and anything you tried. Rate before and after to learn what helps.</p>
+      <div class="field"><span>Energy</span><div class="chips" id="eEnergy"></div></div>
+      <div class="field"><span>Stress</span><div class="chips" id="eStress"></div></div>
+      <label class="field"><span>Technique used</span><select id="eTech"></select></label>
+      <div class="row"><label class="inline">Distress before <select id="eBefore"></select></label><label class="inline">after <select id="eAfter"></select></label></div>
+      <label class="field"><span>Note (optional)</span><input type="text" id="eNote" maxlength="300"></label>
+      <button class="btn" type="submit">Save moment</button>
+      <p class="toast" id="eventToast" role="status"></p>
+    </form>
+    </div>
+    <div class="card"><h2>Recent</h2><ul class="list" id="recent"></ul></div>
+  </section>
+
+  <!-- TRENDS -->
+  <section class="tab hidden" id="tab-trends">
+    <div class="row noprint" style="margin-bottom:.8rem"><label class="inline">Range <select id="range"><option value="28">4 weeks</option><option value="84" selected>12 weeks</option><option value="365">1 year</option></select></label></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="card"><h2>Peak Now: daily and 7-day average</h2><div id="chPeak"></div></div>
+    <div class="grid2">
+      <div class="card"><h2>Weekly trend</h2><div id="chWeekly"></div></div>
+      <div class="card"><h2>Sleep (hours)</h2><div id="chSleep"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2>State frequency</h2><p class="note">Energy (rows) by stress (columns), from the State Finder.</p><div id="chHeat"></div></div>
+      <div class="card"><h2>What helps</h2><p class="note">Average drop in distress, before minus after. Higher means it helped more. n is the number of rated uses.</p><div id="chTech"></div></div>
+    </div>
+    <div class="card"><h2>Peak Now items by week</h2><div id="tbItems"></div></div>
+  </section>
+
+  <!-- REPORTS -->
+  <section class="tab hidden" id="tab-reports">
+    <div class="row noprint" style="margin-bottom:.8rem">
+      <select id="repKind" aria-label="Report period"><option value="week">Weekly</option><option value="month">Monthly</option></select>
+      <button class="btn ghost" id="repPrev" type="button" aria-label="Previous period">‹</button>
+      <button class="btn ghost" id="repNext" type="button" aria-label="Next period">›</button>
+      <button class="btn" id="repPrint" type="button">Print / save as PDF</button>
+    </div>
+    <div id="report"></div>
+  </section>
+
+  <!-- TRAINING -->
+  <section class="tab hidden" id="tab-training">
+    <div class="card">
+      <h2>Replay a high-load time</h2>
+      <p class="note" id="scenarioText"></p>
+      <div id="replay">
+        <label class="inline">How tense are you right now (0–10)? <select id="rBefore"></select></label>
+        <ol class="steps" id="replaySteps"></ol>
+        <div class="row"><button class="btn" id="replayStart" type="button">Start replay</button><span class="timer" id="replayTimer"></span></div>
+        <p id="replayPhase" class="note" aria-live="polite"></p>
+        <div class="hidden" id="replayEnd"><label class="inline">And now (0–10)? <select id="rAfter"></select></label><button class="btn" id="replaySave" type="button">Save drill</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Timed rest drill</h2>
+      <p class="note">Practice going into rest on purpose while things are calm, so it's easier when they aren't.</p>
+      <div class="row"><select id="restLen" aria-label="length"><option value="120">2 min</option><option value="300">5 min</option><option value="600">10 min</option></select>
+        <label class="inline">Before <select id="restBefore"></select></label>
+        <button class="btn" id="restStart" type="button">Start</button><span class="timer" id="restTimer"></span></div>
+      <div class="breath hidden" id="restBreath" aria-hidden="true">breathe</div>
+      <div class="hidden row" id="restEnd"><label class="inline">After <select id="restAfter"></select></label><button class="btn" id="restSave" type="button">Save drill</button></div>
+    </div>
+    <div class="card">
+      <h2>Pacing simulation · your day</h2>
+      <p class="note">A simple model of energy over a waking day (7 am to 11 pm). The hourly load comes from your own logged stress. Pick your rest half-hours and compare them with two automatic strategies.</p>
+      <div class="row"><label class="inline">Day <select id="simDay"></select></label><label class="inline">Sleep <input type="number" id="simSleep" min="3" max="11" step="0.5" style="width:5rem"> h</label></div>
+      <p class="note" style="margin-bottom:.3rem">Your rest blocks (the first 30 minutes of each hour you pick):</p>
+      <div class="hours" id="simHours"></div>
+      <div class="row" style="margin-top:.6rem"><button class="btn" id="simRun" type="button">Run simulation</button><button class="btn ghost" id="simPlay" type="button">Play the day</button></div>
+      <div id="simOut"></div>
+    </div>
+    <div class="card">
+      <h2>Thermostat drill (live)</h2>
+      <p class="note">Your day plays fast (1 second = 15 minutes). Tap Rest and Return yourself. The aim: rest before the load peaks, and don't flip back and forth. Afterward you'll see how it compares with the hysteresis strategy.</p>
+      <div class="energybar" aria-hidden="true"><i id="liveBar" style="width:80%"></i></div>
+      <p class="big" id="liveClock">7:00 am</p>
+      <p class="note" id="liveInfo" style="text-align:center"></p>
+      <div class="row" style="justify-content:center"><button class="btn" id="liveStart" type="button">Start drill</button><button class="btn ghost" id="liveToggle" type="button" disabled>Rest</button></div>
+      <div id="liveOut"></div>
+    </div>
+    <div class="card"><h2>Suggestions from your history</h2><p class="heur">These are rough patterns pulled from your own log. They aren't medical advice, and they aren't a diagnosis. Treat them as ideas to try and check against how you actually feel.</p><ul id="suggest"></ul></div>
+  </section>
+
+  <!-- DATA -->
+  <section class="tab hidden" id="tab-data">
+    <div class="card">
+      <h2>Example data</h2>
+      <label class="inline"><input type="checkbox" id="exampleToggle"> Show example data (90 made-up days, labeled everywhere)</label>
+      <p class="note">While example data is on, your real log is hidden but untouched, and saving is paused.</p>
+    </div>
+    <div class="card">
+      <h2>Export</h2>
+      <div class="row"><button class="btn" id="expJson" type="button">Download JSON</button><button class="btn ghost" id="expCsv" type="button">Download CSV</button></div>
+      <p class="note">Everything stays on this device unless you export it.</p>
+    </div>
+    <div class="card">
+      <h2>Import</h2>
+      <p class="note">This accepts MindFrame Log JSON or CSV, and the .json files MindFrame Now saves. Duplicates are skipped. Entries saved in MindFrame Now on this same site are brought in automatically.</p>
+      <input type="file" id="impFile" accept=".json,.csv,application/json,text/csv">
+      <p class="toast" id="impToast" role="status"></p>
+    </div>
+    <div class="card">
+      <h2>Settings</h2>
+      <label class="inline">Theme <select id="theme"><option value="">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+      <p class="note" id="storageInfo"></p>
+      <button class="btn ghost" id="clearAll" type="button">Delete all my entries…</button>
+    </div>
+  </section>
+
+  <footer class="site">
+    Offline app: no account, no server, no tracking. Your data is stored on this device (localStorage).<br>
+    Patterns and flags are only prompts to reflect, not diagnoses. If you're worried, talk to your support person. Crisis: <a href="tel:988">988</a>.<br>
+    All credit and glory to God.
+  </footer>
+</main>
+<script src="core.js"></script>
+<script src="charts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
