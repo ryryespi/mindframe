@@ -88,6 +88,8 @@ Enter the state the system needs — not the full sequence every time:
 
 **If interrupted mid-task.** The Checkpoint v1.3 card already gives Park it / Turn / Return (a one-word note of where you are; face the person with “Here. Heard.”; read the breadcrumb and pick up). That sits beside Hold the Thread and Ground. It is prior work, not a new Kata state.
 
+**Later form.** A word-named Final Version (23 November 2026), with short live sequences and Surrender reserved for God, is later in this log.
+
 </div>
 
 
@@ -114,7 +116,7 @@ Published research describes related constructs. It does not test this Kata, the
 
 ## Improved Kata — Evidence-Backed
 
-These are suggested refinements of body cue, breath, or phrase, mapped onto real practices. They are offered in the spirit of continuous return, not as a new stance to hold. Evidence belongs to the mapped practices, often from intensive meditation, slow-breathing training, or older-adult Tai Chi — not from this Kata, and not from a study of long, complex conversation. Transfer to comprehension and conversation endurance is mostly inferred. Where a link to self-transcendent cognition is speculative, that is stated.
+These are suggested refinements of body cue, breath, or phrase, mapped onto real practices. They are offered in the spirit of continuous return, not as a new stance to hold. Evidence belongs to the mapped practices, often from intensive meditation, slow-breathing training, or older-adult Tai Chi — not from this Kata, and not from a study of long, complex conversation. Transfer to comprehension and conversation endurance is mostly inferred. Where a link to self-transcendent cognition is speculative, that is stated. A later, word-named form — *The Kata of Continuous Return: Final Version (23 November 2026)* — is recorded later in this log.
 
 <div class="keep" markdown="1">
 
@@ -235,9 +237,176 @@ What this can reasonably do is lower arousal, reduce mind-wandering, and keep on
 
 
 
+
+## Fear, Anxiety, and the Denied Want (Honest Selfishness)
+
+*A working thesis from Ryan's 23 November 2026 question, written into this log with his agreement. Conceptual notes, not medical advice, not therapy, and not a validated treatment. This section does not settle whether a particular want is right or wrong before God. That discernment belongs to the person and their faith. The psychological claim is narrower: a want that cannot even be admitted as data tends to return as agitation, and naming it is not the same as serving it.*
+
+The working thesis is this. Fear is a clean, present threat. Anxiety is fear with nowhere to go, looping on “what if.” Denying an honest want — “I want this,” “I’m tired,” “I need something for me” — creates a constant gap between what is felt and the story one is allowed to tell. The mind treats that gap as a threat, and anxiety fills it. The denial narrative (“a good person doesn’t want for himself,” “wanting is sin,” “my needs come last”) often feels like virtue but is fear in disguise: fear of judgment or rejection. It is protection, not selflessness. The way out is the pillar already in this log: the Self Integrated, not Dissolved. Admit the want as data through the Researcher state. Then the want can be weighed with love and chosen or set down freely. Denied wants leak out as tension, irritability, resentment, and burnout.
+
+That is Ryan’s account. The research below supports pieces of it. It does not test the account as a whole.
+
+**Fear and anxiety are related, and they are not the same.** In the NIMH Research Domain Criteria, fear is a response to *acute* threat: a danger that is present or about to arrive, which organizes a short, protective response. Anxiety is a response to *potential* threat: harm that is distant, ambiguous, or uncertain, which organizes a longer state of vigilance and risk assessment ([NIMH RDoC, Acute Threat](https://www.nimh.nih.gov/research/research-funded-by-nimh/rdoc/constructs/acute-threat-fear); [Potential Threat](https://www.nimh.nih.gov/research/research-funded-by-nimh/rdoc/constructs/potential-threat-anxiety)). Laboratory work in this tradition treats fear as a phasic state that starts and stops with a predictable cue, and anxiety as a more sustained state under unpredictable threat ([Davis, Walker, Miles, & Grillon, 2010](https://pmc.ncbi.nlm.nih.gov/articles/PMC2795099/); [Schmitz & Grillon, 2012](https://www.nature.com/articles/nprot.2012.001)). Ryan’s plain-language contrast — a clean present threat versus a loop that has nowhere to go — is a fair cousin of that distinction, not a copy of it. The lab work is about predictable versus unpredictable external threat. The claim that a *denied inner want* becomes the uncertain threat is a mapping, not a finding from the NPU-threat test.
+
+**A denied want is a gap in the self-story.** Self-discrepancy theory holds that a gap between the actual self and an *ought* self (duties, obligations, what one or a significant other believes one should be) is associated with agitation-related emotions such as fear, threat, and restlessness; a gap with an *ideal* self is associated more with dejection, such as disappointment and sadness ([Higgins, 1987](https://pubmed.ncbi.nlm.nih.gov/3615707/), [PDF](https://www.columbia.edu/cu/psychology/higgins/papers/HIGGINS=PSYCH%20REVIEW%201987.pdf)). A rule such as “a good person doesn’t want for himself” functions as an ought-guide. The theory is well known and has correlational and experimental support in Higgins’s own program; it was not written as a theory of “honest selfishness,” and later work has refined and sometimes narrowed the original predictions. The honest fit is this: when the felt want cannot be included in the allowed story of the self, the person is living inside a discrepancy, and agitation is a predicted cost.
+
+Acceptance and Commitment Therapy names a related process *experiential avoidance*: being unwilling to stay in contact with private experiences — thoughts, feelings, bodily sensations, wants — and taking steps to change their form, frequency, or the situations that bring them on, even when that costs the life one cares about ([Hayes, Wilson, Gifford, Follette, & Strosahl, 1996](https://pubmed.ncbi.nlm.nih.gov/8991302/)). The alternative in that tradition is not indulgence. It is an open, curious posture toward the inner event, then a free choice toward what one values. That is close to “admit the want as data, then weigh it with love.” ACT as a treatment package has a substantial evidence base; the 1996 paper is a conceptual argument, not a trial of this Kata.
+
+**Suppression hides the sign; it does not clear the charge.** In Gross’s process model, *expressive suppression* (inhibiting the outward signs of an inner feeling) reduces visible expression but often fails to reduce the feeling itself, increases sympathetic physiological responding, and can impair memory. *Reappraisal* (changing how the situation is construed, earlier in the process) more often reduces both experience and expression without that physiological cost ([Gross, 2002](https://pubmed.ncbi.nlm.nih.gov/12212647/), [PDF](https://www.psychiatry.wisc.edu/courses/Nitschke/seminar/gross_2002_psychophys.pdf)). This is not identical to denying a want — Gross’s experiments are mostly about hiding emotion in the moment, often in film or social tasks — but it supports a narrower, well-replicated point: putting a lid on the display is not the same as resolving the state, and the body may work harder for the lid.
+
+Trying not to think of the denied want can also make it more available. Wegner’s ironic-process theory holds that suppression uses an effortful search for distractions plus an automatic monitor looking for the unwanted thought; under load, the monitor can bring back exactly what was pushed away ([Wegner, 1994](https://doi.org/10.1037/0033-295X.101.1.34), [PDF](https://dtg.sites.fas.harvard.edu/DANWEGNER/pub/Wegner%20Ironic%20Processes%201994.pdf); the classic “white bear” demonstration is [Wegner, Schneider, Carter, & White, 1987](https://pubmed.ncbi.nlm.nih.gov/3612492/)). A later meta-analysis found a small-to-moderate *rebound* after suppression ended, with effects that vary by how the thought is measured and what is being suppressed; the immediate “the thought floods in while you suppress it” effect was not consistent, and clinical samples were few ([Abramowitz, Tolin, & Street, 2001](https://pubmed.ncbi.nlm.nih.gov/11434226/)). So rebound is real enough to take seriously, and not a law that every denied want returns as anxiety. Leakage as tension, irritability, or burnout is a clinical and everyday observation consistent with this literature; it is not something those papers measured in those words.
+
+**Needs matter, including one’s own.** Self-determination theory treats autonomy, competence, and relatedness as basic psychological needs. Need *satisfaction* supports well-being; need *frustration* — being actively blocked, pressured, or made to matter less — is linked with ill-being and defensiveness, and is more than the mere absence of satisfaction ([Ryan & Deci, 2000](https://pubmed.ncbi.nlm.nih.gov/11392867/), [PDF](https://selfdeterminationtheory.org/SDT/documents/2000_RyanDeci_SDT.pdf); [Vansteenkiste & Ryan, 2013](https://selfdeterminationtheory.org/wp-content/uploads/2014/07/2013_VansteenkisteRyan_JOPI2.pdf)). “I need something for me” can be heard, in this vocabulary, as a bid for autonomy or relatedness, not as a moral failure. That is a theoretical reading, not a study of this exact sentence.
+
+Work on “healthy selfishness” points in the same direction without blessing every want. Kaufman and Jauk (2020) developed scales for *healthy selfishness* (a respectful concern for one’s own health, growth, happiness, and freedom) and *pathological altruism* (helping that is driven by unhealthy motives and associated with poorer functioning). In two validation studies, healthy selfishness was related to better well-being and to a genuine prosocial orientation; pathological altruism was related to maladaptive outcomes and to more selfish motives for helping ([Kaufman & Jauk, 2020](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2020.01006/full)). This is scale development and correlation, published in 2020, not a 2021 experiment proving that self-denial causes anxiety. It does undercut a simple equation of self-concern with vice and of self-erasure with virtue, which is the equation the denial narrative often relies on.
+
+**Naming is a way to integrate the self, not to dissolve it.** Putting a feeling into words — affect labeling — has been shown, in an fMRI study, to reduce amygdala responses to negative images and to engage right ventrolateral prefrontal regions involved in regulation ([Lieberman, Eisenberger, Crockett, Tom, Pfeifer, & Way, 2007](https://pubmed.ncbi.nlm.nih.gov/17576282/), [PDF](https://sanlab.psych.ucla.edu/wp-content/uploads/sites/31/2016/03/Lieberman_2007_PsychScience.pdf)). That is one study, with pictures in a scanner, not a conversation in which someone admits “I want X.” It still gives a mechanistic reason why the Researcher phrase might help: labeling can take some of the charge out of a state without requiring that the state be banished. Self-compassion research describes a related stance: meeting one’s own difficulty with kindness, a sense of common humanity, and mindful awareness, rather than harsh self-judgment ([Neff, 2003](https://doi.org/10.1080/15298860309032), [scale paper](https://self-compassion.org/wp-content/uploads/publications/empirical.article.pdf)). Self-compassion is not self-indulgence in that literature, and it is not a Christian theological claim. It is a psychological description of a kinder way to stay in contact with oneself. For this log, it sits beside “Love as Practice, Not Performance”: love that is sourced, not displayed, can include the self that is actually here.
+
+The pillar this all returns to is the Self Integrated, not Dissolved. The want is not the whole self, and the self is not made holy by disappearing. A want admitted as data can be chosen, delayed, or set down. A want that is not allowed to exist has to hide, and hidden things are hard to love or to limit.
+
+### Name the Want
+
+*A suggested way to catch the moment of denial. It has not been trialled. Use it once, in the body, then return. It is not a verdict on the want, and not a test of faith.*
+
+<div class="keep" markdown="1">
+
+1. **Notice the body tell (Ground).** Feet flat, weight dropped, spine long. Scan for the usual signs that a want is being pushed under: a held jaw, a tight chest or belly, restlessness, a sudden burst of helpfulness, irritability, or the phrase “it doesn’t matter” said too quickly. One unforced exhale. “Here.”
+
+2. **Name both sides (Researcher).** Quietly, without a speech: “I notice I want X. I notice I’m afraid of what wanting X says about me.” If the story is “a good person wouldn’t want this,” name that story too, as a story. Do not argue with it yet. This is affect labeling and decentering, not a decision.
+
+3. **Clear a little charge (Empty Cup).** One longer exhale, hands open, jaw unclenched. Visit Φ(t) = 0. Do not hold emptiness as a way to make the want disappear.
+
+4. **Choose with love, or park it.** With the want still in view, weigh it: act, wait, ask, or set it down. If it cannot be resolved now, Hold the Thread — one word, or a fingertip — and let the epsilon (ε) buffer keep it. Setting it down freely is not the same as denying that it was there. The inventory phrase that belongs here is “Optional. Chosen.”
+
+5. **Return.** Full exhale, back to Ground. “Continuous return.”
+
+</div>
+
+If the same want keeps returning after it has been named and set down, that is information, not failure. Return to it later as data. If fear or anxiety is overwhelming, or if thoughts of harming yourself appear, this practice is not the right tool. Set it aside and get help; in the U.S., call or text 988.
+
+## The Kata of Continuous Return: Final Version (23 November 2026)
+
+This is the word-named Kata as it stood after the 23 November 2026 conversation (about 1:50–2:40 PM PT). Earlier seven-state and evidence-backed forms in this log are not replaced; this is the later, simplified form meant to be remembered under pressure. It is an untested practice, not a treatment, not medical advice, and not therapy. It has not been trialled. A short demonstration video of someone moving through Arrive to Surrender is in this same folder: [kata_continuous_return.mp4](kata_continuous_return.mp4).
+
+### Principles
+
+**Finish the story, then return.** Techniques used to escape a feeling only postpone it. If they keep holding off a story that never gets finished, it comes back and haunts you. Processing it — like grief work, or telling a fear all the way to the end — lets it loosen. The order is not “finish the story, then use techniques.” A heavy story can swallow you while you’re inside it. Steady first, briefly. Then let the fear or doubt tell its whole story. Don’t back down, and don’t fight it. If your body shakes or tightens, let it, because that’s the stress being felt rather than avoided. If a story is too heavy to finish in one sitting, park it on purpose: “Held, not hidden.” Some stories can’t be finished in one sitting. Being able to leave one open without it haunting you is a strength too. Then return.
+
+**Techniques are tools, and God is reserved for Surrender only.** The Kata is fully practical. God gets one gesture of His own at the very end, separate from everything else. The techniques are what you do. Surrender is where you stop doing. No technique, no goal, and nothing to fix. You’re not using it to calm down or to make the Kata work. You’re giving over what’s left. Use Surrender at the end of the day, after a hard moment, or when the techniques run out. Don’t use it as one more step to get results. If a technique starts to feel like a prayer you’re counting on, that’s your cue to set it down and surrender instead. That keeps the techniques as tools and keeps God as God.
+
+**The stress dial (Yerkes-Dodson).** The balance between too little stress and too much is real. Psychology calls it the Yerkes-Dodson curve: a moderate amount of stress sharpens action, and too much freezes you. Before you start, and in the moment, read your body. If you feel flat, foggy or unmotivated, which is too little stress, stand a little firmer, breathe a little faster, and step with more purpose. If you feel tight, shaky or frozen, which is too much, lengthen your exhales, lower your hands, and soften your knees. Your stance becomes a dial: firmer when you need to wake up, softer when you need to come down, until you land in the zone where you know how to act. Enough stress to act, not so much that you freeze.
+
+### Word-named gestures
+
+Each name is a small gesture tied to one thought. They’re subtle enough to use anywhere, and once you’ve practiced them, the gesture brings back the strength on its own. Keep the gestures the same every time, because consistency is what makes an anchor work.
+
+<div class="keep" markdown="1">
+
+| Phase | Name | Body movement | Phrase |
+|---|---|---|---|
+| Arrive | **Step** | Walk a few slow steps, or shift your weight side to side. | “Here.” |
+| Arrive | **Drop** | Roll your shoulders, then let them drop. | “I can stay.” |
+| Arrive | **Dial** | Read the stress dial (see Principles). Firmer if you’re flat; softer if you’re tight. | *(the stance is the dial)* |
+| Stand | **Plant** | Feet planted shoulder-width apart, knees soft, spine long, chin level. | “Steady.” |
+| Stand | **Pinch** | Hands meet at your center, thumb touching index finger. This is also your bookmark. | “One.” |
+| Stand | **Turn** | Turn your body toward them, feet pointed at the person, head tilted slightly, soft eyes. | “I’m staying. Help me understand.” |
+| Stand | **Nod** | Nod slowly once. Before you answer, reflect back what they said in one line. | “I heard you.” |
+| Stand | **Own** | Put a hand over your heart or wrist. Name your share honestly and without groveling. | “My part is…” |
+| Stand | **Offer** | Open your palm, facing up. This moves from blame to repair: one next step together. | “What do we need?” |
+| Stand | **Pause** | If it’s getting too heated to stay steady, raise one hand gently, palm out, then come back. The return is what makes it different from running. | “I want to keep talking. I need ten minutes.” |
+
+</div>
+
+<div class="keep" markdown="1">
+
+| Phase | Name | Body movement | Phrase |
+|---|---|---|---|
+| Absorb | **Heart** | Hand over your heart. | “I feel this, and it isn’t the verdict.” |
+| Absorb | **Loved** | Put your other hand on your chest too and inhale slowly. Bring up one specific, real memory of being loved — from family, a friend, or a day someone showed up. Hold it for one breath. A memory is evidence, and a slogan isn’t. | One specific memory (for example, “That day, they showed up for me.”). |
+| Absorb | **Release** | Close your hand slowly, then open it. | “Held, not hidden.” |
+| Absorb | **Still** | Put both hands down at your sides and let them be still. Stillness tells your body, “I’m safe without their reply.” | “I don’t need to chase.” |
+| Grow | **Out** | Long exhale through the mouth while your hands push slowly forward and down. Repeat until the shaking settles. | “Out.” |
+| Grow | **Horizon** | Look up or out at something far away. Find one true positive, even a small one. | “Something good came from this.” |
+| Grow | **Lesson** | Press your thumb to your middle finger. Use it when you want to flee. | “This stress taught me…” |
+| Grow | **Ask** | Open both hands upward. Write the question down if you need to, then bring it somewhere it can be explored. | “What am I really asking?” |
+| Grow | **Forward** | Take one real step forward. Hands open, chest open. Choose your next action, and act. | “Now clear. Next step.” |
+| — | **Surrender** | Kneel, bow your head, or turn your palms down and open. God’s alone. No technique, no goal, and nothing to fix. | “I’ve done my part. The rest is Yours.” |
+
+</div>
+
+In a protected full practice, after Plant and Pinch, stay still while the fear or doubt tells its whole story: “And then what?” Don’t argue with it and don’t back down. Then Absorb, Grow, and, when you’re done, Surrender. If you only memorize one line, make it **Plant, Out, Heart, Forward**, and then, when you’re done, **Surrender**.
+
+### Sequences
+
+- **Live, 2 seconds** (any interaction): Plant, Out, Pinch, then “What do they need?” Put requests on fingertips, and bookmark any sting. Feet, a long exhale before you speak, then one thing at a time.
+
+- **Hard conversation:** Plant, Turn, Nod, Own, Offer (Pause if it’s too much). Turn toward them and stay. Reflect before you answer: feeling heard calms people more than being agreed with. Own your part. Then one next step together. If you need a break, Pause and come back.
+
+- **Interrupted (Bookmark and Bridge).** That flash of frustration is normal. The mind grips harder on anything left unfinished, so being pulled out mid-story feels like being robbed. You need a two-second catch, and a way back to the story later.
+  - *Catch the spike.* The moment you feel the jolt, exhale through your mouth before you say anything. That half-second keeps the frustration from landing on the person who interrupted you. They didn’t cause the storm. They just walked in during it.
+  - *Bookmark it in three words.* Mark where the story stopped: “Stopped at: rejection,” or “Stopped at: and then what.” Press one fingertip as a physical bookmark (Pinch). Now your mind knows the case isn’t lost, only paused, and that loosens its grip.
+  - *Bridge: “Yes. Now you.”* Turn toward the person with soft eyes and grounded feet. If some frustration still slips out, own it quickly and simply: “Sorry, you caught me mid-thought. What’s up?”
+  - *Return to the bookmark.* In your next quiet practice, pick up exactly where you stopped. If the story still won’t reach an ending, close it for now with “Held, not hidden. I’ll know more later” (Release, later).
+  - Word sequence: Out, Pinch, Turn, then Release later. Before a still session, a one-line permission helps: “If I’m interrupted, people come first. The story will wait.”
+
+- **Drop and Carry** (when an external force takes priority). If training breaks the moment real life shows up, it’s just a ritual. The point is to absorb the techniques so they show up without effort, the way a martial artist doesn’t recite forms during a fight.
+  - *Drop: “Yes.”* The instant something outside needs you — a person, a call, or a problem — say “Yes” inside and let go of every form. No finishing the step and no guilt. Dropping is part of the practice, not a failure of it.
+  - *Carry: one breath.* Keep only one thing from all the training: a single slow exhale while you turn toward what needs you. Your feet stay grounded and your eyes stay soft. Nobody can see it.
+  - *Move with it: “What’s needed?”* Now the interaction itself becomes the meditation. Listen fully, and hold each point on a fingertip if there are several. Dial in the moment: if you go flat, lean in and speak a little firmer; if you go tight, lengthen your exhale and slow your words.
+  - *Return later: “Now clear.”* Once it’s over, take one breath. If something stirred up a fear, park it (“Held, not hidden”) and finish that story in your next quiet practice. If the training ever pulls you away from people, drop the form and keep the person.
+
+- **After, or cut off:** Loved, Still, Horizon. Hand on heart with one real memory; hands still (“I don’t need to chase”); look far away (“Something good came from this”). The 3-second version is hand on heart, hands still, and a thought: “I am loved. I don’t need to chase.” Wait at least a day before reaching out again, and only if it’s to repair, not to be reassured. The urge to be acknowledged isn’t wrong. It’s a real want. Name it (“I want them to see me”) rather than deny it, then let the love you already have answer it first.
+
+- **Everyday, 5 seconds:** Plant, Out, Heart, Forward, and then, when you’re done, Surrender.
+
+- **Minimum** (overload, when nothing works): Plant, and “Here.” One breath and a planted stance. That’s the minimum, and it counts.
+
+- **Doubt-day:** Plant, then Ask (“What am I really asking?”), then Loved (one specific memory), then “I don’t have to decide today,” then Forward.
+
+### Doubt, relationships, and what the stress tests changed
+
+**Doubt flaws and fixes.** Doubt is where the Kata is weakest. Most of its earlier anchors leaned on faith or self-trust, and doubt shakes both of those at once. That is part of why God was later reserved for Surrender only, so the techniques can still be used when faith language rings hollow. The flaws, each with a fix:
+
+- “Here. With You.” can feel hollow. When you doubt God’s presence, an opening line that depends on it might ring empty and make the doubt worse. *Fix:* the opening technique is now just Step, “Here.” God is no longer in the techniques. Honest doubt spoken to God still has a place, but in Surrender, not as a tool.
+- “I am loved” may not land. If you doubt yourself, the Loved gesture can feel like a lie you’re telling yourself. *Fix:* Anchor it in a specific memory, not a claim: “That day, they showed up for me.” A memory is evidence, and a slogan isn’t.
+- “It isn’t the verdict” assumes you trust the judge. In deep self-doubt you might think, “Maybe it is the verdict.” *Fix:* Switch to “I don’t have to decide the verdict today.” You don’t need certainty, only a pause.
+- The Kata can turn into a test. If it doesn’t make you feel better, doubt says, “See, none of this works, and neither does your faith.” *Fix:* Measure the practice by showing up, not by feeling better. Doing it while doubting counts double.
+- There’s no step for the doubt itself. Treating doubt only like a fear to settle can miss that sometimes it’s an honest question that deserves to be explored. *Fix:* Ask: open both hands upward and think, “What am I really asking?” Write the question down, then bring it to scripture, a pastor, or a trusted believer. Doubt that’s explored can deepen faith, while doubt you push down tends to come back.
+- Practice can slide back into working for God, or proving your faith by practicing harder. *Fix:* Use Still: “I don’t need to chase acknowledgement, even from God.” Being with Him includes being with Him while you’re unsure.
+- It’s mostly done alone. Doubt grows in isolation. *Fix:* When it lasts more than a few days, tell one person. Faith and self-worth are both strengthened by community, not only by private practice.
+
+Doubt isn’t a failure of the Kata. It’s one of the hardest stress tests for it, and you pass simply by staying in it and returning.
+
+**Relationship guidance: reach out once, from security not fear.** Don’t reach out to quiet the fear. Ground yourself first, then reach out to repair. When someone walks in upset, Plant, Out, Pinch: feet down, an exhale, and a bookmark on your own story. Then Turn and Nod: turn toward them and reflect, “You feel like I’m not listening.” No defending. When they cut you off, stay quiet and nod. Their point is partly proven if you talk over them, so let them finish. When the door closes: Heart, Loved, Still. “I feel this, and it isn’t the verdict.” Then one specific memory of being loved. Hands still: “I don’t need to chase.” The fear of being left will shout “Go fix it now!” That’s the beg-for-acknowledgement urge, so let it pass without acting on it. Then finish your story honestly: “Is there truth in what they said?” That’s Own, your part, and it’s useful, not shameful. Then Horizon: “Something good came from this. They told me what they need.” Then reach out, once and calmly. Wait until you’re steady, whether that’s 20 minutes or the next morning. Then something short like: “I heard you. You’re right that I’ve been in my head. I want to listen properly. Can we talk when you’re ready?” Then wait without following up. That’s Offer, reaching out from security instead of from fear. The test of whether you’re ready: if you’re reaching out to stop your own anxiety, wait. If you’re reaching out because you want to understand them, go. One door closing hard isn’t the end of a relationship. Coming back steady is usually what makes it stronger. Begging comes from fear, and asking comes from security.
+
+**What two stress-test scenarios changed.**
+
+- *Round one — a mid-practice call.* Ten minutes into a still practice at home, working through a fear of not doing enough and falling behind, the phone rings. A boss or family member is upset, talking fast, with three requests, and one of them stings because it confirms the exact fear already in motion. What held: feet on the floor (“Here,” mid-call, without anyone knowing); one long exhale before speaking, so the sting doesn’t come out as a snap; attention on the person, not the story — “What do they need?” — with requests on fingertips; the sting bookmarked (“Stopped at: falling behind. Held, not hidden”) rather than finished mid-call. Standing your ground means staying steady, not defensive. After they hang up, silence can be rest or quietly swallowing the sting. Check it: “Is this silence peaceful, or am I holding something in?” If something’s still pressing, give it one honest sentence, then one small action. What this changed: under pressure you’ll only remember what’s very simple, so live use was cut to a few beats (now Plant, Out, Pinch, “What do they need?”). Insecurities are handled with “I feel this, and it isn’t the verdict,” not by denying the feeling. An after-check was added because silence can be peace or quiet swallowing. The minimum, when nothing works, is just Plant and “Here.”
+
+- *Round two — face to face, someone you love.* Evening, tired, a short full practice already started, at “And then what?” on a fear of not being appreciated. Someone close walks in without knocking, already upset: “You never listen to me. You’re always off in your own head doing your thing.” Their voice gets louder. A mid-sentence answer gets cut off — “See? You’re not even letting me finish.” — and they walk out and close the door hard. Interrupted, accused of exactly the fear being worked on, cut off, and left with no conclusion. What this confirmed and added: Bookmark and Bridge when they walk in; no defending and no talking over them; Loved, Still, and Horizon after the door closes; and the reach-out rule above — once, later, from security, not from the urge to fix the anxiety. The relationship set (Turn, Nod, Own, Offer, Pause) and the after / cut-off gestures came from this kind of test.
+
+### Learning plan (skill transfer, weeks 1–4)
+
+Learn in order.
+
+- **Week 1.** The everyday 5-second sequence first: Plant, Out, Heart, Forward, and then, when you’re done, Surrender.
+- **Week 2.** The live 2-second sequence: Plant, Out, Pinch, then “What do they need?”
+- **Weeks 3–4.** The full practice (Arrive through Grow, finishing the story in the middle, then Surrender) and the relationship set (Turn, Nod, Own, Offer, Pause; Bookmark and Bridge; Drop and Carry; After or cut off).
+
+**Anchor it.** Do the full practice each morning while you remember a time you felt loved or strong. That pairs each gesture with the feeling.
+
+**Rep it small.** Use the live sequence in low-stakes moments every day — waiting in line, opening a hard email, or a mild annoyance — so the gestures become automatic when the big one comes.
+
+**Teach it.** One word-name, one gesture, one thought, is enough to pass on. If you only pass on one line, make it Plant, Out, Heart, Forward, then Surrender.
+
+This remains an untested practice, not a treatment. Showing up is the measure, not whether it makes you feel better.
+
+A demonstration of the body form, from Arrive through Surrender, is here in the same folder: [kata_continuous_return.mp4](kata_continuous_return.mp4).
+
+
 ## Sources
 
-Links were checked at the time of writing (22 November 2026). Prefer the open pages and PDFs where both are given.
+Links were checked at the time of writing (22–23 November 2026). Prefer the open pages and PDFs where both are given.
 
 1. Yaden, D. B., Haidt, J., Hood, R. W., Jr., Vago, D. R., & Newberg, A. B. (2017). The varieties of self-transcendent experience. *Review of General Psychology, 21*(2), 143–160. https://doi.org/10.1037/gpr0000102 — https://ppc.sas.upenn.edu/sites/default/files/transcendentexper.pdf
 2. Brewer, J. A., Worhunsky, P. D., Gray, J. R., Tang, Y.-Y., Weber, J., & Kober, H. (2011). Meditation experience is associated with differences in default mode network activity and connectivity. *Proceedings of the National Academy of Sciences, 108*(50), 20254–20259. https://www.pnas.org/doi/10.1073/pnas.1112029108
@@ -257,3 +426,19 @@ Links were checked at the time of writing (22 November 2026). Prefer the open pa
 16. Thayer, J. F., Hansen, A. L., Saus-Rose, E., & Johnsen, B. H. (2009). Heart rate variability, prefrontal neural function, and cognitive performance: The neurovisceral integration perspective on self-regulation, adaptation, and health. *Annals of Behavioral Medicine, 37*(2), 141–153. https://pubmed.ncbi.nlm.nih.gov/19424767/
 17. Hansen, A. L., Johnsen, B. H., & Thayer, J. F. (2003). Vagal influence on working memory and attention. *International Journal of Psychophysiology, 48*(3), 263–274. https://pubmed.ncbi.nlm.nih.gov/12798986/
 18. Cowan, N. (2001). The magical number 4 in short-term memory: A reconsideration of mental storage capacity. *Behavioral and Brain Sciences, 24*(1), 87–114. https://pubmed.ncbi.nlm.nih.gov/11515286/
+19. National Institute of Mental Health. (n.d.). *Acute threat (“fear”)*. Research Domain Criteria. https://www.nimh.nih.gov/research/research-funded-by-nimh/rdoc/constructs/acute-threat-fear
+20. National Institute of Mental Health. (n.d.). *Potential threat (“anxiety”)*. Research Domain Criteria. https://www.nimh.nih.gov/research/research-funded-by-nimh/rdoc/constructs/potential-threat-anxiety
+21. Davis, M., Walker, D. L., Miles, L., & Grillon, C. (2010). Phasic vs sustained fear in rats and humans: Role of the extended amygdala in fear vs anxiety. *Neuropsychopharmacology, 35*(1), 105–135. https://pmc.ncbi.nlm.nih.gov/articles/PMC2795099/
+22. Schmitz, A., & Grillon, C. (2012). Assessing fear and anxiety in humans using the threat of predictable and unpredictable aversive events (the NPU-threat test). *Nature Protocols, 7*(3), 527–532. https://www.nature.com/articles/nprot.2012.001
+23. Higgins, E. T. (1987). Self-discrepancy: A theory relating self and affect. *Psychological Review, 94*(3), 319–340. https://pubmed.ncbi.nlm.nih.gov/3615707/ — https://www.columbia.edu/cu/psychology/higgins/papers/HIGGINS=PSYCH%20REVIEW%201987.pdf
+24. Hayes, S. C., Wilson, K. G., Gifford, E. V., Follette, V. M., & Strosahl, K. (1996). Experiential avoidance and behavioral disorders: A functional dimensional approach to diagnosis and treatment. *Journal of Consulting and Clinical Psychology, 64*(6), 1152–1168. https://pubmed.ncbi.nlm.nih.gov/8991302/
+25. Gross, J. J. (2002). Emotion regulation: Affective, cognitive, and social consequences. *Psychophysiology, 39*(3), 281–291. https://pubmed.ncbi.nlm.nih.gov/12212647/ — https://www.psychiatry.wisc.edu/courses/Nitschke/seminar/gross_2002_psychophys.pdf
+26. Wegner, D. M. (1994). Ironic processes of mental control. *Psychological Review, 101*(1), 34–52. https://doi.org/10.1037/0033-295X.101.1.34 — https://dtg.sites.fas.harvard.edu/DANWEGNER/pub/Wegner%20Ironic%20Processes%201994.pdf
+27. Wegner, D. M., Schneider, D. J., Carter, S. R., 3rd, & White, T. L. (1987). Paradoxical effects of thought suppression. *Journal of Personality and Social Psychology, 53*(1), 5–13. https://pubmed.ncbi.nlm.nih.gov/3612492/
+28. Abramowitz, J. S., Tolin, D. F., & Street, G. P. (2001). Paradoxical effects of thought suppression: A meta-analysis of controlled studies. *Clinical Psychology Review, 21*(5), 683–703. https://pubmed.ncbi.nlm.nih.gov/11434226/
+29. Ryan, R. M., & Deci, E. L. (2000). Self-determination theory and the facilitation of intrinsic motivation, social development, and well-being. *American Psychologist, 55*(1), 68–78. https://pubmed.ncbi.nlm.nih.gov/11392867/ — https://selfdeterminationtheory.org/SDT/documents/2000_RyanDeci_SDT.pdf
+30. Vansteenkiste, M., & Ryan, R. M. (2013). On psychological growth and vulnerability: Basic psychological need satisfaction and need frustration as a unifying principle. *Journal of Psychotherapy Integration, 23*(3), 263–280. https://selfdeterminationtheory.org/wp-content/uploads/2014/07/2013_VansteenkisteRyan_JOPI2.pdf
+31. Kaufman, S. B., & Jauk, E. (2020). Healthy selfishness and pathological altruism: Measuring two paradoxical forms of selfishness. *Frontiers in Psychology, 11*, 1006. https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2020.01006/full
+32. Lieberman, M. D., Eisenberger, N. I., Crockett, M. J., Tom, S. M., Pfeifer, J. H., & Way, B. M. (2007). Putting feelings into words: Affect labeling disrupts amygdala activity in response to affective stimuli. *Psychological Science, 18*(5), 421–428. https://pubmed.ncbi.nlm.nih.gov/17576282/ — https://sanlab.psych.ucla.edu/wp-content/uploads/sites/31/2016/03/Lieberman_2007_PsychScience.pdf
+33. Neff, K. D. (2003). Self-compassion: An alternative conceptualization of a healthy attitude toward oneself. *Self and Identity, 2*(2), 85–101. https://doi.org/10.1080/15298860309032
+34. Neff, K. D. (2003). The development and validation of a scale to measure self-compassion. *Self and Identity, 2*(3), 223–250. https://self-compassion.org/wp-content/uploads/publications/empirical.article.pdf

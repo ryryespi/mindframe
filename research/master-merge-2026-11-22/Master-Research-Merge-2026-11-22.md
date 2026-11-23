@@ -178,4 +178,4 @@ Signal loss — not lack of strength — is the failure condition.
 
 
 
-A shorter practice log of the philosophy and the Kata's physical meditations is in *Philosophy and Physical Meditations Log* (same folder).
+A shorter practice log of the philosophy and the Kata's physical meditations is in *Philosophy and Physical Meditations Log* (same folder). That log now includes *The Kata of Continuous Return: Final Version (23 November 2026)* — word-named gestures in four phases plus Surrender, the live sequences, and a short demonstration video, <span style="white-space:nowrap"><em>kata_continuous_return.mp4</em></span>, in this same folder. It remains an untested practice, not a treatment.
