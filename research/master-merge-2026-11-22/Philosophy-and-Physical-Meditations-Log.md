@@ -442,3 +442,120 @@ Links were checked at the time of writing (22–23 November 2026). Prefer the op
 32. Lieberman, M. D., Eisenberger, N. I., Crockett, M. J., Tom, S. M., Pfeifer, J. H., & Way, B. M. (2007). Putting feelings into words: Affect labeling disrupts amygdala activity in response to affective stimuli. *Psychological Science, 18*(5), 421–428. https://pubmed.ncbi.nlm.nih.gov/17576282/ — https://sanlab.psych.ucla.edu/wp-content/uploads/sites/31/2016/03/Lieberman_2007_PsychScience.pdf
 33. Neff, K. D. (2003). Self-compassion: An alternative conceptualization of a healthy attitude toward oneself. *Self and Identity, 2*(2), 85–101. https://doi.org/10.1080/15298860309032
 34. Neff, K. D. (2003). The development and validation of a scale to measure self-compassion. *Self and Identity, 2*(3), 223–250. https://self-compassion.org/wp-content/uploads/publications/empirical.article.pdf
+
+## The Baby God and the Ten Returns: A Mythology of the Kata
+
+*Original mythic expansion by Ryan Espinosa; simplified 23 November 2026.*
+
+<div class="story" markdown="1">
+
+**1. The Hall of Mirrors** *(Finish the Story)*
+
+Mirrors show every future he fears. He runs through them all and finds an old woman drinking tea at the end. “This is after,” she says. “After everything you’re afraid of. You wake up tomorrow.”
+
+*Fear only becomes endless when you leave it unfinished.*
+
+</div>
+
+<div class="story" markdown="1">
+
+**2. The Mountain of Unsaid Words** *(Family)*
+
+Every unspoken hurt becomes a stone, and families build mountains over the centuries. A boy whispers, “I needed you,” and half the mountain falls.
+
+*What breaks relationships is what we never say.*
+
+</div>
+
+<div class="story" markdown="1">
+
+**3. The Sea of Discarded Loves** *(Future Love)*
+
+A traveler throws away everyone he meets, waiting to be certain. The sea grows until it surrounds the world. “Then you’ll never cross,” it tells him.
+
+*Love begins where certainty ends.*
+
+</div>
+
+<div class="story" markdown="1">
+
+**4. The Tree of Small Kindnesses** *(Friendship)*
+
+A giant tree feeds on kindnesses people forgot: a ride home, an awkward apology, staying after a fight. Whole cities live in its shade.
+
+*Small returns build more than grand gestures.*
+
+</div>
+
+<div class="story" markdown="1">
+
+**5. The Planet of Mirrors** *(Self Integrated)*
+
+Everyone sees a distorted reflection. Breaking the mirrors changes nothing. Then a child says, “That’s not me, but it’s part of me,” and the mirrors turn clear.
+
+*Healing comes from integration, not erasing yourself.*
+
+</div>
+
+<div class="story" markdown="1">
+
+**6. The Storm of Verdicts** *(Feelings Aren’t Facts)*
+
+A storm whispers “Unwanted. Failing. Alone.” Fighting it only makes it louder. He puts a hand on his heart: “I feel afraid, and that isn’t the verdict.” The storm weakens.
+
+*A feeling is not a judgment.*
+
+</div>
+
+<div class="story" markdown="1">
+
+**7. The Kingdom of Frozen Time** *(Stress Dial)*
+
+A kingdom is so afraid of mistakes that time stops. Then someone says, “I’m scared, but I’ll try,” and the first clock starts ticking.
+
+*Life moves only when we accept imperfection.*
+
+</div>
+
+<div class="story" markdown="1">
+
+**8. The City That Couldn’t Listen** *(Hard Conversations)*
+
+Everyone talks, and the noise causes earthquakes. A janitor hands him a chair: “Sit. Listen.” He listens for days, and the earthquakes stop.
+
+*Understanding comes before agreement.*
+
+</div>
+
+<div class="story" markdown="1">
+
+**9. The Garden of Lost Loves** *(Being Cut Off)*
+
+Every ended relationship is a flower, and he tries to save them all. “Some gifts are seasons,” the gardener says.
+
+*Be grateful without holding on.*
+
+</div>
+
+<div class="story" markdown="1">
+
+**10. The Last Door** *(Surrender)*
+
+Someone he loves walks through a door he can’t follow. He could force it open. Instead he kneels, opens his hands, and says: “I’ve done my part. The rest is Yours.” The door closes, not as a tragedy but as trust.
+
+*He became fully divine when he learned where control ends.*
+
+</div>
+
+<p class="closing-line"><em>Maturity isn’t never falling apart. It’s learning to return, again and again, and helping the people you love return with you.</em></p>
+
+<div class="creed-page">
+<div class="creed-inner">
+<h2>Closing Creed:<br>For the Days When You Forget</h2>
+<p>The kata is not for the days when you remember. It is for the days when you forget. When fear feels truer than hope, when loss is heavier than gratitude, when love feels distant, and when the will to continue cannot be found.</p>
+<p>In those moments, the answer is not to wait for strength, certainty, or inspiration. The answer is to return anyway. Plant your feet. Take one breath. Take one step. Trust the return until memory returns.</p>
+<p>Because the world does not suffer because people do not know what matters; it suffers because pain makes them forget. The kata is how we remember. And when remembering is impossible, the kata is how we endure until remembrance comes home again.</p>
+<p>You do not need enough strength for the whole journey. You only need enough strength for the next return. Then the next. Then the next. Until one day you remember: reality is still here, people are still worth loving, truth is still true, and you are still capable of coming home.</p>
+<p class="creed-credit">— Ryan Espinosa</p>
+</div>
+</div>
